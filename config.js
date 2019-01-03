@@ -29,20 +29,22 @@ function list_envs(root_dir) {
     return res;
 }
 
-function parse_args(root_dir) {
+// options can have the following optional values
+// - description: program description in the --help output
+function parse_args(root_dir, options) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
 
     const parser = new AutoWidthArgumentParser({
-        description: 'Run integration tests against the whole Toniecloud',
+        description: options.description,
     });
 
     // General arguments
     parser.addArgument(['-e', '--env'], {
         choices: list_envs(root_dir),
         defaultValue: 'local',
-        help: 'The Toniecloud environment to test against. Default is %(defaultValue)s.',
+        help: 'The environment to test against. Default is %(defaultValue)s.',
     });
 
     const output_group = parser.addArgumentGroup({title: 'Output'});

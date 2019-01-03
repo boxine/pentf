@@ -34,11 +34,12 @@ function load_tests(args, tests_dir) {
 //
 // Available options:
 // - default_config: Function to call on the loaded configuration, to set/compute default values.
+// - description: program description in the --help output
 async function real_main(root_dir, options) {
     assert(root_dir, 'root_dir must be set');
     options = options || {};
 
-    const args = parse_args(root_dir);
+    const args = parse_args(root_dir, options);
     const config = read_config(root_dir, args);
     if (options.default_config) {
         options.default_config(config);

@@ -68,8 +68,21 @@ async function assert_value(input, expected) {
     }
 }
 
+// Assert that there is currently no element matching the xpath on the page
+async function assert_not_xpath(page, xpath, message) {
+    const found = await page.evaluate(xpath => {
+        const element = document.evaluate(
+            xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+        return !!element;
+    }, xpath);
+    assert(!found,
+        'Element matching ' + xpath + ' is present, but should not be there' +
+        (message ? ' ' + message : ''));
+}
+
 module.exports = {
     assert_value,
+    assert_not_xpath,
     close_page,
     new_page,
     waitForVisible,

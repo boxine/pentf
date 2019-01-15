@@ -45,7 +45,9 @@ async function make_curl_command(options, url) {
     }
 
     if (options.body) {
+        // Avoids "100 Continue" answers by some webservers
         curl_command += ' -H ' + escape_shell('Expect:');
+
         if (typeof options.body.getBoundary === 'function') {
             options.body = await stream2buf(options.body);
             const body_b64 = options.body.toString('base64');

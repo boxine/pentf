@@ -138,7 +138,7 @@ function parse_args(root_dir, options) {
         metavar: 'COUNT',
         help: 'Maximum number of tests to run in parallel. 0 to run without a pool, sequentially. Defaults to %(defaultValue)s.',
         dest: 'concurrency',
-        defaultValue: 5,
+        defaultValue: 10,
         type: 'int',
     });
     runner_group.addArgument(['-S', '--sequential'], {

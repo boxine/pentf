@@ -128,8 +128,8 @@ function parse_args(root_dir, options) {
         type: 'int',
         help: 'Wait this many milliseconds after every call to the virtual browser',
     });
-    puppeteer_group.addArgument(['--keep-open'], {
-        help: 'Keep browser sessions open in case of failures (You probably want to pass in -V to see them).',
+    puppeteer_group.addArgument(['-k', '--keep-open'], {
+        help: 'Keep browser sessions open in case of failures. Implies -V.',
         action: 'storeTrue',
     });
 
@@ -165,6 +165,10 @@ function parse_args(root_dir, options) {
     }
     if (args.html_file !== DEFAULT_HTML_NAME && !args.html) {
         console.log('Warning: --html-file given, but not -h/--html. Will NOT write HTML.'); // eslint-disable-line no-console
+    }
+
+    if (args.keep_open) {
+        args.headless = false;
     }
 
     return args;

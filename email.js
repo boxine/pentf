@@ -125,7 +125,7 @@ async function get_mail(config, since, to, subject_contains) {
 
     const msg = await utils.retry(
         () => _find_message(config, client, since, to, subject_contains),
-        [200, 500, 1000, 2000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]);
+        [200, 500, 1000, 2000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]);
     assert(msg, (
         'Could not find message to ' + to + ' matching ' + JSON.stringify(subject_contains) + ' since ' + since));
 

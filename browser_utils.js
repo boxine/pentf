@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer');
 async function new_page(config) {
     const params = {
         args: ['--no-sandbox'],
-        ignoreHTTPSErrors: (config.env !== 'prod'),
+        ignoreHTTPSErrors: (config.env === 'local'),
     };
     if (!config.headless) {
         params.headless = false;

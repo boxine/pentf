@@ -35,6 +35,7 @@ function parse_args(root_dir, options) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
+    const DEFAULT_PDF_NAME = 'results.pdf';
 
     const parser = new AutoWidthArgumentParser({
         description: options.description,
@@ -79,6 +80,16 @@ function parse_args(root_dir, options) {
         dest: 'html_file',
         defaultValue: DEFAULT_HTML_NAME,
         help: 'HTML file to write a report to. Defaults to %(defaultValue)s .',
+    });
+    output_group.addArgument(['--pdf'], {
+        action: 'storeTrue',
+        help: 'Write tests results as a PDF file.',
+    });
+    output_group.addArgument(['--pdf-file'], {
+        metavar: 'FILE.pdf',
+        dest: 'pdf_file',
+        defaultValue: DEFAULT_PDF_NAME,
+        help: 'PDF file to write a report to. Defaults to %(defaultValue)s .',
     });
     output_group.addArgument(['-M', '--markdown'], {
         action: 'storeTrue',
@@ -166,6 +177,10 @@ function parse_args(root_dir, options) {
     if (args.html_file !== DEFAULT_HTML_NAME && !args.html) {
         console.log('Warning: --html-file given, but not -h/--html. Will NOT write HTML.'); // eslint-disable-line no-console
     }
+    if (args.pdf_file !== DEFAULT_PDF_NAME && !args.pdf) {
+        console.log('Warning: --pdf-file given, but not --pdf. Will NOT write PDF.'); // eslint-disable-line no-console
+    }
+
 
     if (args.keep_open) {
         args.headless = false;

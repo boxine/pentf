@@ -1,5 +1,6 @@
 const fs = require('fs');
 const {promisify} = require('util');
+const {new_page, close_page} = require('../pintf/browser_utils');
 
 const utils = require('./utils');
 
@@ -42,6 +43,10 @@ async function do_render(config, results) {
     if (config.html) {
         const html_code = html(results);
         await promisify(fs.writeFile)(config.html_file, html_code, {encoding: 'utf-8'});
+    }
+
+    if (config.pdf) {
+        await pdf(config, config.pdf_file, results);
     }
 }
 
@@ -221,6 +226,16 @@ td.test_number {
 .result-error {
     color: #ff0000;
 }
+
+@media print {
+    html, body {
+        font-size: 16px;
+    }
+}
+@page {
+    size: A4;
+    margin: 0.5cm 0.5cm;
+}
 </style>
 </head>
 <body>
@@ -251,6 +266,18 @@ ${table}
 
 }
 
+async function pdf(config, path, results) {
+    const html_code = html(results);
+    const page = await new_page(config);
+
+    await page.setContent(html_code);
+    await page.pdf({
+        path,
+        printBackground: true,
+        preferCSSPageSize: true,
+    });
+    await close_page(page);
+}
 
 module.exports = {
     craft_results,

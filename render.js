@@ -173,6 +173,7 @@ function html(results) {
 html, body {
     margin-top: 0;
     font-size: 26px;
+    font-family: sans-serif;
 }
 h1 {
     margin: 0 0 .1em 0;

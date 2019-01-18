@@ -117,6 +117,10 @@ function next_task(state) {
 async function parallel_run(config, state) {
     output.status(config, state);
 
+    // Many tests run 1 or 2 Chrome windows, so make sure we have enough handles.
+    // 2 windows per test on avera should be sufficient
+    process.setMaxListeners(10 + 2 * config.concurrency);
+
     const running = [];
     let runner_task_id = 0;
     while (true) {  // eslint-disable-line no-constant-condition

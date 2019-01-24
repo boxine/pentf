@@ -36,7 +36,11 @@ async function make_curl_command(options, url) {
     }
 
     if (options.method && options.method !== 'GET') {
-        curl_command += ' -X ' + options.method;
+        if (options.method === 'HEAD') {
+            curl_command += ' -I';
+        } else {
+            curl_command += ' -X ' + options.method;
+        }
     }
 
     const headers = options.headers || {};

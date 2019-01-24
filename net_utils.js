@@ -21,6 +21,13 @@ async function fetch(config, url, options) {
         }
     }
 
+    if (! options.headers) {
+        options.headers = {};
+    }
+    if (! Object.keys(options.headers).find(h => h.toLowerCase() === 'user-agent')) {
+        options.headers['User-Agent'] = 'pintf integration test (https://github.com/boxine/pintf)';
+    }
+
     if (config.print_curl) {
         output.log(config, await make_curl_command(options, url));
     }

@@ -61,7 +61,7 @@ async function sequential_run(config, state) {
             task.status = 'error';
             task.duration = performance.now() - task.start;
             task.error = e;
-            console.log('test case ' + task.name + ' FAILED:');
+            console.log(`test case ${task.name} FAILED at ${(new Date()).toISOString()}:`);
             console.log(e.stack);
             if (config.fail_fast) {
                 process.exit(3);
@@ -89,7 +89,7 @@ async function run_one(config, state, task) {
         task.status = 'error';
         task.duration = performance.now() - task.start;
         task.error = e;
-        output.log(config, 'test case ' + task.name + ' FAILED:\n' + e.stack + '\n');
+        output.log(config, `test case ${task.name} FAILED at ${(new Date()).toISOString()}:\n${e.stack}\n`);
         if (config.fail_fast) {
             process.exit(3);
         }

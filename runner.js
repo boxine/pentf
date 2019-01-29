@@ -35,6 +35,22 @@ function verify_dependencies(config, task) {
     return false;
 }
 
+async function run_task(config, task) {
+    try {
+        await task.tc.run(config);
+        task.status = 'success';
+        task.duration = performance.now() - task.start;
+    } catch(e) {
+        task.status = 'error';
+        task.duration = performance.now() - task.start;
+        task.error = e;
+        output.log(config, `test case ${task.name} FAILED at ${utils.local_iso8601()}:\n${e.stack}\n`);
+        if (config.fail_fast) {
+            process.exit(3);
+        }
+    }
+}
+
 async function sequential_run(config, state) {
     const skipped = state.filter(s => s.status === 'skipped');
     if (!config.quiet && skipped.length > 0) {
@@ -53,20 +69,7 @@ async function sequential_run(config, state) {
 
         task.status = 'running';
         task.start = performance.now();
-        try {
-            await task.tc.run(config);
-            task.status = 'success';
-            task.duration = performance.now() - task.start;
-        } catch(e) {
-            task.status = 'error';
-            task.duration = performance.now() - task.start;
-            task.error = e;
-            console.log(`test case ${task.name} FAILED at ${(new Date()).toISOString()}:`);
-            console.log(e.stack);
-            if (config.fail_fast) {
-                process.exit(3);
-            }
-        }
+        await run_task(config, task);
     }
 }
 
@@ -81,19 +84,7 @@ async function run_one(config, state, task) {
     task.start = performance.now();
     output.status(config, state);
 
-    try {
-        await task.tc.run(config);
-        task.status = 'success';
-        task.duration = performance.now() - task.start;
-    } catch(e) {
-        task.status = 'error';
-        task.duration = performance.now() - task.start;
-        task.error = e;
-        output.log(config, `test case ${task.name} FAILED at ${(new Date()).toISOString()}:\n${e.stack}\n`);
-        if (config.fail_fast) {
-            process.exit(3);
-        }
-    }
+    await run_task(config, task);
 
     output.status(config, state);
     return task;

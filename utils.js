@@ -96,9 +96,38 @@ function filter_map(ar, cb) {
     return res;
 }
 
+const _pad = num => ('' + num).padStart(2, '0');
+
+function _timezone_offset_str(offset) {
+    if (!offset) return 'Z';
+
+    const sign = (offset < 0) ? '+' : '-';
+    offset = Math.abs(offset);
+    const minutes = offset % 60;
+    const hours = (offset - minutes) / 60;
+    return sign + _pad(hours) + ':' + _pad(minutes);
+}
+
+function local_iso8601(date) {
+    if (!date) date = new Date();
+
+    // Adapted from: https://stackoverflow.com/a/8563517/35070
+    return (
+        date.getFullYear()
+        + '-' + _pad(date.getMonth() + 1)
+        + '-' + _pad(date.getDate())
+        + 'T' + _pad(date.getHours())
+        + ':' + _pad(date.getMinutes())
+        + ':' + _pad(date.getSeconds())
+        + '.' + String((date.getMilliseconds() / 1000).toFixed(3)).slice(2, 5)
+        + _timezone_offset_str(date.getTimezoneOffset())
+    );
+}
+
 module.exports = {
     count,
     filter_map,
+    local_iso8601,
     make_email_address,
     make_random_email,
     pluck,
@@ -110,4 +139,6 @@ module.exports = {
     remove,
     retry,
     wait,
+    // Tests only
+    _timezone_offset_str,
 };

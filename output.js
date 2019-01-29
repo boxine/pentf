@@ -63,6 +63,11 @@ function finish(config, state) {
 }
 
 function log(config, message) {
+    if (! config.concurrency) {
+        console.log(message);  // eslint-disable-line no-console
+        return;
+    }
+
     if (last_state) {
         clean();
     }

@@ -76,7 +76,7 @@ async function assert_not_xpath(page, xpath, message) {
         return !!element;
     }, xpath);
     assert(!found,
-        'Element matching ' + xpath + ' is present, but should not be there' +
+        'Element matching ' + xpath + ' is present, but should not be there.' +
         (message ? ' ' + message : ''));
 }
 

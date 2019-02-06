@@ -80,10 +80,28 @@ async function assert_not_xpath(page, xpath, message) {
         (message ? ' ' + message : ''));
 }
 
+async function set_language(page, lang) {
+    // From https://stackoverflow.com/a/47292022/35070
+    await page.setExtraHTTPHeaders({'Accept-Language': lang}); // For HTTP requests
+    await page.evaluateOnNewDocument(lang => { // For JavaScript code
+        Object.defineProperty(navigator, 'language', {
+            get: function() {
+                return [lang];
+            }
+        });
+        Object.defineProperty(navigator, 'languages', {
+            get: function() {
+                return [lang];
+            }
+        });
+    }, lang);
+}
+
 module.exports = {
-    assert_value,
     assert_not_xpath,
+    assert_value,
     close_page,
     new_page,
+    set_language,
     waitForVisible,
 };

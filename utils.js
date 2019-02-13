@@ -56,6 +56,11 @@ function* range(count) {
     }
 }
 
+// Range as array
+function arange(count) {
+    return Array.from(range(count));
+}
+
 function count(ar, filter) {
     let res = 0;
     for (var el of ar) {
@@ -125,6 +130,7 @@ function local_iso8601(date) {
 }
 
 module.exports = {
+    arange,
     count,
     filter_map,
     local_iso8601,

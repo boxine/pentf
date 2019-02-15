@@ -4,9 +4,12 @@ const assert = require('assert');
 
 const puppeteer = require('puppeteer');
 
-async function new_page(config) {
+async function new_page(config, chrome_args=[]) {
+    const args = ['--no-sandbox'];
+    args.push(...chrome_args);
+
     const params = {
-        args: ['--no-sandbox'],
+        args,
         ignoreHTTPSErrors: (config.env === 'local'),
     };
     if (!config.headless) {

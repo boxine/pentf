@@ -57,6 +57,10 @@ function parse_args(root_dir, options) {
         action: 'storeTrue',
         help: 'Do not output test status',
     });
+    output_group.addArgument(['--print-config'], {
+        action: 'storeTrue',
+        help: 'Output the effective configuration and exit.',
+    });
     output_group.addArgument(['-c', '--print-curl'], {
         action: 'storeTrue',
         help: 'Print curl commands for each HTTP request',

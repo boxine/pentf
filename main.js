@@ -54,6 +54,11 @@ async function real_main(root_dir, options) {
         return;
     }
 
+    if (args.print_config) {
+        console.log(config);
+        return;
+    }
+
     let results;
     if (args.load_json) {
         const json_input = await readFile(args.load_json, {encoding: 'utf-8'});

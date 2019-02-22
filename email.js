@@ -25,7 +25,7 @@ function parse_body(body) {
     return res;
 }
 
-function _parse_header(name, value) {
+function parse_header(name, value) {
     assert(/^[a-zA-Z0-9]+$/.test(name));
     const expect = name.toLowerCase() + ':';
     if (value.substring(0, expect.length).toLowerCase() !== expect) {
@@ -52,19 +52,19 @@ async function _find_message(config, client, since, to, subject_contains) {
     let newest_timestamp = 0;
     let newest_msg = undefined;
     for (const msg of messages) {
-        const header_date = _parse_header('Date', msg['body[header.fields (date)]']);
+        const header_date = parse_header('Date', msg['body[header.fields (date)]']);
 
         const timestamp = (new Date(header_date)).getTime();
         if (timestamp < since_timestamp - 60 * 1000) {
             continue;
         }
 
-        const header_to = _parse_header('To', msg['body[header.fields (to)]']);
+        const header_to = parse_header('To', msg['body[header.fields (to)]']);
         if (header_to.toLowerCase() != to.toLowerCase()) {
             continue;
         }
 
-        const subject = _parse_header('Subject', msg['body[header.fields (subject)]']);
+        const subject = parse_header('Subject', msg['body[header.fields (subject)]']);
         if (! subject.includes(subject_contains)) {
             continue;
         }
@@ -105,7 +105,10 @@ async function connect(config, user) {
 
 const cached_clients = new Map();
 
-async function get_mail(config, since, to, subject_contains) {
+async function get_mail(
+    config, since, to, subject_contains,
+    wait_times=[200, 500, 1000, 2000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]) {
+
     let user = config.imap.user;
     if (user === '__to__') {
         user = to;
@@ -124,8 +127,7 @@ async function get_mail(config, since, to, subject_contains) {
     }
 
     const msg = await utils.retry(
-        () => _find_message(config, client, since, to, subject_contains),
-        [200, 500, 1000, 2000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]);
+        () => _find_message(config, client, since, to, subject_contains), wait_times);
     assert(msg, (
         'Could not find message to ' + to + ' matching ' + JSON.stringify(subject_contains) + ' since ' + since));
 
@@ -142,7 +144,8 @@ async function shutdown() {
 }
 
 module.exports = {
+    connect,
     get_mail,
     shutdown,
-    _parse_header, // tests only
+    parse_header,
 };

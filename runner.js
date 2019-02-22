@@ -155,7 +155,7 @@ function resolve_dependencies(tasks) {
             if (! dependency) {
                 throw new Error(
                     `Failed to calculate tasks: Could not find dependency ${dependency_id} of ${t.id}.` +
-                    'Pass in -i / --ignore-dependencies to suppress dependency handling.');
+                    ' Pass in -i / --ignore-dependencies to suppress dependency handling.');
             }
             return dependency;
         });

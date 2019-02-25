@@ -146,6 +146,7 @@ async function shutdown() {
 module.exports = {
     connect,
     get_mail,
-    shutdown,
+    parse_body,
     parse_header,
+    shutdown,
 };

@@ -119,6 +119,11 @@ function parse_args(root_dir, options) {
         action: 'storeTrue',
         help: 'List all tests that would be run and exit',
     });
+    selection_group.addArgument(['-a', '--all', '--include-slow-tests'], {
+        action: 'storeTrue',
+        dest: 'include_slow_tests',
+        help: 'Run tests that take a very long time',
+    });
 
     const email_group = parser.addArgumentGroup({title: 'Email'});
     email_group.addArgument(['--keep-emails'], {

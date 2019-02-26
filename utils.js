@@ -61,14 +61,6 @@ function arange(count) {
     return Array.from(range(count));
 }
 
-function repeat(array, count) {
-    const res = [];
-    while (count-- > 0) {
-        res.push(...array);
-    }
-    return res;
-}
-
 function count(ar, filter) {
     let res = 0;
     for (var el of ar) {
@@ -151,7 +143,6 @@ module.exports = {
     re_escape,
     readFile,
     remove,
-    repeat,
     retry,
     wait,
     // Tests only

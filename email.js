@@ -109,6 +109,8 @@ async function get_mail(
     config, since, to, subject_contains,
     wait_times=[200, 500, 1000, 2000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]) {
 
+    assert(Array.isArray(wait_times));
+
     let user = config.imap.user;
     if (user === '__to__') {
         user = to;

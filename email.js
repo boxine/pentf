@@ -8,6 +8,7 @@ const utils = require('./utils');
 
 
 function parse_body(body) {
+    assert(body instanceof Uint8Array);
     const parsed = mime_parse(body);
     const subject = parsed.headers.subject[0].value;
     assert(subject);
@@ -17,9 +18,9 @@ function parse_body(body) {
     for (const part of parsed.childNodes) {
         const mtype = part.headers['content-type'][0].value;
         if (mtype === 'text/plain') {
-            res.text = part.raw;
+            res.text = (new TextDecoder(part.charset)).decode(part.content);
         } else if (mtype === 'text/html') {
-            res.html = part.raw;
+            res.html = (new TextDecoder(part.charset)).decode(part.content);
         }
     }
     return res;
@@ -71,7 +72,7 @@ async function _find_message(config, client, since, to, subject_contains) {
 
         if (timestamp > newest_timestamp) {
             const full_msg = (await client.listMessages(
-                'INBOX', msg.uid, ['UID', 'body[]'], {byUid: true}))[0];
+                'INBOX', msg.uid, ['UID', 'body[]'], {byUid: true, valueAsString: false}))[0];
             if (full_msg) {
                 newest_msg = full_msg;
                 newest_timestamp = timestamp;

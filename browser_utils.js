@@ -83,18 +83,24 @@ async function assert_not_xpath(page, xpath, message) {
         (message ? ' ' + message : ''));
 }
 
+// lang can either be a single string (e.g. "en") or an array of supported languages (e.g. ['de-DE', 'en-US', 'gr'])
 async function set_language(page, lang) {
+    if (typeof lang === 'string') {
+        lang = [lang];
+    }
+    assert(Array.isArray(lang));
+
     // From https://stackoverflow.com/a/47292022/35070
-    await page.setExtraHTTPHeaders({'Accept-Language': lang}); // For HTTP requests
+    await page.setExtraHTTPHeaders({'Accept-Language': lang.join(',')}); // For HTTP requests
     await page.evaluateOnNewDocument(lang => { // For JavaScript code
         Object.defineProperty(navigator, 'language', {
             get: function() {
-                return [lang];
+                return lang[0];
             }
         });
         Object.defineProperty(navigator, 'languages', {
             get: function() {
-                return [lang];
+                return lang;
             }
         });
     }, lang);

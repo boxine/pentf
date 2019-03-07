@@ -65,47 +65,53 @@ function parse_args(root_dir, options) {
         action: 'storeTrue',
         help: 'Print curl commands for each HTTP request',
     });
-    output_group.addArgument(['-J', '--json'], {
+    output_group.addArgument(['-I', '--ignore-errors'], {
+        metavar: 'REGEXP',
+        help: 'Do not output error messages matching the regular expression. Example: -I "\\(TOC-[0-9]+\\)"',
+    });
+
+    const results_group = parser.addArgumentGroup({title: 'Writing results to disk'});
+    results_group.addArgument(['-J', '--json'], {
         action: 'storeTrue',
         help: 'Write tests results as a JSON file.',
     });
-    output_group.addArgument(['--json-file'], {
+    results_group.addArgument(['--json-file'], {
         metavar: 'FILE.json',
         dest: 'json_file',
         defaultValue: DEFAULT_JSON_NAME,
         help: 'JSON file to write to. Defaults to %(defaultValue)s .',
     });
-    output_group.addArgument(['-H', '--html'], {
+    results_group.addArgument(['-H', '--html'], {
         action: 'storeTrue',
         help: 'Write tests results as an HTML file.',
     });
-    output_group.addArgument(['--html-file'], {
+    results_group.addArgument(['--html-file'], {
         metavar: 'FILE.html',
         dest: 'html_file',
         defaultValue: DEFAULT_HTML_NAME,
         help: 'HTML file to write a report to. Defaults to %(defaultValue)s .',
     });
-    output_group.addArgument(['--pdf'], {
+    results_group.addArgument(['--pdf'], {
         action: 'storeTrue',
         help: 'Write tests results as a PDF file.',
     });
-    output_group.addArgument(['--pdf-file'], {
+    results_group.addArgument(['--pdf-file'], {
         metavar: 'FILE.pdf',
         dest: 'pdf_file',
         defaultValue: DEFAULT_PDF_NAME,
         help: 'PDF file to write a report to. Defaults to %(defaultValue)s .',
     });
-    output_group.addArgument(['-M', '--markdown'], {
+    results_group.addArgument(['-M', '--markdown'], {
         action: 'storeTrue',
         help: 'Write tests results as a Markdown file.',
     });
-    output_group.addArgument(['--markdown-file'], {
+    results_group.addArgument(['--markdown-file'], {
         metavar: 'FILE.md',
         dest: 'markdown_file',
         defaultValue: DEFAULT_MARKDOWN_NAME,
         help: 'Markdown file to write a report to. Defaults to %(defaultValue)s .',
     });
-    output_group.addArgument(['--load-json'], {
+    results_group.addArgument(['--load-json'], {
         metavar: 'INPUT.json',
         help: 'Load test results from JSON (instead of executing tests)',
     });

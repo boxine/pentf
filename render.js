@@ -269,7 +269,9 @@ ${table}
 
 async function pdf(config, path, results) {
     const html_code = html(results);
-    const page = await new_page(config);
+    const pdf_config = {...config};
+    pdf_config.headless = true;
+    const page = await new_page(pdf_config);
 
     await page.setContent(html_code);
     await page.pdf({

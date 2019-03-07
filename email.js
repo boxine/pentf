@@ -24,6 +24,13 @@ function parse_body(body) {
             res.html = (new TextDecoder(part.charset)).decode(part.content);
         }
     }
+
+    const text_body = (new TextDecoder('utf-8')).decode(body);
+    const header_end_m = /(?:\r?\n){2}/.exec(text_body);
+    if (header_end_m) {
+        res.header = text_body.slice(0, header_end_m.index);
+    }
+
     return res;
 }
 

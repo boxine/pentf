@@ -130,12 +130,6 @@ function parse_args(root_dir, options) {
         action: 'storeTrue',
         help: 'Keep generated emails instead of deleting them',
     });
-    email_group.addArgument(['--email-no-client-recycling'], {
-        help: 'Create a new email client for every connection',
-        dest: 'email_new_client',
-        action: 'storeConst',
-        constant: 'always',
-    });
 
     const puppeteer_group = parser.addArgumentGroup({title: 'puppeteer browser test'});
     puppeteer_group.addArgument(['-V', '--visible'], {

@@ -103,7 +103,7 @@ function filter_map(ar, cb) {
 
 const _pad = num => ('' + num).padStart(2, '0');
 
-function _timezone_offset_str(offset) {
+function timezone_offset_str(offset) {
     if (!offset) return 'Z';
 
     const sign = (offset < 0) ? '+' : '-';
@@ -125,7 +125,7 @@ function local_iso8601(date) {
         + ':' + _pad(date.getMinutes())
         + ':' + _pad(date.getSeconds())
         + '.' + String((date.getMilliseconds() / 1000).toFixed(3)).slice(2, 5)
-        + _timezone_offset_str(date.getTimezoneOffset())
+        + timezone_offset_str(date.getTimezoneOffset())
     );
 }
 
@@ -144,7 +144,6 @@ module.exports = {
     readFile,
     remove,
     retry,
+    timezone_offset_str,
     wait,
-    // Tests only
-    _timezone_offset_str,
 };

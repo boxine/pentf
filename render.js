@@ -1,6 +1,7 @@
 const fs = require('fs');
 const {promisify} = require('util');
 const {new_page, close_page} = require('../pintf/browser_utils');
+const {timezone_offset_str} = require('../pintf/utils');
 
 const utils = require('./utils');
 
@@ -68,7 +69,18 @@ function format_duration(ms) {
 }
 
 function format_timestamp(ts) {
-    return new Date(ts).toLocaleString();
+    const _pad = num => ('' + num).padStart(2, '0');
+    const date = new Date(ts);
+
+    return (
+        date.getFullYear()
+        + '-' + _pad(date.getMonth() + 1)
+        + '-' + _pad(date.getDate())
+        + ' ' + _pad(date.getHours())
+        + ':' + _pad(date.getMinutes())
+        + ':' + _pad(date.getSeconds())
+        + timezone_offset_str(date.getTimezoneOffset())
+    );
 }
 
 function escape_html(str) {

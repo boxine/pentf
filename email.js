@@ -1,4 +1,5 @@
 const assert = require('assert');
+const {TextDecoder} = require('util');
 
 const ImapClient = require('emailjs-imap-client').default;
 const mime_parse = require('emailjs-mime-parser').default;

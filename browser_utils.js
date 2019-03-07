@@ -1,8 +1,8 @@
 'use strict';
 
 const assert = require('assert');
-
 const puppeteer = require('puppeteer');
+const {wait} = require('../pintf/utils');
 
 async function new_page(config, chrome_args=[]) {
     const args = ['--no-sandbox'];
@@ -72,15 +72,24 @@ async function assert_value(input, expected) {
 }
 
 // Assert that there is currently no element matching the xpath on the page
-async function assert_not_xpath(page, xpath, message) {
-    const found = await page.evaluate(xpath => {
-        const element = document.evaluate(
-            xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-        return !!element;
-    }, xpath);
-    assert(!found,
-        'Element matching ' + xpath + ' is present, but should not be there.' +
-        (message ? ' ' + message : ''));
+async function assert_not_xpath(page, xpath, message='', wait_seconds=0, check_every=200) {
+    while (true) { // eslint-disable-line no-constant-condition
+        const found = await page.evaluate(xpath => {
+            const element = document.evaluate(
+                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+            return !!element;
+        }, xpath);
+        assert(!found,
+            'Element matching ' + xpath + ' is present, but should not be there.' +
+            (message ? ' ' + message : ''));
+
+        if (wait_seconds <= 0) {
+            break;
+        }
+
+        await wait(Math.min(check_every, wait_seconds));
+        wait_seconds -= check_every;
+    }
 }
 
 // lang can either be a single string (e.g. "en") or an array of supported languages (e.g. ['de-DE', 'en-US', 'gr'])

@@ -77,8 +77,14 @@ function log(config, message) {
     }
 }
 
+function log_verbose(config, message) {
+    if (!config.verbose) return;
+    log(config, message);
+}
+
 module.exports = {
     finish,
     log,
+    log_verbose,
     status,
 };

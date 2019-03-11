@@ -115,10 +115,21 @@ async function set_language(page, lang) {
     }, lang);
 }
 
+// Get all options of a select as an array of strings, e.g. ['Option A', 'Option B(***)', 'Option C']
+async function get_select_options(page, select) {
+    return await page.evaluate(select => {
+        const option_elements = Array.from(select.querySelectorAll('option'));
+        return option_elements.map(option => {
+            return option.innerText + (select.value == option.value ? '(***)' : '');
+        });
+    }, select);
+}
+
 module.exports = {
     assert_not_xpath,
     assert_value,
     close_page,
+    get_select_options,
     new_page,
     set_language,
     waitForVisible,

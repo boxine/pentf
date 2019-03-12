@@ -36,6 +36,7 @@ function parse_body(body) {
 
 function parse_header(name, value) {
     assert(/^[a-zA-Z0-9]+$/.test(name));
+    if (!value) return '';
     const expect = name.toLowerCase() + ':';
     if (value.substring(0, expect.length).toLowerCase() !== expect) {
         throw new Error('Cannot parse ' + name + ': in ' + JSON.stringify(value));

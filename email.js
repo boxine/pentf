@@ -6,6 +6,7 @@ const mime_parse = require('emailjs-mime-parser').default;
 const libmime = require('libmime');
 
 const utils = require('./utils');
+const output = require('./output');
 
 
 function parse_body(body) {
@@ -128,7 +129,10 @@ async function get_mail(
 
     let client = cached_clients.get(user);
     let do_logout = false;
-    if (! client) {
+    if (client) {
+        output.log_verbose(config, `[email] Reusing existing client for ${user}`);
+    } else {
+        output.log_verbose(config, `[email] Connecting to account ${user}`);
         client = await connect(config, user);
 
         if (!cached_clients.has(user) && config.email_new_client !== 'always') {

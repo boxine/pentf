@@ -7,8 +7,8 @@ const utils = require('./utils');
 const email = require('./email');
 const output = require('./output');
 
-async function shutdown() {
-    await email.shutdown();
+async function shutdown(config) {
+    await email.shutdown(config);
 }
 
 // Returns a blocking dependency or none.
@@ -223,7 +223,7 @@ async function run(config, test_cases) {
         }
     }
 
-    await shutdown();
+    await shutdown(config);
     const test_end = Date.now();
 
     return {

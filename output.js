@@ -49,6 +49,7 @@ function status(config, state) {
 
 
 function finish(config, state) {
+    last_state = null;
     if (config.quiet) return;
 
     clean();

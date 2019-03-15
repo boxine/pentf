@@ -149,13 +149,18 @@ async function get_mail(
 
     if (do_logout) {
         await client.close();
+        output.log_verbose(config, `[email] Closed client for ${user}`);
     }
 
     return msg;
 }
 
-async function shutdown() {
-    await Promise.all(Array.from(cached_clients.values()).map(client => client.close()));
+async function shutdown(config) {
+    const client_list = Array.from(cached_clients.values());
+    if (client_list.length > 0) {
+        output.log_verbose(config, `[email] Shutting down ${client_list.length} clients`);
+    }
+    await Promise.all(client_list.map(client => client.close()));
     cached_clients.clear();
 }
 

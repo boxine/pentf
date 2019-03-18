@@ -46,7 +46,7 @@ async function run_task(config, task) {
         task.error = e;
 
         if (!config.ignore_errors || !(new RegExp(config.ignore_errors)).test(e.stack)) {
-            output.log(config, `test case ${task.name} FAILED at ${utils.local_iso8601()}:\n${e.stack}\n`);
+            output.log(config, `test case ${task.name} FAILED at ${utils.localIso8601()}:\n${e.stack}\n`);
         }
         if (config.fail_fast) {
             process.exit(3);

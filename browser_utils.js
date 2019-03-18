@@ -4,7 +4,7 @@ const assert = require('assert');
 const puppeteer = require('puppeteer');
 const {wait} = require('../pintf/utils');
 
-async function new_page(config, chrome_args=[]) {
+async function newPage(config, chrome_args=[]) {
     const args = ['--no-sandbox'];
     args.push(...chrome_args);
 
@@ -22,7 +22,7 @@ async function new_page(config, chrome_args=[]) {
     return browser.newPage();
 }
 
-async function close_page(page) {
+async function closePage(page) {
     const browser = await page.browser();
     await page.close();
     await browser.close();
@@ -40,7 +40,7 @@ async function waitForVisible(page, selector) {
     return el;
 }
 
-async function assert_value(input, expected) {
+async function assertValue(input, expected) {
     const page = input._page;
     assert(page);
     try {
@@ -72,7 +72,7 @@ async function assert_value(input, expected) {
 }
 
 // Assert that there is currently no element matching the xpath on the page
-async function assert_not_xpath(page, xpath, message='', wait_ms=2000, check_every=200) {
+async function assertNotXPath(page, xpath, message='', wait_ms=2000, check_every=200) {
     while (true) { // eslint-disable-line no-constant-condition
         const found = await page.evaluate(xpath => {
             const element = document.evaluate(
@@ -93,7 +93,7 @@ async function assert_not_xpath(page, xpath, message='', wait_ms=2000, check_eve
 }
 
 // lang can either be a single string (e.g. "en") or an array of supported languages (e.g. ['de-DE', 'en-US', 'gr'])
-async function set_language(page, lang) {
+async function setLanguage(page, lang) {
     if (typeof lang === 'string') {
         lang = [lang];
     }
@@ -116,7 +116,7 @@ async function set_language(page, lang) {
 }
 
 // Get all options of a select as an array of strings, e.g. ['Option A', 'Option B(***)', 'Option C']
-async function get_select_options(page, select) {
+async function getSelectOptions(page, select) {
     return await page.evaluate(select => {
         const option_elements = Array.from(select.querySelectorAll('option'));
         return option_elements.map(option => {
@@ -126,11 +126,11 @@ async function get_select_options(page, select) {
 }
 
 module.exports = {
-    assert_not_xpath,
-    assert_value,
-    close_page,
-    get_select_options,
-    new_page,
-    set_language,
+    assertNotXPath,
+    assertValue,
+    closePage,
+    getSelectOptions,
+    newPage,
+    setLanguage,
     waitForVisible,
 };

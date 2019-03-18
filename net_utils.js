@@ -2,7 +2,7 @@ const http = require('http');
 const https = require('https');
 const node_fetch = require('node-fetch');
 
-const {make_curl_command} = require('./curl_command');
+const {makeCurlCommand} = require('./curl_command');
 const output = require('./output');
 
 async function fetch(config, url, options) {
@@ -29,7 +29,7 @@ async function fetch(config, url, options) {
     }
 
     if (config.print_curl) {
-        output.log(config, await make_curl_command(options, url));
+        output.log(config, await makeCurlCommand(options, url));
     }
 
     return await node_fetch(url, options);

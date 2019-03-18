@@ -9,7 +9,7 @@ const utils = require('./utils');
 const output = require('./output');
 
 
-function parse_body(body) {
+function parseBody(body) {
     assert(body instanceof Uint8Array);
     const parsed = mime_parse(body);
     const subject = parsed.headers.subject[0].value;
@@ -35,7 +35,7 @@ function parse_body(body) {
     return res;
 }
 
-function parse_header(name, value) {
+function parseHeader(name, value) {
     assert(/^[a-zA-Z0-9]+$/.test(name));
     if (!value) return '';
     const expect = name.toLowerCase() + ':';
@@ -63,19 +63,19 @@ async function _find_message(config, client, since, to, subject_contains) {
     let newest_timestamp = 0;
     let newest_msg = undefined;
     for (const msg of messages) {
-        const header_date = parse_header('Date', msg['body[header.fields (date)]']);
+        const header_date = parseHeader('Date', msg['body[header.fields (date)]']);
 
         const timestamp = (new Date(header_date)).getTime();
         if (timestamp < since_timestamp - 60 * 1000) {
             continue;
         }
 
-        const header_to = parse_header('To', msg['body[header.fields (to)]']);
+        const header_to = parseHeader('To', msg['body[header.fields (to)]']);
         if (header_to.toLowerCase() != to.toLowerCase()) {
             continue;
         }
 
-        const subject = parse_header('Subject', msg['body[header.fields (subject)]']);
+        const subject = parseHeader('Subject', msg['body[header.fields (subject)]']);
         if (! subject.includes(subject_contains)) {
             continue;
         }
@@ -94,7 +94,7 @@ async function _find_message(config, client, since, to, subject_contains) {
         if (! config.keep_emails) {
             await client.deleteMessages('INBOX', newest_msg.uid, {byUid: true});
         }
-        return parse_body(newest_msg['body[]']);
+        return parseBody(newest_msg['body[]']);
     }
 
     return undefined;
@@ -116,7 +116,7 @@ async function connect(config, user) {
 
 const cached_clients = new Map();
 
-async function get_mail(
+async function getMail(
     config, since, to, subject_contains,
     wait_times=[200, 500, 1000, 2000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]) {
 
@@ -130,9 +130,9 @@ async function get_mail(
     let client = cached_clients.get(user);
     let do_logout = false;
     if (client) {
-        output.log_verbose(config, `[email] Reusing existing client for ${user}`);
+        output.logVerbose(config, `[email] Reusing existing client for ${user}`);
     } else {
-        output.log_verbose(config, `[email] Connecting to account ${user}`);
+        output.logVerbose(config, `[email] Connecting to account ${user}`);
         client = await connect(config, user);
 
         if (!cached_clients.has(user) && config.email_new_client !== 'always') {
@@ -149,7 +149,7 @@ async function get_mail(
 
     if (do_logout) {
         await client.close();
-        output.log_verbose(config, `[email] Closed client for ${user}`);
+        output.logVerbose(config, `[email] Closed client for ${user}`);
     }
 
     return msg;
@@ -158,7 +158,7 @@ async function get_mail(
 async function shutdown(config) {
     const client_list = Array.from(cached_clients.values());
     if (client_list.length > 0) {
-        output.log_verbose(config, `[email] Shutting down ${client_list.length} clients`);
+        output.logVerbose(config, `[email] Shutting down ${client_list.length} clients`);
     }
     await Promise.all(client_list.map(client => client.close()));
     cached_clients.clear();
@@ -166,8 +166,8 @@ async function shutdown(config) {
 
 module.exports = {
     connect,
-    get_mail,
-    parse_body,
-    parse_header,
+    getMail,
+    parseBody,
+    parseHeader,
     shutdown,
 };

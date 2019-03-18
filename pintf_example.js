@@ -1,11 +1,11 @@
 const assert = require('assert');
-const {get_mail} = require('../pintf/email');
-const {new_page, close_page} = require('../pintf/browser_utils');
+const {getMail} = require('../pintf/email');
+const {newPage, closePage} = require('../pintf/browser_utils');
 const {fetch} = require('../pintf/net_utils');
-const {make_random_email} = require('../pintf/utils');
+const {makeRandomEmail} = require('../pintf/utils');
 
 async function run(config) {
-    const email = make_random_email(config, 'pintf_example');
+    const email = makeRandomEmail(config, 'pintf_example');
     const start = new Date();
     const response = await fetch(config, 'https://api.tonie.cloud/v2/users', {
         method: 'POST',
@@ -23,11 +23,11 @@ async function run(config) {
     assert.equal(response.status, 201);
     assert((await response.json()).jwt);
 
-    const mail = await get_mail(config, start, email, 'Your Toniecloud confirmation link');
+    const mail = await getMail(config, start, email, 'Your Toniecloud confirmation link');
     assert(mail);
 
     // Test with a browser
-    const page = await new_page(config);
+    const page = await newPage(config);
     await page.goto('https://meine.tonies.de/');
 
     // During development, you can make the test fail.
@@ -36,7 +36,7 @@ async function run(config) {
 
     // assert(false);
 
-    await close_page(page);
+    await closePage(page);
 }
 
 module.exports = {

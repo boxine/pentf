@@ -78,7 +78,7 @@ function log(config, message) {
     }
 }
 
-function log_verbose(config, message) {
+function logVerbose(config, message) {
     if (!config.verbose) return;
     log(config, message);
 }
@@ -86,6 +86,6 @@ function log_verbose(config, message) {
 module.exports = {
     finish,
     log,
-    log_verbose,
+    logVerbose,
     status,
 };

@@ -1,11 +1,11 @@
 const fs = require('fs');
 const {promisify} = require('util');
-const {new_page, close_page} = require('../pintf/browser_utils');
-const {timezone_offset_str} = require('../pintf/utils');
+const {newPage, closePage} = require('../pintf/browser_utils');
+const {timezoneOffsetString} = require('../pintf/utils');
 
 const utils = require('./utils');
 
-function craft_results(config, test_info) {
+function craftResults(config, test_info) {
     const {test_start, test_end, state} = test_info;
 
     const test_results = state.map(s => {
@@ -30,7 +30,7 @@ function craft_results(config, test_info) {
     };
 }
 
-async function do_render(config, results) {
+async function doRender(config, results) {
     if (config.json) {
         const json = JSON.stringify(results, undefined, 2) + '\n';
         await promisify(fs.writeFile)(config.json_file, json, {encoding: 'utf-8'});
@@ -79,7 +79,7 @@ function format_timestamp(ts) {
         + ' ' + _pad(date.getHours())
         + ':' + _pad(date.getMinutes())
         + ':' + _pad(date.getSeconds())
-        + timezone_offset_str(date.getTimezoneOffset())
+        + timezoneOffsetString(date.getTimezoneOffset())
     );
 }
 
@@ -283,7 +283,7 @@ async function pdf(config, path, results) {
     const html_code = html(results);
     const pdf_config = {...config};
     pdf_config.headless = true;
-    const page = await new_page(pdf_config);
+    const page = await newPage(pdf_config);
 
     await page.setContent(html_code);
     await page.pdf({
@@ -291,10 +291,10 @@ async function pdf(config, path, results) {
         printBackground: true,
         preferCSSPageSize: true,
     });
-    await close_page(page);
+    await closePage(page);
 }
 
 module.exports = {
-    craft_results,
-    do_render,
+    craftResults,
+    doRender,
 };

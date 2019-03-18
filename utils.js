@@ -5,7 +5,7 @@ function make_email_address(config, suffix) {
     return account + '+' + suffix + '@' + domain;
 }
 
-function make_random_email(config, prefix) {
+function makeRandomEmail(config, prefix) {
     if (!prefix) prefix = '';
     return make_email_address(config, prefix + Math.random().toString(36).slice(2));
 }
@@ -31,21 +31,21 @@ async function retry(func, waitTimes) {
     return await func();
 }
 
-function random_hex() {
+function randomHex() {
     return [
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 16)];
 }
 
-function random_hexstring(len) {
+function randomHexstring(len) {
     let res = '';
     while (len-- > 0) {
-        res += random_hex();
+        res += randomHex();
     }
     return res;
 }
 
-function re_escape(s) {
+function regexEscape(s) {
     // From https://stackoverflow.com/a/3561711/35070
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
@@ -90,7 +90,7 @@ function remove(array, callback) {
     throw new Error('Did not remove anything');
 }
 
-function filter_map(ar, cb) {
+function filterMap(ar, cb) {
     const res = [];
     for (let i = 0;i < ar.length;i++) {
         const mapped = cb(ar[i], i);
@@ -103,7 +103,7 @@ function filter_map(ar, cb) {
 
 const _pad = num => ('' + num).padStart(2, '0');
 
-function timezone_offset_str(offset) {
+function timezoneOffsetString(offset) {
     if (!offset) return 'Z';
 
     const sign = (offset < 0) ? '+' : '-';
@@ -113,7 +113,7 @@ function timezone_offset_str(offset) {
     return sign + _pad(hours) + ':' + _pad(minutes);
 }
 
-function local_iso8601(date) {
+function localIso8601(date) {
     if (!date) date = new Date();
 
     // Adapted from: https://stackoverflow.com/a/8563517/35070
@@ -125,25 +125,25 @@ function local_iso8601(date) {
         + ':' + _pad(date.getMinutes())
         + ':' + _pad(date.getSeconds())
         + '.' + String((date.getMilliseconds() / 1000).toFixed(3)).slice(2, 5)
-        + timezone_offset_str(date.getTimezoneOffset())
+        + timezoneOffsetString(date.getTimezoneOffset())
     );
 }
 
 module.exports = {
     arange,
     count,
-    filter_map,
-    local_iso8601,
+    filterMap,
+    localIso8601,
     make_email_address,
-    make_random_email,
+    makeRandomEmail,
     pluck,
-    random_hex,
-    random_hexstring,
+    randomHex,
+    randomHexstring,
     range,
-    re_escape,
+    regexEscape,
     readFile,
     remove,
     retry,
-    timezone_offset_str,
+    timezoneOffsetString,
     wait,
 };

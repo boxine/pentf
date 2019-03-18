@@ -24,7 +24,7 @@ function add_binary_data(curl_command, data_b64) {
     return 'echo ' + escape_shell(data_b64) + ' | base64 -d | ' + curl_command + ' -d @-';
 }
 
-async function make_curl_command(options, url) {
+async function makeCurlCommand(options, url) {
     let curl_command = 'curl';
 
     if (options.agent && (options.agent.options.rejectUnauthorized === false)) {
@@ -80,5 +80,5 @@ async function make_curl_command(options, url) {
 }
 
 module.exports = {
-    make_curl_command,
+    makeCurlCommand,
 };

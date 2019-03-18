@@ -18,10 +18,10 @@ class AutoWidthArgumentParser extends argparse.ArgumentParser {
     }
 }
 
-function list_envs(root_dir) {
+function listEnvs(root_dir) {
     const config_dir = path.join(root_dir, 'config');
     const all_files = fs.readdirSync(config_dir);
-    const res = utils.filter_map(all_files, fn => {
+    const res = utils.filterMap(all_files, fn => {
         const m = /^(?!common)(?!\.)([_A-Za-z0-9.]+)\.json$/.exec(fn);
         return m && m[1];
     });
@@ -31,7 +31,7 @@ function list_envs(root_dir) {
 
 // options can have the following optional values
 // - description: program description in the --help output
-function parse_args(root_dir, options) {
+function parseArgs(root_dir, options) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
@@ -43,7 +43,7 @@ function parse_args(root_dir, options) {
 
     // General arguments
     parser.addArgument(['-e', '--env'], {
-        choices: list_envs(root_dir),
+        choices: listEnvs(root_dir),
         defaultValue: 'local',
         help: 'The environment to test against. Default is %(defaultValue)s.',
     });
@@ -198,7 +198,7 @@ function parse_args(root_dir, options) {
     return args;
 }
 
-function read_config(root_dir, args) {
+function readConfig(root_dir, args) {
     const env = args.env;
     const common_config_fn = path.join(root_dir, 'config', 'common.json');
     const common_config_json = fs.readFileSync(common_config_fn, 'utf-8');
@@ -212,7 +212,7 @@ function read_config(root_dir, args) {
 }
 
 module.exports = {
-    list_envs,
-    parse_args,
-    read_config,
+    listEnvs,
+    parseArgs,
+    readConfig,
 };

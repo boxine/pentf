@@ -4,7 +4,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-const {read_config, parse_args} = require('./config');
+const {readConfig, parseArgs} = require('./config');
 const {readFile} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
@@ -33,16 +33,16 @@ function load_tests(args, tests_dir) {
 // - config/  with configuration files (*.json)
 //
 // Available options:
-// - default_config: Function to call on the loaded configuration, to set/compute default values.
+// - defaultConfig: Function to call on the loaded configuration, to set/compute default values.
 // - description: program description in the --help output
 async function real_main(root_dir, options) {
     assert(root_dir, 'root_dir must be set');
     options = options || {};
 
-    const args = parse_args(root_dir, options);
-    const config = read_config(root_dir, args);
-    if (options.default_config) {
-        options.default_config(config);
+    const args = parseArgs(root_dir, options);
+    const config = readConfig(root_dir, args);
+    if (options.defaultConfig) {
+        options.defaultConfig(config);
     }
     const tests_dir = path.join(root_dir, 'tests');
     const test_cases = load_tests(args, tests_dir);
@@ -67,10 +67,10 @@ async function real_main(root_dir, options) {
         // Run tests
         const test_info = await runner.run(config, test_cases);
 
-        results = render.craft_results(config, test_info);
+        results = render.craftResults(config, test_info);
     }
 
-    await render.do_render(config, results);
+    await render.doRender(config, results);
 
     const any_errors = results.tests.some(s => s.status === 'error');
     if (any_errors && !config.keep_open) {

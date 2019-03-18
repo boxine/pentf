@@ -72,7 +72,7 @@ async function assert_value(input, expected) {
 }
 
 // Assert that there is currently no element matching the xpath on the page
-async function assert_not_xpath(page, xpath, message='', wait_seconds=0, check_every=200) {
+async function assert_not_xpath(page, xpath, message='', wait_ms=2000, check_every=200) {
     while (true) { // eslint-disable-line no-constant-condition
         const found = await page.evaluate(xpath => {
             const element = document.evaluate(
@@ -83,12 +83,12 @@ async function assert_not_xpath(page, xpath, message='', wait_seconds=0, check_e
             'Element matching ' + xpath + ' is present, but should not be there.' +
             (message ? ' ' + message : ''));
 
-        if (wait_seconds <= 0) {
+        if (wait_ms <= 0) {
             break;
         }
 
-        await wait(Math.min(check_every, wait_seconds));
-        wait_seconds -= check_every;
+        await wait(Math.min(check_every, wait_ms));
+        wait_ms -= check_every;
     }
 }
 

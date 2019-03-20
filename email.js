@@ -118,7 +118,10 @@ const cached_clients = new Map();
 
 async function getMail(
     config, since, to, subject_contains,
-    wait_times=[200, 500, 1000, 2000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]) {
+    wait_times=[
+        200, 500, 1000, 2000, // for local setups where the email arrives immediately
+        5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, // 1 minute for decent mail servers
+        10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000]) { // 2 minutes for delays
 
     assert(Array.isArray(wait_times));
 

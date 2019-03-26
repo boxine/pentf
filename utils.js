@@ -129,8 +129,19 @@ function localIso8601(date) {
     );
 }
 
+async function assertEventually(testfunc, message, waitFor=10000, checkEvery=200) {
+    for (let remaining = waitFor;remaining > 0;remaining -= checkEvery) {
+        const res = testfunc();
+        if (res) return res;
+
+        await wait(checkEvery);
+    }
+    throw new Error(`${message} (waited ${waitFor}ms)`);
+}
+
 module.exports = {
     arange,
+    assertEventually,
     count,
     filterMap,
     localIso8601,

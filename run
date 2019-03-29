@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+const pintf = require('./index.js');
+
+pintf.main(__dirname, {
+    description: 'Test pintf itself',
+});

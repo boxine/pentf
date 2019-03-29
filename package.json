@@ -1,13 +1,28 @@
 {
   "name": "pintf",
   "version": "1.0.0",
-  "description": "Parallel Integration Test Framework",
+  "description": "Parallel INtegration Test Framework",
   "main": "index.js",
   "directories": {
     "test": "tests"
   },
+  "dependencies": {
+    "argparse": "^1.0.10",
+    "emailjs-imap-client": "^3.0.7",
+    "emailjs-mime-parser": "^2.0.5",
+    "form-data": "^2.3.3",
+    "libmime": "^4.0.1",
+    "node-fetch": "^2.3.0",
+    "protobufjs": "^6.8.8",
+    "puppeteer": "^1.10.0",
+    "stream-buffers": "^3.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^5.9.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./run",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",

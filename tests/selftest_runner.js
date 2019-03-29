@@ -1,6 +1,6 @@
 const assert = require('assert');
 
-const {_next_task, _resolve_dependencies} = require('../pintf/runner');
+const {_next_task, _resolve_dependencies} = require('../runner');
 
 
 async function run() {

@@ -1,13 +1,13 @@
 const fs = require('fs');
 
-function make_email_address(config, suffix) {
+function makeEmailAddress(config, suffix) {
     const [account, domain] = config.email.split('@');
     return account + '+' + suffix + '@' + domain;
 }
 
 function makeRandomEmail(config, prefix) {
     if (!prefix) prefix = '';
-    return make_email_address(config, prefix + Math.random().toString(36).slice(2));
+    return makeEmailAddress(config, prefix + Math.random().toString(36).slice(2));
 }
 
 async function readFile(fileName, type) {
@@ -145,7 +145,6 @@ module.exports = {
     count,
     filterMap,
     localIso8601,
-    make_email_address,
     makeRandomEmail,
     pluck,
     randomHex,

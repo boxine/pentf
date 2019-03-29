@@ -6,10 +6,10 @@ Simply plop a new `.js` file into `tests/`. Its name will be the test's name, an
 
 ```
 const assert = require('assert');
-const {get_mail} = require('../pintf/email');
-const {new_page, close_page} = require('../pintf/browser_utils');
-const {fetch} = require('../pintf/net_utils');
-const {make_random_email} = require('../pintf/utils');
+const {get_mail} = require('pintf/email');
+const {new_page, close_page} = require('pintf/browser_utils');
+const {fetch} = require('pintf/net_utils');
+const {make_random_email} = require('pintf/utils');
 
 async function run(config) {
     const email = make_random_email(config, 'pintf_example');

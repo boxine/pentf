@@ -1,0 +1,22 @@
+{
+  "name": "pintf",
+  "version": "1.0.0",
+  "description": "Parallel Integration Test Framework",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boxine/pintf.git"
+  },
+  "author": "Philipp Hagemeister",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/boxine/pintf/issues"
+  },
+  "homepage": "https://github.com/boxine/pintf#readme"
+}

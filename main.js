@@ -1,6 +1,5 @@
 /*eslint no-console: "off"*/
 
-const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
@@ -39,8 +38,10 @@ async function real_main(options={}) {
             options.testsDir = path.join(options.rootDir, 'tests');
         }
         if (! options.configDir) {
-            // TODO: determine config dir
-            ;;;
+            const autoConfigDir = path.join(options.rootDir, 'config');
+            if (fs.existsSync(autoConfigDir)) {
+                options.configDir = autoConfigDir;
+            }
         }
     }
 
@@ -59,6 +60,9 @@ async function real_main(options={}) {
     }
 
     if (args.print_config) {
+        if (options.rootDir) config._rootDir = options.rootDir;
+        if (options.configDir) config._configDir = options.configDir;
+        if (options.testDir) config._testDir = options.testDir;
         console.log(config);
         return;
     }

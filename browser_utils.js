@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const puppeteer = require('puppeteer');
-const {wait} = require('../pintf/utils');
+const {wait} = require('./utils');
 
 async function newPage(config, chrome_args=[]) {
     const args = ['--no-sandbox'];

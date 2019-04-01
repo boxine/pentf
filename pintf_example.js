@@ -1,8 +1,8 @@
 const assert = require('assert');
-const {getMail} = require('../pintf/email');
-const {newPage, closePage} = require('../pintf/browser_utils');
-const {fetch} = require('../pintf/net_utils');
-const {makeRandomEmail} = require('../pintf/utils');
+const {getMail} = require('pintf/email');
+const {newPage, closePage} = require('pintf/browser_utils');
+const {fetch} = require('pintf/net_utils');
+const {makeRandomEmail} = require('pintf/utils');
 
 async function run(config) {
     const email = makeRandomEmail(config, 'pintf_example');

@@ -2,6 +2,7 @@
 
 const pintf = require('./index.js');
 
-pintf.main(__dirname, {
+pintf.main({
+    rootDir: __dirname,
     description: 'Test pintf itself',
 });

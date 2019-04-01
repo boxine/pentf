@@ -1,6 +1,7 @@
 'use strict';
 
 const argparse = require('argparse');
+const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
@@ -18,11 +19,10 @@ class AutoWidthArgumentParser extends argparse.ArgumentParser {
     }
 }
 
-function listEnvs(root_dir) {
-    const config_dir = path.join(root_dir, 'config');
-    const all_files = fs.readdirSync(config_dir);
-    const res = utils.filterMap(all_files, fn => {
-        const m = /^(?!common)(?!\.)([_A-Za-z0-9.]+)\.json$/.exec(fn);
+function listEnvs(configDir) {
+    const allFiles = fs.readdirSync(configDir);
+    const res = utils.filterMap(allFiles, fn => {
+        const m = /^(?![_.])([_A-Za-z0-9.]+)\.json$/.exec(fn);
         return m && m[1];
     });
 
@@ -40,11 +40,15 @@ function parseArgs(options) {
     });
 
     // General arguments
-    parser.addArgument(['-e', '--env'], {
-        choices: listEnvs(root_dir),
-        defaultValue: 'local',
-        help: 'The environment to test against. Default is %(defaultValue)s.',
-    });
+    const {configDir} = options;
+    if (configDir) {
+        assert.equal(typeof configDir, 'string');
+        parser.addArgument(['-e', '--env'], {
+            choices: listEnvs(configDir),
+            defaultValue: 'local',
+            help: 'The environment to test against. Default is %(defaultValue)s.',
+        });
+    }
 
     const output_group = parser.addArgumentGroup({title: 'Output'});
     output_group.addArgument(['-v', '--verbose'], {
@@ -196,17 +200,26 @@ function parseArgs(options) {
     return args;
 }
 
-function readConfig(options, args) {
-    const env = args.env;
-    const common_config_fn = path.join(root_dir, 'config', 'common.json');
-    const common_config_json = fs.readFileSync(common_config_fn, 'utf-8');
-    const common_config = JSON.parse(common_config_json);
-
-    const config_fn = path.join(root_dir, 'config', env + '.json');
+function readConfigFile(configDir, env) {
+    const config_fn = path.join(configDir, env + '.json');
     const config_json = fs.readFileSync(config_fn, 'utf-8');
-    const config = JSON.parse(config_json);
+    let config = JSON.parse(config_json);
+    assert.equal(typeof config, 'object');
 
-    return {...common_config, ...config, ...args};
+    if (config.extends) {
+        config = {... readConfigFile(configDir, config.extends), ...config};
+    }
+    return config;
+}
+
+function readConfig(options, args) {
+    const {configDir} = options;
+    assert(configDir);
+    const env = args.env;
+    assert(env);
+
+    const config = readConfigFile(configDir, env);
+    return {...config, ...args};
 }
 
 module.exports = {

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const {promisify} = require('util');
-const {newPage, closePage} = require('../pintf/browser_utils');
-const {timezoneOffsetString} = require('../pintf/utils');
+const {newPage, closePage} = require('./browser_utils');
+const {timezoneOffsetString} = require('./utils');
 
 const utils = require('./utils');
 

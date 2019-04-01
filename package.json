@@ -22,13 +22,13 @@
   },
   "scripts": {
     "test": "./run",
-    "lint": "eslint ."
+    "lint": "eslint . run"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/boxine/pintf.git"
   },
-  "author": "Philipp Hagemeister",
+  "author": "Philipp Hagemeister, Boxine GmbH",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/boxine/pintf/issues"

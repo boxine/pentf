@@ -27,25 +27,29 @@ function load_tests(args, tests_dir) {
     });
 }
 
-
-// root_dir must contain the following directories:
-// - tests/   runnable test files (*.js)
-// - config/  with configuration files (*.json)
-//
 // Available options:
 // - defaultConfig: Function to call on the loaded configuration, to set/compute default values.
 // - description: program description in the --help output
-async function real_main(root_dir, options) {
-    assert(root_dir, 'root_dir must be set');
-    options = options || {};
+// - rootDir: Root directory (assume tests/ contains tests, config/ if exists contains config)
+// - testsDir: Test directory
+// - configDir: Configuration directory. false disables configuration.
+async function real_main(options={}) {
+    if (options.rootDir) {
+        if (! options.testsDir) {
+            options.testsDir = path.join(options.rootDir, 'tests');
+        }
+        if (! options.configDir) {
+            // TODO: determine config dir
+            ;;;
+        }
+    }
 
-    const args = parseArgs(root_dir, options);
-    const config = readConfig(root_dir, args);
+    const args = parseArgs(options);
+    const config = readConfig(options, args);
     if (options.defaultConfig) {
         options.defaultConfig(config);
     }
-    const tests_dir = path.join(root_dir, 'tests');
-    const test_cases = load_tests(args, tests_dir);
+    const test_cases = load_tests(args, options.testsDir);
 
     if (args.list) {
         for (const tc of test_cases) {
@@ -78,10 +82,10 @@ async function real_main(root_dir, options) {
     }
 }
 
-function main(root_dir, options) {
+function main(options) {
     (async () => {
         try {
-            await real_main(root_dir, options);
+            await real_main(options);
         } catch (e) {
             console.error(e.stack);
             process.exit(2);

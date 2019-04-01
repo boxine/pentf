@@ -29,9 +29,7 @@ function listEnvs(root_dir) {
     return res;
 }
 
-// options can have the following optional values
-// - description: program description in the --help output
-function parseArgs(root_dir, options) {
+function parseArgs(options) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
@@ -198,7 +196,7 @@ function parseArgs(root_dir, options) {
     return args;
 }
 
-function readConfig(root_dir, args) {
+function readConfig(options, args) {
     const env = args.env;
     const common_config_fn = path.join(root_dir, 'config', 'common.json');
     const common_config_json = fs.readFileSync(common_config_fn, 'utf-8');

@@ -1,7 +1,7 @@
 {
   "name": "pintf",
-  "version": "1.0.0",
-  "description": "Parallel INtegration Test Framework",
+  "version": "1.0.1",
+  "description": "parallel integration test framework",
   "main": "index.js",
   "directories": {
     "test": "tests"

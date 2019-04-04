@@ -74,6 +74,7 @@ async function real_main(options={}) {
     } else {
         // Run tests
         const test_info = await runner.run(config, test_cases);
+        if (!test_info) return;
 
         results = render.craftResults(config, test_info);
     }

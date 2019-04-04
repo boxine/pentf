@@ -7,8 +7,8 @@ const utils = require('./utils');
 
 function craftResults(config, test_info) {
     const {test_start, test_end, state} = test_info;
-
-    const test_results = state.map(s => {
+    const {tasks} = state;
+    const test_results = tasks.map(s => {
         const res = utils.pluck(s, ['status', 'name', 'duration']);
 
         if (s.error) {

@@ -177,8 +177,8 @@ function parseArgs(options) {
         help: 'Abort once a test fails',
         action: 'storeTrue',
     });
-    runner_group.addArgument(['-i', '--ignore-dependencies'], {
-        help: 'Ignore test dependencies and just run them in any order',
+    runner_group.addArgument(['--print-tasks'], {
+        help: 'Output all tasks that the runner would perform, and exit',
         action: 'storeTrue',
     });
 

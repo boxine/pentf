@@ -19,13 +19,15 @@ function clean(config) {
 
 function status(config, state) {
     if (config.quiet) return;
+    assert(state.tasks);
 
     last_state = state;
 
-    const running = state.filter(s => s.status === 'running');
+    const {tasks} = state;
+    const running = tasks.filter(s => s.status === 'running');
     const running_count = running.length;
-    const done_count = utils.count(state, s => (s.status === 'success') || (s.status === 'error'));
-    const todo_count = utils.count(state, s => s.status === 'todo');
+    const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
+    const todo_count = utils.count(tasks, t => t.status === 'todo');
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
@@ -54,12 +56,14 @@ function status(config, state) {
 function finish(config, state) {
     last_state = null;
     if (config.quiet) return;
+    const {tasks} = state;
+    assert(tasks);
 
     clean(config);
 
-    const success_count = utils.count(state, s => s.status === 'success');
-    const error_count = utils.count(state, s => s.status === 'error');
-    const skipped = state.filter(s => s.status === 'skipped');
+    const success_count = utils.count(tasks, t => t.status === 'success');
+    const error_count = utils.count(tasks, t => t.status === 'error');
+    const skipped = tasks.filter(t => t.status === 'skipped');
     STATUS_STREAM.write(`${success_count} tests passed, ${error_count} tests failed.\n`);
     if (skipped.length > 0) {
         STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);

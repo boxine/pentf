@@ -52,9 +52,6 @@ module.exports = {
 
     // You can skip the test in some conditions by defining an optional skip method:
     skip: config => config.env === 'prod',
-
-    // The "after" key can make the test run only after other tests have run.
-    // Example:   after: ['prepare_account'],
 };
 ```
 

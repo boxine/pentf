@@ -59,6 +59,10 @@ function parseArgs(options) {
         action: 'storeTrue',
         help: 'Do not output test status',
     });
+    output_group.addArgument(['--no-clear-line', '--ci'], {
+        action: 'storeTrue',
+        help: 'Never clear the current output line (as if output is not a tty)',
+    });
     output_group.addArgument(['--print-config'], {
         action: 'storeTrue',
         help: 'Output the effective configuration and exit.',

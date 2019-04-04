@@ -1,5 +1,6 @@
 // Functions to output the current state.
 // For functions to render the state _after_ the tests have finished, look in render.js .
+const assert = require('assert');
 const readline = require('readline');
 
 const utils = require('./utils');
@@ -8,8 +9,10 @@ const STATUS_STREAM = process.stderr;
 
 var last_state;
 
-function clean() {
+function clean(config) {
+    assert(config);
     if (!STATUS_STREAM.isTTY) return;
+    if (config.no_clear_line) return;
     readline.cursorTo(STATUS_STREAM, 0);
     readline.clearLine(STATUS_STREAM, 0);
 }
@@ -40,9 +43,9 @@ function status(config, state) {
         }
     }
 
-    clean();
+    clean(config);
     STATUS_STREAM.write(status_str);
-    if (!STATUS_STREAM.isTTY) {
+    if (!STATUS_STREAM.isTTY || config.no_clear_line) {
         STATUS_STREAM.write('\n');
     }
 }
@@ -52,14 +55,14 @@ function finish(config, state) {
     last_state = null;
     if (config.quiet) return;
 
-    clean();
+    clean(config);
 
     const success_count = utils.count(state, s => s.status === 'success');
     const error_count = utils.count(state, s => s.status === 'error');
     const skipped = state.filter(s => s.status === 'skipped');
     STATUS_STREAM.write(`${success_count} tests passed, ${error_count} tests failed.\n`);
     if (skipped.length > 0) {
-        STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map (s => s.name).join(' ')})\n`);
+        STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);
     }
 }
 
@@ -70,7 +73,7 @@ function log(config, message) {
     }
 
     if (last_state) {
-        clean();
+        clean(config);
     }
     console.log(message); // eslint-disable-line no-console
     if (last_state) {

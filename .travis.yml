@@ -7,5 +7,5 @@ node_js:
   - node
 
 script:
-  - make test
+  - ./run --ci
   - make lint

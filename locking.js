@@ -11,6 +11,9 @@ function annotateTaskResources(config, task) {
 
     const {tc} = task;
     if (tc.resources) {
+        for (const r of tc.resources) {
+            assert(/^[-A-Za-z_0-9]+$/.test(r), `Invalid resource name in task ${task.id}: ${JSON.stringify(r)}`);
+        }
         task.resources = tc.resources;
     } else {
         task.resources = [`test_${tc.name}`];

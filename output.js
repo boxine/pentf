@@ -54,8 +54,8 @@ function status(config, state) {
 
 
 function finish(config, state) {
-    last_state = null;
     if (config.quiet) return;
+    last_state = null;
     const {tasks} = state;
     assert(tasks);
 
@@ -71,6 +71,8 @@ function finish(config, state) {
 }
 
 function log(config, message) {
+    if (config.logFunc) return config.logFunc(config, message);
+
     if (! config.concurrency) {
         console.log(message);  // eslint-disable-line no-console
         return;

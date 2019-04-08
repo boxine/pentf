@@ -182,6 +182,16 @@ function parseArgs(options) {
         action: 'storeTrue',
     });
 
+    const locking_group = parser.addArgumentGroup({title: 'Locking'});
+    locking_group.addArgument(['-L', '--no-locking'], {
+        help: 'Completely disable any locking of resources between tests.',
+        action: 'storeTrue',
+    });
+    locking_group.addArgument(['--locking-verbose'], {
+        help: 'Output status messages about locking',
+        action: 'storeTrue',
+    });
+
     const args = parser.parseArgs();
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {
         console.log('Warning: --json-file given, but not -j/--json. Will NOT write JSON.'); // eslint-disable-line no-console
@@ -199,6 +209,10 @@ function parseArgs(options) {
 
     if (args.keep_open) {
         args.headless = false;
+    }
+
+    if (args.fail_fast && !args.no_locking) {
+        parser.error('At the moment, --fail-fast does not work with locking. Pass in --no-locking');
     }
 
     return args;

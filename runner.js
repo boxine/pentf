@@ -4,6 +4,7 @@ const assert = require('assert');
 const {performance} = require('perf_hooks');
 
 const email = require('./email');
+const locking = require('./locking');
 const output = require('./output');
 const utils = require('./utils');
 
@@ -38,6 +39,7 @@ async function sequential_run(config, state) {
 
     for (const task of state.tasks) {
         if (task.status === 'skipped') continue;
+        await locking.acquireEventually(config, state, task);
 
         if (! config.quiet) {
             console.log(task.name + ' ...');
@@ -46,6 +48,8 @@ async function sequential_run(config, state) {
         task.status = 'running';
         task.start = performance.now();
         await run_task(config, task);
+
+        await locking.release(config, state, task);
     }
 }
 
@@ -67,10 +71,25 @@ async function run_one(config, state, task) {
 async function nextTask(config, state) {
     assert(state);
     assert(state.tasks);
+
+    let firstBlockedTask = undefined;
     for (const task of state.tasks) {
         if (task.status !== 'todo') continue;
 
+        if (! await locking.acquire(config, state, task)) {
+            if (! firstBlockedTask) {
+                firstBlockedTask = task;
+            }
+            continue;
+        }
+
         return task;
+    }
+
+    if (firstBlockedTask) {
+        // Everything locked, block until the first task can run again
+        await locking.acquireEventually(config, state, firstBlockedTask);
+        return firstBlockedTask;
     }
 
     return undefined; // Did not find any task
@@ -96,6 +115,7 @@ async function parallel_run(config, state) {
 
             task._runner_task_id = runner_task_id;
             const promise = run_one(config, state, task);
+            if (config.verbose) output.log(config, `[runner] started task #${task._runner_task_id}: ${task.id}`);
             promise._runner_task_id = runner_task_id;
             runner_task_id++;
             state.running.push(promise);
@@ -113,6 +133,8 @@ async function parallel_run(config, state) {
 
         // Wait for one task to finish
         const done_task = await Promise.race(state.running);
+        if (config.verbose) output.log(config, `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`);
+        await locking.release(config, state, done_task);
         utils.remove(state.running, promise => promise._runner_task_id === done_task._runner_task_id);
     }
 }
@@ -132,6 +154,8 @@ async function run(config, test_cases) {
             task.status = 'skipped';
         }
 
+        locking.annotateTaskResources(config, task);
+
         return task;
     });
 
@@ -144,6 +168,7 @@ async function run(config, test_cases) {
         config,
         tasks,
     };
+    await locking.init(state);
 
     if (config.concurrency === 0) {
         await sequential_run(config, state);
@@ -155,6 +180,7 @@ async function run(config, test_cases) {
         }
     }
 
+    await locking.shutdown(config, state);
     await shutdown(config);
     const test_end = Date.now();
 

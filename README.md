@@ -52,6 +52,11 @@ module.exports = {
 
     // You can skip the test in some conditions by defining an optional skip method:
     skip: config => config.env === 'prod',
+
+    // Resources is a list of strings. Tests accessing the same resources are run sequentially.
+    resources: ['toniebox_1234', 'another_resource'],
+    // Default is one resource with the name `test_${test.name}`, i.e. tests are not run concurrently by default
+    // Using no shared resources? Set resources: []
 };
 ```
 

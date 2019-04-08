@@ -93,11 +93,37 @@ async function release(config, state, task) {
     }
 }
 
+function listConflicts(config, tasks) {
+    const tasksByResource = new Map();
+    for (const t of tasks) {
+        for (const r of t.resources) {
+            let tasks = tasksByResource.get(r);
+            if (!tasks) {
+                tasks = [];
+                tasksByResource.set(r, tasks);
+            }
+            tasks.push(t);
+        }
+    }
+
+    let anyConflicts = false;
+    for (const [resource, tasks] of tasksByResource) {
+        if (tasks.length === 1) continue;
+
+        anyConflicts = true;
+        output.log(config, `${resource}: ${tasks.map(t => t.id).join(' ')}`);
+    }
+    if (! anyConflicts) {
+        output.log(config, 'No resource conflicts found');
+    }
+}
+
 module.exports = {
     acquire,
     acquireEventually,
     annotateTaskResources,
     init,
-    shutdown,
+    listConflicts,
     release,
+    shutdown,
 };

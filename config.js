@@ -191,6 +191,10 @@ function parseArgs(options) {
         help: 'Output status messages about locking',
         action: 'storeTrue',
     });
+    locking_group.addArgument(['--list-conflicts'], {
+        help: 'Show which tasks conflict on which resources, and exit immediately',
+        action: 'storeTrue',
+    });
 
     const args = parser.parseArgs();
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {

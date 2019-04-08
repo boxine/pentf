@@ -164,6 +164,11 @@ async function run(config, test_cases) {
         return;
     }
 
+    if (config.list_conflicts) {
+        locking.listConflicts(config, tasks);
+        return;
+    }
+
     const state = {
         config,
         tasks,

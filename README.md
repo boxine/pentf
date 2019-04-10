@@ -4,7 +4,7 @@
 
 Simply plop a new `.js` file into `tests/`. Its name will be the test's name, and it should have an async `run` function, like this.
 
-```
+```javascript
 const assert = require('assert');
 const {get_mail} = require('pintf/email');
 const {new_page, close_page} = require('pintf/browser_utils');

@@ -80,7 +80,7 @@ async function externalList(config) {
 
 async function listLocks(config) {
     const locks = await externalList(config);
-    console.table(locks);
+    console.table(locks); // eslint-disable-line no-console
 }
 
 async function clearAllLocks(config) {

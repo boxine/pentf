@@ -180,3 +180,6 @@ Note that while the above example tests a webpage with [puppeteer](https://githu
 ```
 
 
+## License
+
+[MIT](LICENSE). Patches welcome!

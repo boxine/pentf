@@ -1,3 +1,5 @@
+const assert = require('assert');
+
 function readBody(request) {
     return new Promise((resolve, reject) => {
         let done = false;
@@ -50,7 +52,17 @@ function requestError(response, message) {
     response.end(message);
 }
 
+function writeJSON(response, status, data) {
+    assert(Number.isInteger(status));
+
+    response.writeHead(status, {
+        'Content-Type': 'application/json; charset=utf-8',
+    });
+    response.end(JSON.stringify(data, null, 2));
+}
+
 module.exports = {
     readJSONBody,
     requestError,
+    writeJSON,
 };

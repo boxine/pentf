@@ -5,7 +5,7 @@ const assert = require('assert');
 const http = require('http');
 const he = require('he');
 
-const {readJSONBody, requestError} = require('./server_utils');
+const {readJSONBody, requestError, writeJSON} = require('./server_utils');
 
 const MAX_EXPIRE_IN = 60000;
 
@@ -14,7 +14,7 @@ function listNamespaces(namespaces, request, response) {
         'Content-Type': 'text/html; charset=utf-8',
     });
 
-    const namespaceList = namespaces.keys().map(nskey => {
+    const namespaceList = Array.from(namespaces.keys()).map(nskey => {
         return `<li><a href="${he.encode(nskey)}">${he.encode(nskey)}</a></li>`;
     }).join('\n');
     response.end(`<!DOCTYPE html>
@@ -48,10 +48,7 @@ function listLocks(locks, request, response) {
         });
     }
 
-    response.writeHead(200, {
-        'Content-Type': 'application/json; charset=utf-8',
-    });
-    response.end(JSON.stringify(res));
+    writeJSON(response, 200, res);
 }
 
 async function acquireLocks(locks, request, response) {
@@ -100,14 +97,11 @@ async function acquireLocks(locks, request, response) {
         if (e.expireAt <= now) continue; // Expired
 
         if (e.client !== client) {
-            response.writeHead(409, {
-                'Content-Type': 'application/json; charset=utf-8',
-            });
-            response.end(JSON.stringify({
+            writeJSON(response, 409, {
                 firstResource: r,
                 client: e.client,
                 expireIn: (e.expireAt - now),
-            }));
+            });
             return;
         }
     }
@@ -121,10 +115,7 @@ async function acquireLocks(locks, request, response) {
         });
     }
 
-    response.writeHead(200, {
-        'Content-Type': 'application/json; charset=utf-8',
-    });
-    response.end(JSON.stringify({}));
+    writeJSON(response, 200, {});
 }
 
 async function releaseLocks(locks, request, response) {
@@ -132,7 +123,7 @@ async function releaseLocks(locks, request, response) {
     if (!data) return;
 
     if (typeof data.client !== 'string') {
-        return requestError(response, 'client is not a string');
+        return requestError(response, `client ${JSON.stringify(data.client)} is not a string`);
     }
     if (!data.client) {
         return requestError(response, 'client is empty');
@@ -163,14 +154,11 @@ async function releaseLocks(locks, request, response) {
         if (e.expireAt <= now) continue; // Expired
 
         if (e.client !== client) {
-            response.writeHead(409, {
-                'Content-Type': 'application/json; charset=utf-8',
-            });
-            response.end(JSON.stringify({
+            writeJSON(response, 409, {
                 firstResource: r,
                 client: e.client,
                 expireIn: (e.expireAt - now),
-            }));
+            });
             return;
         }
     }
@@ -180,10 +168,7 @@ async function releaseLocks(locks, request, response) {
         locks.delete(r);
     }
 
-    response.writeHead(200, {
-        'Content-Type': 'application/json; charset=utf-8',
-    });
-    response.end(JSON.stringify({}));
+    writeJSON(response, 200, {});
 }
 
 function handleRequest(request, response) {
@@ -226,7 +211,11 @@ function handleRequest(request, response) {
 async function lockserver(options) {
     const server = http.createServer(handleRequest);
     server.namespaces = new Map();
-    
+
+    if (options.keepAliveTimeout !== undefined) {
+        server.keepAliveTimeout = options.keepAliveTimeout;
+    }
+
     return new Promise((resolve, reject) => {
         server.listen(options.port, (err) => {
             if (err) return reject(err);
@@ -245,8 +234,11 @@ async function beforeAllTests(config) {
         return;
     }
 
-    const serverData = await lockserver({port: 0});
+    const serverData = await lockserver({port: 0, keepAliveTimeout: 500});
     config.pintf_lockserver_url = `http://localhost:${serverData.port}/`;
+    if (! config.external_locking_url) {
+        config.external_locking_url = config.pintf_lockserver_url + 'pintf';
+    }
     return serverData;
 }
 

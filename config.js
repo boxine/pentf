@@ -241,6 +241,8 @@ function readConfig(options, args) {
     assert(env);
 
     const config = readConfigFile(configDir, env);
+    config.beforeAllTests = options.beforeAllTests;
+    config.afterAllTests = options.afterAllTests;
     return {...config, ...args};
 }
 

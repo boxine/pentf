@@ -150,10 +150,28 @@ async function assertAlways(testfunc, message, waitFor=2000, checkEvery=200) {
     }
 }
 
+function cmp(a, b) {
+    if (a < b) {
+        return -1;
+    } else if (a > b) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+function cmpKey(key) {
+    return function(x, y) {
+        return cmp(x[key], y[key]);
+    };
+}
+
 module.exports = {
     arange,
     assertAlways,
     assertEventually,
+    cmp,
+    cmpKey,
     count,
     filterMap,
     localIso8601,
@@ -162,8 +180,8 @@ module.exports = {
     randomHex,
     randomHexstring,
     range,
-    regexEscape,
     readFile,
+    regexEscape,
     remove,
     retry,
     timezoneOffsetString,

@@ -2,7 +2,11 @@
 
 const pintf = require('./index.js');
 
+const lockserver = require('./lockserver/lockserver');
+
 pintf.main({
+    beforeAllTests: lockserver.beforeAllTests,
+    afterAllTests: lockserver.afterAllTests,
     rootDir: __dirname,
     description: 'Test pintf itself',
 });

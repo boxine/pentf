@@ -11,6 +11,7 @@
     "emailjs-imap-client": "^3.0.7",
     "emailjs-mime-parser": "^2.0.5",
     "form-data": "^2.3.3",
+    "he": "^1.2.0",
     "libmime": "^4.0.1",
     "node-fetch": "^2.3.0",
     "protobufjs": "^6.8.8",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "deep-equal": "^1.0.1",
+    "nodemon": "^1.18.11",
     "eslint": "^5.9.0"
   },
   "scripts": {

@@ -6,5 +6,8 @@ lint:
 test:
 	@npm run test --silent
 
-.PHONY: default lint test
+lockserver-dev:
+	node_modules/.bin/nodemon lockserver/lockserver.js
+
+.PHONY: default lint test lockserver-dev
 

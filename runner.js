@@ -8,10 +8,6 @@ const locking = require('./locking');
 const output = require('./output');
 const utils = require('./utils');
 
-async function shutdown(config) {
-    await email.shutdown(config);
-}
-
 async function run_task(config, task) {
     try {
         await task.tc.run(config);
@@ -142,6 +138,8 @@ async function parallel_run(config, state) {
 async function run(config, test_cases) {
     const test_start = Date.now();
 
+    const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
+
     const tasks = test_cases.map(tc => {
         const task = {
             tc,
@@ -186,7 +184,10 @@ async function run(config, test_cases) {
     }
 
     await locking.shutdown(config, state);
-    await shutdown(config);
+    await email.shutdown(config);
+    if (config.afterAllTests) {
+        await config.afterAllTests(config, initData);
+    }
     const test_end = Date.now();
 
     return {

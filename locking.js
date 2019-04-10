@@ -2,6 +2,7 @@ const assert = require('assert');
 
 const output = require('./output');
 const {wait} = require('./utils');
+const external_locking = require('./external_locking');
 
 
 function annotateTaskResources(config, task) {
@@ -24,9 +25,11 @@ async function init(state) {
     assert(state);
     assert(state.config);
     state.locks = new Set();
+    external_locking.init(state);
 }
 
 async function shutdown(config, state) {
+    external_locking.shutdown(state);
     state.locks.length = 0;
     assert.equal(
         state.locks.size, 0,
@@ -56,6 +59,23 @@ async function acquire(config, state, task) {
         return false;
     }
 
+    if (! config.no_external_locking) {
+        try {
+            const acquireRes = await external_locking.externalAcquire(config, task.resources, 40000);
+            if (acquireRes !== true) {
+                if (config.locking_verbose) {
+                    output.log(config,
+                        `[exlocking] ${task.id}: Failed to acquire ${acquireRes.firstResource}`  +
+                        `, held by ${acquireRes.client}, expires in ${acquireRes.expireIn} ms`);
+                }
+                return false;
+            }
+        } catch(e) {
+            output.log(config, `[exlocking] Failed to acquire for ${task.id}: ${e.stack}`);
+            return false;
+        }
+    }
+
     for (const r of task.resources) {
         locks.add(r);
     }
@@ -70,8 +90,10 @@ async function acquireEventually(config, state, task) {
     if (config.locking_verbose) {
         output.log(config, `[locking] ${task.id}: Trying to eventually acquire ${task.resources.join(',')}`);
     }
+    let waitTime = 50;
     while (! await acquire(config, state, task)) {
-        await wait(100);
+        await wait(waitTime);
+        waitTime = Math.min(10000, waitTime * 2);
     }
     return true;
 }
@@ -83,6 +105,19 @@ async function release(config, state, task) {
             output.log(config, `[locking] ${task.id}: No resources, nothing to release`);
         }
         return;
+    }
+
+    try {
+        const response = await external_locking.externalRelease(config, task.resources);
+        if (response !== true) {
+            if (config.locking_verbose) {
+                output.log(config,
+                    `[exlocking] ${task.id}: Failed to release ${response.firstResource}` +
+                    `, held by ${response.client} expires in ${response.expireIn} ms`);
+            }
+        }
+    } catch(e) {
+        output.log(config, `[exlocking] Failed to release for ${task.id}: ${e.stack}`);
     }
 
     const {locks} = state;

@@ -4,7 +4,10 @@ const assert = require('assert');
 const os = require('os');
 
 const {fetch} = require('./net_utils');
+const output = require('./output');
 
+const REFRESH_INTERVAL = 30000;
+const REQUEST_EXPIRE_IN = 40000;
 
 async function externalAcquire(config, resources, expireIn) {
     assert(config.external_locking_client);
@@ -98,11 +101,50 @@ function prepare(config) {
     config.external_locking_client = `${os.userInfo().username}-${Date.now()}`;
 }
 
+async function refresh(state) {
+    const {config, locks} = state;
+    assert(locks);
+    if (locks.size > 0) {
+        const locksArray = Array.from(locks);
+
+        try {
+            const acquireRes = await externalAcquire(config, locksArray, REQUEST_EXPIRE_IN);
+            if (acquireRes !== true) {
+                state.external_locking_failed = true;
+                output.log(config, `[exlocking] Lock refresh failed: ${acquireRes.client} holds ${acquireRes.firstResource}, expires in ${acquireRes.expireIn} ms`);
+            } else {
+                if (config.locking_verbose) {
+                    const locks_str = locksArray.sort().join(',');
+                    output.log(config, `[exlocking] Refreshed locks ${locks_str}`);
+                }
+            }
+        } catch (e) {
+            state.external_locking_failed = true;
+            output.log(config, `[exlocking] Lock refresh errored: ${e.stack}`);
+        }
+    }
+
+    state.external_locking_refresh_timeout = setTimeout(() => refresh(state), REFRESH_INTERVAL);
+}
+
+async function init(state) {
+    if (state.config.no_external_locking) return;
+    state.external_locking_refresh_timeout = setTimeout(() => refresh(state), REFRESH_INTERVAL);
+}
+
+async function shutdown(state) {
+    if (state.config.no_external_locking) return;
+    assert(state.external_locking_refresh_timeout);
+    clearTimeout(state.external_locking_refresh_timeout);
+}
+
 module.exports = {
-    externalList,
-    listLocks,
     clearAllLocks,
-    prepare,
     externalAcquire,
+    externalList,
     externalRelease,
+    init,
+    listLocks,
+    prepare,
+    shutdown,
 };

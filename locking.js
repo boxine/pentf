@@ -107,17 +107,19 @@ async function release(config, state, task) {
         return;
     }
 
-    try {
-        const response = await external_locking.externalRelease(config, task.resources);
-        if (response !== true) {
-            if (config.locking_verbose) {
-                output.log(config,
-                    `[exlocking] ${task.id}: Failed to release ${response.firstResource}` +
-                    `, held by ${response.client} expires in ${response.expireIn} ms`);
+    if (! config.no_external_locking) {
+        try {
+            const response = await external_locking.externalRelease(config, task.resources);
+            if (response !== true) {
+                if (config.locking_verbose) {
+                    output.log(config,
+                        `[exlocking] ${task.id}: Failed to release ${response.firstResource}` +
+                        `, held by ${response.client} expires in ${response.expireIn} ms`);
+                }
             }
+        } catch(e) {
+            output.log(config, `[exlocking] Failed to release for ${task.id}: ${e.stack}`);
         }
-    } catch(e) {
-        output.log(config, `[exlocking] Failed to release for ${task.id}: ${e.stack}`);
     }
 
     const {locks} = state;

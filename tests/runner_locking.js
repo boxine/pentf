@@ -9,6 +9,7 @@ async function run() {
     const outputs = [];
     const config = {
         no_locking: false,
+        no_external_locking: true,
         quiet: true,
         locking_verbose: true,
         logFunc: (_, msg) => outputs.push(msg),

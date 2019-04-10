@@ -24,7 +24,7 @@ Make the file executable with `chmod a+x run`, and from then on type
 ./run
 ```
 
-to execute all tests. You may also use the [options](#options).
+to execute all tests. You may also want to have a look at the [options](#options).
 
 ## Writing tests
 
@@ -92,7 +92,7 @@ Note that while the above example tests a webpage with [puppeteer](https://githu
 
 ```
 -h, --help            Show this help message and exit.
--e {local,localhost}, --env {local,localhost}
+-e YOUR_ENVIRONMENTS, --env YOUR_ENVIRONMENTS
                       The environment to test against. Default is local.
 ```
 

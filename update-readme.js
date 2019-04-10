@@ -18,11 +18,15 @@ function main() {
     const readme_m = /^([^]+## Options)\n[^]*?\n(##[^#][^]*|\s*)$/.exec(readme_input);
     assert(readme_m);
 
-    const full_help = child_process.execSync('./run --help', {
+    const full_help = (child_process.execSync('./run --help', {
         env: {
             COLUMNS: 110,
         },
-    }).toString('utf-8');
+    }).toString('utf-8')
+        .replace(/(-e\s+|\s--env\s+)\{[^}]*?\}/g, (_, key) => {
+            return key + 'YOUR_ENVIRONMENTS';
+        })
+    );
     const main_help = /^[^]*\nOptional arguments:\n([^]+)$/.exec(full_help)[1];
     const help_groups = main_help.split('\n\n');
     const help_md = help_groups.map(hg => {

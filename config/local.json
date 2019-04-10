@@ -1,1 +1,5 @@
-{}
+{
+	"extends": "_common",
+
+	"pintf_boot_lockserver": true
+}

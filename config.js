@@ -263,7 +263,6 @@ function readConfig(options, args) {
     if (args.override_external_locking_url) {
         config.external_locking_url = args.override_external_locking_url;
     }
-    console.log(config.external_locking_url)
 
     return {...config, ...args};
 }

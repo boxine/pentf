@@ -28,7 +28,9 @@ async function init(state) {
 
 async function shutdown(config, state) {
     state.locks.length = 0;
-    assert.equal(state.locks.size, 0, `Still got some locks on shutdown: ${Array.from(state.locks).sort().join(',')}`);
+    assert.equal(
+        state.locks.size, 0,
+        `Still got some locks on shutdown: ${Array.from(state.locks).sort().join(',')}`);
 }
 
 async function acquire(config, state, task) {

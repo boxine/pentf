@@ -208,6 +208,11 @@ function parseArgs(options) {
         dest: 'clear_external_locks',
         action: 'storeTrue',
     });
+    locking_group.addArgument(['--external-locking-url'], {
+        metavar: 'URL',
+        help: 'Override URL of lockserver',
+        dest: 'override_external_locking_url',
+    });
 
     const args = parser.parseArgs();
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {
@@ -222,7 +227,6 @@ function parseArgs(options) {
     if (args.pdf_file !== DEFAULT_PDF_NAME && !args.pdf) {
         console.log('Warning: --pdf-file given, but not --pdf. Will NOT write PDF.'); // eslint-disable-line no-console
     }
-
 
     if (args.keep_open) {
         args.headless = false;
@@ -256,6 +260,11 @@ function readConfig(options, args) {
     const config = readConfigFile(configDir, env);
     config.beforeAllTests = options.beforeAllTests;
     config.afterAllTests = options.afterAllTests;
+    if (args.override_external_locking_url) {
+        config.external_locking_url = args.override_external_locking_url;
+    }
+    console.log(config.external_locking_url)
+
     return {...config, ...args};
 }
 

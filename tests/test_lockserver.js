@@ -1,7 +1,7 @@
 const assert = require('assert');
 
 const {fetch} = require('../net_utils');
-const {externalList, _externalAcquire, _externalRelease} = require('../external_locking');
+const {externalList, externalAcquire, externalRelease} = require('../external_locking');
 const {wait, cmpKey} = require('../utils');
 
 
@@ -47,7 +47,7 @@ async function run(config) {
     assert.equal(acquireTooLong.status, 400);
 
     // Actually acquire something
-    let acquireRes = await _externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget3'], 30000);
+    let acquireRes = await externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget3'], 30000);
     assert.strictEqual(acquireRes, true);
 
     const firstList = await externalList(config1);
@@ -69,7 +69,7 @@ async function run(config) {
     assert.deepStrictEqual(secondList.map(l => l.expireIn), [secondExpireIn, secondExpireIn, secondExpireIn, secondExpireIn]);
 
     // Extend locks
-    acquireRes = await _externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget3'], 40000);
+    acquireRes = await externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget3'], 40000);
     assert.strictEqual(acquireRes, true);
 
     let curList = await externalList(config2);
@@ -81,7 +81,7 @@ async function run(config) {
     assert.deepStrictEqual(curList.map(l => l.expireIn), [thirdExpireIn, thirdExpireIn, thirdExpireIn, thirdExpireIn]);
 
     // Extending can add new locks
-    acquireRes = await _externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget4'], 50000);
+    acquireRes = await externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget4'], 50000);
     assert.strictEqual(acquireRes, true);
 
     curList = await externalList(config1);
@@ -102,7 +102,7 @@ async function run(config) {
     assert(curList[4].expireIn <= 50000);
 
     // Second client can not acquire resources locked by the first one
-    acquireRes = await _externalAcquire(config2, ['widget1', 'client2'], 10000);
+    acquireRes = await externalAcquire(config2, ['widget1', 'client2'], 10000);
     assert.strictEqual(acquireRes.client, config1.external_locking_client);
     assert.strictEqual(acquireRes.firstResource, 'widget1');
     assert(acquireRes.expireIn > 39000);
@@ -114,7 +114,7 @@ async function run(config) {
     assert(curList.every(l => l.client === config1.external_locking_client));
 
     // Second client can not delete resources locked by the first one
-    let releaseRes = await _externalRelease(config2, ['widget1'], 10000);
+    let releaseRes = await externalRelease(config2, ['widget1']);
     assert.strictEqual(releaseRes.client, config1.external_locking_client);
     assert.strictEqual(releaseRes.firstResource, 'widget1');
     assert(releaseRes.expireIn > 39000);
@@ -125,7 +125,7 @@ async function run(config) {
     assert(curList.every(l => l.client === config1.external_locking_client));
 
     // First client can delete their resources
-    releaseRes = await _externalRelease(config1, ['test1', 'widget1', '404']);
+    releaseRes = await externalRelease(config1, ['test1', 'widget1', '404']);
     assert.deepStrictEqual(releaseRes, true);
     curList = (await externalList(config1)).sort(cmpKey('resource'));
     assert.deepStrictEqual(
@@ -133,7 +133,7 @@ async function run(config) {
     assert(curList.every(l => l.client === config1.external_locking_client));
 
     // Second client can now acquire resources
-    acquireRes = await _externalAcquire(config2, ['widget1', 'client2'], 20000);
+    acquireRes = await externalAcquire(config2, ['widget1', 'client2'], 20000);
     assert.deepStrictEqual(acquireRes, true);
     curList = (await externalList(config1)).sort(cmpKey('resource'));
     assert.deepStrictEqual(

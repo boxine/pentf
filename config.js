@@ -195,6 +195,19 @@ function parseArgs(options) {
         help: 'Show which tasks conflict on which resources, and exit immediately',
         action: 'storeTrue',
     });
+    locking_group.addArgument(['--manually-lock'], {
+        metavar: 'RESOURCES',
+        help: 'Externally lock the specified comma-separated resources for 60s before the test',
+    });
+    locking_group.addArgument(['--list-locks', '--list-external-locks'], {
+        help: 'List (external) locks and exit',
+        action: 'storeTrue',
+    });
+    locking_group.addArgument(['--clear-locks', '--clear-external-locks'], {
+        help: 'Clear all external locks and exit',
+        dest: 'clear_external_locks',
+        action: 'storeTrue',
+    });
 
     const args = parser.parseArgs();
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {

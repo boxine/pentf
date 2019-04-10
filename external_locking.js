@@ -1,6 +1,7 @@
 // Locking functions for communication with the lockserver
 
 const assert = require('assert');
+const os = require('os');
 
 const {fetch} = require('./net_utils');
 
@@ -33,8 +34,10 @@ async function externalAcquire(config, resources, expireIn) {
     return true;
 }
 
-async function externalRelease(config, resources) {
-    assert(config.external_locking_client);
+async function externalRelease(config, resources, overrideClient) {
+    const client = overrideClient || config.external_locking_client;
+    assert(client);
+    assert.equal(typeof client, 'string');
     assert(config.external_locking_url);
     assert(Array.isArray(resources));
     assert(resources.every(r => typeof r === 'string'));
@@ -43,7 +46,7 @@ async function externalRelease(config, resources) {
         method: 'DELETE',
         body: JSON.stringify({
             resources,
-            client: config.external_locking_client,
+            client: client,
         }),
     });
 
@@ -75,9 +78,31 @@ async function externalList(config) {
     return await response.json();
 }
 
+async function listLocks(config) {
+    const locks = await externalList(config);
+    console.table(locks);
+}
+
+async function clearAllLocks(config) {
+    const locks = await externalList(config);
+    await Promise.all(locks.map(async l => {
+        const res = await externalRelease(config, [l.resource], l.client);
+        assert.strictEqual(res, true);
+    }));
+}
+
+function prepare(config) {
+    if (! config.external_locking_url) {
+        config.no_external_locking = true;
+    }
+    config.external_locking_client = `${os.userInfo().username}-${Date.now()}`;
+}
+
 module.exports = {
     externalList,
-    // Testing only
-    _externalAcquire: externalAcquire,
-    _externalRelease: externalRelease,
+    listLocks,
+    clearAllLocks,
+    prepare,
+    externalAcquire,
+    externalRelease,
 };

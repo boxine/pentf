@@ -4,6 +4,7 @@ const assert = require('assert');
 const {performance} = require('perf_hooks');
 
 const email = require('./email');
+const external_locking = require('./external_locking');
 const locking = require('./locking');
 const output = require('./output');
 const utils = require('./utils');
@@ -135,12 +136,8 @@ async function parallel_run(config, state) {
     }
 }
 
-async function run(config, test_cases) {
-    const test_start = Date.now();
-
-    const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
-
-    const tasks = test_cases.map(tc => {
+function testCases2tasks(config, testCases) {
+    return testCases.map(tc => {
         const task = {
             tc,
             status: 'todo',
@@ -156,37 +153,69 @@ async function run(config, test_cases) {
 
         return task;
     });
+}
 
-    if (config.print_tasks) {
-        console.log(tasks);
-        return;
-    }
+async function run(config, testCases) {
+    const test_start = Date.now();
 
-    if (config.list_conflicts) {
-        locking.listConflicts(config, tasks);
-        return;
-    }
+    external_locking.prepare(config);
+    const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
+    const tasks = testCases2tasks(config, testCases);
     const state = {
         config,
         tasks,
     };
-    await locking.init(state);
 
-    if (config.concurrency === 0) {
-        await sequential_run(config, state);
-    } else {
-        try {
-            await parallel_run(config, state);
-        } finally {
-            output.finish(config, state);
+    try {
+        if (config.manually_lock) {
+            const resources = config.manually_lock.split(',');
+            const acquireRes = await external_locking.externalAcquire(config, resources, 60000);
+            if (acquireRes !== true) {
+                throw new Error(
+                    `Failed to lock ${acquireRes.firstResource}: ` +
+                    `Locked by ${acquireRes.client}, expires in ${acquireRes.expireIn}ms`);
+            }
         }
-    }
 
-    await locking.shutdown(config, state);
-    await email.shutdown(config);
-    if (config.afterAllTests) {
-        await config.afterAllTests(config, initData);
+        if (config.print_tasks) {
+            console.log(tasks);
+            return;
+        }
+
+        if (config.list_conflicts) {
+            locking.listConflicts(config, tasks);
+            return;
+        }
+
+        if (config.clear_external_locks) {
+            await external_locking.clearAllLocks(config);
+            return;
+        }
+
+        if (config.list_locks) {
+            await external_locking.listLocks(config);
+            return;
+        }
+
+        await locking.init(state);
+
+        if (config.concurrency === 0) {
+            await sequential_run(config, state);
+        } else {
+            try {
+                await parallel_run(config, state);
+            } finally {
+                output.finish(config, state);
+            }
+        }
+
+        await locking.shutdown(config, state);
+        await email.shutdown(config);
+    } finally {
+        if (config.afterAllTests) {
+            await config.afterAllTests(config, initData);
+        }
     }
     const test_end = Date.now();
 

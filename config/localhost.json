@@ -1,0 +1,7 @@
+{
+	"extends": "_common",
+
+	"pintf_boot_lockserver": false,
+	"external_locking_url": "http://localhost:1524/pintf-localhost",
+	"pintf_lockserver_url": "http://localhost:1524/pintf-internal"
+}

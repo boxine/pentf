@@ -1,8 +1,26 @@
 # pintf - Parallel INTegration Test Framework
 
+## Installation
+
+```shell
+npm i --save-dev pintf
+```
+
+## Usage
+
+pintf can be used as a library (A standalone binary is also planned). Create a script named `run` in the directory of your tests, and fill it like this:
+
+```javascript
+#!/usr/bin/env node
+require('pintf').main({
+    rootDir: __dirname,
+    description: 'Test my cool application',
+});
+```
+
 ## Writing tests
 
-Simply plop a new `.js` file into `tests/`. Its name will be the test's name, and it should have an async `run` function, like this.
+Plop a new `.js` file into `tests/`. Its name will be the test''s name, and it should have an async `run` function, like this:
 
 ```javascript
 const assert = require('assert');

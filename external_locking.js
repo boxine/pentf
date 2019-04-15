@@ -18,6 +18,9 @@ async function externalAcquire(config, resources, expireIn) {
 
     const response = await fetch(config, config.external_locking_url, {
         method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
             resources,
             expireIn,
@@ -47,6 +50,9 @@ async function externalRelease(config, resources, overrideClient) {
 
     const response = await fetch(config, config.external_locking_url, {
         method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
             resources,
             client: client,
@@ -73,6 +79,9 @@ async function externalList(config) {
 
     const response = await fetch(config, config.external_locking_url, {
         method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
     });
 
     assert.equal(

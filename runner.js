@@ -173,7 +173,7 @@ async function run(config, testCases) {
             const acquireRes = await external_locking.externalAcquire(config, resources, 60000);
             if (acquireRes !== true) {
                 throw new Error(
-                    `Failed to lock ${acquireRes.firstResource}: ` +
+                    `Failed to lock ${acquireRes.resource}: ` +
                     `Locked by ${acquireRes.client}, expires in ${acquireRes.expireIn}ms`);
             }
         }

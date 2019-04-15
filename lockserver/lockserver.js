@@ -98,7 +98,7 @@ async function acquireLocks(locks, request, response) {
 
         if (e.client !== client) {
             writeJSON(response, 409, {
-                firstResource: r,
+                resource: r,
                 client: e.client,
                 expireIn: (e.expireAt - now),
             });
@@ -155,7 +155,7 @@ async function releaseLocks(locks, request, response) {
 
         if (e.client !== client) {
             writeJSON(response, 409, {
-                firstResource: r,
+                resource: r,
                 client: e.client,
                 expireIn: (e.expireAt - now),
             });

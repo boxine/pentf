@@ -65,7 +65,7 @@ async function acquire(config, state, task) {
             if (acquireRes !== true) {
                 if (config.locking_verbose) {
                     output.log(config,
-                        `[exlocking] ${task.id}: Failed to acquire ${acquireRes.firstResource}`  +
+                        `[exlocking] ${task.id}: Failed to acquire ${acquireRes.resource}`  +
                         `, held by ${acquireRes.client}, expires in ${acquireRes.expireIn} ms`);
                 }
                 return false;
@@ -113,7 +113,7 @@ async function release(config, state, task) {
             if (response !== true) {
                 if (config.locking_verbose) {
                     output.log(config,
-                        `[exlocking] ${task.id}: Failed to release ${response.firstResource}` +
+                        `[exlocking] ${task.id}: Failed to release ${response.resource}` +
                         `, held by ${response.client} expires in ${response.expireIn} ms`);
                 }
             }

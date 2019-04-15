@@ -111,7 +111,7 @@ async function refresh(state) {
             const acquireRes = await externalAcquire(config, locksArray, REQUEST_EXPIRE_IN);
             if (acquireRes !== true) {
                 state.external_locking_failed = true;
-                output.log(config, `[exlocking] Lock refresh failed: ${acquireRes.client} holds ${acquireRes.firstResource}, expires in ${acquireRes.expireIn} ms`);
+                output.log(config, `[exlocking] Lock refresh failed: ${acquireRes.client} holds ${acquireRes.resource}, expires in ${acquireRes.expireIn} ms`);
             } else {
                 if (config.locking_verbose) {
                     const locks_str = locksArray.sort().join(',');

@@ -104,7 +104,7 @@ async function run(config) {
     // Second client can not acquire resources locked by the first one
     acquireRes = await externalAcquire(config2, ['widget1', 'client2'], 10000);
     assert.strictEqual(acquireRes.client, config1.external_locking_client);
-    assert.strictEqual(acquireRes.firstResource, 'widget1');
+    assert.strictEqual(acquireRes.resource, 'widget1');
     assert(acquireRes.expireIn > 39000);
     assert(acquireRes.expireIn <= 50000);
 
@@ -116,7 +116,7 @@ async function run(config) {
     // Second client can not delete resources locked by the first one
     let releaseRes = await externalRelease(config2, ['widget1']);
     assert.strictEqual(releaseRes.client, config1.external_locking_client);
-    assert.strictEqual(releaseRes.firstResource, 'widget1');
+    assert.strictEqual(releaseRes.resource, 'widget1');
     assert(releaseRes.expireIn > 39000);
     assert(releaseRes.expireIn <= 50000);
     curList = (await externalList(config1)).sort(cmpKey('resource'));

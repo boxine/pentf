@@ -65,33 +65,6 @@ async function run_one(config, state, task) {
     return task;
 }
 
-async function nextTask(config, state) {
-    assert(state);
-    assert(state.tasks);
-
-    let firstBlockedTask = undefined;
-    for (const task of state.tasks) {
-        if (task.status !== 'todo') continue;
-
-        if (! await locking.acquire(config, state, task)) {
-            if (! firstBlockedTask) {
-                firstBlockedTask = task;
-            }
-            continue;
-        }
-
-        return task;
-    }
-
-    if (firstBlockedTask) {
-        // Everything locked, block until the first task can run again
-        await locking.acquireEventually(config, state, firstBlockedTask);
-        return firstBlockedTask;
-    }
-
-    return undefined; // Did not find any task
-}
-
 async function parallel_run(config, state) {
     output.status(config, state);
 
@@ -100,13 +73,33 @@ async function parallel_run(config, state) {
     process.setMaxListeners(10 + 2 * config.concurrency);
 
     state.running = [];
+    state.locking_backoff = 10;
     let runner_task_id = 0;
     while (true) {  // eslint-disable-line no-constant-condition
         // Add new tasks
         while (state.running.length < config.concurrency) {
-            const task = await nextTask(config, state);
+            let task = undefined;
+            let anyLocked = false;
+            for (const t of state.tasks) {
+                if (t.status !== 'todo') continue;
+
+                if (! await locking.acquire(config, state, t)) {
+                    anyLocked = true;
+                    continue;
+                }
+
+                task = t; // Found a task to do!
+                state.locking_backoff = 100;
+                break;
+            }
             if (!task) {
-                // Nothing to do right now (may be blocked by currently running tasks)
+                if (anyLocked) {
+                    if (config.verbose || config.locking_verbose) {
+                        output.log(config, `[runner] All tasks are locked, sleeping for ${state.locking_backoff} ms`);
+                    }
+                    await utils.wait(state.locking_backoff);
+                    state.locking_backoff = Math.min(2 * state.locking_backoff, 10000);
+                }
                 break;
             }
 
@@ -119,6 +112,15 @@ async function parallel_run(config, state) {
         }
 
         if (state.running.length === 0) {
+            if (state.tasks.some(t => t.status === 'todo')) {
+                // Still waiting for locks
+                if (config.verbose || config.locking_verbose) {
+                    const waitingTasksStr = state.tasks.filter(t => t.status === 'todo').map(t => t.id).join(',');
+                    output.log(config, `[runner] Still waiting for locks on tasks ${waitingTasksStr}`);
+                }
+                continue;
+            }
+
             for (const task of state.tasks) {
                 assert(
                     ['skipped', 'success', 'error'].includes(task.status),
@@ -228,6 +230,4 @@ async function run(config, testCases) {
 
 module.exports = {
     run,
-    // testing only
-    _nextTask: nextTask,
 };

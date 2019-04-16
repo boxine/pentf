@@ -108,6 +108,10 @@ function prepare(config) {
         config.no_external_locking = true;
     }
     config.external_locking_client = `${os.userInfo().username}-${Date.now()}`;
+    if (config.locking_verbose) {
+        output.log(config, `[exlocking] Client id: ${config.external_locking_client}`);
+    }
+
 }
 
 async function refresh(state) {

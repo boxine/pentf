@@ -208,6 +208,10 @@ function parseArgs(options) {
         dest: 'clear_external_locks',
         action: 'storeTrue',
     });
+    locking_group.addArgument(['--no-external-locking'], {
+        help: 'Disable external locking (via a lockserver)',
+        action: 'storeTrue',
+    });
     locking_group.addArgument(['--external-locking-url'], {
         metavar: 'URL',
         help: 'Override URL of lockserver',

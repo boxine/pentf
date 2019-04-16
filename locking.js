@@ -42,9 +42,6 @@ async function acquire(config, state, task) {
     assert(task);
     assert(task.resources);
     if (! task.resources.length) {
-        if (config.locking_verbose) {
-            output.log(config, `[locking] ${task.id}: Needs no resources`);
-        }
         return true;
     }
 
@@ -101,9 +98,6 @@ async function acquireEventually(config, state, task) {
 async function release(config, state, task) {
     if (config.no_locking) return true;
     if (! task.resources.length) {
-        if (config.locking_verbose) {
-            output.log(config, `[locking] ${task.id}: No resources, nothing to release`);
-        }
         return;
     }
 

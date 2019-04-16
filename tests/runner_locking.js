@@ -41,7 +41,7 @@ async function run() {
 
     assert.deepStrictEqual(await _nextTask(config, state), t2);
     assert.deepStrictEqual(state.locks, new Set(['test_t1', 'widget']));
-    assertOutput(['[locking] t2: Needs no resources']);
+    assertOutput([]); // t2 does not need any resources
     t2.status = 'inprogress';
 
     assert.deepStrictEqual(await _nextTask(config, state), t4);
@@ -89,7 +89,7 @@ async function run() {
 
     t2.status = 'success';
     await locking.release(config, state, t2);
-    assertOutput(['[locking] t2: No resources, nothing to release']);
+    assertOutput([]);
 
     t5.status = 'errored';
     await locking.release(config, state, t5);

@@ -34,7 +34,7 @@ async function externalAcquire(config, resources, expireIn) {
     if (response.status !== 200) {
         throw new Error(
             `Acquiry of ${resources.join(',')} at ${config.external_locking_url} ` +
-            `failed with error code ${response.status}: ${await response.text()}`);
+            `failed with error code ${response.status}`);
     }
     await response.json();
     return true;

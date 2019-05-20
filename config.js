@@ -158,6 +158,10 @@ function parseArgs(options) {
         help: 'Keep browser sessions open in case of failures. Implies -V.',
         action: 'storeTrue',
     });
+    puppeteer_group.addArgument(['--devtools'], {
+        help: 'Start browser with devtools open',
+        action: 'storeTrue',
+    });
 
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
     runner_group.addArgument(['-C', '--concurrency'], {

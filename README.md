@@ -150,6 +150,7 @@ Note that while the above example tests a webpage with [puppeteer](https://githu
 -V, --visible         Make browser tests visible (i.e. not headless)
 -s MS, --slow-mo MS   Wait this many milliseconds after every call to the virtual browser
 -k, --keep-open       Keep browser sessions open in case of failures. Implies -V.
+--devtools            Start browser with devtools open
 ```
 
 ###### Test runner
@@ -175,6 +176,8 @@ Note that while the above example tests a webpage with [puppeteer](https://githu
                       List (external) locks and exit
 --clear-locks, --clear-external-locks
                       Clear all external locks and exit
+--no-external-locking
+                      Disable external locking (via a lockserver)
 --external-locking-url URL
                       Override URL of lockserver
 ```

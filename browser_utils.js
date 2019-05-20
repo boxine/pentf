@@ -18,6 +18,9 @@ async function newPage(config, chrome_args=[]) {
     if (config.slow_mo) {
         params.slowMo = config.slow_mo;
     }
+    if (config.devtools) {
+        params.devtools = true;
+    }
     const browser = await puppeteer.launch(params);
     return browser.newPage();
 }

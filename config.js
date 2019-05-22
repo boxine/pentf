@@ -159,7 +159,11 @@ function parseArgs(options) {
         action: 'storeTrue',
     });
     puppeteer_group.addArgument(['--devtools'], {
-        help: 'Start browser with devtools open',
+        help: 'Start browser with devtools open. Implies -V',
+        action: 'storeTrue',
+    });
+    puppeteer_group.addArgument(['--devtools-preserve'], {
+        help: 'Configure devtools to preserve logs and network requests upon navigation. Implies --devtools',
         action: 'storeTrue',
     });
 
@@ -237,6 +241,12 @@ function parseArgs(options) {
     }
 
     if (args.keep_open) {
+        args.headless = false;
+    }
+    if (args.devtools_preserve) {
+        args.devtools = true;
+    }
+    if (args.devtools) {
         args.headless = false;
     }
 

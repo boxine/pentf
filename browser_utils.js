@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const puppeteer = require('puppeteer');
-const {wait} = require('./utils');
+const {assertAsyncEventually, wait} = require('./utils');
 
 async function newPage(config, chrome_args=[]) {
     const args = ['--no-sandbox'];
@@ -22,7 +22,34 @@ async function newPage(config, chrome_args=[]) {
         params.devtools = true;
     }
     const browser = await puppeteer.launch(params);
-    return browser.newPage();
+
+    if (config.devtools_preserve) {
+        browser.on('targetcreated', async target => {
+            if (! /^chrome-devtools:\/\//.test(await target.url())) {
+                return;
+            }
+
+            // new devtools created, configure it
+            const session = await target.createCDPSession();
+            await assertAsyncEventually(async() => {
+                return (await session.send('Runtime.evaluate', {
+                    expression: `(() => {
+                        try {
+                            Common.moduleSetting("network_log.preserve-log").set(true);
+                            Common.moduleSetting("preserveConsoleLog").set(true);
+                        } catch { // devtools not yet loaded
+                            return false;
+                        }
+
+                        return Common.moduleSetting("preserveConsoleLog").get() === true;
+                        })()
+                    `
+                })).result.value;
+            }, 'could not toggle preserve options in devtools', 10000, 100);
+        });
+    }
+
+    return await browser.newPage();
 }
 
 async function closePage(page) {

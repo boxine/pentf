@@ -150,7 +150,9 @@ Note that while the above example tests a webpage with [puppeteer](https://githu
 -V, --visible         Make browser tests visible (i.e. not headless)
 -s MS, --slow-mo MS   Wait this many milliseconds after every call to the virtual browser
 -k, --keep-open       Keep browser sessions open in case of failures. Implies -V.
---devtools            Start browser with devtools open
+--devtools            Start browser with devtools open. Implies -V
+--devtools-preserve   Configure devtools to preserve logs and network requests upon navigation. Implies 
+                      --devtools
 ```
 
 ###### Test runner

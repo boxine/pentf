@@ -139,6 +139,16 @@ async function assertEventually(testfunc, message, waitFor=10000, checkEvery=200
     throw new Error(`${message} (waited ${waitFor}ms)`);
 }
 
+async function assertAsyncEventually(testfunc, message, waitFor=10000, checkEvery=200) {
+    for (let remaining = waitFor;remaining > 0;remaining -= checkEvery) {
+        const res = await testfunc();
+        if (res) return res;
+
+        await wait(checkEvery);
+    }
+    throw new Error(`${message} (waited ${waitFor}ms)`);
+}
+
 async function assertAlways(testfunc, message, waitFor=2000, checkEvery=200) {
     for (let remaining = waitFor;remaining > 0;remaining -= checkEvery) {
         const res = testfunc();
@@ -170,6 +180,7 @@ module.exports = {
     arange,
     assertAlways,
     assertEventually,
+    assertAsyncEventually,
     cmp,
     cmpKey,
     count,

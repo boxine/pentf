@@ -46,10 +46,11 @@ async function newPage(config, chrome_args=[]) {
                     `
                 })).result.value;
             }, 'could not toggle preserve options in devtools', 10000, 100);
+            await session.detach();
         });
     }
 
-    return await browser.newPage();
+    return browser.newPage();
 }
 
 async function closePage(page) {

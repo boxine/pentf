@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {promisify} = require('util');
-const {newPage, closePage, html2pdf} = require('./browser_utils');
+const {html2pdf} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
 
 const utils = require('./utils');

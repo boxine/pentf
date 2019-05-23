@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {promisify} = require('util');
-const {newPage, closePage, workaround_setContent} = require('./browser_utils');
+const {newPage, closePage, html2pdf} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
 
 const utils = require('./utils');
@@ -281,18 +281,7 @@ ${table}
 }
 
 async function pdf(config, path, results) {
-    const html_code = html(results);
-    const pdf_config = {...config};
-    pdf_config.headless = true;
-    const page = await newPage(pdf_config);
-
-    await workaround_setContent(page, html_code);
-    await page.pdf({
-        path,
-        printBackground: true,
-        preferCSSPageSize: true,
-    });
-    await closePage(page);
+    return html2pdf(config, path, html(results));
 }
 
 module.exports = {

@@ -167,12 +167,31 @@ async function workaround_setContent(page, html) {
     await waiter;
 }
 
+// Render HTML code as a PDF file.
+// modifyPage can be an async function to change the page in the browser.
+async function html2pdf(config, path, html, modifyPage=null) {
+    const pdfConfig = {...config};
+    pdfConfig.headless = true;
+    const page = await newPage(pdfConfig);
+
+    await workaround_setContent(page, html);
+    if (modifyPage) {
+        await modifyPage(page);
+    }
+    await page.pdf({
+        path,
+        printBackground: true,
+        preferCSSPageSize: true,
+    });
+    await closePage(page);
+}
+
 module.exports = {
     assertNotXPath,
     assertValue,
-    workaround_setContent,
     closePage,
     getSelectOptions,
+    html2pdf,
     newPage,
     setLanguage,
     waitForVisible,

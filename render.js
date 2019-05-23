@@ -1,6 +1,6 @@
 const fs = require('fs');
 const {promisify} = require('util');
-const {newPage, closePage} = require('./browser_utils');
+const {newPage, closePage, workaround_setContent} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
 
 const utils = require('./utils');
@@ -180,6 +180,7 @@ function html(results) {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
+<meta charset="utf-8" />
 <title>Integration Test Report</title>
 <style>
 html, body {
@@ -285,7 +286,7 @@ async function pdf(config, path, results) {
     pdf_config.headless = true;
     const page = await newPage(pdf_config);
 
-    await page.setContent(html_code);
+    await workaround_setContent(page, html_code);
     await page.pdf({
         path,
         printBackground: true,

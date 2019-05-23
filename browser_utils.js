@@ -156,9 +156,21 @@ async function getSelectOptions(page, select) {
     }, select);
 }
 
+async function workaround_setContent(page, html) {
+    // Workaround for https://github.com/GoogleChrome/puppeteer/issues/4464
+    const waiter = page.waitForNavigation({waitUntil: 'load'});
+    await page.evaluate(html => {
+        document.open();
+        document.write(html);
+        document.close();
+    }, html);
+    await waiter;
+}
+
 module.exports = {
     assertNotXPath,
     assertValue,
+    workaround_setContent,
     closePage,
     getSelectOptions,
     newPage,

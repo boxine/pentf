@@ -156,17 +156,6 @@ async function getSelectOptions(page, select) {
     }, select);
 }
 
-async function workaround_setContent(page, html) {
-    // Workaround for https://github.com/GoogleChrome/puppeteer/issues/4464
-    const waiter = page.waitForNavigation({waitUntil: 'load'});
-    await page.evaluate(html => {
-        document.open();
-        document.write(html);
-        document.close();
-    }, html);
-    await waiter;
-}
-
 // Render HTML code as a PDF file.
 // modifyPage can be an async function to change the page in the browser.
 async function html2pdf(config, path, html, modifyPage=null) {
@@ -174,7 +163,7 @@ async function html2pdf(config, path, html, modifyPage=null) {
     pdfConfig.headless = true;
     const page = await newPage(pdfConfig);
 
-    await workaround_setContent(page, html);
+    await page.setContent(html);
     if (modifyPage) {
         await modifyPage(page);
     }

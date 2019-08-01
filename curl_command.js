@@ -5,10 +5,12 @@ async function stream2buf(stream) {
     return new Promise((resolve, reject) => {
         const write_stream = new streamBuffers.WritableStreamBuffer();
         stream.pipe(write_stream);
-        stream.on('end', () => {
+        write_stream.on('finish', () => {
             resolve(write_stream.getContents());
         });
-        stream.on('error', reject);
+        write_stream.on('error', (e) => {
+            reject(e);
+        });
     });
 }
 

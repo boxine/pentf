@@ -64,9 +64,13 @@ function finish(config, state) {
     const success_count = utils.count(tasks, t => t.status === 'success');
     const error_count = utils.count(tasks, t => t.status === 'error');
     const skipped = tasks.filter(t => t.status === 'skipped');
+    const expectedToFail = tasks.filter(t => t.expectedToFail);
     STATUS_STREAM.write(`${success_count} tests passed, ${error_count} tests failed.\n`);
     if (skipped.length > 0) {
         STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);
+    }
+    if (!config.expect_nothing && (expectedToFail.length > 0)) {
+        STATUS_STREAM.write(`Expected ${expectedToFail.length} tests to fail (${expectedToFail.map(s => s.name).join(' ')}). Pass in -E/--expect-nothing to ignore expectedToFail declarations.\n`);
     }
 }
 

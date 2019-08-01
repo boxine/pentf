@@ -75,6 +75,10 @@ function parseArgs(options) {
         metavar: 'REGEXP',
         help: 'Do not output error messages matching the regular expression. Example: -I "\\(TOC-[0-9]+\\)"',
     });
+    output_group.addArgument(['-E', '--expect-nothing'], {
+        action: 'storeTrue',
+        help: 'Ignore expectedToFail attributes on tests',
+    });
 
     const results_group = parser.addArgumentGroup({title: 'Writing results to disk'});
     results_group.addArgument(['-J', '--json'], {

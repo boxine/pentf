@@ -108,6 +108,7 @@ Note that while the above example tests a webpage with [puppeteer](https://githu
 -I REGEXP, --ignore-errors REGEXP
                       Do not output error messages matching the regular expression. Example: -I 
                       "\(TOC-[0-9]+\)"
+-E, --expect-nothing  Ignore expectedToFail attributes on tests
 ```
 
 ###### Writing results to disk

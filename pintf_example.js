@@ -46,6 +46,9 @@ module.exports = {
     // You can skip the test in some conditions by defining an optional skip method:
     skip: config => config.env === 'prod',
 
+    // either true or a function returning true to suppress output about this test if it fails
+    expectedToFail: config => (config.env === 'alwaysbroken'),
+
     // Resources is a list of strings. Tests accessing the same resources are run sequentially.
     resources: ['toniebox_1234', 'another_resource'],
     // Default is one resource with the name `test_${test.name}`, i.e. tests are not run concurrently by default

@@ -14,12 +14,18 @@ async function run_task(config, task) {
         await task.tc.run(config);
         task.status = 'success';
         task.duration = performance.now() - task.start;
+        if (task.expectedToFail && !config.expect_nothing) {
+            output.log(config, `test case ${task.name} SUCCEEDED, but expectedToFail was set\n`);
+        }
     } catch(e) {
         task.status = 'error';
         task.duration = performance.now() - task.start;
         task.error = e;
 
-        if (!config.ignore_errors || !(new RegExp(config.ignore_errors)).test(e.stack)) {
+        const show_error = (
+            !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&
+            !task.expectedToFail);
+        if (show_error) {
             output.log(config, `test case ${task.name} FAILED at ${utils.localIso8601()}:\n${e.stack}\n`);
         }
         if (config.fail_fast) {
@@ -149,6 +155,14 @@ function testCases2tasks(config, testCases) {
 
         if (tc.skip && tc.skip(config)) {
             task.status = 'skipped';
+        }
+
+        if (tc.hasOwnProperty('expectedToFail')) {
+            if (typeof tc.expectedToFail === 'function') {
+                task.expectedToFail = tc.expectedToFail(config);
+            } else {
+                task.expectedToFail = tc.expectedToFail;
+            }
         }
 
         locking.annotateTaskResources(config, task);

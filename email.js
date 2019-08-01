@@ -114,8 +114,6 @@ async function connect(config, user) {
     return client;
 }
 
-const cached_clients = new Map();
-
 async function getMail(
     config, since, to, subject_contains,
     wait_times=[
@@ -130,7 +128,11 @@ async function getMail(
         user = to;
     }
 
-    let client = cached_clients.get(user);
+    let {email_cached_clients} = config;
+    if (! email_cached_clients) {
+        email_cached_clients = config.email_cached_clients = new Map();
+    }
+    let client = email_cached_clients.get(user);
     let do_logout = false;
     if (client) {
         output.logVerbose(config, `[email] Reusing existing client for ${user}`);
@@ -138,8 +140,8 @@ async function getMail(
         output.logVerbose(config, `[email] Connecting to account ${user}`);
         client = await connect(config, user);
 
-        if (!cached_clients.has(user) && config.email_new_client !== 'always') {
-            cached_clients.set(user, client);
+        if (!email_cached_clients.has(user) && config.email_new_client !== 'always') {
+            email_cached_clients.set(user, client);
         } else {
             do_logout = true;
         }
@@ -159,12 +161,14 @@ async function getMail(
 }
 
 async function shutdown(config) {
-    const client_list = Array.from(cached_clients.values());
+    if (! config.email_cached_clients) return;
+
+    const client_list = Array.from(config.email_cached_clients.values());
     if (client_list.length > 0) {
         output.logVerbose(config, `[email] Shutting down ${client_list.length} clients`);
     }
     await Promise.all(client_list.map(client => client.close()));
-    cached_clients.clear();
+    config.email_cached_clients.clear();
 }
 
 module.exports = {

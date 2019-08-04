@@ -2,8 +2,8 @@ const assert = require('assert');
 
 const runner = require('../runner');
 
-async function run(config) {
-    const output = [];
+async function run() {
+    let output = [];
     const runnerConfig = {
         no_locking: true,
         concurrency: 0,
@@ -24,7 +24,7 @@ async function run(config) {
         expectedToFail: true,
     }, {
         name: 'works_except_on_totallybroken',
-        run: async () => {
+        run: async config => {
             if (config.env == 'totallybroken') throw new Error('fail');
         },
         expectedToFail: config => (config.env == 'totallybroken'),
@@ -47,6 +47,13 @@ async function run(config) {
     assert(! output.some(o => o.includes('test case works_except_on_totallybroken FAILED')));
     assert(output.some(o => o.includes('test case unexpected_success SUCCEEDED')));
     assert(! output.some(o => o.includes('test case expected_success')));
+
+    output = [];
+    runnerConfig.expect_nothing = true;
+    await runner.run(runnerConfig, testCases);
+    assert(output.some(o => o.includes('test case normal_failure FAILED')));
+    assert(output.some(o => o.includes('test case expected_failure_true FAILED')));
+    assert(output.some(o => o.includes('test case works_except_on_totallybroken FAILED')));
 }
 
 module.exports = {

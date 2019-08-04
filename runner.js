@@ -24,7 +24,7 @@ async function run_task(config, task) {
 
         const show_error = (
             !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&
-            !task.expectedToFail);
+            (config.expect_nothing || !task.expectedToFail));
         if (show_error) {
             output.log(config, `test case ${task.name} FAILED at ${utils.localIso8601()}:\n${e.stack}\n`);
         }

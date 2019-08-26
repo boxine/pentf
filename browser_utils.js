@@ -5,6 +5,8 @@ const puppeteer = require('puppeteer');
 const {assertAsyncEventually, wait} = require('./utils');
 const tmp = require('tmp-promise');
 
+let tmp_home;
+
 async function newPage(config, chrome_args=[]) {
     const args = ['--no-sandbox'];
     args.push(...chrome_args);
@@ -22,10 +24,15 @@ async function newPage(config, chrome_args=[]) {
     if (config.devtools) {
         params.devtools = true;
     }
+
     // Redirect home directory to prevent puppeteer from accessing smart cards
+    if (!tmp_home) {
+        // Races here are fine; we just want to limit the number of temporary directories
+        tmp_home = (await tmp.dir({prefix: 'itest-chromium'})).path;
+    }
     params.env = {
         ...process.env,
-        HOME: (await tmp.dir({prefix: 'itest-chromium'})).path,
+        HOME: tmp_home,
     };
     const browser = await puppeteer.launch(params);
 

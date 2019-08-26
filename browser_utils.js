@@ -25,7 +25,7 @@ async function newPage(config, chrome_args=[]) {
     // Redirect home directory to prevent puppeteer from accessing smart cards
     params.env = {
         ...process.env,
-        HOME: await tmp.dir({prefix: 'itest-chromium'}),
+        HOME: (await tmp.dir({prefix: 'itest-chromium'})).path,
     };
     const browser = await puppeteer.launch(params);
 

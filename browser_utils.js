@@ -3,6 +3,7 @@
 const assert = require('assert');
 const puppeteer = require('puppeteer');
 const {assertAsyncEventually, wait} = require('./utils');
+const tmp = require('tmp-promise');
 
 async function newPage(config, chrome_args=[]) {
     const args = ['--no-sandbox'];
@@ -21,6 +22,11 @@ async function newPage(config, chrome_args=[]) {
     if (config.devtools) {
         params.devtools = true;
     }
+    // Redirect home directory to prevent puppeteer from accessing smart cards
+    params.env = {
+        ...process.env,
+        HOME: await tmp.dir({prefix: 'itest-chromium'}),
+    };
     const browser = await puppeteer.launch(params);
 
     if (config.devtools_preserve) {

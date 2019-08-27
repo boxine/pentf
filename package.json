@@ -21,8 +21,8 @@
   },
   "devDependencies": {
     "deep-equal": "^1.0.1",
-    "nodemon": "^1.18.11",
-    "eslint": "^5.9.0"
+    "eslint": "^6.2.2",
+    "nodemon": "^1.18.11"
   },
   "scripts": {
     "test": "./run",

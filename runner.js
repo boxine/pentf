@@ -157,7 +157,7 @@ function testCases2tasks(config, testCases) {
             task.status = 'skipped';
         }
 
-        if (tc.hasOwnProperty('expectedToFail')) {
+        if (Object.prototype.hasOwnProperty.call(tc, 'expectedToFail')) {
             if (typeof tc.expectedToFail === 'function') {
                 task.expectedToFail = tc.expectedToFail(config);
             } else {

@@ -72,7 +72,7 @@ function count(ar, filter) {
 function pluck(obj, keys) {
     const res = {};
     for (const k of keys) {
-        if (obj.hasOwnProperty(k)) {
+        if (Object.prototype.hasOwnProperty.call(obj, k)) {
             res[k] = obj[k];
         }
     }

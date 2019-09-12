@@ -5,8 +5,14 @@ const pintf = require('./index.js');
 const lockserver = require('./lockserver/lockserver');
 
 pintf.main({
+    rootDir: __dirname, // Mandatory
+    // All further properties are optional
     beforeAllTests: lockserver.beforeAllTests,
     afterAllTests: lockserver.afterAllTests,
-    rootDir: __dirname,
     description: 'Test pintf itself',
+    defaultConfig: config => {
+        // You can compute more complicated properties here. For example ...
+        config.report_header_md = 'This is the integration test report in *markdown* form.';
+        config.report_header_html = 'This is the integration test report in <strong>HTML/PDF</strong> form.';
+    },
 });

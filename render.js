@@ -24,8 +24,7 @@ function craftResults(config, test_info) {
     return {
         start: test_start,
         duration: test_end - test_start,
-        concurrency: config.concurrency,
-        env: config.env,
+        config,
         tests: test_results,
     };
 }
@@ -109,14 +108,14 @@ function markdown(results) {
     const error_count = utils.count(results.tests, s => s.status === 'error');
     const skipped_count = utils.count(results.tests, s => s.status === 'skipped');
 
+    const report_header_md = (
+        results.config.report_header_md ? '\n' + results.config.report_header_md + '\n' : '');
+
     return `# Integration Test Report
-
-This is an automatically generated report of all performed integration tests for the Toniecloud.
-For further information please contact <philipp.hagemeister@boxine.de>.
-
+${report_header_md}
 ### Options
-Tested Environment: **${results.env}**  
-Concurrency: ${results.concurrency === 0 ? 'sequential' : results.concurrency}  
+Tested Environment: **${results.config.env}**  
+Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}  
 Start: ${format_timestamp(results.start)}  
 
 ### Results
@@ -176,6 +175,8 @@ function html(results) {
     const success_count = utils.count(results.tests, s => s.status === 'success');
     const error_count = utils.count(results.tests, s => s.status === 'error');
     const skipped_count = utils.count(results.tests, s => s.status === 'skipped');
+
+    const report_header_html = results.config.report_header_html || '';
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -255,12 +256,10 @@ td.test_number {
 <body>
 <h1>Integration Test Report</h1>
 
-<p>This is an automatically generated report of all performed integration tests for the Toniecloud.
-For further information please contact <a href="philipp.hagemeister@boxine.de?subject=Integration-Test">philipp.hagemeister@boxine.de</a>.</p>
-
+${report_header_html}
 <h2>Options</h2>
-<p>Tested Environment: <strong>${results.env}</strong><br/>
-Concurrency: ${results.concurrency === 0 ? 'sequential' : results.concurrency}<br/>
+<p>Tested Environment: <strong>${results.config.env}</strong><br/>
+Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}<br/>
 Start: ${format_timestamp(results.start)}<br/>
 </p>
 

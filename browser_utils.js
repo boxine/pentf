@@ -1,9 +1,13 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const puppeteer = require('puppeteer');
-const {assertAsyncEventually, wait} = require('./utils');
+const {promisify} = require('util');
 const tmp = require('tmp-promise');
+
+const {assertAsyncEventually, wait} = require('./utils');
 
 let tmp_home;
 
@@ -25,15 +29,33 @@ async function newPage(config, chrome_args=[]) {
         params.devtools = true;
     }
 
-    // Redirect home directory to prevent puppeteer from accessing smart cards
-    if (!tmp_home) {
-        // Races here are fine; we just want to limit the number of temporary directories
-        tmp_home = (await tmp.dir({prefix: 'itest-chromium'})).path;
+    // Redirect home directory to prevent puppeteer from accessing smart cards on Linux
+    if (process.platform === 'linux') {
+        if (!tmp_home) {
+            // Races here are fine; we just want to limit the number of temporary directories
+            tmp_home = (await tmp.dir({prefix: 'itest-chromium'})).path;
+
+            // Set up .pki, to allow local certificate shenenigans (like mkcert)
+            const mkdir = promisify(fs.mkdir);
+            await mkdir(path.join(tmp_home, '.pki'));
+            await mkdir(path.join(tmp_home, '.pki', 'nssdb'));
+            const copyNssFile = async basename => {
+                const source_file = path.join(process.env.HOME, '.pki', 'nssdb', basename);
+                const exists = await new Promise(resolve =>
+                    fs.access(source_file, fs.constants.F_OK, err => resolve(!err))
+                );
+
+                if (!exists) return;
+                await promisify(fs.copyFile)(
+                    source_file, path.join(tmp_home, '.pki', 'nssdb', basename));
+            };
+            await copyNssFile('cert9.db');
+        }
+        params.env = {
+            ...process.env,
+            HOME: tmp_home,
+        };
     }
-    params.env = {
-        ...process.env,
-        HOME: tmp_home,
-    };
     const browser = await puppeteer.launch(params);
 
     if (config.devtools_preserve) {

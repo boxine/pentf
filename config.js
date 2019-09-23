@@ -146,6 +146,10 @@ function parseArgs(options) {
         action: 'storeTrue',
         help: 'Keep generated emails instead of deleting them',
     });
+    email_group.addArgument(['--email-verbose'], {
+        action: 'storeTrue',
+        help: 'Log all IMAP commands and responses',
+    });
 
     const puppeteer_group = parser.addArgumentGroup({title: 'puppeteer browser test'});
     puppeteer_group.addArgument(['-V', '--visible'], {

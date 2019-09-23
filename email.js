@@ -1,7 +1,8 @@
 const assert = require('assert');
 const {TextDecoder} = require('util');
 
-const ImapClient = require('emailjs-imap-client').default;
+const imap_client_module = require('emailjs-imap-client');
+const ImapClient = imap_client_module.default;
 const mime_parse = require('emailjs-mime-parser').default;
 const libmime = require('libmime');
 
@@ -102,7 +103,7 @@ async function _find_message(config, client, since, to, subject_contains) {
 
 async function connect(config, user) {
     const client = new ImapClient(config.imap.host, config.imap.port, {
-        logLevel: 'info',
+        logLevel: config.email_verbose ? imap_client_module.LOG_LEVEL_DEBUG : imap_client_module.LOG_LEVEL_INFO,
         auth: {
             user,
             pass: config.imap.password,

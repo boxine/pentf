@@ -143,6 +143,7 @@ Note that while the above example tests a webpage with [puppeteer](https://githu
 
 ```
 --keep-emails         Keep generated emails instead of deleting them
+--email-verbose       Log all IMAP commands and responses
 ```
 
 ###### puppeteer browser test

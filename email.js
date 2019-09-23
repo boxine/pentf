@@ -103,7 +103,7 @@ async function _find_message(config, client, since, to, subject_contains) {
 
 async function connect(config, user) {
     const client = new ImapClient(config.imap.host, config.imap.port, {
-        logLevel: config.email_verbose ? imap_client_module.LOG_LEVEL_DEBUG : imap_client_module.LOG_LEVEL_INFO,
+        logLevel: config.email_verbose ? imap_client_module.LOG_LEVEL_DEBUG : imap_client_module.LOG_LEVEL_NONE,
         auth: {
             user,
             pass: config.imap.password,

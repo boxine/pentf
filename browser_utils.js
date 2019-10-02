@@ -33,12 +33,12 @@ async function newPage(config, chrome_args=[]) {
     if (process.platform === 'linux') {
         if (!tmp_home) {
             // Races here are fine; we just want to limit the number of temporary directories
-            tmp_home = (await tmp.dir({prefix: 'itest-chromium'})).path;
+            const future_tmp_home = (await tmp.dir({prefix: 'itest-chromium'})).path;
 
             // Set up .pki, to allow local certificate shenenigans (like mkcert)
             const mkdir = promisify(fs.mkdir);
-            await mkdir(path.join(tmp_home, '.pki'));
-            await mkdir(path.join(tmp_home, '.pki', 'nssdb'));
+            await mkdir(path.join(future_tmp_home, '.pki'));
+            await mkdir(path.join(future_tmp_home, '.pki', 'nssdb'));
             const copyNssFile = async basename => {
                 const source_file = path.join(process.env.HOME, '.pki', 'nssdb', basename);
                 const exists = await new Promise(resolve =>
@@ -47,9 +47,10 @@ async function newPage(config, chrome_args=[]) {
 
                 if (!exists) return;
                 await promisify(fs.copyFile)(
-                    source_file, path.join(tmp_home, '.pki', 'nssdb', basename));
+                    source_file, path.join(future_tmp_home, '.pki', 'nssdb', basename));
             };
             await copyNssFile('cert9.db');
+            tmp_home = future_tmp_home;
         }
         params.env = {
             ...process.env,

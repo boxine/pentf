@@ -88,6 +88,24 @@ module.exports = {
 
 Note that while the above example tests a webpage with [puppeteer](https://github.com/GoogleChrome/puppeteer) and uses pintf's has native support for HTTP requests (in `net_utils`) and email sending (in `email`), tests can be anything – they just have to fail the promise if the test fails.
 
+## Configuration
+
+pintf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the `config` subdirectory for each environment. You can also add a programatic configuration by passing a function `defaultConfig` to `pintf.main`; see [pintf's own run](run) for an example. 
+
+The keys are up to you; for example you probably want to have a main entry point. Predefined keys are:
+
+- **`imap`** If you are using the `pintf/email` module to fetch and test emails, configure your imap connection here, like
+```
+  "imap": {
+    "user": "user@example.com",
+    "password": "secret",
+    "host": "mail.example.com",
+    "port": 993,
+    "tls": true
+  }
+```
+- **`rejectUnauthorized`** Set to `false` to not check the certificate in TLS connections.
+
 ## Options
 
 ```

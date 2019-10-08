@@ -16,7 +16,8 @@ async function fetch(config, url, options) {
             keepAlive: true,
         };
         if (/^https:\/\//.test(url)) {
-            agentOptions.rejectUnauthorized = false;
+            agentOptions.rejectUnauthorized = (
+                (config.rejectUnauthorized === undefined) ? true : config.rejectUnauthorized);
             options.agent = new https.Agent(agentOptions);
         } else {
             options.agent = new http.Agent(agentOptions);

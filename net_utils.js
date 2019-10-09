@@ -1,3 +1,4 @@
+const assert = require('assert');
 const http = require('http');
 const https = require('https');
 const node_fetch = require('node-fetch');
@@ -39,6 +40,7 @@ async function fetch(config, url, options) {
 }
 
 async function setupTLSClientAuth(fetchOptions, keyFilename, certFilename, rejectUnauthorized=false) {
+    assert.equal(typeof fetchOptions, 'object');
     const agentOptions = {
         rejectUnauthorized,
         keepAlive: true,

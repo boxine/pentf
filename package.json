@@ -14,7 +14,6 @@
     "he": "^1.2.0",
     "libmime": "^4.0.1",
     "node-fetch": "^2.3.0",
-    "protobufjs": "^6.8.8",
     "puppeteer": "^1.20.0",
     "stream-buffers": "^3.0.2",
     "tmp-promise": "^2.0.2"

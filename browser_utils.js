@@ -86,7 +86,7 @@ async function newPage(config, chrome_args=[]) {
         });
     }
 
-    return browser.newPage();
+    return (await browser.pages())[0];
 }
 
 async function closePage(page) {

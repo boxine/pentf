@@ -58,10 +58,11 @@ async function newPage(config, chrome_args=[]) {
         };
     }
     const browser = await puppeteer.launch(params);
+    const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {
-        browser.on('targetcreated', async target => {
-            if (! /^chrome-devtools:\/\//.test(await target.url())) {
+        const configureDevtools = async (target) => {
+            if (! /^(?:chrome-)?devtools:\/\//.test(await target.url())) {
                 return;
             }
 
@@ -83,10 +84,14 @@ async function newPage(config, chrome_args=[]) {
                 })).result.value;
             }, 'could not toggle preserve options in devtools', 10000, 100);
             await session.detach();
-        });
+        };
+
+        browser.on('targetcreated', configureDevtools);
+        const targets = await browser.targets();
+        await Promise.all(targets.map(t => configureDevtools(t)));
     }
 
-    return (await browser.pages())[0];
+    return page;
 }
 
 async function closePage(page) {

@@ -12,5 +12,6 @@ async function run() {
 
 module.exports = {
     description: 'Testing the integration test framework itself: Small utility functions',
+    resources: [],
     run,
 };

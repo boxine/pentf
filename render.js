@@ -134,7 +134,7 @@ function screenshots_html(result) {
         const dataUri = 'data:image/png;base64,' + (screenshot.toString('base64'));
         return (
             `<img src="${dataUri}" ` +
-            'style="display:inline-block; height:300px; margin:2px 10px 2px 0; border: 1px solid #888;"/>');
+            'style="display:inline-block; width:250px; margin:2px 10px 2px 0; border: 1px solid #888;"/>');
     }).join('\n');
 }
 

@@ -35,7 +35,11 @@ async function run_task(config, task) {
                     async (page, i) => {
                         await promisify(mkdirp)(config.screenshot_directory);
                         const fn = path.join(config.screenshot_directory, `${task.name}-${i}.png`);
-                        return await page.screenshot({path: fn});
+                        return await page.screenshot({
+                            path: fn,
+                            type: 'png',
+                            fullPage: true,
+                        });
                     }));
             } catch(e) {
                 output.log(config, `INTERNAL ERROR: failed to take screenshot of ${task.name}: ${e}`);

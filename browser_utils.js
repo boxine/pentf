@@ -3,11 +3,18 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const puppeteer = require('puppeteer');
 const {promisify} = require('util');
 const tmp = require('tmp-promise');
 
 const {assertAsyncEventually, wait, remove} = require('./utils');
+
+let puppeteer
+try {
+    // puppeteer is a peer dependency. Show a helpful error message when it's missing.
+    puppeteer = require('puppeteer');
+} catch(e) {
+    console.error(`Please install "puppeteer" package with 'npm i puppeteer'.`);
+}
 
 let tmp_home;
 

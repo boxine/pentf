@@ -31,12 +31,11 @@ async function run_task(config, task) {
 
         if (config.take_screenshots) {
             try {
-                task.error_screenshot_files = await Promise.all(task_config._browser_pages.map(
+                task.error_screenshots = await Promise.all(task_config._browser_pages.map(
                     async (page, i) => {
                         await promisify(mkdirp)(config.screenshot_directory);
                         const fn = path.join(config.screenshot_directory, `${task.name}-${i}.png`);
-                        await page.screenshot({path: fn});
-                        return fn;
+                        return await page.screenshot({path: fn});
                     }));
             } catch(e) {
                 output.log(config, `INTERNAL ERROR: failed to take screenshot of ${task.name}: ${e}`);

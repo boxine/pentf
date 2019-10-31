@@ -143,16 +143,17 @@ function html(results) {
         let res = (
             `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
             `<td class="test_number" rowspan="${rowspan}">` + + (idx + 1) + '</td>' +
-            '<td>' + escape_html(test_result.name) + '</td>' +
+            '<td class="test_name">' + escape_html(test_result.name) + '</td>' +
             (skipped ? '' : '<td class="duration">' + escape_html(format_duration(test_result.duration)) + '</td>') +
-            `<td class="result result-${test_result.status}" ${skipped ? 'colspan="2"' : ''}>` + status_str + '</td>' +
+            `<td class="result result-${test_result.status}" ${skipped ? 'colspan="2"' : ''} rowspan=${test_result.description ? 2 : 1}>` +
+            '<div>' + status_str + '</div></td>' +
             '</tr>'
         );
 
         if (test_result.description) {
             res += (
                 `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                '<td class="description" colspan="3">' +
+                '<td class="description" colspan="2">' +
                 escape_html(test_result.description) +
                 '</td>' +
                 '</tr>'
@@ -168,6 +169,13 @@ function html(results) {
                 '</tr>'
             );
         }
+
+        res += (
+            `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+            '<td colspan="4" class="test_footer">' +
+            '</td>' +
+            '</tr>'
+        );
 
         return res;
     }).join('\n');
@@ -214,6 +222,15 @@ td.test_number {
     text-align: right;
     padding-right: .4em;
 }
+td.test_number,
+td.test_name,
+td.test_duration {
+    padding-top: 3px;
+}
+td.test_footer {
+    height: 7px;
+}
+
 .description {
     font-size: 80%;
     color: #333;
@@ -228,6 +245,7 @@ td.test_number {
     color: #aa0000;
 }
 .result {
+    vertical-align: top;
     text-align: center;
 }
 .result-skipped {
@@ -238,8 +256,14 @@ td.test_number {
 .result-success {
     color: #250;
 }
+.result-success div {
+    margin-top: -3px;
+}
 .result-error {
     color: #ff0000;
+}
+.result-error div {
+    margin-top: 1px;
 }
 
 @media print {

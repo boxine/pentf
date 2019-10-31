@@ -9,7 +9,7 @@ function craftResults(config, test_info) {
     const {test_start, test_end, state} = test_info;
     const {tasks} = state;
     const test_results = tasks.map(s => {
-        const res = utils.pluck(s, ['status', 'name', 'duration']);
+        const res = utils.pluck(s, ['status', 'name', 'duration', 'error_screenshot_files']);
 
         if (s.error) {
             res.error_stack = s.error.stack;
@@ -129,6 +129,16 @@ ${table}
 `;
 }
 
+function screenshots_html(result) {
+    return result.error_screenshot_files.map(screenshot_fn => {
+        const image = fs.readFileSync(screenshot_fn);
+        const dataUri = 'data:image/png;base64,' + (image.toString('base64'));
+        return (
+            `<img src="${dataUri}" ` +
+            'style="display:inline-block; height:300px; margin:2px 10px 2px 0; border: 1px solid #888;"/>');
+    }).join('\n');
+}
+
 function html(results) {
     const table = results.tests.map((test_result, idx) => {
         const errored = test_result.status === 'error';
@@ -138,11 +148,14 @@ function html(results) {
             'error': '✘',
         }[test_result.status] || test_result.status;
 
-        const rowspan = 1 + (test_result.description ? 1 : 0) + (errored ? 1 : 0);
+        const rowspan = (
+            1 +
+            (test_result.description ? 1 : 0) +
+            (errored ? (test_result.error_screenshot_files ? 2 : 1) : 0));
 
         let res = (
             `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-            `<td class="test_number" rowspan="${rowspan}">` + + (idx + 1) + '</td>' +
+            `<td class="test_number" rowspan="${rowspan}">` + (idx + 1) + '</td>' +
             '<td class="test_name">' + escape_html(test_result.name) + '</td>' +
             (skipped ? '' : '<td class="duration">' + escape_html(format_duration(test_result.duration)) + '</td>') +
             `<td class="result result-${test_result.status}" ${skipped ? 'colspan="2"' : ''} rowspan=${test_result.description ? 2 : 1}>` +
@@ -168,6 +181,15 @@ function html(results) {
                 '</td>' +
                 '</tr>'
             );
+            if (test_result.error_screenshot_files) {
+                res += (
+                    `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                    '<td colspan="3">' +
+                    screenshots_html(test_result) +
+                    '</td>' +
+                    '</tr>'
+                );
+            }
         }
 
         res += (

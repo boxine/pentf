@@ -8,12 +8,12 @@ const tmp = require('tmp-promise');
 
 const {assertAsyncEventually, wait, remove} = require('./utils');
 
-let puppeteer
+let puppeteer;
 try {
     // puppeteer is a peer dependency. Show a helpful error message when it's missing.
     puppeteer = require('puppeteer');
 } catch(e) {
-    console.error(`Please install "puppeteer" package with 'npm i puppeteer'.`);
+    console.error('Please install "puppeteer" package with \'npm i puppeteer\'.');
 }
 
 let tmp_home;

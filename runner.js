@@ -1,7 +1,10 @@
 /* eslint no-console: 0 */
 
 const assert = require('assert');
+const path = require('path');
 const {performance} = require('perf_hooks');
+const {promisify} = require('util');
+const mkdirp = require('mkdirp');
 
 const email = require('./email');
 const external_locking = require('./external_locking');
@@ -10,8 +13,12 @@ const output = require('./output');
 const utils = require('./utils');
 
 async function run_task(config, task) {
+    let task_config = config;
+    if (config.take_screenshots) {
+        task_config = {...config, _browser_pages: []};
+    }
     try {
-        await task.tc.run(config);
+        await task.tc.run(task_config);
         task.status = 'success';
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
@@ -21,6 +28,20 @@ async function run_task(config, task) {
         task.status = 'error';
         task.duration = performance.now() - task.start;
         task.error = e;
+
+        if (config.take_screenshots) {
+            try {
+                task.screenshot_files = await Promise.all(task_config._browser_pages.map(
+                    async (page, i) => {
+                        await promisify(mkdirp)(config.screenshot_directory);
+                        const fn = path.join(config.screenshot_directory, `${task.name}-${i}.png`);
+                        await page.screenshot({path: fn});
+                        return fn;
+                    }));
+            } catch(e) {
+                output.log(config, `INTERNAL ERROR: failed to take screenshot of ${task.name}: ${e}`);
+            }
+        }
 
         const show_error = (
             !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&

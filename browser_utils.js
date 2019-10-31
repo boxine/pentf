@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer');
 const {promisify} = require('util');
 const tmp = require('tmp-promise');
 
-const {assertAsyncEventually, wait} = require('./utils');
+const {assertAsyncEventually, wait, remove} = require('./utils');
 
 let tmp_home;
 
@@ -91,10 +91,19 @@ async function newPage(config, chrome_args=[]) {
         await Promise.all(targets.map(t => configureDevtools(t)));
     }
 
+    if (config._browser_pages) {
+        page._pintf_browser_pages = config._browser_pages;
+        config._browser_pages.push(page);
+    }
+
     return page;
 }
 
 async function closePage(page) {
+    if (page._pintf_browser_pages) {
+        remove(page._pintf_browser_pages, p => p === page);
+    }
+
     const browser = await page.browser();
     await page.close();
     await browser.close();

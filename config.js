@@ -157,6 +157,18 @@ function parseArgs(options) {
         action: 'storeFalse',
         help: 'Make browser tests visible (i.e. not headless)',
     });
+    puppeteer_group.addArgument(['--no-screenshots'], {
+        action: 'storeFalse',
+        dest: 'take_screenshots',
+        help: 'Do not take screenshots of browser failures',
+    });
+    const defaultScreenshotDir = path.join(
+        options.rootDir ? options.rootDir : process.cwd(), 'screenshots');
+    puppeteer_group.addArgument(['--screenshot-directory'], {
+        metavar: 'DIR',
+        defaultValue: defaultScreenshotDir,
+        help: `Directory to write screenshots to (default: ${process.env.PINTF_GENERIC_HELP ? './screenshots' : '%(defaultValue)s'})`,
+    });
     puppeteer_group.addArgument(['-s', '--slow-mo'], {
         metavar: 'MS',
         type: 'int',

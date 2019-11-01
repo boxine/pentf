@@ -3,7 +3,7 @@
 ## Installation
 
 ```shell
-npm i --save-dev pintf
+npm i --save-dev pintf puppeteer
 ```
 
 ## Usage

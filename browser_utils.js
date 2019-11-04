@@ -8,17 +8,25 @@ const tmp = require('tmp-promise');
 
 const {assertAsyncEventually, wait, remove} = require('./utils');
 
-let puppeteer;
-try {
-    // puppeteer is a peer dependency. Show a helpful error message when it's missing.
-    puppeteer = require('puppeteer');
-} catch(e) {
-    console.error('Please install "puppeteer" package with \'npm i puppeteer\'.');
-}
-
 let tmp_home;
 
 async function newPage(config, chrome_args=[]) {
+    let puppeteer;
+    try {
+        if(config.puppeteer_firefox) {
+            puppeteer = require('puppeteer-firefox');
+        } else {
+            puppeteer = require('puppeteer');
+        }
+    } catch(e) {
+        // puppeteer/puppeteer-firefox is a peer dependency. Show a helpful error message when it's missing.
+        if(config.puppeteer_firefox) {
+            console.error('Please install "puppeteer-firefox" package with \'npm i puppeteer\'.');
+        } else {
+            console.error('Please install "puppeteer" package with \'npm i puppeteer\'.');
+        }
+    }
+
     const args = ['--no-sandbox'];
     args.push(...chrome_args);
 

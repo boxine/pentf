@@ -1,6 +1,6 @@
 {
   "name": "pintf",
-  "version": "1.0.25",
+  "version": "1.0.27",
   "description": "parallel integration/end-to-end test framework",
   "main": "index.js",
   "directories": {

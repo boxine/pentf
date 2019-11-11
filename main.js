@@ -51,6 +51,9 @@ async function real_main(options={}) {
         options.defaultConfig(config);
     }
     const test_cases = load_tests(args, options.testsDir);
+    config._testsDir = options.testsDir;
+    if (options.rootDir) config._rootDir = options.rootDir;
+    if (options.configDir) config._configDir = options.configDir;
 
     if (args.list) {
         for (const tc of test_cases) {
@@ -60,9 +63,6 @@ async function real_main(options={}) {
     }
 
     if (args.print_config) {
-        if (options.rootDir) config._rootDir = options.rootDir;
-        if (options.configDir) config._configDir = options.configDir;
-        if (options.testDir) config._testDir = options.testDir;
         console.log(config);
         return;
     }

@@ -1,6 +1,7 @@
 /* eslint no-console: 0 */
 
 const assert = require('assert');
+const child_process = require('child_process');
 const path = require('path');
 const {performance} = require('perf_hooks');
 const {promisify} = require('util');
@@ -259,9 +260,26 @@ async function run(config, testCases) {
     }
     const test_end = Date.now();
 
+    let testsVersion = 'unknown';
+    try {
+        const gitVersion = (await promisify(child_process.exec)('git show --pretty="format:%h (%ai)" --no-patch HEAD', {
+            cwd: config._testsDir,
+        })).stdout.trim();
+        const changesStr = (await promisify(child_process.exec)('git status --porcelain', {
+            cwd: config._testsDir,
+        })).stdout.trim();
+        const changedFiles = changesStr.split('\n').map(line => line.trim().split(' ', 2)[1]);
+
+        testsVersion = gitVersion + ((changedFiles.length > 0) ? `+changes(${changedFiles.join(' ')})` : '');
+    } catch(e) {
+        // Fall back to above default
+    }
+
     return {
         test_start,
         test_end,
+        pintfVersion: utils.pintfVersion(),
+        testsVersion,
         state,
     };
 }

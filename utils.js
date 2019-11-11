@@ -176,17 +176,22 @@ function cmpKey(key) {
     };
 }
 
+function pintfVersion() {
+    return require('./package.json').version;
+}
+
 module.exports = {
     arange,
     assertAlways,
-    assertEventually,
     assertAsyncEventually,
+    assertEventually,
     cmp,
     cmpKey,
     count,
     filterMap,
     localIso8601,
     makeRandomEmail,
+    pintfVersion,
     pluck,
     randomHex,
     randomHexstring,

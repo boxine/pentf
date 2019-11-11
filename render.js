@@ -6,7 +6,7 @@ const {timezoneOffsetString} = require('./utils');
 const utils = require('./utils');
 
 function craftResults(config, test_info) {
-    const {test_start, test_end, state} = test_info;
+    const {test_start, test_end, state, ...moreInfo} = test_info;
     const {tasks} = state;
     const test_results = tasks.map(s => {
         const res = utils.pluck(s, ['status', 'name', 'duration', 'error_screenshots']);
@@ -26,6 +26,7 @@ function craftResults(config, test_info) {
         duration: test_end - test_start,
         config,
         tests: test_results,
+        ...moreInfo,
     };
 }
 
@@ -306,6 +307,7 @@ ${report_header_html}
 <p>Tested Environment: <strong>${results.config.env}</strong><br/>
 Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}<br/>
 Start: ${format_timestamp(results.start)}<br/>
+Version: ${results.testsVersion}, pintf ${results.pintfVersion}<br/>
 </p>
 
 <h2>Results</h2>

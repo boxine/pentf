@@ -9,7 +9,7 @@ function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
     const {tasks} = state;
     const test_results = tasks.map(s => {
-        const res = utils.pluck(s, ['status', 'name', 'duration', 'error_screenshots']);
+        const res = utils.pluck(s, ['status', 'name', 'duration', 'error_screenshots', 'expectedToFail']);
 
         if (s.error) {
             res.error_stack = s.error.stack;
@@ -83,6 +83,22 @@ function format_timestamp(ts) {
     );
 }
 
+function linkify(str) {
+    let res = '';
+    let pos = 0;
+
+    const rex = /https?:\/\/[-_.\w:]+\/(?:[-_\w/:?#&=%.;]*)/g;
+    let m;
+    while ((m = rex.exec(str))) {
+        res += escape_html(str.substring(pos, m.index));
+        res += `<a href="${escape_html(m[0])}">${escape_html(m[0])}</a>`;
+        pos = m.index + m[0].length;
+    }
+    res += escape_html(str.substring(pos));
+
+    return res;
+}
+
 function escape_html(str) {
     // From https://stackoverflow.com/a/6234804/35070
     return (str
@@ -151,6 +167,7 @@ function html(results) {
         const rowspan = (
             1 +
             (test_result.description ? 1 : 0) +
+            (test_result.expectedToFail ? 1 : 0) +
             (errored ? (test_result.error_screenshots ? 2 : 1) : 0));
 
         let res = (
@@ -168,6 +185,19 @@ function html(results) {
                 `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
                 '<td class="description" colspan="2">' +
                 escape_html(test_result.description) +
+                '</td>' +
+                '</tr>'
+            );
+        }
+
+        if (test_result.expectedToFail) {
+            res += (
+                `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                '<td class="expectedToFail" colspan="2">' +
+                ((typeof test_result.expectedToFail === 'string')
+                    ? 'Expected to fail: ' + linkify(test_result.expectedToFail)
+                    : 'Expected to fail.'
+                ) +
                 '</td>' +
                 '</tr>'
             );
@@ -266,6 +296,11 @@ td.test_footer {
     font-size: 70%;
     color: #aa0000;
 }
+.expectedToFail {
+    font-size: 80%;
+    color: #aa0000;
+    padding-bottom: 4px;
+}
 .result {
     vertical-align: top;
     text-align: center;
@@ -333,4 +368,6 @@ async function pdf(config, path, results) {
 module.exports = {
     craftResults,
     doRender,
+    // test only
+    _linkify: linkify,
 };

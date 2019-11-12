@@ -46,8 +46,11 @@ module.exports = {
     // You can skip the test in some conditions by defining an optional skip method:
     skip: config => config.env === 'prod',
 
-    // either true or a function returning true to suppress output about this test if it fails
-    expectedToFail: config => (config.env === 'alwaysbroken'),
+    // Optional: a true-ish value to indicate that to suppress output about this test if it fails.
+    // Used to indicate tests for bugs/features that are not yet implemented (e.g. with TDD).
+    // Strings will be reported; the URL to an issue is a good and typical value.
+    // Alternatively, a function that is called with the config and returns a value as described above.
+    expectedToFail: config => (config.env === 'alwaysbroken') ? 'Known to be broken here' : false,
 
     // Resources is a list of strings. Tests accessing the same resources are run sequentially.
     resources: ['toniebox_1234', 'another_resource'],

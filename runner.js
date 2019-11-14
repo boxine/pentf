@@ -23,7 +23,8 @@ async function run_task(config, task) {
         task.status = 'success';
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
-            output.log(config, `test case ${task.name} SUCCEEDED, but expectedToFail was set\n`);
+            const etf = (typeof task.expectedToFail === 'string') ? ` (${task.expectedToFail})` : '';
+            output.log(config, `test case ${task.name} SUCCEEDED, but expectedToFail was set${etf}\n`);
         }
     } catch(e) {
         task.status = 'error';

@@ -7,17 +7,16 @@ const {performance} = require('perf_hooks');
 const {promisify} = require('util');
 const mkdirp = require('mkdirp');
 
+const browser_utils = require('./browser_utils');
 const email = require('./email');
 const external_locking = require('./external_locking');
 const locking = require('./locking');
 const output = require('./output');
 const utils = require('./utils');
+const {catchLater} = require('./promise_utils');
 
 async function run_task(config, task) {
-    let task_config = config;
-    if (config.take_screenshots) {
-        task_config = {...config, _browser_pages: []};
-    }
+    const task_config = {...config, _browser_pages: []};
     try {
         await task.tc.run(task_config);
         task.status = 'success';
@@ -46,6 +45,10 @@ async function run_task(config, task) {
             } catch(e) {
                 output.log(config, `INTERNAL ERROR: failed to take screenshot of ${task.name}: ${e}`);
             }
+        }
+        // Close all browser windows
+        if (! config.keep_open && task_config._browser_pages.length > 0) {
+            await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
         }
 
         const show_error = (
@@ -100,9 +103,14 @@ async function run_one(config, state, task) {
 async function parallel_run(config, state) {
     output.status(config, state);
 
-    // Many tests run 1 or 2 Chrome windows, so make sure we have enough handles.
-    // 2 windows per test on average should be sufficient
-    process.setMaxListeners(10 + 2 * config.concurrency);
+    if (config.keep_open) {
+        // We will have many, many  Chrome windows. Disable the maxListener limit
+        process.setMaxListeners(0);
+    } else {
+        // Many tests run 1 or 2 Chrome windows, so make sure we have enough handles.
+        // 2 windows per test on average should be sufficient
+        process.setMaxListeners(10 + 2 * config.concurrency);
+    }
 
     state.running = [];
     state.locking_backoff = 10;

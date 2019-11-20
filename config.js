@@ -209,6 +209,10 @@ function parseArgs(options) {
         help: 'Output all tasks that the runner would perform, and exit',
         action: 'storeTrue',
     });
+    runner_group.addArgument(['--exit-zero'], {
+        help: 'Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still emitted in cases of internal crashes)',
+        action: 'storeTrue',
+    });
 
     const locking_group = parser.addArgumentGroup({title: 'Locking'});
     locking_group.addArgument(['-L', '--no-locking'], {

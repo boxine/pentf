@@ -13,7 +13,6 @@ const external_locking = require('./external_locking');
 const locking = require('./locking');
 const output = require('./output');
 const utils = require('./utils');
-const {catchLater} = require('./promise_utils');
 
 async function run_task(config, task) {
     const task_config = {...config, _browser_pages: []};

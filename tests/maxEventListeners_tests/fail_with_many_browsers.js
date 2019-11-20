@@ -1,4 +1,4 @@
-const {closePage, newPage} = require('../../browser_utils');
+const {newPage} = require('../../browser_utils');
 const {arange} = require('../../utils');
 
 async function run(config) {

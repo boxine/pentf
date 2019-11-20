@@ -1,6 +1,5 @@
 const assert = require('assert');
 const child_process = require('child_process');
-const {promisify} = require('util');
 const path = require('path');
 
 

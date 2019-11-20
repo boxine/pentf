@@ -136,6 +136,10 @@ async function waitForVisible(page, selector) {
     return el;
 }
 
+async function waitForText(page, text) {
+    return await page.waitForXPath(`//text()[contains(., ${JSON.stringify(text)})]`);
+}
+
 async function assertValue(input, expected) {
     const page = input._page;
     assert(page);
@@ -259,5 +263,6 @@ module.exports = {
     html2pdf,
     newPage,
     setLanguage,
+    waitForText,
     waitForVisible,
 };

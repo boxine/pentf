@@ -136,8 +136,24 @@ async function waitForVisible(page, selector) {
     return el;
 }
 
-async function waitForText(page, text) {
-    return await page.waitForXPath(`//text()[contains(., ${JSON.stringify(text)})]`);
+function text2xpath(text) {
+    let textRepr;
+    if (text.includes('"')) {
+        textRepr = 'concat(' + text.split('"').map(part => `"${part}"`).join(', \'"\', ') + ')';
+    } else {
+        // No doubles quotes ("), simple case
+        textRepr = `"${text}"`;
+    }
+
+    return `//text()[contains(., ${textRepr})]`;
+}
+
+async function waitForText(page, text, {timeout=30000}) {
+    try {
+        return await page.waitForXPath(text2xpath(text), {timeout});
+    } catch (e) {
+        throw new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms`);
+    }
 }
 
 async function assertValue(input, expected) {

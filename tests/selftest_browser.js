@@ -13,7 +13,7 @@ async function run(config) {
     await assertNotXPath(page, '//div[@id="d3"]');
 
     await waitForText(page, 'test');
-    await waitForText(page, 'test" text \\ " a', {timeout: 10});
+    await waitForText(page, 'test" text \\ " a');
     await assert.rejects(waitForText(page, 'foobar', {timeout: 10}), {
         message: 'Unable to find text "foobar" after 10ms',
     });

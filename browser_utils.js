@@ -145,6 +145,10 @@ function escapeXPathText(text) {
 }
 
 async function waitForText(page, text, {timeout=30000}={}) {
+    if (!text) {
+        throw new Error(`Missing text argument: ${JSON.stringify(text)}`);
+    }
+
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
         return await page.waitForXPath(xpath, {timeout});
@@ -237,6 +241,10 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
 
 // Click a link or button by its text content
 async function clickText(page, text, {timeout=30000, checkEvery=200}={}) {
+    if (!text) {
+        throw new Error(`Missing text argument: ${JSON.stringify(text)}`);
+    }
+
     const xpath = (
         '//*[local-name()="a" or local-name()="button" or local-name()="input"]' +
         `[contains(text(), ${escapeXPathText(text)})]`);

@@ -136,21 +136,18 @@ async function waitForVisible(page, selector) {
     return el;
 }
 
-function text2xpath(text) {
-    let textRepr;
-    if (text.includes('"')) {
-        textRepr = 'concat(' + text.split('"').map(part => `"${part}"`).join(', \'"\', ') + ')';
-    } else {
+function escapeXPathText(text) {
+    if (!text.includes('"')) {
         // No doubles quotes ("), simple case
-        textRepr = `"${text}"`;
+        return `"${text}"`;
     }
-
-    return `//text()[contains(., ${textRepr})]`;
+    return 'concat(' + text.split('"').map(part => `"${part}"`).join(', \'"\', ') + ')';
 }
 
-async function waitForText(page, text, {timeout=30000}) {
+async function waitForText(page, text, {timeout=30000}={}) {
+    const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
-        return await page.waitForXPath(text2xpath(text), {timeout});
+        return await page.waitForXPath(xpath, {timeout});
     } catch (e) {
         throw new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms`);
     }
@@ -206,6 +203,48 @@ async function assertNotXPath(page, xpath, message='', wait_ms=2000, check_every
         await wait(Math.min(check_every, wait_ms));
         wait_ms -= check_every;
     }
+}
+
+// Clicks an element atomically, e.g. within the same event loop run as finding it
+async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined} = {}) {
+    let remainingTimeout = timeout;
+    while (true) { // eslint-disable-line no-constant-condition
+        const found = await page.evaluate(xpath => {
+            const element = document.evaluate(
+                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+            if (!element) return false;
+
+            if (element.offsetParent === null) return null; // invisible
+
+            element.click();
+            return true;
+        }, xpath);
+
+        if (found) {
+            return;
+        }
+
+        if (remainingTimeout <= 0) {
+            if (!message) {
+                message = `Unable to find XPath ${xpath} after ${timeout}ms`;
+            }
+            throw new Error(message);
+        }
+        await wait(Math.min(remainingTimeout, checkEvery));
+        remainingTimeout -= checkEvery;
+    }
+}
+
+// Click a link or button by its text content
+async function clickText(page, text, {timeout=30000, checkEvery=200}={}) {
+    const xpath = (
+        '//*[local-name()="a" or local-name()="button" or local-name()="input"]' +
+        `[contains(text(), ${escapeXPathText(text)})]`);
+    return clickXPath(page, xpath, {
+        timeout,
+        checkEvery,
+        message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms`,
+    });
 }
 
 // lang can either be a single string (e.g. "en") or an array of supported languages (e.g. ['de-DE', 'en-US', 'gr'])
@@ -274,6 +313,8 @@ async function html2pdf(config, path, html, modifyPage=null) {
 module.exports = {
     assertNotXPath,
     assertValue,
+    clickText,
+    clickXPath,
     closePage,
     getSelectOptions,
     html2pdf,

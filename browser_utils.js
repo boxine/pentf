@@ -144,10 +144,23 @@ function escapeXPathText(text) {
     return 'concat(' + text.split('"').map(part => `"${part}"`).join(', \'"\', ') + ')';
 }
 
-async function waitForText(page, text, {timeout=30000}={}) {
+function checkText(text) {
+    if (typeof text !== 'string') {
+        let repr;
+        try {
+            repr = JSON.stringify(text);
+        } catch(e) {
+            repr = '' + text;
+        }
+        throw new Error(`Invalid text argument: ${repr}`);
+    }
     if (!text) {
         throw new Error(`Missing text argument: ${JSON.stringify(text)}`);
     }
+}
+
+async function waitForText(page, text, {timeout=30000}={}) {
+    checkText(text);
 
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
@@ -241,9 +254,7 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
 
 // Click a link or button by its text content
 async function clickText(page, text, {timeout=30000, checkEvery=200}={}) {
-    if (!text) {
-        throw new Error(`Missing text argument: ${JSON.stringify(text)}`);
-    }
+    checkText(text);
 
     const xpath = (
         '//*[local-name()="a" or local-name()="button" or local-name()="input"]' +

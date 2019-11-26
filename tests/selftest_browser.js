@@ -20,6 +20,12 @@ async function run(config) {
     await assert.rejects(waitForText(page, 'foo " bar', {timeout: 10}), {
         message: 'Unable to find text "foo \\" bar" after 10ms',
     });
+    await assert.rejects(waitForText(page, {error: 'not-a-string'}), {
+        message: 'Invalid text argument: {"error":"not-a-string"}',
+    });
+    await assert.rejects(waitForText(page, page), {
+        message: 'Invalid text argument: [object Object]',
+    });
 
     let clickCount = 0;
     await page.exposeFunction('countClick', () => {
@@ -60,6 +66,9 @@ async function run(config) {
     });
     await assert.rejects(clickText(page, 'invisible button', {timeout: 10}), {
         message: 'Unable to find text "invisible button" after 10ms',
+    });
+    await assert.rejects(clickText(page, {error: 'not-a-string'}), {
+        message: 'Invalid text argument: {"error":"not-a-string"}',
     });
     assert.strictEqual(clickCount, 2);
 

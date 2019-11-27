@@ -258,7 +258,7 @@ const DEFAULT_CLICKABLE = '//*[local-name()="a" or local-name()="button" or loca
 async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
     checkText(text);
     const xpath = (
-         elementXPath +
+        elementXPath +
         `[contains(text(), ${escapeXPathText(text)})]`);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
     return clickXPath(page, xpath, {

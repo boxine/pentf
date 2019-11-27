@@ -252,12 +252,12 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
     }
 }
 
+const DEFAULT_CLICKABLE = '//*[local-name()="a" or local-name()="button" or local-name()="input"]';
 // Click a link or button by its text content
-async function clickText(page, text, {timeout=30000, checkEvery=200}={}) {
+async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE}={}) {
     checkText(text);
-
     const xpath = (
-        '//*[local-name()="a" or local-name()="button" or local-name()="input"]' +
+         elementXPath +
         `[contains(text(), ${escapeXPathText(text)})]`);
     return clickXPath(page, xpath, {
         timeout,

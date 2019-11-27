@@ -17,8 +17,8 @@ async function run(config) {
     await assert.rejects(waitForText(page, 'foobar', {timeout: 10}), {
         message: 'Unable to find text "foobar" after 10ms',
     });
-    await assert.rejects(waitForText(page, 'foo " bar', {timeout: 10}), {
-        message: 'Unable to find text "foo \\" bar" after 10ms',
+    await assert.rejects(waitForText(page, 'foo " bar', {timeout: 10, extraMessage: 'too short'}), {
+        message: 'Unable to find text "foo \\" bar" after 10ms (too short)',
     });
     await assert.rejects(waitForText(page, {error: 'not-a-string'}), {
         message: 'Invalid text argument: {"error":"not-a-string"}',
@@ -64,11 +64,14 @@ async function run(config) {
     await assert.rejects(clickText(page, '404', {timeout: 10}), {
         message: 'Unable to find text "404" after 10ms',
     });
-    await assert.rejects(clickText(page, 'invisible button', {timeout: 10}), {
-        message: 'Unable to find text "invisible button" after 10ms',
+    await assert.rejects(clickText(page, 'invisible button', {timeout: 10, extraMessage: '12'}), {
+        message: 'Unable to find text "invisible button" after 10ms (12)',
     });
     await assert.rejects(clickText(page, {error: 'not-a-string'}), {
         message: 'Invalid text argument: {"error":"not-a-string"}',
+    });
+    await assert.rejects(clickText(page, 'button', {elementXPath: '//notfound', timeout: 100}), {
+        message: 'Unable to find text "button" after 100ms',
     });
     assert.strictEqual(clickCount, 2);
 

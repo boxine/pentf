@@ -159,14 +159,15 @@ function checkText(text) {
     }
 }
 
-async function waitForText(page, text, {timeout=30000}={}) {
+async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={}) {
     checkText(text);
 
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
         return await page.waitForXPath(xpath, {timeout});
     } catch (e) {
-        throw new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms`);
+        const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
+        throw new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
     }
 }
 
@@ -254,15 +255,16 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
 
 const DEFAULT_CLICKABLE = '//*[local-name()="a" or local-name()="button" or local-name()="input"]';
 // Click a link or button by its text content
-async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE}={}) {
+async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
     checkText(text);
     const xpath = (
          elementXPath +
         `[contains(text(), ${escapeXPathText(text)})]`);
+    const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
     return clickXPath(page, xpath, {
         timeout,
         checkEvery,
-        message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms`,
+        message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`,
     });
 }
 

@@ -335,6 +335,7 @@ module.exports = {
     clickText,
     clickXPath,
     closePage,
+    escapeXPathText,
     getSelectOptions,
     html2pdf,
     newPage,

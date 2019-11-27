@@ -193,6 +193,8 @@ The keys are up to you; for example you probably want to have a main entry point
 -S, --sequential      Do not run tests in parallel (same as -C 0)
 --fail-fast           Abort once a test fails
 --print-tasks         Output all tasks that the runner would perform, and exit
+--exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still 
+                      emitted in cases of internal crashes)
 ```
 
 ###### Locking

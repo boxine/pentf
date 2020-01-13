@@ -161,13 +161,14 @@ function checkText(text) {
 
 async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={}) {
     checkText(text);
+    const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
+    const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
 
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
         return await page.waitForXPath(xpath, {timeout});
     } catch (e) {
-        const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-        throw new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
+        throw err;
     }
 }
 

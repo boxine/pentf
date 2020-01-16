@@ -65,6 +65,9 @@ function finish(config, state) {
     const error_count = utils.count(tasks, t => t.status === 'error');
     const skipped = tasks.filter(t => t.status === 'skipped');
     const expectedToFail = tasks.filter(t => t.expectedToFail);
+    if (tasks.length === 0 && config.filter) {
+        STATUS_STREAM.write(`No test case found with filter: ${config.filter}\n`);
+    }
     STATUS_STREAM.write(`${success_count} tests passed, ${error_count} tests failed.\n`);
     if (skipped.length > 0) {
         STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);

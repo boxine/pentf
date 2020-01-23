@@ -172,6 +172,31 @@ async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={
     }
 }
 
+async function waitForTestId(page, testId, {extraMessage=undefined, timeout=undefined, visible=true} = {}) {
+    if (typeof testId !== 'string') throw new Error(`Invalid testId type ${testId}`);
+    assert(/^[a-zA-Z0-9_-]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
+
+    const err = new Error(
+        `Failed to find ${visible ? 'visible ' : ''}element with data-testid "${testId}" within ${timeout}ms` +
+        (extraMessage ? `. ${extraMessage}` : ''));
+
+    const qs = `*[data-testid="${testId}"]`;
+    let el;
+    try {
+        el = await page.waitForFunction((qs, visible) => {
+            const all = document.querySelectorAll(qs);
+            if (all.length !== 1) return null;
+            const [el] = all;
+            if (visible && (el.offsetParent === null)) return null;
+            return el;
+        }, {timeout}, qs, visible);
+    } catch (e) {
+        throw err; // Do not construct error here lest stack trace gets lost
+    }
+    assert(el !== null);
+    return el;
+}
+
 async function assertValue(input, expected) {
     const page = input._page;
     assert(page);
@@ -344,5 +369,6 @@ module.exports = {
     newPage,
     setLanguage,
     waitForText,
+    waitForTestId,
     waitForVisible,
 };

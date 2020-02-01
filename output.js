@@ -27,7 +27,8 @@ function status(config, state) {
     const running = tasks.filter(s => s.status === 'running');
     const running_count = running.length;
     const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
-    const todo_count = utils.count(tasks, t => t.status === 'todo');
+    const failed_count = tasks.filter(t => t.status === 'error').length;
+    const failed_str = failed_count > 0 ? `${failed_count} failed, ` : '';
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
@@ -38,7 +39,7 @@ function status(config, state) {
             running.slice(0, running_show).map(({tc}) => tc.name).join(' ')
             + (running_show < running.length ? '  +' + (running.length - running_show) : '')
         );
-        status_str = `${running_count} running (${running_str}), ${done_count} done, ${todo_count} more`;
+        status_str = `${done_count}/${tasks.length} done, ${failed_str}${running_count} running (${running_str})`;
 
         if (status_str.length < terminal_width) {
             break; // Fits!

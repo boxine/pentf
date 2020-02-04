@@ -129,31 +129,79 @@ function localIso8601(date) {
     );
 }
 
-async function assertEventually(testfunc, message, waitFor=10000, checkEvery=200) {
-    for (let remaining = waitFor;remaining > 0;remaining -= checkEvery) {
+async function assertEventually(testfunc, message, options, _checkEvery=200) {
+    if (typeof options === 'number') {
+        console.trace(`DEPRECATED call to assertEventually with non-option argument ${options}`);
+        options = {
+            timeout: options,
+            checkEvery: _checkEvery,
+        };
+    } else {
+        // Normal call
+        if (!options) {
+            options = {};
+        }
+        options.timeout = options.timeout || 10000;
+        options.checkEvery = options.checkEvery || 200;
+    }
+    const {timeout, checkEvery} = options;
+
+    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         const res = testfunc();
         if (res) return res;
 
         await wait(checkEvery);
     }
-    throw new Error(`${message} (waited ${waitFor}ms)`);
+    throw new Error(`${message} (waited ${timeout}ms)`);
 }
 
-async function assertAsyncEventually(testfunc, message, waitFor=10000, checkEvery=200) {
-    for (let remaining = waitFor;remaining > 0;remaining -= checkEvery) {
+async function assertAsyncEventually(testfunc, message, options, _checkEvery=200) {
+    if (typeof options === 'number') {
+        console.trace(`DEPRECATED call to assertAsyncEventually with non-option argument ${options}`);
+        options = {
+            timeout: options,
+            checkEvery: _checkEvery,
+        };
+    } else {
+        // Normal call
+        if (!options) {
+            options = {};
+        }
+        options.timeout = options.timeout || 10000;
+        options.checkEvery = options.checkEvery || 200;
+    }
+    const {timeout, checkEvery} = options;
+
+    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         const res = await testfunc();
         if (res) return res;
 
         await wait(checkEvery);
     }
-    throw new Error(`${message} (waited ${waitFor}ms)`);
+    throw new Error(`${message} (waited ${timeout}ms)`);
 }
 
-async function assertAlways(testfunc, message, waitFor=2000, checkEvery=200) {
-    for (let remaining = waitFor;remaining > 0;remaining -= checkEvery) {
+async function assertAlways(testfunc, message, options, _checkEvery=200) {
+    if (typeof options === 'number') {
+        console.trace(`DEPRECATED call to assertAlways with non-option argument ${options}`);
+        options = {
+            timeout: options,
+            checkEvery: _checkEvery,
+        };
+    } else {
+        // Normal call
+        if (!options) {
+            options = {};
+        }
+        options.timeout = options.timeout || 10000;
+        options.checkEvery = options.checkEvery || 200;
+    }
+    const {timeout, checkEvery} = options;
+
+    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         const res = testfunc();
         if (!res) {
-            throw new Error(`${message} (after ${waitFor - remaining}ms)`);
+            throw new Error(`${message} (after ${timeout - remaining}ms)`);
         }
 
         await wait(checkEvery);

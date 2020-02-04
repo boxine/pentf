@@ -22,7 +22,7 @@ async function run_task(config, task) {
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
             const etf = (typeof task.expectedToFail === 'string') ? ` (${task.expectedToFail})` : '';
-            output.log(config, `test case ${task.name} SUCCEEDED, but expectedToFail was set${etf}\n`);
+            output.log(config, `PASSED test case ${task.name}, but expectedToFail was set${etf}\n`);
         }
     } catch(e) {
         task.status = 'error';
@@ -54,7 +54,7 @@ async function run_task(config, task) {
             !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&
             (config.expect_nothing || !task.expectedToFail));
         if (show_error) {
-            output.log(config, `test case ${task.name} FAILED at ${utils.localIso8601()}:\n${e.stack}\n`);
+            output.log(config, `FAILED test case ${task.name} at ${utils.localIso8601()}:\n${e.stack}\n`);
         }
         if (config.fail_fast) {
             process.exit(3);

@@ -135,6 +135,7 @@ async function assertEventually(testfunc, message, options, _checkEvery=200) {
         options = {
             timeout: options,
             checkEvery: _checkEvery,
+            crashOnError: true,
         };
     } else {
         // Normal call
@@ -143,11 +144,19 @@ async function assertEventually(testfunc, message, options, _checkEvery=200) {
         }
         options.timeout = options.timeout || 10000;
         options.checkEvery = options.checkEvery || 200;
+        options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
     }
-    const {timeout, checkEvery} = options;
+    const {timeout, checkEvery, crashOnError} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
-        const res = testfunc();
+        let res = false;
+        if (crashOnError) {
+            res = await testfunc();
+        } else {
+            try {
+                res = await testfunc();
+            } catch (e) { /* Ignored */ }
+        }
         if (res) return res;
 
         await wait(checkEvery);
@@ -161,6 +170,7 @@ async function assertAsyncEventually(testfunc, message, options, _checkEvery=200
         options = {
             timeout: options,
             checkEvery: _checkEvery,
+            crashOnError: true,
         };
     } else {
         // Normal call
@@ -169,11 +179,19 @@ async function assertAsyncEventually(testfunc, message, options, _checkEvery=200
         }
         options.timeout = options.timeout || 10000;
         options.checkEvery = options.checkEvery || 200;
+        options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
     }
-    const {timeout, checkEvery} = options;
+    const {timeout, checkEvery, crashOnError} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
-        const res = await testfunc();
+        let res = false;
+        if (crashOnError) {
+            res = await testfunc();
+        } else {
+            try {
+                res = await testfunc();
+            } catch (e) { /* Ignored */ }
+        }
         if (res) return res;
 
         await wait(checkEvery);

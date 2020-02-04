@@ -12,6 +12,19 @@ async function run() {
         return counter++ > 2;
     }, 'succeeds eventually', {checkEvery: 1});
 
+    await assert.rejects(assertEventually(() => {throw new Error('crash')}, '(not shown)', {}), {
+        message: 'crash',
+    });
+
+    counter = 0;
+    await assertEventually(() => {
+        counter++;
+        if (counter < 2) {
+            throw new Error('crash');
+        }
+        return (counter > 4);
+    }, 'error suppressed', {checkEvery: 1, crashOnError: false});
+    assert.strictEqual(counter, 5);
 }
 
 module.exports = {

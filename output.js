@@ -74,7 +74,7 @@ function finish(config, state) {
         STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);
     }
     if (!config.expect_nothing && (expectedToFail.length > 0)) {
-        STATUS_STREAM.write(`Expected ${expectedToFail.length} tests to fail (${expectedToFail.map(s => s.name).join(' ')}). Pass in -E/--expect-nothing to ignore expectedToFail declarations.\n`);
+        STATUS_STREAM.write(`${expectedToFail.length} tests failed as expected (${expectedToFail.map(s => s.name).join(' ')}). Pass in -E/--expect-nothing to ignore expectedToFail declarations.\n`);
     }
 }
 

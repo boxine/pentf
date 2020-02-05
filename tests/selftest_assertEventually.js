@@ -3,16 +3,20 @@ const assert = require('assert');
 const {assertEventually} = require('../utils');
 
 async function run() {
-    await assert.rejects(assertEventually(() => false, 'Never changed', {timeout: 10, checkEvery: 1}), {
+    await assert.rejects(assertEventually(() => false, {timeout: 10, checkEvery: 1, message: 'Never changed'}), {
         message: 'Never changed (waited 10ms)',
+    });
+
+    await assert.rejects(assertEventually(() => false, {timeout: 10, checkEvery: 1}), {
+        message: 'assertEventually failed (waited 10ms)',
     });
 
     let counter = 0;
     await assertEventually(() => {
         return counter++ > 2;
-    }, 'succeeds eventually', {checkEvery: 1});
+    }, {checkEvery: 1});
 
-    await assert.rejects(assertEventually(() => {throw new Error('crash');}, '(not shown)', {}), {
+    await assert.rejects(assertEventually(() => {throw new Error('crash');}), {
         message: 'crash',
     });
 
@@ -22,7 +26,7 @@ async function run() {
         if (counter < 3) {
             throw new Error('crash');
         }
-    }, 'error suppressed', {checkEvery: 1, crashOnError: false});
+    }, {checkEvery: 1, crashOnError: false});
     assert.strictEqual(counter, 3);
 }
 

@@ -60,7 +60,7 @@ async function run(config) {
     await assertEventually(() => clickCount === 1);
 
     await clickText(page, 'click "this" button');
-    await assertEventually(() => clickCount === 2, 'Expect 2 clicks');
+    await assertEventually(() => clickCount === 2, {message: 'Expect 2 clicks'});
     await assert.rejects(clickText(page, '404', {timeout: 10}), {
         message: 'Unable to find text "404" after 10ms',
     });

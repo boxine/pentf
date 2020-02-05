@@ -149,15 +149,19 @@ async function assertEventually(testfunc, message, options, _checkEvery=200) {
     const {timeout, checkEvery, crashOnError} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
-        let res = false;
         if (crashOnError) {
-            res = await testfunc();
+            const res = await testfunc();
+            if (res) return res;
         } else {
+            let crashed = false;
+            let res;
             try {
                 res = await testfunc();
-            } catch (e) { /* Ignored */ }
+            } catch (e) {
+                crashed = true;
+            }
+            if (!crashed) return res;
         }
-        if (res) return res;
 
         await wait(checkEvery);
     }
@@ -184,15 +188,19 @@ async function assertAsyncEventually(testfunc, message, options, _checkEvery=200
     const {timeout, checkEvery, crashOnError} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
-        let res = false;
         if (crashOnError) {
-            res = await testfunc();
+            const res = await testfunc();
+            if (res) return res;
         } else {
+            let crashed = false;
+            let res;
             try {
                 res = await testfunc();
-            } catch (e) { /* Ignored */ }
+            } catch (e) {
+                crashed = true;
+            }
+            if (!crashed) return res;
         }
-        if (res) return res;
 
         await wait(checkEvery);
     }

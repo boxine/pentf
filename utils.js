@@ -129,24 +129,25 @@ function localIso8601(date) {
     );
 }
 
-async function assertEventually(testfunc, message, options, _checkEvery=200) {
-    if (typeof options === 'number') {
-        console.trace(`DEPRECATED call to assertEventually with non-option argument ${options}`);
-        options = {
-            timeout: options,
-            checkEvery: _checkEvery,
-            crashOnError: true,
-        };
+async function assertEventually(testfunc, options, _options) {
+    if (typeof options === 'string') {
+        console.trace(`DEPRECATED call to assertEventually with non-option argument ${JSON.stringify(options)}`);
+        if (!_options) {
+            _options = {};
+        }
+        _options.message = options;
+        options = _options;
     } else {
         // Normal call
         if (!options) {
             options = {};
         }
-        options.timeout = options.timeout || 10000;
-        options.checkEvery = options.checkEvery || 200;
-        options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
+        options.message = options.message || 'assertEventually failed';
     }
-    const {timeout, checkEvery, crashOnError} = options;
+    options.timeout = options.timeout || 10000;
+    options.checkEvery = options.checkEvery || 200;
+    options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
+    const {timeout, checkEvery, crashOnError, message} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         if (crashOnError) {
@@ -168,24 +169,25 @@ async function assertEventually(testfunc, message, options, _checkEvery=200) {
     throw new Error(`${message} (waited ${timeout}ms)`);
 }
 
-async function assertAsyncEventually(testfunc, message, options, _checkEvery=200) {
-    if (typeof options === 'number') {
-        console.trace(`DEPRECATED call to assertAsyncEventually with non-option argument ${options}`);
-        options = {
-            timeout: options,
-            checkEvery: _checkEvery,
-            crashOnError: true,
-        };
+async function assertAsyncEventually(testfunc, options, _options) {
+    if (typeof options === 'string') {
+        console.trace(`DEPRECATED call to assertAsyncEventually with non-option argument ${JSON.stringify(options)}`);
+        if (!_options) {
+            _options = {};
+        }
+        _options.message = options;
+        options = _options;
     } else {
         // Normal call
         if (!options) {
             options = {};
         }
-        options.timeout = options.timeout || 10000;
-        options.checkEvery = options.checkEvery || 200;
-        options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
+        options.message = options.message || 'assertAsyncEventually failed';
     }
-    const {timeout, checkEvery, crashOnError} = options;
+    options.timeout = options.timeout || 10000;
+    options.checkEvery = options.checkEvery || 200;
+    options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
+    const {timeout, checkEvery, crashOnError, message} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         if (crashOnError) {
@@ -207,22 +209,24 @@ async function assertAsyncEventually(testfunc, message, options, _checkEvery=200
     throw new Error(`${message} (waited ${timeout}ms)`);
 }
 
-async function assertAlways(testfunc, message, options, _checkEvery=200) {
-    if (typeof options === 'number') {
-        console.trace(`DEPRECATED call to assertAlways with non-option argument ${options}`);
-        options = {
-            timeout: options,
-            checkEvery: _checkEvery,
-        };
+async function assertAlways(testfunc, options, _options) {
+    if (typeof options === 'string') {
+        console.trace(`DEPRECATED call to assertAlways with non-option argument ${JSON.stringify(options)}`);
+        if (!_options) {
+            _options = {};
+        }
+        _options.message = options;
+        options = _options;
     } else {
         // Normal call
         if (!options) {
             options = {};
         }
-        options.timeout = options.timeout || 10000;
-        options.checkEvery = options.checkEvery || 200;
     }
-    const {timeout, checkEvery} = options;
+    options.message = options.message || 'assertAlways failed';
+    options.timeout = options.timeout || 10000;
+    options.checkEvery = options.checkEvery || 200;
+    const {timeout, checkEvery, message} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         const res = testfunc();

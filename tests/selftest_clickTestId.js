@@ -28,7 +28,7 @@ async function run(config) {
     await clickTestId(page, 'first');
     await assertEventually(
         () => assert.deepStrictEqual(clicks, ['first']),
-        'click should have been registered', {crashOnError: false});
+        {mesage: 'click should have been registered', crashOnError: false});
     clicks.splice(0, clicks.length);
 
     await assert.rejects(clickTestId(page, 'invisible', {timeout: 43}), {

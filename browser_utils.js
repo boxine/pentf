@@ -250,19 +250,19 @@ async function assertNotXPath(page, xpath, message='', wait_ms=2000, check_every
 }
 
 // Clicks an element atomically, e.g. within the same event loop run as finding it
-async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined} = {}) {
+async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
     let remainingTimeout = timeout;
     while (true) { // eslint-disable-line no-constant-condition
-        const found = await page.evaluate(xpath => {
+        const found = await page.evaluate((xpath, visible) => {
             const element = document.evaluate(
                 xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
             if (!element) return false;
 
-            if (element.offsetParent === null) return null; // invisible
+            if (visible && element.offsetParent === null) return null; // invisible
 
             element.click();
             return true;
-        }, xpath);
+        }, xpath, visible);
 
         if (found) {
             return;
@@ -292,6 +292,16 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
         checkEvery,
         message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`,
     });
+}
+
+async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
+    if (typeof testId !== 'string') throw new Error(`Invalid testId type ${testId}`);
+    assert(/^[a-zA-Z0-9_-]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
+
+    const xpath = `//*[@data-testid="${testId}"]`;
+    const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
+    const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
+    return await clickXPath(page, xpath, {timeout, message, visible});
 }
 
 // lang can either be a single string (e.g. "en") or an array of supported languages (e.g. ['de-DE', 'en-US', 'gr'])
@@ -360,6 +370,7 @@ async function html2pdf(config, path, html, modifyPage=null) {
 module.exports = {
     assertNotXPath,
     assertValue,
+    clickTestId,
     clickText,
     clickXPath,
     closePage,

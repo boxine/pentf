@@ -330,9 +330,8 @@ async function setLanguage(page, lang) {
 // Get all options of a select as an array of strings, e.g. ['Option A', 'Option B(***)', 'Option C']
 async function getSelectOptions(page, select) {
     return await page.evaluate(select => {
-        const option_elements = Array.from(select.querySelectorAll('option'));
-        return option_elements.map(option => {
-            return option.innerText + (select.value == option.value ? '(***)' : '');
+        return Array.from(select.options).map(option => {
+            return option.innerText + (option.selected ? '(***)' : '');
         });
     }, select);
 }

@@ -172,9 +172,13 @@ async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={
     }
 }
 
-async function waitForTestId(page, testId, {extraMessage=undefined, timeout=undefined, visible=true} = {}) {
+function _checkTestId(testId) {
     if (typeof testId !== 'string') throw new Error(`Invalid testId type ${testId}`);
-    assert(/^[a-zA-Z0-9_-]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
+    assert(/^[-a-zA-Z0-9_.]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
+}
+
+async function waitForTestId(page, testId, {extraMessage=undefined, timeout=undefined, visible=true} = {}) {
+    _checkTestId(testId);
 
     const err = new Error(
         `Failed to find ${visible ? 'visible ' : ''}element with data-testid "${testId}" within ${timeout}ms` +
@@ -295,8 +299,7 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
 }
 
 async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
-    if (typeof testId !== 'string') throw new Error(`Invalid testId type ${testId}`);
-    assert(/^[a-zA-Z0-9_-]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
+    _checkTestId(testId);
 
     const xpath = `//*[@data-testid="${testId}"]`;
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';

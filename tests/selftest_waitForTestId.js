@@ -6,7 +6,7 @@ async function run(config) {
     const page = await newPage(config);
     await page.setContent(`
         <div id="foo"></div>
-        <div data-testid="bar">bartext</div>
+        <div data-testid="bar.">bartext</div>
         <div data-testid="invisible" style="display:none;"></div>
     `);
 
@@ -14,7 +14,7 @@ async function run(config) {
         message: 'Failed to find visible element with data-testid "foo" within 1ms. blabla',
     });
 
-    const bar = await waitForTestId(page, 'bar');
+    const bar = await waitForTestId(page, 'bar.');
     assert.strictEqual(await page.evaluate(bar => bar.innerText, bar), 'bartext');
 
     await assert.rejects(waitForTestId(page, 'invisible', {timeout: 101}));

@@ -9,6 +9,26 @@ const libmime = require('libmime');
 const utils = require('./utils');
 const output = require('./output');
 
+function parseDeep(mime_part) {
+
+    let text = null;
+    let html = null;
+
+    for (const part of mime_part.childNodes) {
+        const mtype = part.headers['content-type'][0].value;
+
+        if (mtype === 'multipart/related' || mtype === 'multipart/alternative') {
+            return parseDeep(part);
+        } else if (mtype === 'text/plain') {
+            text = (new TextDecoder(part.charset)).decode(part.content);
+        } else if (mtype === 'text/html') {
+            html = (new TextDecoder(part.charset)).decode(part.content);
+        }
+    }
+
+    return { text, html };
+}
+
 
 function parseBody(body) {
     assert(body instanceof Uint8Array);
@@ -18,14 +38,10 @@ function parseBody(body) {
     const res = {
         subject,
     };
-    for (const part of parsed.childNodes) {
-        const mtype = part.headers['content-type'][0].value;
-        if (mtype === 'text/plain') {
-            res.text = (new TextDecoder(part.charset)).decode(part.content);
-        } else if (mtype === 'text/html') {
-            res.html = (new TextDecoder(part.charset)).decode(part.content);
-        }
-    }
+
+    const parse_result = parseDeep(parsed);
+    res.text = parse_result.text;
+    res.html = parse_result.html;
 
     const text_body = (new TextDecoder('utf-8')).decode(body);
     const header_end_m = /(?:\r?\n){2}/.exec(text_body);

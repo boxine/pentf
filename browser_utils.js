@@ -97,7 +97,11 @@ async function newPage(config, chrome_args=[]) {
                         })()
                     `
                 })).result.value;
-            }, 'could not toggle preserve options in devtools', 10000, 100);
+            }, {
+                message: 'could not toggle preserve options in devtools',
+                timeout: 10000,
+                checkEvery: 100,
+            });
             await session.detach();
         };
 

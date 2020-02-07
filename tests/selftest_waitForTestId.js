@@ -17,8 +17,8 @@ async function run(config) {
     const bar = await waitForTestId(page, 'bar.');
     assert.strictEqual(await page.evaluate(bar => bar.innerText, bar), 'bartext');
 
-    await assert.rejects(waitForTestId(page, 'invisible', {timeout: 101}));
-    await waitForTestId(page, 'invisible', {visible: false, timeout: 102});
+    await assert.rejects(waitForTestId(page, 'invisible', {timeout: 201}));
+    await waitForTestId(page, 'invisible', {visible: false, timeout: 1002});
 
     await closePage(page);
 }

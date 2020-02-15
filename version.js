@@ -13,8 +13,8 @@ async function testsVersion(config) {
         const changesStr = await _cmd('git', ['status', '--porcelain'], {cwd: config._testsDir});
         const changedFiles = (
             changesStr.split('\n')
-            .filter(line => line)
-            .map(line => line.trim().split(/\s+/, 2)[1]));
+                .filter(line => line)
+                .map(line => line.trim().split(/\s+/, 2)[1]));
         const suffix = (changedFiles.length > 0) ? `+changes(${changedFiles.join(' ')})` : '';
 
         return gitVersion + suffix;

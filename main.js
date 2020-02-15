@@ -7,6 +7,7 @@ const {readConfig, parseArgs} = require('./config');
 const {readFile} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
+const {testsVersion, pintfVersion} = require('./version');
 
 function load_tests(args, tests_dir) {
     let test_names = (
@@ -54,6 +55,12 @@ async function real_main(options={}) {
     config._testsDir = options.testsDir;
     if (options.rootDir) config._rootDir = options.rootDir;
     if (options.configDir) config._configDir = options.configDir;
+
+    if (args.print_version) {
+        console.log(await testsVersion(config));
+        console.log('pintf ' + pintfVersion());
+        return;
+    }
 
     if (args.list) {
         for (const tc of test_cases) {

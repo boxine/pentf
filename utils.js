@@ -254,10 +254,6 @@ function cmpKey(key) {
     };
 }
 
-function pintfVersion() {
-    return require('./package.json').version;
-}
-
 module.exports = {
     arange,
     assertAlways,
@@ -269,7 +265,6 @@ module.exports = {
     filterMap,
     localIso8601,
     makeRandomEmail,
-    pintfVersion,
     pluck,
     randomHex,
     randomHexstring,

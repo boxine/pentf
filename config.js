@@ -49,6 +49,11 @@ function parseArgs(options) {
             help: 'The environment to test against. Default is %(defaultValue)s.',
         });
     }
+    parser.addArgument(['--version'], {
+        action: 'storeTrue',
+        dest: 'print_version',
+        help: 'Print version of tests and test framework and exit.',
+    });
 
     const output_group = parser.addArgumentGroup({title: 'Output'});
     output_group.addArgument(['-v', '--verbose'], {

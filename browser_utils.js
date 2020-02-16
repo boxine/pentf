@@ -343,6 +343,37 @@ async function getSelectOptions(page, select) {
     }, select);
 }
 
+async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
+    function applyTimeouts(factor) {
+        window._pintf_real_setTimeout = window._pintf_real_setTimeout || window.setTimeout;
+        window.setTimeout = (func, delay, ...args) => {
+            return window._pintf_real_setTimeout(func, delay && (delay / factor), ...args);
+        };
+
+        window._pintf_real_setInterval = window._pintf_real_setInterval || window.setInterval;
+        window.setInterval = (func, delay, ...args) => {
+            return window._pintf_real_setInterval(func, delay && (delay / factor), ...args);
+        };
+    }
+
+    if (persistent) {
+        await page.evaluateOnNewDocument(applyTimeouts, factor);
+    } else {
+        await page.evaluate(applyTimeouts, factor);
+    }
+}
+
+async function restoreTimeouts(page) {
+    await page.evaluate(() => {
+        if (window._pintf_real_setTimeout) {
+            window.setTimeout = window._pintf_real_setTimeout;
+        }
+        if (window._pintf_real_setInterval) {
+            window.setInterval = window._pintf_real_setInterval;
+        }
+    });
+}
+
 async function workaround_setContent(page, html) {
     // Workaround for https://github.com/GoogleChrome/puppeteer/issues/4464
     const waiter = page.waitForNavigation({waitUntil: 'load'});
@@ -384,8 +415,10 @@ module.exports = {
     getSelectOptions,
     html2pdf,
     newPage,
+    restoreTimeouts,
     setLanguage,
-    waitForText,
+    speedupTimeouts,
     waitForTestId,
+    waitForText,
     waitForVisible,
 };

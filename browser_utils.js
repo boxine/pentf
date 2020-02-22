@@ -138,7 +138,8 @@ async function waitForVisible(page, selector) {
 }
 
 function escapeRegexText(text) {
-    return text.replace(/\\/g, '\\\\');
+    // See: https://stackoverflow.com/a/29700268/755391
+    return text.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
 function escapeXPathText(text) {

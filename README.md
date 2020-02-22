@@ -3,7 +3,7 @@
 ## Installation
 
 ```shell
-npm i --save-dev pintf puppeteer
+npm i --save-dev pintf playwright
 ```
 
 ## Usage
@@ -92,7 +92,7 @@ module.exports = {
 };
 ```
 
-Note that while the above example tests a webpage with [puppeteer](https://github.com/GoogleChrome/puppeteer) and uses pintf's has native support for HTTP requests (in `net_utils`) and email sending (in `email`), tests can be anything – they just have to fail the promise if the test fails.
+Note that while the above example tests a webpage with [playwright](https://github.com/microsoft/playwright) and uses pintf's has native support for HTTP requests (in `net_utils`) and email sending (in `email`), tests can be anything – they just have to fail the promise if the test fails.
 
 ## Configuration
 
@@ -170,7 +170,7 @@ The keys are up to you; for example you probably want to have a main entry point
 --email-verbose       Log all IMAP commands and responses
 ```
 
-###### puppeteer browser test
+###### playwright browser test
 
 ```
 -V, --visible         Make browser tests visible (i.e. not headless)

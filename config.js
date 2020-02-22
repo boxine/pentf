@@ -156,38 +156,38 @@ function parseArgs(options) {
         help: 'Log all IMAP commands and responses',
     });
 
-    const puppeteer_group = parser.addArgumentGroup({title: 'puppeteer browser test'});
-    puppeteer_group.addArgument(['-V', '--visible'], {
+    const playwright_group = parser.addArgumentGroup({title: 'playwright browser test'});
+    playwright_group.addArgument(['-V', '--visible'], {
         dest: 'headless',
         action: 'storeFalse',
         help: 'Make browser tests visible (i.e. not headless)',
     });
-    puppeteer_group.addArgument(['--no-screenshots'], {
+    playwright_group.addArgument(['--no-screenshots'], {
         action: 'storeFalse',
         dest: 'take_screenshots',
         help: 'Do not take screenshots of browser failures',
     });
     const defaultScreenshotDir = path.join(
         options.rootDir ? options.rootDir : process.cwd(), 'screenshots');
-    puppeteer_group.addArgument(['--screenshot-directory'], {
+    playwright_group.addArgument(['--screenshot-directory'], {
         metavar: 'DIR',
         defaultValue: defaultScreenshotDir,
         help: `Directory to write screenshots to (default: ${process.env.PINTF_GENERIC_HELP ? './screenshots' : '%(defaultValue)s'})`,
     });
-    puppeteer_group.addArgument(['-s', '--slow-mo'], {
+    playwright_group.addArgument(['-s', '--slow-mo'], {
         metavar: 'MS',
         type: 'int',
         help: 'Wait this many milliseconds after every call to the virtual browser',
     });
-    puppeteer_group.addArgument(['-k', '--keep-open'], {
+    playwright_group.addArgument(['-k', '--keep-open'], {
         help: 'Keep browser sessions open in case of failures. Implies -V.',
         action: 'storeTrue',
     });
-    puppeteer_group.addArgument(['--devtools'], {
+    playwright_group.addArgument(['--devtools'], {
         help: 'Start browser with devtools open. Implies -V',
         action: 'storeTrue',
     });
-    puppeteer_group.addArgument(['--devtools-preserve'], {
+    playwright_group.addArgument(['--devtools-preserve'], {
         help: 'Configure devtools to preserve logs and network requests upon navigation. Implies --devtools',
         action: 'storeTrue',
     });

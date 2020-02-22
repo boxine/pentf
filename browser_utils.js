@@ -11,20 +11,12 @@ const {assertAsyncEventually, wait, remove} = require('./utils');
 let tmp_home;
 
 async function newPage(config, chrome_args=[]) {
-    let puppeteer;
+    let playwright;
     try {
-        if(config.puppeteer_firefox) {
-            puppeteer = require('puppeteer-firefox');
-        } else {
-            puppeteer = require('puppeteer');
-        }
+        playwright = require('playwright');
     } catch(e) {
-        // puppeteer/puppeteer-firefox is a peer dependency. Show a helpful error message when it's missing.
-        if(config.puppeteer_firefox) {
-            console.error('Please install "puppeteer-firefox" package with \'npm i puppeteer\'.');
-        } else {
-            console.error('Please install "puppeteer" package with \'npm i puppeteer\'.');
-        }
+        // playwright is a peer dependency. Show a helpful error message when it's missing.
+        console.error('Please install "playwright" package with \'npm i playwright\'.');
     }
 
     const args = ['--no-sandbox'];
@@ -44,7 +36,7 @@ async function newPage(config, chrome_args=[]) {
         params.devtools = true;
     }
 
-    // Redirect home directory to prevent puppeteer from accessing smart cards on Linux
+    // Redirect home directory to prevent playwright from accessing smart cards on Linux
     if (process.platform === 'linux') {
         if (!tmp_home) {
             // Races here are fine; we just want to limit the number of temporary directories
@@ -72,8 +64,11 @@ async function newPage(config, chrome_args=[]) {
             HOME: tmp_home,
         };
     }
-    const browser = await puppeteer.launch(params);
-    const page = (await browser.pages())[0];
+
+    const browser_type = [config.puppeteer_firefox ? 'firefox' : 'chromium'];
+    const browser = await playwright[browser_type].launch(params);
+    const context = await browser.newContext();
+    const page = await context.newPage();
 
     if (config.devtools_preserve) {
         const configureDevtools = async (target) => {
@@ -112,6 +107,7 @@ async function newPage(config, chrome_args=[]) {
 
     if (config._browser_pages) {
         page._pintf_browser_pages = config._browser_pages;
+        page._browser = browser;
         config._browser_pages.push(page);
     }
 
@@ -123,9 +119,10 @@ async function closePage(page) {
         remove(page._pintf_browser_pages, p => p === page);
     }
 
-    const browser = await page.browser();
+    const context = page.context();
     await page.close();
-    await browser.close();
+    await context.close();
+    await page._browser.close();
 }
 
 async function waitForVisible(page, selector) {
@@ -138,6 +135,10 @@ async function waitForVisible(page, selector) {
     }, {}, selector);
     assert(el !== null);
     return el;
+}
+
+function escapeRegexText(text) {
+    return text.replace(/\\/g, '\\\\');
 }
 
 function escapeXPathText(text) {
@@ -163,14 +164,14 @@ function checkText(text) {
     }
 }
 
-async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={}) {
+async function waitForText(page, text, {timeout=2000, extraMessage=undefined}={}) {
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
     const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
 
-    const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
+    const selector = `text=/${escapeRegexText(text)}/`;
     try {
-        return await page.waitForXPath(xpath, {timeout});
+        return await page.waitFor(selector, {timeout});
     } catch (e) {
         throw err;
     }
@@ -411,6 +412,7 @@ module.exports = {
     clickText,
     clickXPath,
     closePage,
+    escapeRegexText,
     escapeXPathText,
     getSelectOptions,
     html2pdf,

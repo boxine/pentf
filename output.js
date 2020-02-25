@@ -55,7 +55,6 @@ function status(config, state) {
 
 
 function finish(config, state) {
-    if (config.quiet) return;
     last_state = null;
     const {tasks} = state;
     assert(tasks);

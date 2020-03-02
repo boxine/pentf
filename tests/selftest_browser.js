@@ -36,11 +36,16 @@ async function run(config) {
         <head>
         <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const body = document.querySelector('body');
+            const h1 = document.createElement('h1');
+            h1.appendChild(document.createTextNode('do not click "this" button (headline)'));
+            body.appendChild(h1);
+
             const btn = document.createElement('button');
             btn.setAttribute('id', 'clickme');
             btn.appendChild(document.createTextNode('click "this" button'));
             btn.addEventListener('click', countClick);
-            document.querySelector('body').appendChild(btn);
+            body.appendChild(btn);
         });
         </script>
         </head>

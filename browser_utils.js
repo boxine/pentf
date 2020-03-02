@@ -287,9 +287,9 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
     }
 }
 
-const DEFAULT_UNCLICKABLE_ELEMENTS = ['link', 'html', 'head', 'meta', 'script', 'style', 'title'];
+const DEFAULT_CLICKABLE_ELEMENTS = ['a', 'button', 'input', 'label'];
 const DEFAULT_CLICKABLE = (
-    '//*[' + DEFAULT_UNCLICKABLE_ELEMENTS.map(e => `local-name()!="${e}"`).join(' and ') + ']');
+    '//*[' + DEFAULT_CLICKABLE_ELEMENTS.map(e => `local-name()="${e}"`).join(' or ') + ']');
 // Click a link or button by its text content
 async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
     checkText(text);

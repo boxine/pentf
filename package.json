@@ -7,6 +7,7 @@
     "test": "tests"
   },
   "dependencies": {
+    "@types/puppeteer": "^2.0.1",
     "argparse": "^1.0.10",
     "emailjs-imap-client": "^3.0.7",
     "emailjs-mime-parser": "^2.0.5",

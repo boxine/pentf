@@ -18,6 +18,9 @@ async function readFile(fileName, type) {
     });
 }
 
+/**
+ * @param {number} ms 
+ */
 async function wait(ms) {
     await new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -37,6 +40,9 @@ function randomHex() {
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 16)];
 }
 
+/**
+ * @param {number} len 
+ */
 function randomHexstring(len) {
     let res = '';
     while (len-- > 0) {
@@ -56,7 +62,10 @@ function* range(count) {
     }
 }
 
-// Range as array
+/**
+ * Range as array
+ * @param {number} count 
+ */
 function arange(count) {
     return Array.from(range(count));
 }
@@ -129,6 +138,11 @@ function localIso8601(date) {
     );
 }
 
+/**
+ * @param {() => any} testfunc 
+ * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options] 
+ * @param {*} [_options] 
+ */
 async function assertEventually(testfunc, options, _options) {
     if (typeof options === 'string') {
         console.trace(`DEPRECATED call to assertEventually with non-option argument ${JSON.stringify(options)}`);
@@ -169,6 +183,11 @@ async function assertEventually(testfunc, options, _options) {
     throw new Error(`${message} (waited ${timeout}ms)`);
 }
 
+/**
+ * @param {() => Promise<any>} testfunc 
+ * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options] 
+ * @param {*} [_options] 
+ */
 async function assertAsyncEventually(testfunc, options, _options) {
     if (typeof options === 'string') {
         console.trace(`DEPRECATED call to assertAsyncEventually with non-option argument ${JSON.stringify(options)}`);
@@ -209,6 +228,11 @@ async function assertAsyncEventually(testfunc, options, _options) {
     throw new Error(`${message} (waited ${timeout}ms)`);
 }
 
+/**
+ * @param {() => any} testfunc 
+ * @param {{message?: string, timeout?: number, checkEvery?: number}} [options] 
+ * @param {*} [_options] 
+ */
 async function assertAlways(testfunc, options, _options) {
     if (typeof options === 'string') {
         console.trace(`DEPRECATED call to assertAlways with non-option argument ${JSON.stringify(options)}`);

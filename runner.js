@@ -36,11 +36,15 @@ async function run_task(config, task) {
                     async (page, i) => {
                         await promisify(mkdirp)(config.screenshot_directory);
                         const fn = path.join(config.screenshot_directory, `${task.name}-${i}.png`);
-                        return await page.screenshot({
+                        await page.screenshot({
                             path: fn,
                             type: 'png',
                             fullPage: true,
                         });
+
+                        // Taking a screenshot will break viewport resizing. Setting both
+                        // "width" and "height" to 0 will restore resizing capabilities.
+                        await page.setViewport({width: 0, height: 0});
                     }));
             } catch(e) {
                 output.log(config, `INTERNAL ERROR: failed to take screenshot of ${task.name}: ${e}`);

@@ -33,6 +33,9 @@ async function newPage(config, chrome_args=[]) {
     const params = {
         args,
         ignoreHTTPSErrors: (config.env === 'local'),
+        // By default puppeteer emulates the browser's viewport which breaks resizing the browser window.
+        // See: https://github.com/puppeteer/puppeteer/issues/3688#issuecomment-453218745
+        defaultViewport: null,
     };
     if (!config.headless) {
         params.headless = false;

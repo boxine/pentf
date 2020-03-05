@@ -1,14 +1,21 @@
-// Avoid UnhandledPromiseRejectionWarning if a promise fails before we use it.
-// Use like this:
-// const email_promise = catchLater(getMail(...));
-// await ...
-// const email = await email_promise;
+/**
+ * Avoid UnhandledPromiseRejectionWarning if a promise fails before we use it.
+ * Use like this:
+ * const email_promise = catchLater(getMail(...));
+ * await ...
+ * const email = await email_promise;
+ * @param {Promise<any>} promise 
+ */
 function catchLater(promise) {
     promise.catch(() => undefined);
     return promise;
 }
 
-// await and emit a custom message if it fails
+/**
+ * await and emit a custom message if it fails
+ * @param {Promise<any>} promise 
+ * @param {string} error_message 
+ */
 async function customErrorMessage(promise, error_message) {
     try {
         return await promise;

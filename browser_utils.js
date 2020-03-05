@@ -10,6 +10,12 @@ const {assertAsyncEventually, wait, remove} = require('./utils');
 
 let tmp_home;
 
+/**
+ * Launch a new page
+ * @param {*} config 
+ * @param {string[]} [chrome_args] 
+ * @returns {import('puppeteer').Page}
+ */
 async function newPage(config, chrome_args=[]) {
     let puppeteer;
     try {
@@ -118,6 +124,9 @@ async function newPage(config, chrome_args=[]) {
     return page;
 }
 
+/**
+ * @param {import('puppeteer').Page} page 
+ */
 async function closePage(page) {
     if (page._pintf_browser_pages) {
         remove(page._pintf_browser_pages, p => p === page);
@@ -128,6 +137,11 @@ async function closePage(page) {
     await browser.close();
 }
 
+/**
+ * @param {import('puppeteer').Page} page 
+ * @param {string} selector
+ * @returns {Promise<import('puppeteer').ElementHandle>}
+ */
 async function waitForVisible(page, selector) {
     const el = await page.waitForFunction(qs => {
         const all = document.querySelectorAll(qs);
@@ -140,6 +154,9 @@ async function waitForVisible(page, selector) {
     return el;
 }
 
+/**
+ * @param {string} text 
+ */
 function escapeXPathText(text) {
     if (!text.includes('"')) {
         // No doubles quotes ("), simple case
@@ -148,6 +165,9 @@ function escapeXPathText(text) {
     return 'concat(' + text.split('"').map(part => `"${part}"`).join(', \'"\', ') + ')';
 }
 
+/**
+ * @param {string} text 
+ */
 function checkText(text) {
     if (typeof text !== 'string') {
         let repr;
@@ -163,6 +183,12 @@ function checkText(text) {
     }
 }
 
+/**
+ * @param {import('puppeteer').Page} page
+ * @param {string} text
+ * @param {{timeout?: number, extraMessage?: string}} [options]
+ * @returns {Promise<import('puppeteer').ElementHandle>}
+ */
 async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={}) {
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
@@ -181,6 +207,12 @@ function _checkTestId(testId) {
     assert(/^[-a-zA-Z0-9_.]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
 }
 
+/**
+ * @param {import('puppeteer').Page} page 
+ * @param {string} testId 
+ * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [options] 
+ * @returns {Promise<import('puppeteer').ElementHandle>}
+ */
 async function waitForTestId(page, testId, {extraMessage=undefined, timeout=undefined, visible=true} = {}) {
     _checkTestId(testId);
 
@@ -205,6 +237,10 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=unde
     return el;
 }
 
+/**
+ * @param {import('puppeteer').ElementHandle} input 
+ * @param {string} expected 
+ */
 async function assertValue(input, expected) {
     const page = input._page;
     assert(page);
@@ -236,7 +272,14 @@ async function assertValue(input, expected) {
     }
 }
 
-// Assert that there is currently no element matching the xpath on the page
+/**
+ * Assert that there is currently no element matching the xpath on the page
+ * @param {import('puppeteer').Page} page
+ * @param {string} xpath
+ * @param {string} [message]
+ * @param {number} [wait_ms] 
+ * @param {number} [check_every]
+ */
 async function assertNotXPath(page, xpath, message='', wait_ms=2000, check_every=200) {
     while (true) { // eslint-disable-line no-constant-condition
         const found = await page.evaluate(xpath => {
@@ -257,7 +300,12 @@ async function assertNotXPath(page, xpath, message='', wait_ms=2000, check_every
     }
 }
 
-// Clicks an element atomically, e.g. within the same event loop run as finding it
+/**
+ * Clicks an element atomically, e.g. within the same event loop run as finding it
+ * @param {import('puppeteer').Page} page 
+ * @param {string} xpath 
+ * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean}} [options] 
+ */
 async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
     let remainingTimeout = timeout;
     while (true) { // eslint-disable-line no-constant-condition
@@ -290,7 +338,13 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
 const DEFAULT_CLICKABLE_ELEMENTS = ['a', 'button', 'input', 'label'];
 const DEFAULT_CLICKABLE = (
     '//*[' + DEFAULT_CLICKABLE_ELEMENTS.map(e => `local-name()="${e}"`).join(' or ') + ']');
-// Click a link or button by its text content
+    
+/**
+ * Click a link or button by its text content
+ * @param {import('puppeteer').Page} page 
+ * @param {string} text 
+ * @param {{timeout?: number, checkEvery?: number, elementXPath?: string, extraMessage?: string}} [options] 
+ */
 async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
     checkText(text);
     const xpath = (
@@ -304,6 +358,11 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
     });
 }
 
+/**
+ * @param {import('puppeteer').Page} page 
+ * @param {string} testId 
+ * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [options] 
+ */
 async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
     _checkTestId(testId);
 
@@ -313,7 +372,11 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000,
     return await clickXPath(page, xpath, {timeout, message, visible});
 }
 
-// lang can either be a single string (e.g. "en") or an array of supported languages (e.g. ['de-DE', 'en-US', 'gr'])
+/**
+ * lang can either be a single string (e.g. "en") or an array of supported languages (e.g. ['de-DE', 'en-US', 'gr'])
+ * @param {import('puppeteer').Page} page 
+ * @param {string | string[]} lang 
+ */
 async function setLanguage(page, lang) {
     if (typeof lang === 'string') {
         lang = [lang];
@@ -336,7 +399,12 @@ async function setLanguage(page, lang) {
     }, lang);
 }
 
-// Get all options of a select as an array of strings, e.g. ['Option A', 'Option B(***)', 'Option C']
+/**
+ * Get all options of a select as an array of strings, e.g. ['Option A', 'Option B(***)', 'Option C']
+ * @param {import('puppeteer').Page} page 
+ * @param {import('puppeteer').ElementHandle<HTMLSelectElement>} select 
+ * @returns {Promise<string[]>}
+ */
 async function getSelectOptions(page, select) {
     return await page.evaluate(select => {
         return Array.from(select.options).map(option => {
@@ -345,6 +413,10 @@ async function getSelectOptions(page, select) {
     }, select);
 }
 
+/**
+ * @param {import('puppeteer').Page} page 
+ * @param {{factor?: number, persistent?: boolean}} [options]
+ */
 async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
     function applyTimeouts(factor) {
         window._pintf_real_setTimeout = window._pintf_real_setTimeout || window.setTimeout;
@@ -365,6 +437,9 @@ async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
     }
 }
 
+/**
+ * @param {import('puppeteer').Page} page 
+ */
 async function restoreTimeouts(page) {
     await page.evaluate(() => {
         if (window._pintf_real_setTimeout) {
@@ -376,6 +451,10 @@ async function restoreTimeouts(page) {
     });
 }
 
+/**
+ * @param {import('puppeteer').Page} page 
+ * @param {string} html
+ */
 async function workaround_setContent(page, html) {
     // Workaround for https://github.com/GoogleChrome/puppeteer/issues/4464
     const waiter = page.waitForNavigation({waitUntil: 'load'});

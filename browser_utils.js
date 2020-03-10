@@ -42,6 +42,19 @@ async function newPage(config, chrome_args=[]) {
     };
     if (!config.headless) {
         params.headless = false;
+
+        // Browser extensions only work in none-headless mode
+        if (config.extensions.length) {
+            const extensions = config.extensions.join(',');
+            
+            args.push(
+                // Without this flag the supplied extensions are not
+                // initialized correctly and need to be refreshed in
+                // the browser's extension ui.
+                `--disable-extensions-except=${extensions}`,
+                `--load-extension=${extensions}`
+            );
+        }
     }
     if (config.slow_mo) {
         params.slowMo = config.slow_mo;

@@ -191,6 +191,13 @@ function parseArgs(options) {
         help: 'Configure devtools to preserve logs and network requests upon navigation. Implies --devtools',
         action: 'storeTrue',
     });
+    puppeteer_group.addArgument(['--extensions'], {
+        help: 'Load unpacked browser extensions',
+        action: 'append',
+        nargs: '*',
+        defaultValue: [],
+        metavar: 'EXTENSION_DIR',
+    });
 
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
     runner_group.addArgument(['-C', '--concurrency'], {

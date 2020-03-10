@@ -1,3 +1,5 @@
+const assert = require('assert');
+
 /**
  * Avoid UnhandledPromiseRejectionWarning if a promise fails before we use it.
  * Use like this:
@@ -32,7 +34,29 @@ async function customErrorMessage(promise, error_message) {
     }
 }
 
+/**
+ * Mark a code section as expected to fail.
+ * @param {*} config 
+ * @param {string} message
+ * @param {() => any} asyncFunc
+ */
+async function expectedToFail(config, message, asyncFunc) {
+    assert(message);
+    try {
+        await asyncFunc();
+    } catch(e) {
+        e.pintf_expectedToFail = message;
+        throw e;
+    }
+    if (!config.expect_nothing) {
+        throw new Error(
+            `Section mark as expectedToFail (${message}), but succeeded.` +
+            ' Pass in --expect-nothing/-E to ignore this message');
+    }
+}
+
 module.exports = {
     catchLater,
     customErrorMessage,
+    expectedToFail,
 };

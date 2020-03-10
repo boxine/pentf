@@ -182,6 +182,8 @@ The keys are up to you; for example you probably want to have a main entry point
 --devtools            Start browser with devtools open. Implies -V
 --devtools-preserve   Configure devtools to preserve logs and network requests upon navigation. Implies 
                       --devtools
+--extensions [EXTENSION_DIR [EXTENSION_DIR ...]]
+                      Load unpacked browser extensions
 ```
 
 ###### Test runner

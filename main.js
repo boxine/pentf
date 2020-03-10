@@ -62,6 +62,12 @@ async function real_main(options={}) {
         return;
     }
 
+    // Argparse wraps argument lists with another array
+    if (config.extensions.length) {
+        config.extensions = config.extensions
+            .reduce((acc, item) => acc.concat(item), []);
+    } 
+
     if (args.list) {
         for (const tc of test_cases) {
             console.log(tc.name + (tc.description ? ` (${tc.description})` : ''));

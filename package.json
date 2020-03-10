@@ -11,6 +11,7 @@
     "argparse": "^1.0.10",
     "emailjs-imap-client": "^3.0.7",
     "emailjs-mime-parser": "^2.0.5",
+    "extract-zip": "^1.6.7",
     "form-data": "^2.3.3",
     "he": "^1.2.0",
     "libmime": "^4.0.1",

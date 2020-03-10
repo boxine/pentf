@@ -8,6 +8,7 @@ const {readFile} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
 const {testsVersion, pintfVersion} = require('./version');
+const {maybe_install_extension} = require('./extension');
 
 function load_tests(args, tests_dir) {
     let test_names = (
@@ -66,6 +67,14 @@ async function real_main(options={}) {
     if (config.extensions.length) {
         config.extensions = config.extensions
             .reduce((acc, item) => acc.concat(item), []);
+
+        // Download and install extensions if necessary and return
+        // the path to the unpacked extension folder
+        config.extensions = await Promise.all(
+            config.extensions.map(path_or_url => {
+                return maybe_install_extension(path_or_url)
+            })
+        );
     } 
 
     if (args.list) {

@@ -29,6 +29,9 @@ async function run_task(config, task) {
         task.status = 'error';
         task.duration = performance.now() - task.start;
         task.error = e;
+        if (e.pintf_expectedToFail) {
+            task.expectedToFail = e.pintf_expectedToFail;
+        }
 
         if (config.take_screenshots) {
             try {

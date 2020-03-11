@@ -140,16 +140,37 @@ async function closePage(page) {
 /**
  * @param {import('puppeteer').Page} page 
  * @param {string} selector
+ * @param {{timeout?: number, message?: string}} [options]
  * @returns {Promise<import('puppeteer').ElementHandle>}
  */
-async function waitForVisible(page, selector) {
-    const el = await page.waitForFunction(qs => {
-        const all = document.querySelectorAll(qs);
-        if (all.length !== 1) return null;
-        const el = all[0];
-        if (el.offsetParent === null) return null;
-        return el;
-    }, {}, selector);
+async function waitForVisible(page, selector, {message=undefined, timeout=30000}={}) {
+    // Precompute errors for nice stack trace
+    const notFoundErr = new Error(
+        `Failed to find element matching  ${selector}  within ${timeout}ms` +
+        (message ? `. ${message}` : ''));
+    const visibleErr = new Error(
+        `Element matching  ${selector}  did not become visible within ${timeout}ms` +
+        (message ? `. ${message}` : ''));
+
+    let el;
+    try {
+        el = await page.waitForFunction(qs => {
+            const all = document.querySelectorAll(qs);
+            if (all.length !== 1) return null;
+            const el = all[0];
+            if (el.offsetParent === null) return null;
+            if (el.style.visibility === 'hidden') return null;
+            return el;
+        }, {timeout}, selector);
+    } catch(e) {
+        const found = await page.evaluate(
+            qs => document.querySelectorAll(qs).length === 1, selector);
+        if (found) {
+            throw visibleErr;
+        } else {
+            throw notFoundErr;
+        }
+    }
     assert(el !== null);
     return el;
 }

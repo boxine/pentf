@@ -16,7 +16,7 @@ const version = require('./version');
 
 
 async function run_task(config, task) {
-    const task_config = {...config, _browser_pages: []};
+    const task_config = {...config, _browser_pages: [], task_name: task.name};
     try {
         await task.tc.run(task_config);
         task.status = 'success';

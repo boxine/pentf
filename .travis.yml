@@ -7,6 +7,10 @@ node_js:
   - 12
   - node
 
+# Make chrome browser work in non-headless mode
+services:
+  - xvfb
+
 script:
   - ./run --ci
   - make lint

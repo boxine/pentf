@@ -9,6 +9,9 @@ const tmp = require('tmp-promise');
 const {assertAsyncEventually, wait, remove} = require('./utils');
 
 let tmp_home;
+let widthChangeGuess = 8;
+let heightChangeGuess = 128;
+
 
 /**
  * Launch a new page
@@ -16,7 +19,7 @@ let tmp_home;
  * @param {string[]} [chrome_args] 
  * @returns {import('puppeteer').Page}
  */
-async function newPage(config, chrome_args=[]) {
+async function newPage(config, chrome_args=[], desiredViewportSize=[800, 800]) {
     let puppeteer;
     try {
         if(config.puppeteer_firefox) {
@@ -33,7 +36,11 @@ async function newPage(config, chrome_args=[]) {
         }
     }
 
-    const args = ['--no-sandbox'];
+    const windowWidth = desiredViewportSize[0]/* + widthChangeGuess*/;
+    const windowHeight = desiredViewportSize[1]/* + heightChangeGuess*/;
+    const args = [
+        '--no-sandbox',
+        `--window-size=${windowWidth},${windowHeight}`];
     args.push(...chrome_args);
 
     const params = {
@@ -80,6 +87,7 @@ async function newPage(config, chrome_args=[]) {
     }
     const browser = await puppeteer.launch(params);
     const page = (await browser.pages())[0];
+    await page._client.send('Emulation.clearDeviceMetricsOverride');
 
     if (config.devtools_preserve) {
         const configureDevtools = async (target) => {
@@ -115,6 +123,40 @@ async function newPage(config, chrome_args=[]) {
         const targets = await browser.targets();
         await Promise.all(targets.map(t => configureDevtools(t)));
     }
+
+    // Resize to desired viewport size if it doesn't fit yet
+    if (config.devtools) {
+        // Wait for devtools to load
+        await assertAsyncEventually(async() => {
+            return (await page.evaluate(() => (window.outerWidth - window.innerWidth))) > 100;
+        }, {
+            message: 'Could not confirm devtools to be loaded',
+            timeout: 10000,
+            checkEvery: 100,
+        });
+    }
+
+    const [innerWidth, innerHeight] = await page.evaluate(
+        () => [window.innerWidth, window.innerHeight]);
+    console.log({w: innerWidth, h: innerHeight})
+    const widthChange = desiredViewportSize[0] - innerWidth;
+    const heightChange = desiredViewportSize[1] - innerHeight;
+    widthChangeGuess = widthChange;
+    heightChangeGuess = heightChange;
+    console.log({widthChange, heightChange})
+    if (widthChange !== 0 || heightChange !== 0) {
+        const {targetInfos} = await browser._connection.send('Target.getTargets');
+        const target = targetInfos.find(ti => !ti.url.startsWith('devtools://'));
+        assert(target, 'Could not find window target');
+        const {windowId} = await browser._connection.send(
+            'Browser.getWindowForTarget', {targetId: target.targetId});
+
+        await browser._connection.send('Browser.setWindowBounds', {
+            bounds: {width: windowWidth + widthChange, height: windowHeight + heightChange},
+            windowId
+        });
+    }
+    await wait(10000);
 
     if (config._browser_pages) {
         page._pintf_browser_pages = config._browser_pages;

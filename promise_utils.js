@@ -42,6 +42,7 @@ async function customErrorMessage(promise, error_message) {
  */
 async function expectedToFail(config, message, asyncFunc) {
     assert(message);
+    assert(asyncFunc);
     try {
         await asyncFunc();
     } catch(e) {

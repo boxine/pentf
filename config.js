@@ -98,7 +98,7 @@ function parseArgs(options) {
     });
     results_group.addArgument(['-H', '--html'], {
         action: 'storeTrue',
-        help: 'Write tests results as an HTML file.',
+        help: 'Write test results as an HTML file.',
     });
     results_group.addArgument(['--html-file'], {
         metavar: 'FILE.html',
@@ -107,8 +107,14 @@ function parseArgs(options) {
         help: 'HTML file to write a report to. Defaults to %(defaultValue)s .',
     });
     results_group.addArgument(['--pdf'], {
+        dest: 'explicit_pdf',
         action: 'storeTrue',
-        help: 'Write tests results as a PDF file.',
+        help: 'Write test results as a PDF file. (Now enabled by default)',
+    });
+    results_group.addArgument(['--no-pdf'], {
+        dest: 'pdf',
+        action: 'storeFalse',
+        help: 'Do not write a PDF report with test results.'
     });
     results_group.addArgument(['--pdf-file'], {
         metavar: 'FILE.pdf',

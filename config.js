@@ -22,7 +22,7 @@ class AutoWidthArgumentParser extends argparse.ArgumentParser {
 function listEnvs(configDir) {
     const allFiles = fs.readdirSync(configDir);
     const res = utils.filterMap(allFiles, fn => {
-        const m = /^(?![_.])([_A-Za-z0-9.]+)\.json$/.exec(fn);
+        const m = /^(?![_.])([-_A-Za-z0-9.]+)\.json$/.exec(fn);
         return m && m[1];
     });
 

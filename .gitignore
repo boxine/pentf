@@ -2,3 +2,5 @@ node_modules
 results.*
 screenshots
 
+# Editor
+.vscode/

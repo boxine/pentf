@@ -3,6 +3,7 @@
   "version": "1.0.47",
   "description": "parallel integration/end-to-end test framework",
   "main": "index.js",
+  "types": "index.d.ts",
   "directories": {
     "test": "tests"
   },
@@ -23,14 +24,19 @@
     "deep-equal": "^1.0.1",
     "eslint": "^6.2.2",
     "nodemon": "^1.18.11",
-    "puppeteer": "^2.1.0"
+    "puppeteer": "^2.1.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^3.8.3"
   },
   "peerDependencies": {
     "puppeteer": "*"
   },
   "scripts": {
     "test": "./run",
-    "lint": "eslint . run"
+    "lint": "eslint . run",
+    "types": "tsc",
+    "clean": "rimraf *.d.ts **/*.d.ts",
+    "prepublishOnly": "npm run clean && npm run types"
   },
   "repository": {
     "type": "git",

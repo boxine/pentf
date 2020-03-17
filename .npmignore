@@ -1,0 +1,8 @@
+*.pdf
+.gitignore
+.travis.yml
+.eslintrc.json
+.vscode/
+.prettierignore
+screenshots
+pintf*.tgz

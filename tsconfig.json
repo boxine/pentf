@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+  },
+  "files": ["./index.js"]
+}

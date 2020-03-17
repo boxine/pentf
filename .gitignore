@@ -4,3 +4,6 @@ screenshots
 
 # Editor
 .vscode/
+
+# Generated types
+*.d.ts

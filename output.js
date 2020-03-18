@@ -75,6 +75,22 @@ function finish(config, state) {
     if (!config.expect_nothing && (expectedToFail.length > 0)) {
         STATUS_STREAM.write(`${expectedToFail.length} tests failed as expected (${expectedToFail.map(s => s.name).join(' ')}). Pass in -E/--expect-nothing to ignore expectedToFail declarations.\n`);
     }
+
+    // Internal self-check
+    const normal_count = skipped.length + success_count + error_count;
+    if (normal_count !== tasks.length) {
+        const inconsistent = tasks.filter(t => !['success', 'error', 'skipped'].includes(t.status));
+        if (inconsistent.length === 0) {
+            STATUS_STREAM.write(
+                `INTERNAL ERROR: ${normal_count} out of ${tasks.length} tasks are normal, but` +
+                ` ${inconsistent.length} are in a strange state.`);
+        } else {
+            STATUS_STREAM.write(
+                `INTERNAL ERROR: ${inconsistent.length} out of ${tasks.length} tasks` +
+                ` are in an inconsistent state. First affected task is ${inconsistent[0].name}` +
+                ` in state ${inconsistent[0].status}.`);
+        }
+    }
 }
 
 function log(config, message) {

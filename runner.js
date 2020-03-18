@@ -51,7 +51,11 @@ async function run_task(config, task) {
         }
         // Close all browser windows
         if (! config.keep_open && task_config._browser_pages.length > 0) {
-            await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
+            try {
+                await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
+            } catch(e) {
+                output.log(config, `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}`);
+            }
         }
 
         const show_error = (

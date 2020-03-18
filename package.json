@@ -35,7 +35,7 @@
     "test": "./run",
     "lint": "eslint . run",
     "types": "tsc",
-    "clean": "rimraf *.d.ts **/*.d.ts",
+    "clean": "rimraf *.d.ts",
     "prepublishOnly": "npm run clean && npm run types"
   },
   "repository": {

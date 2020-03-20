@@ -15,30 +15,23 @@ const {testsVersion, pintfVersion} = require('./version');
  * @param {string} tests_dir 
  * @param {string} [glob_pattern] 
  */
-function load_tests(args, tests_dir, glob_pattern) {
-    let test_names = [];
-    
-    if (! glob_pattern) {
-        test_names = (
-            fs.readdirSync(tests_dir)
-                .filter(n => n.endsWith('.js'))
-                .map(n => n.substring(0, n.length - '.js'.length))
-        );
-    } else {
-        test_names = glob
-            .sync(glob_pattern, {
-                cwd: tests_dir,
-            })
-            .map(n => path.join(path.dirname(n), path.basename(n)));
-    }
+function load_tests(args, tests_dir, glob_pattern = '*.js') {
+    let tests = glob
+        .sync(glob_pattern, {
+            cwd: tests_dir,
+        })
+        .map(n => ({
+            path: n,
+            name: path.basename(n, path.extname(n))
+        }));
 
     if (args.filter) {
-        test_names = test_names.filter(n => new RegExp(args.filter).test(n));
+        tests = tests.filter(n => new RegExp(args.filter).test(n.name));
     }
 
-    return test_names.map(tn => {
-        const tc = require(path.join(tests_dir, tn));
-        tc.name = tn;
+    return tests.map(t => {
+        const tc = require(path.join(tests_dir, t.path));
+        tc.name = t.name;
         return tc;
     });
 }

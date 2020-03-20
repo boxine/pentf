@@ -1,6 +1,11 @@
 const child_process = require('child_process');
 const {promisify} = require('util');
 
+/**
+ * @param {string} cmd 
+ * @param {string[]} args 
+ * @param {*} options 
+ */
 async function _cmd(cmd, args, options) {
     return (await (promisify(child_process.execFile)(cmd, args, options))).stdout.trim();
 }

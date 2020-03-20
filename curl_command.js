@@ -1,6 +1,9 @@
 const assert = require('assert');
 const streamBuffers = require('stream-buffers');
 
+/**
+ * @param {NodeJS.ReadStream} stream 
+ */
 async function stream2buf(stream) {
     return new Promise((resolve, reject) => {
         const write_stream = new streamBuffers.WritableStreamBuffer();
@@ -14,6 +17,9 @@ async function stream2buf(stream) {
     });
 }
 
+/**
+ * @param {string} arg 
+ */
 function escape_shell(arg) {
     if (/^[-.a-zA-Z0-9_:/]+$/.test(arg)) {
         return arg;
@@ -22,10 +28,18 @@ function escape_shell(arg) {
     return '\'' + arg.replace(/'/g, '\'"\'"\'') + '\'';
 }
 
+/**
+ * @param {string} curl_command 
+ * @param {string} data_b64 
+ */
 function add_binary_data(curl_command, data_b64) {
     return 'echo ' + escape_shell(data_b64) + ' | base64 -d | ' + curl_command + ' -d @-';
 }
 
+/**
+ * @param {{agent?: any, redirect?: 'follow', curl_include_headers?: boolean, method?: string, headers?: Record<string, string>, body: any, curl_extra_options?: string[]}} options 
+ * @param {string} url 
+ */
 async function makeCurlCommand(options, url) {
     let curl_command = 'curl';
 

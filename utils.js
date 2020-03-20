@@ -1,15 +1,27 @@
 const fs = require('fs');
 
+/**
+ * @param {*} config 
+ * @param {string} suffix 
+ */
 function makeEmailAddress(config, suffix) {
     const [account, domain] = config.email.split('@');
     return account + '+' + suffix + '@' + domain;
 }
 
+/**
+ * @param {*} config 
+ * @param {string} prefix 
+ */
 function makeRandomEmail(config, prefix) {
     if (!prefix) prefix = '';
     return makeEmailAddress(config, prefix + Math.random().toString(36).slice(2));
 }
 
+/**
+ * @param {string} fileName 
+ * @param {*} type 
+ */
 async function readFile(fileName, type) {
     return new Promise((resolve, reject) => {
         fs.readFile(fileName, type, (err, data) => {
@@ -25,6 +37,10 @@ async function wait(ms) {
     await new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/**
+ * @param {() => any} func 
+ * @param {number[]} waitTimes 
+ */
 async function retry(func, waitTimes) {
     for (const w of waitTimes) {
         const res = await func();
@@ -51,11 +67,17 @@ function randomHexstring(len) {
     return res;
 }
 
+/**
+ * @param {string} s 
+ */
 function regexEscape(s) {
     // From https://stackoverflow.com/a/3561711/35070
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
+/**
+ * @param {number} count 
+ */
 function* range(count) {
     for (let i = 0;i < count;i++) {
         yield i;
@@ -70,6 +92,11 @@ function arange(count) {
     return Array.from(range(count));
 }
 
+/**
+ * @template T
+ * @param {T[]} ar 
+ * @param {(item: T) => boolean} filter 
+ */
 function count(ar, filter) {
     let res = 0;
     for (var el of ar) {
@@ -78,6 +105,10 @@ function count(ar, filter) {
     return res;
 }
 
+/**
+ * @param {*} obj 
+ * @param {string[]} keys 
+ */
 function pluck(obj, keys) {
     const res = {};
     for (const k of keys) {
@@ -88,7 +119,12 @@ function pluck(obj, keys) {
     return res;
 }
 
-// Remove the element for which callback returns true from the array.
+/**
+ * Remove the element for which callback returns true from the array.
+ * @template T
+ * @param {T[]} array
+ * @param {(item: T) => boolean} callback
+ */
 function remove(array, callback) {
     for (let i = 0;i < array.length;i++) {
         if (callback(array[i])) {
@@ -110,8 +146,14 @@ function filterMap(ar, cb) {
     return res;
 }
 
+/**
+ * @param {number} num 
+ */
 const _pad = num => ('' + num).padStart(2, '0');
 
+/**
+ * @param {number} [offset] 
+ */
 function timezoneOffsetString(offset) {
     if (!offset) return 'Z';
 
@@ -122,6 +164,9 @@ function timezoneOffsetString(offset) {
     return sign + _pad(hours) + ':' + _pad(minutes);
 }
 
+/**
+ * @param {Date} [date] 
+ */
 function localIso8601(date) {
     if (!date) date = new Date();
 
@@ -140,7 +185,7 @@ function localIso8601(date) {
 
 /**
  * @param {() => any} testfunc 
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options] 
+ * @param {string | {message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options] 
  * @param {*} [_options] 
  */
 async function assertEventually(testfunc, options, _options) {
@@ -272,6 +317,10 @@ function cmp(a, b) {
     }
 }
 
+/**
+ * @template K extends string
+ * @param {K} key 
+ */
 function cmpKey(key) {
     return function(x, y) {
         return cmp(x[key], y[key]);

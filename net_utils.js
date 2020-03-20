@@ -7,7 +7,10 @@ const {makeCurlCommand} = require('./curl_command');
 const output = require('./output');
 const {readFile} = require('./utils');
 
-
+/**
+ * @param {import('./internal').Config} config
+ * @param {string} url
+ */
 async function fetch(config, url, options) {
     if (!options) options = {};
     if (!options.redirect) options.redirect = 'manual';

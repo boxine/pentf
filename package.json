@@ -8,7 +8,11 @@
     "test": "tests"
   },
   "dependencies": {
+    "@types/argparse": "^1.0.38",
+    "@types/mkdirp": "^1.0.0",
+    "@types/node-fetch": "^2.5.5",
     "@types/puppeteer": "^2.0.1",
+    "@types/stream-buffers": "^3.0.3",
     "argparse": "^1.0.10",
     "emailjs-imap-client": "^3.0.7",
     "emailjs-mime-parser": "^2.0.5",
@@ -34,8 +38,8 @@
   "scripts": {
     "test": "./run",
     "lint": "eslint . run",
-    "types": "tsc",
-    "clean": "rimraf *.d.ts",
+    "types": "npm run clean && tsc",
+    "clean": "rimraf *.d.ts tests/*.d.ts",
     "prepublishOnly": "npm run clean && npm run types"
   },
   "repository": {

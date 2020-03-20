@@ -19,6 +19,9 @@ class AutoWidthArgumentParser extends argparse.ArgumentParser {
     }
 }
 
+/**
+ * @param {string} configDir 
+ */
 function listEnvs(configDir) {
     const allFiles = fs.readdirSync(configDir);
     const res = utils.filterMap(allFiles, fn => {
@@ -29,6 +32,9 @@ function listEnvs(configDir) {
     return res;
 }
 
+/**
+ * @param {{description: string, rootDir?: string, configDir?: string}} options 
+ */
 function parseArgs(options) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
@@ -299,6 +305,10 @@ function parseArgs(options) {
     return args;
 }
 
+/**
+ * @param {string} configDir 
+ * @param {string} env 
+ */
 function readConfigFile(configDir, env) {
     const config_fn = path.join(configDir, env + '.json');
     const config_json = fs.readFileSync(config_fn, 'utf-8');

@@ -7,8 +7,14 @@ const utils = require('./utils');
 
 const STATUS_STREAM = process.stderr;
 
+/**
+ * @type {import('./internal').State | null}
+ */
 var last_state;
 
+/**
+ * @param {import('./internal').Config} config 
+ */
 function clean(config) {
     assert(config);
     if (!STATUS_STREAM.isTTY) return;
@@ -17,6 +23,10 @@ function clean(config) {
     readline.clearLine(STATUS_STREAM, 0);
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {import('./internal').State} state 
+ */
 function status(config, state) {
     if (config.quiet) return;
     assert(state.tasks);
@@ -33,7 +43,7 @@ function status(config, state) {
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
     const terminal_width = STATUS_STREAM.getWindowSize ? STATUS_STREAM.getWindowSize()[0] : Infinity;
-    let status_str;
+    let status_str = '';
     for (let running_show = running.length;running_show >= 0;running_show--) {
         const running_str = (
             running.slice(0, running_show).map(({tc}) => tc.name).join(' ')
@@ -53,7 +63,10 @@ function status(config, state) {
     }
 }
 
-
+/**
+ * @param {import('./internal').Config} config 
+ * @param {import('./internal').State} state 
+ */
 function finish(config, state) {
     last_state = null;
     const {tasks} = state;
@@ -93,6 +106,10 @@ function finish(config, state) {
     }
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {string} message 
+ */
 function log(config, message) {
     if (config.logFunc) return config.logFunc(config, message);
 
@@ -110,6 +127,10 @@ function log(config, message) {
     }
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {string} message 
+ */
 function logVerbose(config, message) {
     if (!config.verbose) return;
     log(config, message);

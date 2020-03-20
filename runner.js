@@ -15,6 +15,10 @@ const utils = require('./utils');
 const version = require('./version');
 
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {import('./internal').Task} task 
+ */
 async function run_task(config, task) {
     const task_config = {...config, _browser_pages: []};
     try {
@@ -70,6 +74,10 @@ async function run_task(config, task) {
     }
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {import('./internal').State} state 
+ */
 async function sequential_run(config, state) {
     const skipped = state.tasks.filter(s => s.status === 'skipped');
     if (!config.quiet && skipped.length > 0) {
@@ -92,6 +100,11 @@ async function sequential_run(config, state) {
     }
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {import('./internal').State} state 
+ * @param {import('./internal').Task} task 
+ */
 async function run_one(config, state, task) {
     output.status(config, state);
 
@@ -107,6 +120,10 @@ async function run_one(config, state, task) {
     return task;
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {import('./internal').State} state 
+ */
 async function parallel_run(config, state) {
     output.status(config, state);
 
@@ -185,8 +202,15 @@ async function parallel_run(config, state) {
     }
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {import('./internal').TestCase[]} testCases 
+ */
 function testCases2tasks(config, testCases) {
     return testCases.map(tc => {
+        /**
+         * @type {import('./internal').Task}
+         */
         const task = {
             tc,
             status: 'todo',
@@ -212,6 +236,11 @@ function testCases2tasks(config, testCases) {
     });
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {*} testCases 
+ * @returns {Promise<import('./internal').TestInfo | undefined>}
+ */
 async function run(config, testCases) {
     const test_start = Date.now();
 

@@ -8,18 +8,25 @@ const tmp = require('tmp-promise');
 
 const {assertAsyncEventually, wait, remove} = require('./utils');
 
+/**
+ * @type {string}
+ */
 let tmp_home;
 
 /**
  * Launch a new page
  * @param {*} config 
  * @param {string[]} [chrome_args] 
- * @returns {import('puppeteer').Page}
+ * @returns {Promise<import('puppeteer').Page>}
  */
 async function newPage(config, chrome_args=[]) {
+    /**
+     * @type {import('puppeteer')}
+     */
     let puppeteer;
     try {
         if(config.puppeteer_firefox) {
+            // @ts-ignore
             puppeteer = require('puppeteer-firefox');
         } else {
             puppeteer = require('puppeteer');
@@ -36,6 +43,9 @@ async function newPage(config, chrome_args=[]) {
     const args = ['--no-sandbox'];
     args.push(...chrome_args);
 
+    /**
+     * @type {{ args: string[], ignoreHTTPSErrors: boolean, headless?: boolean, slowMo?: boolean, devtools?: boolean, env?: Record<string, string>}}
+     */
     const params = {
         args,
         ignoreHTTPSErrors: (config.env === 'local'),
@@ -73,8 +83,12 @@ async function newPage(config, chrome_args=[]) {
             const mkdir = promisify(fs.mkdir);
             await mkdir(path.join(future_tmp_home, '.pki'));
             await mkdir(path.join(future_tmp_home, '.pki', 'nssdb'));
+            /**
+             * @param {string} basename 
+             */
             const copyNssFile = async basename => {
-                const source_file = path.join(process.env.HOME, '.pki', 'nssdb', basename);
+                // FIXME:
+                const source_file = path.join(process.env.HOME || '', '.pki', 'nssdb', basename);
                 const exists = await new Promise(resolve =>
                     fs.access(source_file, fs.constants.F_OK, err => resolve(!err))
                 );
@@ -95,6 +109,9 @@ async function newPage(config, chrome_args=[]) {
     const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {
+        /**
+         * @param {import('puppeteer').Target} target 
+         */
         const configureDevtools = async (target) => {
             if (! /^(?:chrome-)?devtools:\/\//.test(await target.url())) {
                 return;
@@ -138,7 +155,7 @@ async function newPage(config, chrome_args=[]) {
 }
 
 /**
- * @param {import('puppeteer').Page} page 
+ * @param {import('./internal').Page} page 
  */
 async function closePage(page) {
     if (page._pintf_browser_pages) {
@@ -154,7 +171,7 @@ async function closePage(page) {
  * @param {import('puppeteer').Page} page 
  * @param {string} selector
  * @param {{timeout?: number, message?: string}} [options]
- * @returns {Promise<import('puppeteer').ElementHandle>}
+ * @returns {Promise<import('puppeteer').JSHandle>}
  */
 async function waitForVisible(page, selector, {message=undefined, timeout=30000}={}) {
     // Precompute errors for nice stack trace
@@ -236,13 +253,16 @@ async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={
     }
 }
 
+/**
+ * @param {string} [testId] 
+ */
 function _checkTestId(testId) {
     if (typeof testId !== 'string') throw new Error(`Invalid testId type ${testId}`);
     assert(/^[-a-zA-Z0-9_.]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
 }
 
 /**
- * @param {import('puppeteer').Page} page 
+ * @param {import('./internal').Page} page 
  * @param {string} testId 
  * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [options] 
  * @returns {Promise<import('puppeteer').ElementHandle>}
@@ -258,6 +278,7 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=unde
     let el;
     try {
         el = await page.waitForFunction((qs, visible) => {
+            // FIXME: Array.from
             const all = document.querySelectorAll(qs);
             if (all.length !== 1) return null;
             const [el] = all;
@@ -308,7 +329,7 @@ async function assertValue(input, expected) {
 
 /**
  * Assert that there is currently no element matching the xpath on the page
- * @param {import('puppeteer').Page} page
+ * @param {import('./internal').Page} page
  * @param {string} xpath
  * @param {string} [message]
  * @param {number} [wait_ms] 
@@ -452,6 +473,9 @@ async function getSelectOptions(page, select) {
  * @param {{factor?: number, persistent?: boolean}} [options]
  */
 async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
+    /**
+     * @param {number} factor
+     */
     function applyTimeouts(factor) {
         window._pintf_real_setTimeout = window._pintf_real_setTimeout || window.setTimeout;
         window.setTimeout = (func, delay, ...args) => {
@@ -500,8 +524,13 @@ async function workaround_setContent(page, html) {
     await waiter;
 }
 
-// Render HTML code as a PDF file.
-// modifyPage can be an async function to change the page in the browser.
+/**
+ * Render HTML code as a PDF file.
+ * @param {import('./internal').Config} config 
+ * @param {string} path 
+ * @param {string} html 
+ * @param {*} modifyPage can be an async function to change the page in the browser.
+ */
 async function html2pdf(config, path, html, modifyPage=null) {
     const pdfConfig = {...config};
     pdfConfig.headless = true;

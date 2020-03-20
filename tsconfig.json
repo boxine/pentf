@@ -2,8 +2,16 @@
   "compilerOptions": {
     "module": "CommonJS",
     "allowJs": true,
+    "checkJs": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
     "declaration": true,
     "emitDeclarationOnly": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   },
-  "files": ["./index.js"]
+  "include": ["*.js"]
 }

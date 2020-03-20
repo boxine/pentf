@@ -5,6 +5,10 @@ const {timezoneOffsetString} = require('./utils');
 
 const utils = require('./utils');
 
+/**
+ * @param {import('./internal').Config} config 
+ * @param {*} test_info 
+ */
 function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
     const {tasks} = state;
@@ -30,6 +34,11 @@ function craftResults(config, test_info) {
     };
 }
 
+/**
+ * 
+ * @param {import('./internal').Config} config 
+ * @param {*} results 
+ */
 async function doRender(config, results) {
     if (config.json) {
         const json = JSON.stringify(results, undefined, 2) + '\n';
@@ -51,6 +60,9 @@ async function doRender(config, results) {
     }
 }
 
+/**
+ * @param {number} ms 
+ */
 function format_duration(ms) {
     if (ms === undefined) {
         return '';
@@ -68,7 +80,13 @@ function format_duration(ms) {
     return rounded_str + 's';
 }
 
+/**
+ * @param {number | string | Date} ts 
+ */
 function format_timestamp(ts) {
+    /**
+     * @param {number} num 
+     */
     const _pad = num => ('' + num).padStart(2, '0');
     const date = new Date(ts);
 
@@ -83,6 +101,9 @@ function format_timestamp(ts) {
     );
 }
 
+/**
+ * @param {string} str 
+ */
 function linkify(str) {
     let res = '';
     let pos = 0;
@@ -99,6 +120,9 @@ function linkify(str) {
     return res;
 }
 
+/**
+ * @param {string} str 
+ */
 function escape_html(str) {
     // From https://stackoverflow.com/a/6234804/35070
     return (str
@@ -159,6 +183,9 @@ function html(results) {
     const table = results.tests.map((test_result, idx) => {
         const errored = test_result.status === 'error';
         const skipped = test_result.status === 'skipped';
+        /**
+         * @type {Record<string, string>}
+         */
         const status_str = {
             'success': '✔️',
             'error': '✘',
@@ -361,6 +388,12 @@ ${table}
 
 }
 
+/**
+ * 
+ * @param {import('./internal').Config} config 
+ * @param {string} path 
+ * @param {*} results 
+ */
 async function pdf(config, path, results) {
     return html2pdf(config, path, html(results));
 }

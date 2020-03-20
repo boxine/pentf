@@ -52,6 +52,10 @@ function parseBody(body) {
     return res;
 }
 
+/**
+ * @param {string} name 
+ * @param {string} value 
+ */
 function parseHeader(name, value) {
     assert(/^[a-zA-Z0-9]+$/.test(name));
     if (!value) return '';

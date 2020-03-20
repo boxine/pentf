@@ -20,6 +20,7 @@ async function run(config) {
 
 module.exports = {
     description: 'Check if an unpacked browser extension can be loaded',
+    skip: config => !process.env.CI && config.headless,
     resources: [],
     run,
 };

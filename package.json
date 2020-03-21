@@ -38,7 +38,7 @@
   "scripts": {
     "test": "./run",
     "lint": "eslint . run",
-    "types": "npm run clean && tsc",
+    "types": "tsc",
     "clean": "rimraf *.d.ts tests/*.d.ts",
     "prepublishOnly": "npm run clean && npm run types"
   },

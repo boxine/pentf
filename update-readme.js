@@ -5,6 +5,9 @@ const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * @param {string} str 
+ */
 function dedent(str) {
     const m = /^([ \t]+)/.exec(str);
     if (!m) return str;
@@ -15,12 +18,15 @@ function main() {
     const readme_fn = path.join(__dirname, 'README.md');
     const readme_input = fs.readFileSync(readme_fn, {encoding: 'utf-8'});
 
-    const readme_m = /^([^]+## Options)\n[^]*?\n(##[^#][^]*|\s*)$/.exec(readme_input);
+    const readme_m =
+        /** @type {RegExpExecArray} */
+        (/^([^]+## Options)\n[^]*?\n(##[^#][^]*|\s*)$/.exec(readme_input));
     assert(readme_m);
 
     const full_help = (child_process.execSync('./run --help', {
         env: {
-            COLUMNS: 110,
+            // FIXME:
+            COLUMNS: '110',
             PINTF_GENERIC_HELP: 'true',
         },
     }).toString('utf-8')
@@ -28,7 +34,9 @@ function main() {
             return key + 'YOUR_ENVIRONMENTS';
         })
     );
-    const main_help = /^[^]*\nOptional arguments:\n([^]+)$/.exec(full_help)[1];
+    const main_help = 
+        /** @type {RegExpExecArray} */
+        (/^[^]*\nOptional arguments:\n([^]+)$/.exec(full_help))[1];
     const help_groups = main_help.split('\n\n');
     const help_md = help_groups.map(hg => {
         const m = /^(\S.*):\n([^]*)$/.exec(hg);

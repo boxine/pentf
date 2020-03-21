@@ -4,12 +4,16 @@ const {promisify} = require('util');
 /**
  * @param {string} cmd 
  * @param {string[]} args 
- * @param {*} options 
+ * @param {import('child_process').ExecFileOptions} options 
+ * @returns {Promise<string>}
  */
 async function _cmd(cmd, args, options) {
     return (await (promisify(child_process.execFile)(cmd, args, options))).stdout.trim();
 }
 
+/**
+ * @param {import('./internal').Config} config 
+ */
 async function testsVersion(config) {
     try {
         const gitVersion = await _cmd(

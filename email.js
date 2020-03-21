@@ -9,6 +9,10 @@ const libmime = require('libmime');
 const utils = require('./utils');
 const output = require('./output');
 
+/**
+ * // FIXME: Seems to be the wrong type?
+ * @param {Uint8Array} mime_part 
+ */
 function parseDeep(mime_part) {
 
     let text = null;
@@ -29,7 +33,9 @@ function parseDeep(mime_part) {
     return { text, html };
 }
 
-
+/**
+ * @param {Uint8Array} body 
+ */
 function parseBody(body) {
     assert(body instanceof Uint8Array);
     const parsed = mime_parse(body);

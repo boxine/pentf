@@ -47,9 +47,9 @@ async function externalAcquire(config, resources, expireIn) {
 }
 
 /**
- * @param {*} config 
+ * @param {import('./internal').Config} config 
  * @param {any[]} resources 
- * @param {*} overrideClient 
+ * @param {import('./internal').Config['external_locking_client']} [overrideClient] 
  */
 async function externalRelease(config, resources, overrideClient) {
     const client = overrideClient || config.external_locking_client;
@@ -176,7 +176,7 @@ async function init(state) {
 }
 
 /**
- * @param {import('./internal').State} state 
+ * @param {Pick<import('./internal').State, 'config' | 'external_locking_refresh_timeout'>} state 
  */
 async function shutdown(state) {
     if (state.config.no_external_locking) return;

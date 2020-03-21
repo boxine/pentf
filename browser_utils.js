@@ -15,9 +15,9 @@ let tmp_home;
 
 /**
  * Launch a new page
- * @param {*} config 
+ * @param {import('./internal').Config} config 
  * @param {string[]} [chrome_args] 
- * @returns {Promise<import('puppeteer').Page>}
+ * @returns {Promise<import('./internal').Page>}
  */
 async function newPage(config, chrome_args=[]) {
     /**
@@ -32,11 +32,12 @@ async function newPage(config, chrome_args=[]) {
             puppeteer = require('puppeteer');
         }
     } catch(e) {
+        // FIXME: Throw error
         // puppeteer/puppeteer-firefox is a peer dependency. Show a helpful error message when it's missing.
         if(config.puppeteer_firefox) {
-            console.error('Please install "puppeteer-firefox" package with \'npm i puppeteer\'.');
+            throw new Error('Please install "puppeteer-firefox" package with \'npm i puppeteer\'.');
         } else {
-            console.error('Please install "puppeteer" package with \'npm i puppeteer\'.');
+            throw new Error('Please install "puppeteer" package with \'npm i puppeteer\'.');
         }
     }
 
@@ -44,7 +45,7 @@ async function newPage(config, chrome_args=[]) {
     args.push(...chrome_args);
 
     /**
-     * @type {{ args: string[], ignoreHTTPSErrors: boolean, headless?: boolean, slowMo?: boolean, devtools?: boolean, env?: Record<string, string>}}
+     * @type {{ args: string[], ignoreHTTPSErrors: boolean, headless?: boolean, slowMo?: number, devtools?: boolean, env?: Record<string, string>}}
      */
     const params = {
         args,
@@ -106,6 +107,7 @@ async function newPage(config, chrome_args=[]) {
         };
     }
     const browser = await puppeteer.launch(params);
+    /** @type {import('./internal').Page} */
     const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {
@@ -120,7 +122,9 @@ async function newPage(config, chrome_args=[]) {
             // new devtools created, configure it
             const session = await target.createCDPSession();
             await assertAsyncEventually(async() => {
-                return (await session.send('Runtime.evaluate', {
+                // FIXME: Type help
+                /** @type {{result: {value: boolean}}} */
+                const response =(await session.send('Runtime.evaluate', {
                     expression: `(() => {
                         try {
                             Common.moduleSetting("network_log.preserve-log").set(true);
@@ -132,7 +136,8 @@ async function newPage(config, chrome_args=[]) {
                         return Common.moduleSetting("preserveConsoleLog").get() === true;
                         })()
                     `
-                })).result.value;
+                }));
+                return response.result.value;
             }, {
                 message: 'could not toggle preserve options in devtools',
                 timeout: 10000,
@@ -265,7 +270,7 @@ function _checkTestId(testId) {
  * @param {import('./internal').Page} page 
  * @param {string} testId 
  * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [options] 
- * @returns {Promise<import('puppeteer').ElementHandle>}
+ * @returns {Promise<import('puppeteer').JSHandle>}
  */
 async function waitForTestId(page, testId, {extraMessage=undefined, timeout=undefined, visible=true} = {}) {
     _checkTestId(testId);
@@ -278,9 +283,9 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=unde
     let el;
     try {
         el = await page.waitForFunction((qs, visible) => {
-            // FIXME: Array.from
             const all = document.querySelectorAll(qs);
             if (all.length !== 1) return null;
+            // @ts-ignore
             const [el] = all;
             if (visible && (el.offsetParent === null)) return null;
             return el;
@@ -297,7 +302,11 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=unde
  * @param {string} expected 
  */
 async function assertValue(input, expected) {
-    const page = input._page;
+    // FIXME: Type help
+    /** @type {import('puppeteer').Page} */
+    const page = 
+        /** @type {*} */
+        (input)._page;
     assert(page);
     try {
         await page.waitForFunction((inp, expected) => {
@@ -365,8 +374,10 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
     let remainingTimeout = timeout;
     while (true) { // eslint-disable-line no-constant-condition
         const found = await page.evaluate((xpath, visible) => {
-            const element = document.evaluate(
-                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+            // FIXME: Type help
+            const element = 
+                /** @type {HTMLElement | null} */
+                (document.evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext());
             if (!element) return false;
 
             if (visible && element.offsetParent === null) return null; // invisible
@@ -478,9 +489,12 @@ async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
      */
     function applyTimeouts(factor) {
         window._pintf_real_setTimeout = window._pintf_real_setTimeout || window.setTimeout;
-        window.setTimeout = (func, delay, ...args) => {
-            return window._pintf_real_setTimeout(func, delay && (delay / factor), ...args);
-        };
+        window.setTimeout = 
+            // FIXME: Type help
+            /** @type {*} */
+            ((func, delay, ...args) => {
+                return window._pintf_real_setTimeout(func, delay && (delay / factor), ...args);
+            });
 
         window._pintf_real_setInterval = window._pintf_real_setInterval || window.setInterval;
         window.setInterval = (func, delay, ...args) => {
@@ -529,7 +543,7 @@ async function workaround_setContent(page, html) {
  * @param {import('./internal').Config} config 
  * @param {string} path 
  * @param {string} html 
- * @param {*} modifyPage can be an async function to change the page in the browser.
+ * @param {null | ((page: import('./internal').Page) => any)} [modifyPage] can be an async function to change the page in the browser.
  */
 async function html2pdf(config, path, html, modifyPage=null) {
     const pdfConfig = {...config};

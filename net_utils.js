@@ -1,7 +1,8 @@
 const assert = require('assert');
 const http = require('http');
 const https = require('https');
-const node_fetch = require('node-fetch');
+// FIXME: Types not for CJS
+const node_fetch = require('node-fetch').default;
 
 const {makeCurlCommand} = require('./curl_command');
 const output = require('./output');
@@ -20,8 +21,9 @@ async function fetch(config, url, options) {
             keepAlive: true,
         };
         if (/^https:\/\//.test(url)) {
-            agentOptions.rejectUnauthorized = (
-                (config.rejectUnauthorized === undefined) ? true : config.rejectUnauthorized);
+            // FIXME: Doesn't exist, only on https.request()
+            // agentOptions.rejectUnauthorized = (
+            //     (config.rejectUnauthorized === undefined) ? true : config.rejectUnauthorized);
             options.agent = new https.Agent(agentOptions);
         } else {
             options.agent = new http.Agent(agentOptions);

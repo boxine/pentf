@@ -170,7 +170,9 @@ async function parallel_run(config, state) {
             task._runner_task_id = runner_task_id;
             const promise = run_one(config, state, task);
             if (config.verbose) output.log(config, `[runner] started task #${task._runner_task_id}: ${task.id}`);
-            promise._runner_task_id = runner_task_id;
+            // FIXME: nooo
+            /** @type {*} */
+            (promise)._runner_task_id = runner_task_id;
             runner_task_id++;
             state.running.push(promise);
         }
@@ -216,6 +218,8 @@ function testCases2tasks(config, testCases) {
             status: 'todo',
             name: tc.name,
             id: tc.name,
+            resources: [],
+            start: 0,
         };
 
         if (tc.skip && tc.skip(config)) {

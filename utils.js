@@ -203,9 +203,13 @@ async function assertEventually(testfunc, options, _options) {
         }
         options.message = options.message || 'assertEventually failed';
     }
+    // @ts-ignore
     options.timeout = options.timeout || 10000;
+    // @ts-ignore
     options.checkEvery = options.checkEvery || 200;
+    // @ts-ignore
     options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
+    // @ts-ignore
     const {timeout, checkEvery, crashOnError, message} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
@@ -248,9 +252,13 @@ async function assertAsyncEventually(testfunc, options, _options) {
         }
         options.message = options.message || 'assertAsyncEventually failed';
     }
+    // @ts-ignore
     options.timeout = options.timeout || 10000;
+    // @ts-ignore
     options.checkEvery = options.checkEvery || 200;
+    // @ts-ignore
     options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
+    // @ts-ignore
     const {timeout, checkEvery, crashOnError, message} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
@@ -292,9 +300,13 @@ async function assertAlways(testfunc, options, _options) {
             options = {};
         }
     }
+    // @ts-ignore
     options.message = options.message || 'assertAlways failed';
+    // @ts-ignore
     options.timeout = options.timeout || 10000;
+    // @ts-ignore
     options.checkEvery = options.checkEvery || 200;
+    // @ts-ignore
     const {timeout, checkEvery, message} = options;
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {

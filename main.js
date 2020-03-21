@@ -9,6 +9,10 @@ const runner = require('./runner');
 const render = require('./render');
 const {testsVersion, pintfVersion} = require('./version');
 
+/**
+ * @param {import('./internal').Config} args 
+ * @param {string} tests_dir 
+ */
 function load_tests(args, tests_dir) {
     let test_names = (
         fs.readdirSync(tests_dir)
@@ -17,7 +21,9 @@ function load_tests(args, tests_dir) {
     );
 
     if (args.filter) {
-        test_names = test_names.filter(n => new RegExp(args.filter).test(n));
+        // FIXME
+        const filter = args.filter;
+        test_names = test_names.filter(n => new RegExp(filter).test(n));
     }
 
     return test_names.map(tn => {
@@ -33,6 +39,10 @@ function load_tests(args, tests_dir) {
 // - rootDir: Root directory (assume tests/ contains tests, config/ if exists contains config)
 // - testsDir: Test directory
 // - configDir: Configuration directory. false disables configuration.
+/**
+ * 
+ * @param {{defaultConfig?: (config: import('./internal').Config) => void, description?: string, rootDir?: string, testsDir?: string, configDir?: string}} options 
+ */
 async function real_main(options={}) {
     if (options.rootDir) {
         if (! options.testsDir) {

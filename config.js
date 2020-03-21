@@ -33,7 +33,7 @@ function listEnvs(configDir) {
 }
 
 /**
- * @param {{description: string, rootDir?: string, configDir?: string}} options 
+ * @param {{description?: string, rootDir?: string, configDir?: string}} options 
  */
 function parseArgs(options) {
     const DEFAULT_HTML_NAME = 'results.html';

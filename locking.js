@@ -7,7 +7,7 @@ const external_locking = require('./external_locking');
 
 /**
  * @param {import('./internal').Config} config 
- * @param {*} task 
+ * @param {import('./internal').TaskWithTestCase} task 
  */
 function annotateTaskResources(config, task) {
     if (config.no_locking) {
@@ -37,20 +37,20 @@ async function init(state) {
 
 /**
  * @param {import('./internal').Config} config 
- * @param {import('./internal').State} state 
+ * @param {Pick<import('./internal').State, 'config' | 'locks' | 'external_locking_refresh_timeout'>} state 
  */
 async function shutdown(config, state) {
     external_locking.shutdown(state);
-    state.locks.length = 0;
+    // FIXME:
+    state.locks.clear();
     assert.equal(
         state.locks.size, 0,
         `Still got some locks on shutdown: ${Array.from(state.locks).sort().join(',')}`);
 }
 
 /**
- * 
  * @param {import('./internal').Config} config 
- * @param {import('./internal').State} state 
+ * @param {Pick<import('./internal').State, 'locks'>} state 
  * @param {import('./internal').Task} task 
  */
 async function acquire(config, state, task) {
@@ -101,7 +101,7 @@ async function acquire(config, state, task) {
 
 /**
  * @param {import('./internal').Config} config 
- * @param {import('./internal').State} state 
+ * @param {Pick<import('./internal').State, 'locks'>} state 
  * @param {import('./internal').Task} task 
  */
 async function acquireEventually(config, state, task) {
@@ -120,7 +120,7 @@ async function acquireEventually(config, state, task) {
 
 /**
  * @param {import('./internal').Config} config 
- * @param {import('./internal').State} state 
+ * @param {Pick<import('./internal').State, 'locks'>} state 
  * @param {import('./internal').Task} task 
  */
 async function release(config, state, task) {

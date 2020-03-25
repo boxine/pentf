@@ -118,6 +118,7 @@ The keys are up to you; for example you probably want to have a main entry point
 -h, --help            Show this help message and exit.
 -e YOUR_ENVIRONMENTS, --env YOUR_ENVIRONMENTS
                       The environment to test against. Default is local.
+--version             Print version of tests and test framework and exit.
 ```
 
 ###### Output
@@ -141,10 +142,11 @@ The keys are up to you; for example you probably want to have a main entry point
 -J, --json            Write tests results as a JSON file.
 --json-file FILE.json
                       JSON file to write to. Defaults to results.json .
--H, --html            Write tests results as an HTML file.
+-H, --html            Write test results as an HTML file.
 --html-file FILE.html
                       HTML file to write a report to. Defaults to results.html .
---pdf                 Write tests results as a PDF file.
+--pdf                 Write test results as a PDF file. (Now enabled by default)
+--no-pdf              Do not write a PDF report with test results.
 --pdf-file FILE.pdf   PDF file to write a report to. Defaults to results.pdf .
 -M, --markdown        Write tests results as a Markdown file.
 --markdown-file FILE.md
@@ -213,6 +215,8 @@ The keys are up to you; for example you probably want to have a main entry point
                       Disable external locking (via a lockserver)
 --external-locking-url URL
                       Override URL of lockserver
+--display-locking-client
+                      Display the locking client ID we would use if we would lock something now
 ```
 
 

@@ -255,6 +255,11 @@ async function run(config, testCases) {
             return;
         }
 
+        if (config.display_locking_client) {
+            console.log(config.external_locking_client);
+            return;
+        }
+
         await locking.init(state);
 
         if (config.concurrency === 0) {

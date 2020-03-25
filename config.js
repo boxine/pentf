@@ -260,6 +260,10 @@ function parseArgs(options) {
         help: 'Override URL of lockserver',
         dest: 'override_external_locking_url',
     });
+    locking_group.addArgument(['--display-locking-client'], {
+        action: 'storeTrue',
+        help: 'Display the locking client ID we would use if we would lock something now',
+    });
 
     const args = parser.parseArgs();
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {

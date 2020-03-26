@@ -44,7 +44,7 @@ async function newPage(config, chrome_args=[]) {
         params.headless = false;
 
         // Browser extensions only work in non-headless mode
-        if (config.extensions.length) {
+        if (config.extensions && config.extensions.length) {
             const extensions = config.extensions.join(',');
             
             args.push(

@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+
+const pintf = require('../../index.js');
+
+pintf.main({
+    rootDir: __dirname,
+    testsDir: __dirname,
+    testsGlob: '*.spec.{js,jsx}'
+});

@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const glob = require('glob');
 
 const {readConfig, parseArgs} = require('./config');
 const {readFile} = require('./utils');
@@ -9,20 +10,28 @@ const runner = require('./runner');
 const render = require('./render');
 const {testsVersion, pintfVersion} = require('./version');
 
-function load_tests(args, tests_dir) {
-    let test_names = (
-        fs.readdirSync(tests_dir)
-            .filter(n => n.endsWith('.js'))
-            .map(n => n.substring(0, n.length - '.js'.length))
-    );
+/**
+ * @param {*} args 
+ * @param {string} tests_dir 
+ * @param {string} [glob_pattern] 
+ */
+function load_tests(args, tests_dir, glob_pattern = '*.js') {
+    let tests = glob
+        .sync(glob_pattern, {
+            cwd: tests_dir,
+        })
+        .map(n => ({
+            path: n,
+            name: path.basename(n, path.extname(n))
+        }));
 
     if (args.filter) {
-        test_names = test_names.filter(n => new RegExp(args.filter).test(n));
+        tests = tests.filter(n => new RegExp(args.filter).test(n.name));
     }
 
-    return test_names.map(tn => {
-        const tc = require(path.join(tests_dir, tn));
-        tc.name = tn;
+    return tests.map(t => {
+        const tc = require(path.join(tests_dir, t.path));
+        tc.name = t.name;
         return tc;
     });
 }
@@ -51,7 +60,7 @@ async function real_main(options={}) {
     if (options.defaultConfig) {
         options.defaultConfig(config);
     }
-    const test_cases = load_tests(args, options.testsDir);
+    const test_cases = load_tests(args, options.testsDir, options.testsGlob);
     config._testsDir = options.testsDir;
     if (options.rootDir) config._rootDir = options.rootDir;
     if (options.configDir) config._configDir = options.configDir;

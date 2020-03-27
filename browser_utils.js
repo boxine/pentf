@@ -1,4 +1,9 @@
 'use strict';
+/**
+ * Browser functions, based upon puppeteer.
+ * These functions extend [the puppeteer API](https://github.com/puppeteer/puppeteer/blob/master/docs/api.md).
+ * @packageDocumentation
+ */
 
 const assert = require('assert');
 const fs = require('fs');
@@ -11,10 +16,10 @@ const {assertAsyncEventually, wait, remove} = require('./utils');
 let tmp_home;
 
 /**
- * Launch a new page
- * @param {*} config 
- * @param {string[]} [chrome_args] 
- * @returns {import('puppeteer').Page}
+ * Launch a new browser, with a new page (=Tab)
+ * @param {*} config The pintf configuration
+ * @param {string[]} [chrome_args] Additional arguments for Chrome (optional)
+ * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
 async function newPage(config, chrome_args=[]) {
     let puppeteer;

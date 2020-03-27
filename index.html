@@ -1,0 +1,304 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>pintf</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">pintf</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>pintf</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#pintf---parallel-integration-test-framework" id="pintf---parallel-integration-test-framework" style="color: inherit; text-decoration: none;">
+					<h1>pintf - Parallel INTegration Test Framework</h1>
+				</a>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h2>Installation</h2>
+				</a>
+				<pre><code class="language-shell">npm i --save-dev pintf puppeteer</code></pre>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
+				<p>pintf can be used as a library (A standalone binary is also planned). Create a script named <code>run</code> in the directory of your tests, and fill it like this:</p>
+				<pre><code class="language-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf'</span>).main({
+    <span class="hljs-attr">rootDir</span>: __dirname,
+    <span class="hljs-attr">description</span>: <span class="hljs-string">'Test my cool application'</span>,
+});</code></pre>
+				<p>Make the file executable with <code>chmod a+x run</code>, and from then on type</p>
+				<pre><code class="language-shell">./run</code></pre>
+				<p>to execute all tests. You may also want to have a look at the <a href="#options">options</a>.</p>
+				<a href="#writing-tests" id="writing-tests" style="color: inherit; text-decoration: none;">
+					<h2>Writing tests</h2>
+				</a>
+				<p>Plop a new <code>.js</code> file into <code>tests/</code>. Its name will be the test&#39;&#39;s name, and it should have an async <code>run</code> function, like this:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>);
+<span class="hljs-keyword">const</span> {getMail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf/email'</span>);
+<span class="hljs-keyword">const</span> {newPage, closePage} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf/browser_utils'</span>);
+<span class="hljs-keyword">const</span> {fetch} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf/net_utils'</span>);
+<span class="hljs-keyword">const</span> {makeRandomEmail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf/utils'</span>);
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params">config</span>) </span>{
+    <span class="hljs-keyword">const</span> email = makeRandomEmail(config, <span class="hljs-string">'pintf_example'</span>);
+    <span class="hljs-keyword">const</span> start = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>();
+    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(config, <span class="hljs-string">'https://api.tonie.cloud/v2/users'</span>, {
+        <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
+        <span class="hljs-attr">headers</span>: {
+            <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
+        },
+        <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
+            <span class="hljs-attr">locale</span>: <span class="hljs-string">'en'</span>,
+            <span class="hljs-attr">email</span>: email,
+            <span class="hljs-attr">password</span>: <span class="hljs-string">'Secret123'</span>,
+            <span class="hljs-attr">acceptedGeneralTerms</span>: <span class="hljs-literal">true</span>,
+            <span class="hljs-attr">acceptedPrivacyTerms</span>: <span class="hljs-literal">true</span>,
+        }),
+    });
+    assert.equal(response.status, <span class="hljs-number">201</span>);
+    assert((<span class="hljs-keyword">await</span> response.json()).jwt);
+
+    <span class="hljs-keyword">const</span> mail = <span class="hljs-keyword">await</span> getMail(config, start, email, <span class="hljs-string">'Your Toniecloud confirmation link'</span>);
+    assert(mail);
+
+    <span class="hljs-comment">// Test with a browser</span>
+    <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> newPage(config);
+    <span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">'https://meine.tonies.de/'</span>);
+
+    <span class="hljs-comment">// During development, you can make the test fail.</span>
+    <span class="hljs-comment">// Run with -k to see the browser's state at this time!</span>
+    <span class="hljs-comment">// Any test failure is fine, but in a pinch, try uncommenting:</span>
+
+    <span class="hljs-comment">// assert(false);</span>
+
+    <span class="hljs-keyword">await</span> closePage(page);
+}
+
+<span class="hljs-built_in">module</span>.exports = {
+    run,
+    <span class="hljs-attr">description</span>: <span class="hljs-string">'pintf test example'</span>, <span class="hljs-comment">// optional description for test reports, can be left out</span>
+
+    <span class="hljs-comment">// You can skip the test in some conditions by defining an optional skip method:</span>
+    <span class="hljs-attr">skip</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> config.env === <span class="hljs-string">'prod'</span>,
+
+    <span class="hljs-comment">// Optional: a true-ish value to indicate that to suppress output about this test if it fails.</span>
+    <span class="hljs-comment">// Used to indicate tests for bugs/features that are not yet implemented (e.g. with TDD).</span>
+    <span class="hljs-comment">// Strings will be reported; the URL to an issue is a good and typical value.</span>
+    <span class="hljs-comment">// Alternatively, a function that is called with the config and returns a value as described above.</span>
+    <span class="hljs-attr">expectedToFail</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> (config.env === <span class="hljs-string">'alwaysbroken'</span>) ? <span class="hljs-string">'Known to be broken here'</span> : <span class="hljs-literal">false</span>,
+
+    <span class="hljs-comment">// Resources is a list of strings. Tests accessing the same resources are run sequentially.</span>
+    <span class="hljs-attr">resources</span>: [<span class="hljs-string">'toniebox_1234'</span>, <span class="hljs-string">'another_resource'</span>],
+    <span class="hljs-comment">// Default is one resource with the name `test_${test.name}`, i.e. tests are not run concurrently by default</span>
+    <span class="hljs-comment">// Using no shared resources? Set resources: []</span>
+};</code></pre>
+				<p>Note that while the above example tests a webpage with <a href="https://github.com/GoogleChrome/puppeteer">puppeteer</a> and uses pintf&#39;s has native support for HTTP requests (in <code>net_utils</code>) and email sending (in <code>email</code>), tests can be anything – they just have to fail the promise if the test fails.</p>
+				<p>Have a look in the <a href="https://boxine.github.io/pintf/index.html">API documentation</a> for various helper functions.</p>
+				<a href="#configuration" id="configuration" style="color: inherit; text-decoration: none;">
+					<h2>Configuration</h2>
+				</a>
+				<p>pintf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the <code>config</code> subdirectory for each environment. You can also add a programatic configuration by passing a function <code>defaultConfig</code> to <code>pintf.main</code>; see <a href="run">pintf&#39;s own run</a> for an example. </p>
+				<p>The keys are up to you; for example you probably want to have a main entry point. Predefined keys are:</p>
+				<ul>
+					<li><strong><code>imap</code></strong> If you are using the <code>pintf/email</code> module to fetch and test emails, configure your imap connection here, like<pre><code><span class="hljs-string">"imap"</span>: {
+  <span class="hljs-string">"user"</span>: <span class="hljs-string">"user@example.com"</span>,
+  <span class="hljs-string">"password"</span>: <span class="hljs-string">"secret"</span>,
+  <span class="hljs-string">"host"</span>: <span class="hljs-string">"mail.example.com"</span>,
+  <span class="hljs-string">"port"</span>: <span class="hljs-number">993</span>,
+  <span class="hljs-string">"tls"</span>: <span class="hljs-literal">true</span>
+}</code></pre></li>
+					<li><strong><code>rejectUnauthorized</code></strong> Set to <code>false</code> to not check the certificate in TLS connections.</li>
+				</ul>
+				<a href="#options" id="options" style="color: inherit; text-decoration: none;">
+					<h2>Options</h2>
+				</a>
+				<pre><code>-h, --help            Show this help message and <span class="hljs-keyword">exit</span>.
+-e YOUR_ENVIRONMENTS, --env YOUR_ENVIRONMENTS
+                      The environment to test against. Default is local.
+--version             Print version of tests and test framework and <span class="hljs-keyword">exit</span>.</code></pre>
+				<a href="#output" id="output" style="color: inherit; text-decoration: none;">
+					<h6>Output</h6>
+				</a>
+				<pre><code>-v, --verbose         Let tests output diagnostic details
+-q, --quiet           <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">test</span> status
+--<span class="hljs-keyword">no</span>-<span class="hljs-keyword">clear</span>-<span class="hljs-keyword">line</span>, --<span class="hljs-keyword">ci</span>
+                      Never <span class="hljs-keyword">clear</span> the current output <span class="hljs-keyword">line</span> (<span class="hljs-keyword">as</span> <span class="hljs-keyword">if</span> output is not a tty)
+--<span class="hljs-keyword">print</span>-config        Output the effective configuration and <span class="hljs-keyword">exit</span>.
+-c, --<span class="hljs-keyword">print</span>-curl      <span class="hljs-keyword">Print</span> curl commands <span class="hljs-keyword">for</span> each HTTP request
+-I REGEXP, --ignore-errors REGEXP
+                      <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">error</span> messages matching the regular expression. Example: -I 
+                      <span class="hljs-string">"\(TOC-[0-9]+\)"</span>
+-<span class="hljs-keyword">E</span>, --expect-nothing  Ignore expectedToFail attributes <span class="hljs-keyword">on</span> tests</code></pre>
+				<a href="#writing-results-to-disk" id="writing-results-to-disk" style="color: inherit; text-decoration: none;">
+					<h6>Writing results to disk</h6>
+				</a>
+				<pre><code>-J, --json            <span class="hljs-keyword">Write</span> tests results <span class="hljs-keyword">as</span> a JSON <span class="hljs-keyword">file</span>.
+--json-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.json
+                      JSON <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.json .
+-H, --html            <span class="hljs-keyword">Write</span> test results <span class="hljs-keyword">as</span> an HTML <span class="hljs-keyword">file</span>.
+--html-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.html
+                      HTML <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.html .
+--pdf                 <span class="hljs-keyword">Write</span> test results <span class="hljs-keyword">as</span> a PDF <span class="hljs-keyword">file</span>. (Now enabled by <span class="hljs-keyword">default</span>)
+--no-pdf              <span class="hljs-keyword">Do</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">write</span> a PDF report <span class="hljs-keyword">with</span> test results.
+--pdf-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.pdf   PDF <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.pdf .
+-M, --markdown        <span class="hljs-keyword">Write</span> tests results <span class="hljs-keyword">as</span> a Markdown <span class="hljs-keyword">file</span>.
+--markdown-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.md
+                      Markdown <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.md .
+--load-json INPUT.json
+                      Load test results from JSON (instead <span class="hljs-keyword">of</span> executing tests)</code></pre>
+				<a href="#test-selection" id="test-selection" style="color: inherit; text-decoration: none;">
+					<h6>Test selection</h6>
+				</a>
+				<pre><code>-f REGEXP, --filter REGEXP
+                      Regular expression to match tests to run
+-l, --list            List all tests that would be run and <span class="hljs-keyword">exit</span>
+-a, --all, --include-slow-tests
+                      Run tests that take a very long time</code></pre>
+				<a href="#email" id="email" style="color: inherit; text-decoration: none;">
+					<h6>Email</h6>
+				</a>
+				<pre><code>--<span class="hljs-meta">keep</span>-emails         <span class="hljs-meta">Keep</span> generated emails instead of deleting them
+--email-verbose       Log all IMAP commands <span class="hljs-keyword">and </span>responses</code></pre>
+				<a href="#puppeteer-browser-test" id="puppeteer-browser-test" style="color: inherit; text-decoration: none;">
+					<h6>puppeteer browser test</h6>
+				</a>
+				<pre><code>-V, --visible         Make browser tests visible (i.e. <span class="hljs-keyword">not</span> headless)
+--no-screenshots      <span class="hljs-keyword">Do</span> <span class="hljs-keyword">not</span> take screenshots of browser failures
+--screenshot-directory DIR
+                      Directory <span class="hljs-keyword">to</span> write screenshots <span class="hljs-keyword">to</span> (default: ./screenshots)
+-s MS, --slow-mo MS   Wait this many milliseconds after every call <span class="hljs-keyword">to</span> the virtual browser
+-k, --keep-open       Keep browser sessions open <span class="hljs-keyword">in</span> case of failures. Implies -V.
+--devtools            Start browser with devtools open. Implies -V
+--devtools-preserve   Configure devtools <span class="hljs-keyword">to</span> preserve logs <span class="hljs-keyword">and</span><span class="hljs-built_in"> network </span>requests upon navigation. Implies 
+                      --devtools
+--extensions [EXTENSION_DIR [EXTENSION_DIR <span class="hljs-built_in">..</span>.]]
+                      Load unpacked browser extensions</code></pre>
+				<a href="#test-runner" id="test-runner" style="color: inherit; text-decoration: none;">
+					<h6>Test runner</h6>
+				</a>
+				<pre><code>-C COUNT, --concurrency COUNT
+                      Maximum number of tests to run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> to run without a pool, sequentially. 
+                      Defaults to <span class="hljs-number">10</span>.
+-S, --sequential      Do not run tests <span class="hljs-keyword">in</span> parallel (same as -C <span class="hljs-number">0</span>)
+--fail-fast           Abort once a test fails
+--print-tasks         Output all tasks that the runner would perform, and <span class="hljs-keyword">exit</span>
+--<span class="hljs-keyword">exit</span>-zero           Terminate with <span class="hljs-keyword">exit</span> code <span class="hljs-number">0</span> (success) even <span class="hljs-keyword">if</span> tests fail. (Exit codes != <span class="hljs-number">0</span> are still 
+                      emitted <span class="hljs-keyword">in</span> cases of internal crashes)</code></pre>
+				<a href="#locking" id="locking" style="color: inherit; text-decoration: none;">
+					<h6>Locking</h6>
+				</a>
+				<pre><code>-L, --no-locking      Completely disable any locking of resources between tests.
+--locking-verbose     Output status messages about locking
+--list-conflicts      Show which tasks conflict on which resources, and <span class="hljs-keyword">exit</span> immediately
+--manually-lock RESOURCES
+                      Externally lock the specified comma-separated resources <span class="hljs-keyword">for</span> <span class="hljs-number">60</span>s before the test
+--list-locks, --list-external-locks
+                      List (external) locks and <span class="hljs-keyword">exit</span>
+--clear-locks, --clear-external-locks
+                      Clear all external locks and <span class="hljs-keyword">exit</span>
+--no-external-locking
+                      Disable external locking (via a lockserver)
+--external-locking-url URL
+                      Override URL of lockserver
+--display-locking-client
+                      Display the locking client ID we would use <span class="hljs-keyword">if</span> we would lock something now</code></pre>
+				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+					<h2>License</h2>
+				</a>
+				<p><a href="LICENSE">MIT</a>. Patches welcome!</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_browser_utils_.html">&quot;browser_<wbr>utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_main_.html">&quot;main&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_utils_.html">&quot;utils&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

@@ -510,6 +510,10 @@ async function workaround_setContent(page, html) {
 async function html2pdf(config, path, html, modifyPage=null) {
     const pdfConfig = {...config};
     pdfConfig.headless = true;
+    // The headless option will be overwritten if devtools=true, leading to a
+    // crash when attempting to generate a pdf snapshot. See:
+    // https://github.com/puppeteer/puppeteer/blob/v2.1.1/docs/api.md#puppeteerdefaultargsoptions
+    pdfConfig.devtools = false;
     const page = await newPage(pdfConfig);
 
     await workaround_setContent(page, html);

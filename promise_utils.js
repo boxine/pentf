@@ -36,13 +36,21 @@ async function customErrorMessage(promise, error_message) {
 
 /**
  * Mark a code section as expected to fail.
- * @param {*} config 
- * @param {string} message
- * @param {() => any} asyncFunc
+ * @param {*} config The pintf configuration.
+ * @param {string} message Error message to show when the section fails (recommended: ticket URL)
+ * @param {() => any} asyncFunc The asynchronous section which is part of the test.
+ * @param {{expectNothing?: boolean}} [options]
  */
-async function expectedToFail(config, message, asyncFunc) {
+async function expectedToFail(config, message, asyncFunc, {expectNothing=false} = {}) {
     assert(message);
     assert(asyncFunc);
+
+    if (expectNothing) {
+        // On this environment, we expect everything to work just fine
+        await asyncFunc();
+        return;
+    }
+
     try {
         await asyncFunc();
     } catch(e) {
@@ -50,9 +58,11 @@ async function expectedToFail(config, message, asyncFunc) {
         throw e;
     }
     if (!config.expect_nothing) {
-        throw new Error(
-            `Section mark as expectedToFail (${message}), but succeeded.` +
+        const err = new Error(
+            `Section marked as expectedToFail (${message}), but succeeded.` +
             ' Pass in --expect-nothing/-E to ignore this message');
+        err.pintf_expectedToSucceed = message;
+        throw err;
     }
 }
 

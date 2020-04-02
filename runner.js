@@ -62,7 +62,13 @@ async function run_task(config, task) {
             !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&
             (config.expect_nothing || !task.expectedToFail));
         if (show_error) {
-            output.log(config, `FAILED test case ${task.name} at ${utils.localIso8601()}:\n${e.stack}\n`);
+            if (e.pintf_expectedToSucceed) {
+                output.log(
+                    config, `PASSED test case ${task.name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
+            } else {
+                output.log(
+                    config, `FAILED test case ${task.name} at ${utils.localIso8601()}:\n${e.stack}\n`);
+            }
         }
         if (config.fail_fast) {
             process.exit(3);

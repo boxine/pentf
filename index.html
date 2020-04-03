@@ -201,11 +201,13 @@
 				<a href="#test-selection" id="test-selection" style="color: inherit; text-decoration: none;">
 					<h6>Test selection</h6>
 				</a>
-				<pre><code>-f REGEXP, --filter REGEXP
-                      Regular expression to match tests to run
--l, --list            List all tests that would be run and <span class="hljs-keyword">exit</span>
--a, --all, --include-slow-tests
-                      Run tests that take a very long time</code></pre>
+				<pre><code>-f REGEXP, <span class="hljs-comment">--filter REGEXP</span>
+                      Regular expression <span class="hljs-keyword">to</span> match names <span class="hljs-keyword">of</span> tests <span class="hljs-keyword">to</span> <span class="hljs-built_in">run</span>
+-b REGEXP, <span class="hljs-comment">--filter-body REGEXP</span>
+                      Run only tests <span class="hljs-keyword">whose</span> full code <span class="hljs-keyword">is</span> matched <span class="hljs-keyword">by</span> this regular expression
+-l, <span class="hljs-comment">--list            List all tests that would be run and exit</span>
+-a, <span class="hljs-comment">--all, --include-slow-tests</span>
+                      Run tests <span class="hljs-keyword">that</span> take a very long <span class="hljs-built_in">time</span></code></pre>
 				<a href="#email" id="email" style="color: inherit; text-decoration: none;">
 					<h6>Email</h6>
 				</a>
@@ -271,9 +273,6 @@
 					</li>
 					<li class=" tsd-kind-module tsd-is-external">
 						<a href="modules/_browser_utils_.html">&quot;browser_<wbr>utils&quot;</a>
-					</li>
-					<li class=" tsd-kind-module tsd-is-external">
-						<a href="modules/_main_.html">&quot;main&quot;</a>
 					</li>
 					<li class=" tsd-kind-module tsd-is-external">
 						<a href="modules/_utils_.html">&quot;utils&quot;</a>

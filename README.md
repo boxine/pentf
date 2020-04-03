@@ -161,7 +161,9 @@ The keys are up to you; for example you probably want to have a main entry point
 
 ```
 -f REGEXP, --filter REGEXP
-                      Regular expression to match tests to run
+                      Regular expression to match names of tests to run
+-b REGEXP, --filter-body REGEXP
+                      Run only tests whose full code is matched by this regular expression
 -l, --list            List all tests that would be run and exit
 -a, --all, --include-slow-tests
                       Run tests that take a very long time

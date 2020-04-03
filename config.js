@@ -140,7 +140,11 @@ function parseArgs(options) {
     const selection_group = parser.addArgumentGroup({title: 'Test selection'});
     selection_group.addArgument(['-f', '--filter'], {
         metavar: 'REGEXP',
-        help: 'Regular expression to match tests to run',
+        help: 'Regular expression to match names of tests to run',
+    });
+    selection_group.addArgument(['-b', '--filter-body'], {
+        metavar: 'REGEXP',
+        help: 'Run only tests whose full code is matched by this regular expression',
     });
     selection_group.addArgument(['-l', '--list'], {
         action: 'storeTrue',

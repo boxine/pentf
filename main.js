@@ -2,39 +2,13 @@
 
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
 
 const {readConfig, parseArgs} = require('./config');
 const {readFile} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
 const {testsVersion, pintfVersion} = require('./version');
-
-/**
- * @param {*} args 
- * @param {string} tests_dir 
- * @param {string} [glob_pattern] 
- */
-function load_tests(args, tests_dir, glob_pattern = '*.js') {
-    let tests = glob
-        .sync(glob_pattern, {
-            cwd: tests_dir,
-        })
-        .map(n => ({
-            path: n,
-            name: path.basename(n, path.extname(n))
-        }));
-
-    if (args.filter) {
-        tests = tests.filter(n => new RegExp(args.filter).test(n.name));
-    }
-
-    return tests.map(t => {
-        const tc = require(path.join(tests_dir, t.path));
-        tc.name = t.name;
-        return tc;
-    });
-}
+const {loadTests} = require('./loader');
 
 // Available options:
 // - defaultConfig: Function to call on the loaded configuration, to set/compute default values.
@@ -60,7 +34,7 @@ async function real_main(options={}) {
     if (options.defaultConfig) {
         options.defaultConfig(config);
     }
-    const test_cases = load_tests(args, options.testsDir, options.testsGlob);
+    const test_cases = await loadTests(args, options.testsDir, options.testsGlob);
     config._testsDir = options.testsDir;
     if (options.rootDir) config._rootDir = options.rootDir;
     if (options.configDir) config._configDir = options.configDir;

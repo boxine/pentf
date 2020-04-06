@@ -439,6 +439,36 @@ async function setLanguage(page, lang) {
 }
 
 /**
+ * Retrieve attribute value of a DOM Element
+ * @param {import('puppeteer').Page} page 
+ * @param {string} selector 
+ * @param {string} name 
+ */
+async function getAttribute(page, selector, name) {
+    await page.waitForSelector(selector);
+    return page.$eval(
+        selector,
+        (el, propName) => {
+            if (propName in el) {
+                const value = el[propName];
+                return propName === 'style' ? value.cssText : value;
+            }
+            return el.getAttribute(propName);
+        },
+        name,
+    );
+}
+
+/**
+ * Get the text content of a given DOM Element.
+ * @param {import('puppeteer').Page} page 
+ * @param {string} selector 
+ */
+async function getText(page, selector) {
+    return getAttribute(page, selector, 'textContent');
+}
+
+/**
  * Get all options of a select as an array of strings, e.g. ['Option A', 'Option B(***)', 'Option C']
  * @param {import('puppeteer').Page} page 
  * @param {import('puppeteer').ElementHandle<HTMLSelectElement>} select 
@@ -536,7 +566,9 @@ module.exports = {
     clickXPath,
     closePage,
     escapeXPathText,
+    getAttribute,
     getSelectOptions,
+    getText,
     html2pdf,
     newPage,
     restoreTimeouts,

@@ -109,6 +109,10 @@ function escape_html(str) {
         .replace(/'/g, '&#039;'));
 }
 
+function heading(results) {
+    return results.config.report_heading || 'End-To-End Test Report';
+}
+
 function markdown(results) {
     const table = results.tests.map((test_result, idx) => {
         return (
@@ -128,7 +132,7 @@ function markdown(results) {
     const report_header_md = (
         results.config.report_header_md ? '\n' + results.config.report_header_md + '\n' : '');
 
-    return `# Integration Test Report
+    return `# ${heading(results)}
 ${report_header_md}
 ### Options
 Tested Environment: **${results.config.env}**  
@@ -242,7 +246,7 @@ function html(results) {
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Integration Test Report</title>
+<title>${escape_html(heading(results))}</title>
 <style>
 html, body {
     margin-top: 0;
@@ -335,7 +339,7 @@ td.test_footer {
 </style>
 </head>
 <body>
-<h1>Integration Test Report</h1>
+<h1>${escape_html(heading(results))}</h1>
 
 ${report_header_html}
 <h2>Options</h2>

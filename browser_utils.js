@@ -346,6 +346,8 @@ async function assertNotXPath(page, xpath, message='', wait_ms=2000, check_every
  * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean}} [options] 
  */
 async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
+    assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
+
     let remainingTimeout = timeout;
     while (true) { // eslint-disable-line no-constant-condition
         const found = await page.evaluate((xpath, visible) => {

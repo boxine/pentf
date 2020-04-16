@@ -71,7 +71,11 @@ function finish(config, state) {
     if (tasks.length === 0 && config.filter) {
         STATUS_STREAM.write(`No test case found with filter: ${config.filter}\n`);
     }
-    STATUS_STREAM.write(`${success_count} tests passed, ${error_count} tests failed.\n`);
+    STATUS_STREAM.write(`${success_count} tests passed, ${error_count - expectedToFail.length} tests failed`);
+    if (expectedToFail.length) {
+        STATUS_STREAM.write(`, ${expectedToFail.length} failed as expected`);
+    }
+    STATUS_STREAM.write('.\n');
     if (skipped.length > 0) {
         STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);
     }

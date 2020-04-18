@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>pintf</title>
+	<title>pentf</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">pintf</a>
+					<a href="index.html" class="title">pentf</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,7 +54,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1>pintf</h1>
+			<h1>pentf</h1>
 		</div>
 	</div>
 </header>
@@ -62,19 +62,25 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<a href="#pintf---parallel-integration-test-framework" id="pintf---parallel-integration-test-framework" style="color: inherit; text-decoration: none;">
-					<h1>pintf - Parallel INTegration Test Framework</h1>
+				<a href="#pentf---parallel-end-to-end-test-framework" id="pentf---parallel-end-to-end-test-framework" style="color: inherit; text-decoration: none;">
+					<h1>pentf - Parallel End-To-End Test Framework</h1>
 				</a>
+				<p>pentf runs end-to-end tests (with or without web browsers, emails, and/or direct HTTP requests) in a highly parallel manner, so that tests bound by client CPU can run while other tests are waiting for an email to arrive or slow external servers to answer.</p>
+				<p>Tests are written in plain JavaScript, typically using node&#39;s built-in <a href="https://nodejs.org/api/assert.html">assert</a>. You can use any other assertion framework too; a test is simply an <code>async</code> function which throws an exception to indicate test failure.</p>
+				<p>Browser tests using <a href="https://pptr.dev/">puppeteer</a> benefit from special support such as isolation of parallel tests and screenshots of test failures as well as a number of <a href="https://boxine.github.io/pentf/modules/_browser_utils_.html">helper functions</a>, for example to wait for text to become visible.</p>
+				<p>Depending on the environment (you can set up configurations to run the same tests against dev, stage, prod etc.), tests can be skipped, or marked as <em>expected to fail</em> for test driven development where you write tests first before fixing a bug or implementing a feature.
+					A locking system prevents two tests or the same tests on two different machines from accessing a shared resource, e.g. a test account.
+				You can review test results in a PDF report.</p>
 				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
 					<h2>Installation</h2>
 				</a>
-				<pre><code class="language-shell">npm i --save-dev pintf puppeteer</code></pre>
+				<pre><code class="language-shell">npm i --save-dev pentf puppeteer</code></pre>
 				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
 					<h2>Usage</h2>
 				</a>
-				<p>pintf can be used as a library (A standalone binary is also planned). Create a script named <code>run</code> in the directory of your tests, and fill it like this:</p>
+				<p>pentf can be used as a library (A standalone binary is also planned). Create a script named <code>run</code> in the directory of your tests, and fill it like this:</p>
 				<pre><code class="language-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
-<span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf'</span>).main({
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf'</span>).main({
     <span class="hljs-attr">rootDir</span>: __dirname,
     <span class="hljs-attr">description</span>: <span class="hljs-string">'Test my cool application'</span>,
 });</code></pre>
@@ -86,13 +92,13 @@
 				</a>
 				<p>Plop a new <code>.js</code> file into <code>tests/</code>. Its name will be the test&#39;&#39;s name, and it should have an async <code>run</code> function, like this:</p>
 				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>);
-<span class="hljs-keyword">const</span> {getMail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf/email'</span>);
-<span class="hljs-keyword">const</span> {newPage, closePage} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf/browser_utils'</span>);
-<span class="hljs-keyword">const</span> {fetch} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf/net_utils'</span>);
-<span class="hljs-keyword">const</span> {makeRandomEmail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pintf/utils'</span>);
+<span class="hljs-keyword">const</span> {getMail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/email'</span>);
+<span class="hljs-keyword">const</span> {newPage, closePage} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/browser_utils'</span>);
+<span class="hljs-keyword">const</span> {fetch} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/net_utils'</span>);
+<span class="hljs-keyword">const</span> {makeRandomEmail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/utils'</span>);
 
 <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params">config</span>) </span>{
-    <span class="hljs-keyword">const</span> email = makeRandomEmail(config, <span class="hljs-string">'pintf_example'</span>);
+    <span class="hljs-keyword">const</span> email = makeRandomEmail(config, <span class="hljs-string">'pentf_example'</span>);
     <span class="hljs-keyword">const</span> start = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>();
     <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(config, <span class="hljs-string">'https://api.tonie.cloud/v2/users'</span>, {
         <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
@@ -128,7 +134,7 @@
 
 <span class="hljs-built_in">module</span>.exports = {
     run,
-    <span class="hljs-attr">description</span>: <span class="hljs-string">'pintf test example'</span>, <span class="hljs-comment">// optional description for test reports, can be left out</span>
+    <span class="hljs-attr">description</span>: <span class="hljs-string">'pentf test example'</span>, <span class="hljs-comment">// optional description for test reports, can be left out</span>
 
     <span class="hljs-comment">// You can skip the test in some conditions by defining an optional skip method:</span>
     <span class="hljs-attr">skip</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> config.env === <span class="hljs-string">'prod'</span>,
@@ -144,15 +150,15 @@
     <span class="hljs-comment">// Default is one resource with the name `test_${test.name}`, i.e. tests are not run concurrently by default</span>
     <span class="hljs-comment">// Using no shared resources? Set resources: []</span>
 };</code></pre>
-				<p>Note that while the above example tests a webpage with <a href="https://github.com/GoogleChrome/puppeteer">puppeteer</a> and uses pintf&#39;s has native support for HTTP requests (in <code>net_utils</code>) and email sending (in <code>email</code>), tests can be anything – they just have to fail the promise if the test fails.</p>
-				<p>Have a look in the <a href="https://boxine.github.io/pintf/index.html">API documentation</a> for various helper functions.</p>
+				<p>Note that while the above example tests a webpage with <a href="https://github.com/GoogleChrome/puppeteer">puppeteer</a> and uses pentf&#39;s has native support for HTTP requests (in <code>net_utils</code>) and email sending (in <code>email</code>), tests can be anything – they just have to fail the promise if the test fails.</p>
+				<p>Have a look in the <a href="https://boxine.github.io/pentf/index.html">API documentation</a> for various helper functions.</p>
 				<a href="#configuration" id="configuration" style="color: inherit; text-decoration: none;">
 					<h2>Configuration</h2>
 				</a>
-				<p>pintf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the <code>config</code> subdirectory for each environment. You can also add a programatic configuration by passing a function <code>defaultConfig</code> to <code>pintf.main</code>; see <a href="run">pintf&#39;s own run</a> for an example. </p>
+				<p>pentf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the <code>config</code> subdirectory for each environment. You can also add a programatic configuration by passing a function <code>defaultConfig</code> to <code>pentf.main</code>; see <a href="run">pentf&#39;s own run</a> for an example. </p>
 				<p>The keys are up to you; for example you probably want to have a main entry point. Predefined keys are:</p>
 				<ul>
-					<li><strong><code>imap</code></strong> If you are using the <code>pintf/email</code> module to fetch and test emails, configure your imap connection here, like<pre><code><span class="hljs-string">"imap"</span>: {
+					<li><strong><code>imap</code></strong> If you are using the <code>pentf/email</code> module to fetch and test emails, configure your imap connection here, like<pre><code><span class="hljs-string">"imap"</span>: {
   <span class="hljs-string">"user"</span>: <span class="hljs-string">"user@example.com"</span>,
   <span class="hljs-string">"password"</span>: <span class="hljs-string">"secret"</span>,
   <span class="hljs-string">"host"</span>: <span class="hljs-string">"mail.example.com"</span>,

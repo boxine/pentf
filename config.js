@@ -182,7 +182,7 @@ function parseArgs(options) {
     puppeteer_group.addArgument(['--screenshot-directory'], {
         metavar: 'DIR',
         defaultValue: defaultScreenshotDir,
-        help: `Directory to write screenshots to (default: ${process.env.PINTF_GENERIC_HELP ? './screenshots' : '%(defaultValue)s'})`,
+        help: `Directory to write screenshots to (default: ${process.env.PENTF_GENERIC_HELP ? './screenshots' : '%(defaultValue)s'})`,
     });
     puppeteer_group.addArgument(['-s', '--slow-mo'], {
         metavar: 'MS',

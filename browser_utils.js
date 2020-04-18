@@ -17,7 +17,7 @@ let tmp_home;
 
 /**
  * Launch a new browser, with a new page (=Tab)
- * @param {*} config The pintf configuration
+ * @param {*} config The pentf configuration
  * @param {string[]} [chrome_args] Additional arguments for Chrome (optional)
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
@@ -135,7 +135,7 @@ async function newPage(config, chrome_args=[]) {
     }
 
     if (config._browser_pages) {
-        page._pintf_browser_pages = config._browser_pages;
+        page._pentf_browser_pages = config._browser_pages;
         config._browser_pages.push(page);
     }
 
@@ -146,8 +146,8 @@ async function newPage(config, chrome_args=[]) {
  * @param {import('puppeteer').Page} page 
  */
 async function closePage(page) {
-    if (page._pintf_browser_pages) {
-        remove(page._pintf_browser_pages, p => p === page);
+    if (page._pentf_browser_pages) {
+        remove(page._pentf_browser_pages, p => p === page);
     }
 
     const browser = await page.browser();
@@ -490,14 +490,14 @@ async function getSelectOptions(page, select) {
  */
 async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
     function applyTimeouts(factor) {
-        window._pintf_real_setTimeout = window._pintf_real_setTimeout || window.setTimeout;
+        window._pentf_real_setTimeout = window._pentf_real_setTimeout || window.setTimeout;
         window.setTimeout = (func, delay, ...args) => {
-            return window._pintf_real_setTimeout(func, delay && (delay / factor), ...args);
+            return window._pentf_real_setTimeout(func, delay && (delay / factor), ...args);
         };
 
-        window._pintf_real_setInterval = window._pintf_real_setInterval || window.setInterval;
+        window._pentf_real_setInterval = window._pentf_real_setInterval || window.setInterval;
         window.setInterval = (func, delay, ...args) => {
-            return window._pintf_real_setInterval(func, delay && (delay / factor), ...args);
+            return window._pentf_real_setInterval(func, delay && (delay / factor), ...args);
         };
     }
 
@@ -513,11 +513,11 @@ async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
  */
 async function restoreTimeouts(page) {
     await page.evaluate(() => {
-        if (window._pintf_real_setTimeout) {
-            window.setTimeout = window._pintf_real_setTimeout;
+        if (window._pentf_real_setTimeout) {
+            window.setTimeout = window._pentf_real_setTimeout;
         }
-        if (window._pintf_real_setInterval) {
-            window.setInterval = window._pintf_real_setInterval;
+        if (window._pentf_real_setInterval) {
+            window.setInterval = window._pentf_real_setInterval;
         }
     });
 }

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const pintf = require('../../index.js');
+const pentf = require('../../index.js');
 
-pintf.main({
+pentf.main({
     rootDir: __dirname,
     testsDir: __dirname,
 });

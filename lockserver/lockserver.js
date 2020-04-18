@@ -19,9 +19,9 @@ function listNamespaces(namespaces, request, response) {
     }).join('\n');
     response.end(`<!DOCTYPE html>
 <html>
-<head><title>pintf lockserver</title></head>
+<head><title>pentf lockserver</title></head>
 <body>
-<p>This is the <a href="https://github.com/boxine/pintf">pintf</a> lockserver demo.</p>
+<p>This is the <a href="https://github.com/boxine/pentf">pentf</a> lockserver demo.</p>
 
 Available namespaces:
 
@@ -230,21 +230,21 @@ async function lockserver(options) {
 }
 
 async function beforeAllTests(config) {
-    if (! config.pintf_boot_lockserver) {
+    if (! config.pentf_boot_lockserver) {
         return;
     }
 
     const serverData = await lockserver({port: 0, keepAliveTimeout: 500});
-    config.pintf_lockserver_url = `http://localhost:${serverData.port}/`;
+    config.pentf_lockserver_url = `http://localhost:${serverData.port}/`;
     if (! config.external_locking_url) {
-        config.external_locking_url = config.pintf_lockserver_url + 'pintf';
+        config.external_locking_url = config.pentf_lockserver_url + 'pentf';
     }
     return serverData;
 }
 
 async function afterAllTests(config, serverData) {
     if (!serverData) { // Nothing configured
-        assert(! config.pintf_boot_lockserver);
+        assert(! config.pentf_boot_lockserver);
         return;
     }
 

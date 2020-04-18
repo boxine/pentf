@@ -6,9 +6,9 @@ const {wait, cmpKey} = require('../utils');
 
 
 async function run(config) {
-    assert(config.pintf_lockserver_url);
+    assert(config.pentf_lockserver_url);
 
-    const baseUrl = `${config.pintf_lockserver_url}test_lockserver_${Math.random().toString(36).slice(2)}`;
+    const baseUrl = `${config.pentf_lockserver_url}test_lockserver_${Math.random().toString(36).slice(2)}`;
     const config1 = {
         ...config,
         no_locking: false,

@@ -29,11 +29,11 @@ async function testsVersion(config) {
     }
 }
 
-function pintfVersion() {
+function pentfVersion() {
     return require('./package.json').version;
 }
 
 module.exports = {
     testsVersion,
-    pintfVersion,
+    pentfVersion,
 };

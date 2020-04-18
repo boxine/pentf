@@ -18,5 +18,5 @@ module.exports = {
     description: 'Reproduces a browser failure. This is not a selftest; more of a demo.',
     resources: [],
     run,
-    skip: () => !process.env.PINTF_DEMO,
+    skip: () => !process.env.PENTF_DEMO,
 };

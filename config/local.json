@@ -1,5 +1,5 @@
 {
 	"extends": "_common",
 
-	"pintf_boot_lockserver": true
+	"pentf_boot_lockserver": true
 }

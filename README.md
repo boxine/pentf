@@ -1,18 +1,28 @@
-# pintf - Parallel INTegration Test Framework
+# pentf - Parallel End-To-End Test Framework
+
+pentf runs end-to-end tests (with or without web browsers, emails, and/or direct HTTP requests) in a highly parallel manner, so that tests bound by client CPU can run while other tests are waiting for an email to arrive or slow external servers to answer.
+
+Tests are written in plain JavaScript, typically using node's built-in [assert](https://nodejs.org/api/assert.html). You can use any other assertion framework too; a test is simply an `async` function which throws an exception to indicate test failure.
+
+Browser tests using [puppeteer](https://pptr.dev/) benefit from special support such as isolation of parallel tests and screenshots of test failures as well as a number of [helper functions](https://boxine.github.io/pentf/modules/_browser_utils_.html), for example to wait for text to become visible.
+
+Depending on the environment (you can set up configurations to run the same tests against dev, stage, prod etc.), tests can be skipped, or marked as _expected to fail_ for test driven development where you write tests first before fixing a bug or implementing a feature.
+A locking system prevents two tests or the same tests on two different machines from accessing a shared resource, e.g. a test account.
+You can review test results in a PDF report.
 
 ## Installation
 
 ```shell
-npm i --save-dev pintf puppeteer
+npm i --save-dev pentf puppeteer
 ```
 
 ## Usage
 
-pintf can be used as a library (A standalone binary is also planned). Create a script named `run` in the directory of your tests, and fill it like this:
+pentf can be used as a library (A standalone binary is also planned). Create a script named `run` in the directory of your tests, and fill it like this:
 
 ```javascript
 #!/usr/bin/env node
-require('pintf').main({
+require('pentf').main({
     rootDir: __dirname,
     description: 'Test my cool application',
 });
@@ -32,13 +42,13 @@ Plop a new `.js` file into `tests/`. Its name will be the test''s name, and it s
 
 ```javascript
 const assert = require('assert');
-const {getMail} = require('pintf/email');
-const {newPage, closePage} = require('pintf/browser_utils');
-const {fetch} = require('pintf/net_utils');
-const {makeRandomEmail} = require('pintf/utils');
+const {getMail} = require('pentf/email');
+const {newPage, closePage} = require('pentf/browser_utils');
+const {fetch} = require('pentf/net_utils');
+const {makeRandomEmail} = require('pentf/utils');
 
 async function run(config) {
-    const email = makeRandomEmail(config, 'pintf_example');
+    const email = makeRandomEmail(config, 'pentf_example');
     const start = new Date();
     const response = await fetch(config, 'https://api.tonie.cloud/v2/users', {
         method: 'POST',
@@ -74,7 +84,7 @@ async function run(config) {
 
 module.exports = {
     run,
-    description: 'pintf test example', // optional description for test reports, can be left out
+    description: 'pentf test example', // optional description for test reports, can be left out
 
     // You can skip the test in some conditions by defining an optional skip method:
     skip: config => config.env === 'prod',
@@ -92,17 +102,17 @@ module.exports = {
 };
 ```
 
-Note that while the above example tests a webpage with [puppeteer](https://github.com/GoogleChrome/puppeteer) and uses pintf's has native support for HTTP requests (in `net_utils`) and email sending (in `email`), tests can be anything – they just have to fail the promise if the test fails.
+Note that while the above example tests a webpage with [puppeteer](https://github.com/GoogleChrome/puppeteer) and uses pentf's has native support for HTTP requests (in `net_utils`) and email sending (in `email`), tests can be anything – they just have to fail the promise if the test fails.
 
-Have a look in the [API documentation](https://boxine.github.io/pintf/index.html) for various helper functions.
+Have a look in the [API documentation](https://boxine.github.io/pentf/index.html) for various helper functions.
 
 ## Configuration
 
-pintf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the `config` subdirectory for each environment. You can also add a programatic configuration by passing a function `defaultConfig` to `pintf.main`; see [pintf's own run](run) for an example. 
+pentf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the `config` subdirectory for each environment. You can also add a programatic configuration by passing a function `defaultConfig` to `pentf.main`; see [pentf's own run](run) for an example. 
 
 The keys are up to you; for example you probably want to have a main entry point. Predefined keys are:
 
-- **`imap`** If you are using the `pintf/email` module to fetch and test emails, configure your imap connection here, like
+- **`imap`** If you are using the `pentf/email` module to fetch and test emails, configure your imap connection here, like
 ```
   "imap": {
     "user": "user@example.com",

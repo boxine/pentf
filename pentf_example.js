@@ -1,11 +1,11 @@
 const assert = require('assert');
-const {getMail} = require('pintf/email');
-const {newPage, closePage} = require('pintf/browser_utils');
-const {fetch} = require('pintf/net_utils');
-const {makeRandomEmail} = require('pintf/utils');
+const {getMail} = require('pentf/email');
+const {newPage, closePage} = require('pentf/browser_utils');
+const {fetch} = require('pentf/net_utils');
+const {makeRandomEmail} = require('pentf/utils');
 
 async function run(config) {
-    const email = makeRandomEmail(config, 'pintf_example');
+    const email = makeRandomEmail(config, 'pentf_example');
     const start = new Date();
     const response = await fetch(config, 'https://api.tonie.cloud/v2/users', {
         method: 'POST',
@@ -41,7 +41,7 @@ async function run(config) {
 
 module.exports = {
     run,
-    description: 'pintf test example', // optional description for test reports, can be left out
+    description: 'pentf test example', // optional description for test reports, can be left out
 
     // You can skip the test in some conditions by defining an optional skip method:
     skip: config => config.env === 'prod',

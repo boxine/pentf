@@ -12,5 +12,8 @@ doc: *.js tsconfig.json
 lockserver-dev:
 	node_modules/.bin/nodemon lockserver/lockserver.js
 
-.PHONY: default lint test lockserver-dev
+clean:
+	@npm run clean
+
+.PHONY: default lint test lockserver-dev clean
 

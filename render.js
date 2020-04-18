@@ -346,7 +346,7 @@ ${report_header_html}
 <p>Tested Environment: <strong>${results.config.env}</strong><br/>
 Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}<br/>
 Start: ${format_timestamp(results.start)}<br/>
-Version: ${results.testsVersion}, pintf ${results.pintfVersion}<br/>
+Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>
 </p>
 
 <h2>Results</h2>

@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
-const pintf = require('./index.js');
+const pentf = require('./index.js');
 
 const lockserver = require('./lockserver/lockserver');
 
-pintf.main({
+pentf.main({
     rootDir: __dirname, // Mandatory
     // All further properties are optional
     beforeAllTests: lockserver.beforeAllTests,
     afterAllTests: lockserver.afterAllTests,
-    description: 'Test pintf itself',
+    description: 'Test pentf itself',
     defaultConfig: config => {
         // You can compute more complicated properties here. For example ...
         config.rejectUnauthorized = false; // Allow self-signed TLS certificates

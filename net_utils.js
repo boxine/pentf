@@ -29,7 +29,7 @@ async function fetch(config, url, options) {
         options.headers = {};
     }
     if (! Object.keys(options.headers).find(h => h.toLowerCase() === 'user-agent')) {
-        options.headers['User-Agent'] = 'pintf integration test (https://github.com/boxine/pintf)';
+        options.headers['User-Agent'] = 'pentf integration test (https://github.com/boxine/pentf)';
     }
 
     if (config.print_curl) {

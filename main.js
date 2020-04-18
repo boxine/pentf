@@ -7,7 +7,7 @@ const {readConfig, parseArgs} = require('./config');
 const {readFile} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
-const {testsVersion, pintfVersion} = require('./version');
+const {testsVersion, pentfVersion} = require('./version');
 const {loadTests} = require('./loader');
 
 // Available options:
@@ -41,7 +41,7 @@ async function real_main(options={}) {
 
     if (args.print_version) {
         console.log(await testsVersion(config));
-        console.log('pintf ' + pintfVersion());
+        console.log('pentf ' + pentfVersion());
         return;
     }
 

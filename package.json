@@ -1,7 +1,7 @@
 {
-  "name": "pintf",
+  "name": "pentf",
   "version": "1.0.52",
-  "description": "parallel integration/end-to-end test framework",
+  "description": "parallel end-to-end test framework",
   "main": "index.js",
   "types": "index.d.ts",
   "directories": {
@@ -43,12 +43,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/boxine/pintf.git"
+    "url": "git+https://github.com/boxine/pentf.git"
   },
   "author": "Philipp Hagemeister, Boxine GmbH",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/boxine/pintf/issues"
+    "url": "https://github.com/boxine/pentf/issues"
   },
-  "homepage": "https://github.com/boxine/pintf#readme"
+  "homepage": "https://github.com/boxine/pentf#readme"
 }

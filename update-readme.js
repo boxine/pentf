@@ -21,7 +21,7 @@ function main() {
     const full_help = (child_process.execSync('./run --help', {
         env: {
             COLUMNS: 110,
-            PINTF_GENERIC_HELP: 'true',
+            PENTF_GENERIC_HELP: 'true',
         },
     }).toString('utf-8')
         .replace(/(-e\s+|\s--env\s+)\{[^}]*?\}/g, (_, key) => {

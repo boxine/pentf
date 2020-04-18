@@ -8,10 +8,10 @@ async function run(config) {
     const clicks = [];
 
     await page.setContent(`
-        <div data-testid="first" onclick="javascript:pintfClick('first')">first</div>
-        <div data-testid="invisible" style="display:none;" onclick="pintfClick('invisible')">invisible</div>
+        <div data-testid="first" onclick="javascript:pentfClick('first')">first</div>
+        <div data-testid="invisible" style="display:none;" onclick="pentfClick('invisible')">invisible</div>
     `);
-    await page.exposeFunction('pintfClick', clickId => {
+    await page.exposeFunction('pentfClick', clickId => {
         clicks.push(clickId);
     });
 

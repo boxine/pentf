@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<title>&quot;browser_utils&quot; | pentf</title>
-	<meta name="description" content="">
+	<meta name="description" content="Documentation for pentf">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
 </head>
@@ -13,7 +13,7 @@
 	<div class="tsd-page-toolbar">
 		<div class="container">
 			<div class="table-wrap">
-				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
 					<div class="field">
 						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
 						<input id="tsd-search-field" type="text" />
@@ -73,7 +73,6 @@
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#assertnotxpath" class="tsd-kind-icon">assert<wbr>NotXPath</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#assertvalue" class="tsd-kind-icon">assert<wbr>Value</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#checktext" class="tsd-kind-icon">check<wbr>Text</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#clicktestid" class="tsd-kind-icon">click<wbr>Test<wbr>Id</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#clicktext" class="tsd-kind-icon">click<wbr>Text</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#clickxpath" class="tsd-kind-icon">clickXPath</a></li>
@@ -82,6 +81,7 @@
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#getattribute" class="tsd-kind-icon">get<wbr>Attribute</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#getselectoptions" class="tsd-kind-icon">get<wbr>Select<wbr>Options</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#gettext" class="tsd-kind-icon">get<wbr>Text</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#html2pdf" class="tsd-kind-icon">html2pdf</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#newpage" class="tsd-kind-icon">new<wbr>Page</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#restoretimeouts" class="tsd-kind-icon">restore<wbr>Timeouts</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#setlanguage" class="tsd-kind-icon">set<wbr>Language</a></li>
@@ -89,7 +89,6 @@
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#waitfortestid" class="tsd-kind-icon">wait<wbr>For<wbr>Test<wbr>Id</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#waitfortext" class="tsd-kind-icon">wait<wbr>For<wbr>Text</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#waitforvisible" class="tsd-kind-icon">wait<wbr>For<wbr>Visible</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_browser_utils_.html#workaround_setcontent" class="tsd-kind-icon">workaround_<wbr>set<wbr>Content</a></li>
 							</ul>
 						</section>
 					</div>
@@ -101,36 +100,51 @@
 					<a name="assertnotxpath" class="tsd-anchor"></a>
 					<h3>assert<wbr>NotXPath</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-external">
-						<li class="tsd-signature tsd-kind-icon">assert<wbr>NotXPath<span class="tsd-signature-symbol">(</span>page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span>, xpath<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, wait_ms<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, check_every<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">assert<wbr>NotXPath<span class="tsd-signature-symbol">(</span>page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span>, xpath<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, message<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span>, waitMs<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, checkEvery<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L322">browser_utils.js:322</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L365">browser_utils.js:365</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Assert that there is currently no element matching the xpath on the page</p>
+									<p>Assert that there is currently no element matching the XPath on the page.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>puppeteer page object.</p>
+									</div>
 								</li>
 								<li>
 									<h5>xpath: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>XPath to search for.</p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> message: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Error message shown if the element is not visible in time.</p>
+									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> wait_ms: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 2000</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> waitMs: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 2000</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>How long to wait, in milliseconds. (Default: 2s)</p>
+									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> check_every: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 200</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> checkEvery: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 200</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Intervals between checks, in milliseconds.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -147,50 +161,30 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L283">browser_utils.js:283</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L325">browser_utils.js:325</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Assert an <code>&lt;input&gt;</code> element having a certain value (after a wait if necessary).</p>
+								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>input: <span class="tsd-signature-type">ElementHandle</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Element</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A puppeteer handle to an input element.</p>
+									</div>
 								</li>
 								<li>
 									<h5>expected: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
+										<p>The value that is expected to be present.</p>
 									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-external">
-					<a name="checktext" class="tsd-anchor"></a>
-					<h3>check<wbr>Text</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-external">
-						<li class="tsd-signature tsd-kind-icon">check<wbr>Text<span class="tsd-signature-symbol">(</span>text<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L210">browser_utils.js:210</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>text: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -204,18 +198,28 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L407">browser_utils.js:407</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L465">browser_utils.js:465</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Click an element identified by a test ID (<code>data-testid=</code> attribute).
+									Selecting and clicking happens in the same tick, so this is safe to call even if the client application may currently be rerendering.</p>
+								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The puppeteer page handle.</p>
+									</div>
 								</li>
 								<li>
 									<h5>testId: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The test ID to look for.</p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
@@ -237,21 +241,27 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L389">browser_utils.js:389</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L442">browser_utils.js:442</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Click a link or button by its text content</p>
+									<p>Click a link, button, label, or input by its text content.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>puppeteer page object.</p>
+									</div>
 								</li>
 								<li>
 									<h5>text: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Text that the element must contain.</p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
@@ -273,7 +283,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L348">browser_utils.js:348</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L396">browser_utils.js:396</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -285,9 +295,15 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>puppeteer page object.</p>
+									</div>
 								</li>
 								<li>
 									<h5>xpath: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>XPath selector to match the element.</p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
@@ -309,16 +325,20 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L148">browser_utils.js:148</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L159">browser_utils.js:159</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Close a page (and its associated browser)</p>
+								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
 									<div class="tsd-comment tsd-typography">
+										<p>puppeteer page object returned by <code>newPage</code>.</p>
 									</div>
 								</li>
 							</ul>
@@ -336,16 +356,29 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L199">browser_utils.js:199</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L227">browser_utils.js:227</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Construct an XPath expression for an arbitrary string.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-javascript"><span class="hljs-keyword">const</span> searchString = <span class="hljs-string">`'"'`</span>;
+<span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> newPage(config);
+<span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">'https://github.com/boxine/pentf/blob/master/browser_utils.js'</span>);
+<span class="hljs-keyword">await</span> page.waitForXPath(<span class="hljs-string">`//div[@class="repository-content"]//text()[contains(., <span class="hljs-subst">${escapeXPathText(searchString)}</span>)]`</span>);
+<span class="hljs-keyword">await</span> closePage();</code></pre>
+									</dd>
+								</dl>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>text: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
+										<p>The text to encode. This can be user input or otherwise contain exotic characters.</p>
 									</div>
 								</li>
 							</ul>
@@ -357,35 +390,43 @@
 					<a name="getattribute" class="tsd-anchor"></a>
 					<h3>get<wbr>Attribute</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-external">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Attribute<span class="tsd-signature-symbol">(</span>page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span>, selector<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Attribute<span class="tsd-signature-symbol">(</span>page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span>, selector<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L449">browser_utils.js:449</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L510">browser_utils.js:510</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Retrieve attribute value of a DOM Element</p>
+									<p>Retrieve attribute value of a DOM element.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The puppeteer page handle.</p>
+									</div>
 								</li>
 								<li>
 									<h5>selector: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Query selector for the element.</p>
+									</div>
 								</li>
 								<li>
 									<h5>name: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
+										<p>Attribute name.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>The attribute value</p>
 						</li>
 					</ul>
 				</section>
@@ -399,24 +440,31 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L479">browser_utils.js:479</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L543">browser_utils.js:543</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Get all options of a select as an array of strings, e.g. [&#39;Option A&#39;, &#39;Option B(***)&#39;, &#39;Option C&#39;]</p>
+									<p>Get all options of a <code>&lt;select&gt;</code> as an array of strings. The selected option is suffixed with <code>(***)</code>.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The puppeteer page handle.</p>
+									</div>
 								</li>
 								<li>
 									<h5>select: <span class="tsd-signature-type">ElementHandle</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">HTMLSelectElement</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>puppeteer handl eto the <code>&lt;select&gt;</code>.</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>e.g. <code>[&#39;Option A&#39;, &#39;Option B(***)&#39;, &#39;Option C&#39;]</code></p>
 						</li>
 					</ul>
 				</section>
@@ -424,13 +472,13 @@
 					<a name="gettext" class="tsd-anchor"></a>
 					<h3>get<wbr>Text</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-external">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Text<span class="tsd-signature-symbol">(</span>page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span>, selector<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Text<span class="tsd-signature-symbol">(</span>page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, selector<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L469">browser_utils.js:469</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L532">browser_utils.js:532</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -441,15 +489,66 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<h5>page: <span class="tsd-signature-type">any</span></h5>
 								</li>
 								<li>
 									<h5>selector: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
+										<p>Query selector.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Page</span></h4>
+							<p>The puppeteer page handle.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-external">
+					<a name="html2pdf" class="tsd-anchor"></a>
+					<h3>html2pdf</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">html2pdf<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, html<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, modifyPage<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L635">browser_utils.js:635</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Render a HTML string as a PDF file.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The pentf configuration object.</p>
+									</div>
+								</li>
+								<li>
+									<h5>path: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>PDF file name to write to.</p>
+									</div>
+								</li>
+								<li>
+									<h5>html: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Full HTML document to render.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> modifyPage: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> = null</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An optional async function to modify the <code>page</code> object.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -463,20 +562,30 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L24">browser_utils.js:24</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L34">browser_utils.js:34</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Launch a new browser, with a new page (=Tab)</p>
+									<p>Launch a new browser with puppeteer, with a new page (=Tab). The browser is completely isolated from any other calls.
+										Most interactions will be with the page, but you can get the browser using <code>await page.browser();</code>.
+									For more information about the page object, see the <a href="https://github.com/puppeteer/puppeteer/blob/master/docs/api.md">puppeteer API documentation</a>.</p>
 								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-javascript"><span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> newPage(config);
+<span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">'https://example.org/'</span>);
+<span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">'More information'</span>);
+<span class="hljs-keyword">await</span> closePage(page);</code></pre>
+									</dd>
+								</dl>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>config: <span class="tsd-signature-type">any</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>The pentf configuration</p>
+										<p>The pentf configuration object.</p>
 									</div>
 								</li>
 								<li>
@@ -498,16 +607,20 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L514">browser_utils.js:514</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L598">browser_utils.js:598</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Restore timeouts modified by <a href="_browser_utils_.html#speeduptimeouts">speedupTimeouts</a></p>
+								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
 									<div class="tsd-comment tsd-typography">
+										<p>The puppeteer page handle.</p>
 									</div>
 								</li>
 							</ul>
@@ -525,22 +638,26 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L421">browser_utils.js:421</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L480">browser_utils.js:480</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>lang can either be a single string (e.g. &quot;en&quot;) or an array of supported languages (e.g. [&#39;de-DE&#39;, &#39;en-US&#39;, &#39;gr&#39;])</p>
+									<p>Configure the browser&#39;s language.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The puppeteer page handle.</p>
+									</div>
 								</li>
 								<li>
 									<h5>lang: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
 									<div class="tsd-comment tsd-typography">
+										<p>Either be a single string (e.g. &quot;en&quot;) or an array of supported languages (e.g. <code>[&#39;de-DE&#39;, &#39;en-US&#39;, &#39;gr&#39;]</code>)</p>
 									</div>
 								</li>
 							</ul>
@@ -558,15 +675,36 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L491">browser_utils.js:491</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L573">browser_utils.js:573</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Speed up all timeouts of calls to <code>setTimeout</code>/<code>setInterval</code>.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-javascript"><span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> newPage(config);
+<span class="hljs-keyword">await</span> page.setContent(<span class="hljs-string">'&lt;div&gt;Hello world&lt;/div&gt;'</span>);
+<span class="hljs-keyword">await</span> speedupTimeouts(page, {<span class="hljs-attr">factor</span>: <span class="hljs-number">1000</span>});
+<span class="hljs-keyword">await</span> page.evaluate(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">window</span>.setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"will log almost immediately"</span>), <span class="hljs-number">2000</span>);
+});
+<span class="hljs-keyword">await</span> restoreTimeouts(page);
+<span class="hljs-keyword">await</span> page.evaluate(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-built_in">window</span>.setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"will log after 2 seconds"</span>), <span class="hljs-number">2000</span>);
+});
+<span class="hljs-keyword">await</span> closePage(page);</code></pre>
+									</dd>
+								</dl>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The puppeteer page handle.</p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
@@ -588,18 +726,27 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L255">browser_utils.js:255</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L295">browser_utils.js:295</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Search for an element with the given <code>data-testid</code> attribute.</p>
+								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>puppeteer page object.</p>
+									</div>
 								</li>
 								<li>
 									<h5>testId: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The test id to search</p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
@@ -608,6 +755,7 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ElementHandle</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Element</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Handle to the element with the given test ID.</p>
 						</li>
 					</ul>
 				</section>
@@ -621,18 +769,27 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L231">browser_utils.js:231</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L263">browser_utils.js:263</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Wait for text to appear on the page.</p>
+								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>puppeteer page object.</p>
+									</div>
 								</li>
 								<li>
 									<h5>text: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>String to look for.</p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
@@ -641,6 +798,7 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ElementHandle</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Element</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A handle to the text node.</p>
 						</li>
 					</ul>
 				</section>
@@ -654,18 +812,30 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L164">browser_utils.js:164</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/39b786b/browser_utils.js#L182">browser_utils.js:182</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Wait for an element matched by a CSS query selector to become visible.
+										Visible means the element has neither <code>display:none</code> nor <code>visibility:hidden</code>.
+										Elements outside the current viewport (e.g. you&#39;d need to scroll) and hidden with CSS trickery
+									(opacity, overlaid with z-index, or permanently positioned outside the viewport) count as visible.</p>
+								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>puppeteer page object.</p>
+									</div>
 								</li>
 								<li>
 									<h5>selector: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Query selector, e.g. <code>div &gt; a[href=&quot;/&quot;]:visited</code></p>
+									</div>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
@@ -674,36 +844,7 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ElementHandle</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Element</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-external">
-					<a name="workaround_setcontent" class="tsd-anchor"></a>
-					<h3>workaround_<wbr>set<wbr>Content</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-external">
-						<li class="tsd-signature tsd-kind-icon">workaround_<wbr>set<wbr>Content<span class="tsd-signature-symbol">(</span>page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span>, html<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bec13d2/browser_utils.js#L529">browser_utils.js:529</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>page: <span class="tsd-signature-type">Page</span></h5>
-								</li>
-								<li>
-									<h5>html: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A handle to the found element.</p>
 						</li>
 					</ul>
 				</section>
@@ -722,6 +863,9 @@
 						<a href="_browser_utils_.html">&quot;browser_<wbr>utils&quot;</a>
 					</li>
 					<li class=" tsd-kind-module tsd-is-external">
+						<a href="_net_utils_.html">&quot;net_<wbr>utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
 						<a href="_utils_.html">&quot;utils&quot;</a>
 					</li>
 				</ul>
@@ -733,9 +877,6 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
 						<a href="_browser_utils_.html#assertvalue" class="tsd-kind-icon">assert<wbr>Value</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
-						<a href="_browser_utils_.html#checktext" class="tsd-kind-icon">check<wbr>Text</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
 						<a href="_browser_utils_.html#clicktestid" class="tsd-kind-icon">click<wbr>Test<wbr>Id</a>
@@ -762,6 +903,9 @@
 						<a href="_browser_utils_.html#gettext" class="tsd-kind-icon">get<wbr>Text</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
+						<a href="_browser_utils_.html#html2pdf" class="tsd-kind-icon">html2pdf</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
 						<a href="_browser_utils_.html#newpage" class="tsd-kind-icon">new<wbr>Page</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
@@ -781,9 +925,6 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
 						<a href="_browser_utils_.html#waitforvisible" class="tsd-kind-icon">wait<wbr>For<wbr>Visible</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
-						<a href="_browser_utils_.html#workaround_setcontent" class="tsd-kind-icon">workaround_<wbr>set<wbr>Content</a>
 					</li>
 				</ul>
 			</nav>

@@ -1,12 +1,20 @@
+const assert = require('assert');
 const fs = require('fs');
 
 function makeEmailAddress(config, suffix) {
+    assert(config.email, 'Missing `email` key in pentf configuration');
     const [account, domain] = config.email.split('@');
     return account + '+' + suffix + '@' + domain;
 }
 
-function makeRandomEmail(config, prefix) {
-    if (!prefix) prefix = '';
+/**
+ * Generate a random email address.
+ *
+ * @param {*} config The pentf configuration object. `config.email` needs to be set.
+ * @param {string?} prefix Text to put before the random characters.
+ * @returns {string} If `config.email` is `'foo@bar.com'`, something like `foo+prefix129ad12@bar.com`
+ */
+function makeRandomEmail(config, prefix='') {
     return makeEmailAddress(config, prefix + Math.random().toString(36).slice(2));
 }
 
@@ -19,7 +27,13 @@ async function readFile(fileName, type) {
 }
 
 /**
- * @param {number} ms 
+ * Returns a promise that resolves after the specified time. This should be used sparingly and mostly for debugging tests.
+ *
+ * @example
+ * ```javascript
+ * await wait(10000); // wait for 10s
+ * ```
+ * @param {number} ms Number of milliseconds to wait.
  */
 async function wait(ms) {
     await new Promise(resolve => setTimeout(resolve, ms));
@@ -41,7 +55,10 @@ function randomHex() {
 }
 
 /**
- * @param {number} len 
+ * Generate a random hex string.
+ *
+ * @param {number} len Length of the hex string.
+ * @return string A random hex string, e.g. `A812F0D91`
  */
 function randomHexstring(len) {
     let res = '';
@@ -139,9 +156,21 @@ function localIso8601(date) {
 }
 
 /**
- * @param {() => any} testfunc 
+ * Assert that a condition is eventually true.
+ *
+ * @example
+ * ```javascript
+ * let called = false;
+ * setTimeout(() => {called = true;}, 2000);
+ * await assertEventually(() => called);
+ * ```
+ * @param {() => any} testfunc The test function. Must return `true` to signal success.
  * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options] 
- * @param {*} [_options] 
+ * @param {string?} message Error message shown if the condition never becomes true within the timeout.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
+ * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
+ *                                `false`: A thrown error/exception is treated as if the test function returned false.
  */
 async function assertEventually(testfunc, options, _options) {
     if (typeof options === 'string') {
@@ -184,9 +213,15 @@ async function assertEventually(testfunc, options, _options) {
 }
 
 /**
- * @param {() => Promise<any>} testfunc 
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options] 
- * @param {*} [_options] 
+ * Assert that an asynchronously evaluated condition is eventually true.
+ *
+ * @param {() => Promise<any>} testfunc The async test function. Must return `true` to signal success.
+ * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options]
+ * @param {string?} message Error message shown if the condition never becomes true within the timeout.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
+ * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
+ *                                `false`: A thrown error/exception is treated as if the test function returned false.
  */
 async function assertAsyncEventually(testfunc, options, _options) {
     if (typeof options === 'string') {
@@ -229,10 +264,14 @@ async function assertAsyncEventually(testfunc, options, _options) {
 }
 
 /**
- * @param {() => any} testfunc 
- * @param {{message?: string, timeout?: number, checkEvery?: number}} [options] 
- * @param {*} [_options] 
- */
+ * Assert that a condition remains true for the whole timeout.
+ *
+ * @param {() => any} testfunc The test function. Must return `true` to signal success.
+ * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options]
+ * @param {string?} message Error message shown if the testfunc fails.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
+*/
 async function assertAlways(testfunc, options, _options) {
     if (typeof options === 'string') {
         console.trace(`DEPRECATED call to assertAlways with non-option argument ${JSON.stringify(options)}`);

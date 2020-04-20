@@ -7,36 +7,58 @@ const {makeCurlCommand} = require('./curl_command');
 const output = require('./output');
 const {readFile} = require('./utils');
 
+/**
+ * fetch a URL.
+ * Apart from the first parameter, this implements the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
+ * (Using this method rather than another enables outputting of curl commands with `-c` and a couple of defaults suitable for pentf).
+ *
+ * @example
+ * ```javascript
+ * const response = await fetch(config, 'https://example.org/json-api', {
+ *     method: 'POST',
+ *     headers: {
+ *         'Content-Type': 'application/json',
+ *     },
+ *     body: JSON.stringify({
+ *         key: 'value',
+ *     }),
+ * });
+ * assert.strictEqual(response.status, 200);
+ * const data = await response.json();
+ * ```
+ * @param {*} config The pentf configuration object.
+ * @param {string} url URL to fetch.
+ * @param {Object?} init fetch options, see [`RequestInit` in the Fetch Spec](https://fetch.spec.whatwg.org/#requestinit).
+ */
+async function fetch(config, url, init) {
+    if (!init) init = {};
+    if (!init.redirect) init.redirect = 'manual';
 
-async function fetch(config, url, options) {
-    if (!options) options = {};
-    if (!options.redirect) options.redirect = 'manual';
-
-    if (!options.agent) {
-        const agentOptions = {
+    if (!init.agent) {
+        const agentinit = {
             keepAlive: true,
         };
         if (/^https:\/\//.test(url)) {
-            agentOptions.rejectUnauthorized = (
+            agentinit.rejectUnauthorized = (
                 (config.rejectUnauthorized === undefined) ? true : config.rejectUnauthorized);
-            options.agent = new https.Agent(agentOptions);
+            init.agent = new https.Agent(agentinit);
         } else {
-            options.agent = new http.Agent(agentOptions);
+            init.agent = new http.Agent(agentinit);
         }
     }
 
-    if (! options.headers) {
-        options.headers = {};
+    if (! init.headers) {
+        init.headers = {};
     }
-    if (! Object.keys(options.headers).find(h => h.toLowerCase() === 'user-agent')) {
-        options.headers['User-Agent'] = 'pentf integration test (https://github.com/boxine/pentf)';
+    if (! Object.keys(init.headers).find(h => h.toLowerCase() === 'user-agent')) {
+        init.headers['User-Agent'] = 'pentf integration test (https://github.com/boxine/pentf)';
     }
 
     if (config.print_curl) {
-        output.log(config, await makeCurlCommand(options, url));
+        output.log(config, await makeCurlCommand(init, url));
     }
 
-    return await node_fetch(url, options);
+    return await node_fetch(url, init);
 }
 
 async function setupTLSClientAuth(fetchOptions, keyFilename, certFilename, rejectUnauthorized=false) {

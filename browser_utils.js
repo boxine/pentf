@@ -16,9 +16,19 @@ const {assertAsyncEventually, wait, remove} = require('./utils');
 let tmp_home;
 
 /**
- * Launch a new browser, with a new page (=Tab)
- * @param {*} config The pentf configuration
- * @param {string[]} [chrome_args] Additional arguments for Chrome (optional)
+ * Launch a new browser with puppeteer, with a new page (=Tab). The browser is completely isolated from any other calls.
+ * Most interactions will be with the page, but you can get the browser using `await page.browser();`.
+ * For more information about the page object, see the [puppeteer API documentation](https://github.com/puppeteer/puppeteer/blob/master/docs/api.md).
+ *
+ * @example
+ * ```javascript
+ * const page = await newPage(config);
+ * await page.goto('https://example.org/');
+ * await waitForText(page, 'More information');
+ * await closePage(page);
+ * ```
+ * @param {*} config The pentf configuration object.
+ * @param {string[]} [chrome_args] Additional arguments for Chrome (optional).
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
 async function newPage(config, chrome_args=[]) {
@@ -51,7 +61,7 @@ async function newPage(config, chrome_args=[]) {
         // Browser extensions only work in non-headless mode
         if (config.extensions && config.extensions.length) {
             const extensions = config.extensions.join(',');
-            
+
             args.push(
                 // Without this flag the supplied extensions are not
                 // initialized correctly and need to be refreshed in
@@ -143,7 +153,8 @@ async function newPage(config, chrome_args=[]) {
 }
 
 /**
- * @param {import('puppeteer').Page} page 
+ * Close a page (and its associated browser)
+ * @param {import('puppeteer').Page} page puppeteer page object returned by `newPage`.
  */
 async function closePage(page) {
     if (page._pentf_browser_pages) {
@@ -156,10 +167,17 @@ async function closePage(page) {
 }
 
 /**
- * @param {import('puppeteer').Page} page 
- * @param {string} selector
- * @param {{timeout?: number, message?: string}} [options]
- * @returns {Promise<import('puppeteer').ElementHandle>}
+ * Wait for an element matched by a CSS query selector to become visible.
+ * Visible means the element has neither `display:none` nor `visibility:hidden`.
+ * Elements outside the current viewport (e.g. you'd need to scroll) and hidden with CSS trickery
+ * (opacity, overlaid with z-index, or permanently positioned outside the viewport) count as visible.
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} selector Query selector, e.g. `div > a[href="/"]:visited`
+ * @param {{timeout?: number, message?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} [message] Error message shown if the element is not visible in time.
+ * @param {number?} [timeout] How long to wait, in milliseconds.
+ * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
  */
 async function waitForVisible(page, selector, {message=undefined, timeout=30000}={}) {
     // Precompute errors for nice stack trace
@@ -194,7 +212,17 @@ async function waitForVisible(page, selector, {message=undefined, timeout=30000}
 }
 
 /**
- * @param {string} text 
+ * Construct an XPath expression for an arbitrary string.
+ *
+ * @example
+ * ```javascript
+ * const searchString = `'"'`;
+ * const page = await newPage(config);
+ * await page.goto('https://github.com/boxine/pentf/blob/master/browser_utils.js');
+ * await page.waitForXPath(`//div[@class="repository-content"]//text()[contains(., ${escapeXPathText(searchString)})]`);
+ * await closePage();
+ * ```
+ * @param {string} text The text to encode. This can be user input or otherwise contain exotic characters.
  */
 function escapeXPathText(text) {
     if (!text.includes('"')) {
@@ -205,7 +233,7 @@ function escapeXPathText(text) {
 }
 
 /**
- * @param {string} text 
+ * @hidden
  */
 function checkText(text) {
     if (typeof text !== 'string') {
@@ -223,10 +251,14 @@ function checkText(text) {
 }
 
 /**
- * @param {import('puppeteer').Page} page
- * @param {string} text
- * @param {{timeout?: number, extraMessage?: string}} [options]
- * @returns {Promise<import('puppeteer').ElementHandle>}
+ * Wait for text to appear on the page.
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} text String to look for.
+ * @param {{timeout?: number, extraMessage?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} extraMessage Error message shown if the element is not present in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the text node.
  */
 async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={}) {
     checkText(text);
@@ -241,18 +273,26 @@ async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={
     }
 }
 
+/**
+ * @hidden
+ */
 function _checkTestId(testId) {
     if (typeof testId !== 'string') throw new Error(`Invalid testId type ${testId}`);
     assert(/^[-a-zA-Z0-9_.]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
 }
 
 /**
- * @param {import('puppeteer').Page} page 
- * @param {string} testId 
- * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [options] 
- * @returns {Promise<import('puppeteer').ElementHandle>}
+ * Search for an element with the given `data-testid` attribute.
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} testId The test id to search
+ * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} extraMessage Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
+ * @returns {Promise<import('puppeteer').ElementHandle>} Handle to the element with the given test ID.
  */
-async function waitForTestId(page, testId, {extraMessage=undefined, timeout=undefined, visible=true} = {}) {
+async function waitForTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
     _checkTestId(testId);
 
     const err = new Error(
@@ -277,8 +317,10 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=unde
 }
 
 /**
- * @param {import('puppeteer').ElementHandle} input 
- * @param {string} expected 
+ * Assert an `<input>` element having a certain value (after a wait if necessary).
+ *
+ * @param {import('puppeteer').ElementHandle} input A puppeteer handle to an input element.
+ * @param {string} expected The value that is expected to be present.
  */
 async function assertValue(input, expected) {
     const page = input._page;
@@ -312,14 +354,15 @@ async function assertValue(input, expected) {
 }
 
 /**
- * Assert that there is currently no element matching the xpath on the page
- * @param {import('puppeteer').Page} page
- * @param {string} xpath
- * @param {string} [message]
- * @param {number} [wait_ms] 
- * @param {number} [check_every]
+ * Assert that there is currently no element matching the XPath on the page.
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} xpath XPath to search for.
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} waitMs How long to wait, in milliseconds. (Default: 2s)
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
-async function assertNotXPath(page, xpath, message='', wait_ms=2000, check_every=200) {
+async function assertNotXPath(page, xpath, message='', waitMs=2000, checkEvery=200) {
     while (true) { // eslint-disable-line no-constant-condition
         const found = await page.evaluate(xpath => {
             const element = document.evaluate(
@@ -330,20 +373,25 @@ async function assertNotXPath(page, xpath, message='', wait_ms=2000, check_every
             'Element matching ' + xpath + ' is present, but should not be there.' +
             (message ? ' ' + message : ''));
 
-        if (wait_ms <= 0) {
+        if (waitMs <= 0) {
             break;
         }
 
-        await wait(Math.min(check_every, wait_ms));
-        wait_ms -= check_every;
+        await wait(Math.min(checkEvery, waitMs));
+        waitMs -= checkEvery;
     }
 }
 
 /**
  * Clicks an element atomically, e.g. within the same event loop run as finding it
- * @param {import('puppeteer').Page} page 
- * @param {string} xpath 
- * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean}} [options] 
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} xpath XPath selector to match the element.
+ * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
+ * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  */
 async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
@@ -379,12 +427,17 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
 const DEFAULT_CLICKABLE_ELEMENTS = ['a', 'button', 'input', 'label'];
 const DEFAULT_CLICKABLE = (
     '//*[' + DEFAULT_CLICKABLE_ELEMENTS.map(e => `local-name()="${e}"`).join(' or ') + ']');
-    
+
 /**
- * Click a link or button by its text content
- * @param {import('puppeteer').Page} page 
- * @param {string} text 
- * @param {{timeout?: number, checkEvery?: number, elementXPath?: string, extraMessage?: string}} [options] 
+ * Click a link, button, label, or input by its text content.
+ *
+ * @param {import('puppeteer').Page} page  puppeteer page object.
+ * @param {string} text Text that the element must contain.
+ * @param {{timeout?: number, checkEvery?: number, elementXPath?: string, extraMessage?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
+ * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
  */
 async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
     checkText(text);
@@ -400,9 +453,14 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
 }
 
 /**
- * @param {import('puppeteer').Page} page 
- * @param {string} testId 
- * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [options] 
+ * Click an element identified by a test ID (`data-testid=` attribute).
+ * Selecting and clicking happens in the same tick, so this is safe to call even if the client application may currently be rerendering.
+ *
+ * @param {import('puppeteer').Page} page The puppeteer page handle.
+ * @param {string} testId The test ID to look for.
+ * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} extraMessage Optional error message shown if the element is not present in time.
+ * @param {number?} timeout How long to wait, in milliseconds. (default: true)
  */
 async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
     _checkTestId(testId);
@@ -414,9 +472,10 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000,
 }
 
 /**
- * lang can either be a single string (e.g. "en") or an array of supported languages (e.g. ['de-DE', 'en-US', 'gr'])
- * @param {import('puppeteer').Page} page 
- * @param {string | string[]} lang 
+ * Configure the browser's language.
+ *
+ * @param {import('puppeteer').Page} page The puppeteer page handle.
+ * @param {string | string[]} lang Either be a single string (e.g. "en") or an array of supported languages (e.g. `['de-DE', 'en-US', 'gr']`)
  */
 async function setLanguage(page, lang) {
     if (typeof lang === 'string') {
@@ -441,10 +500,12 @@ async function setLanguage(page, lang) {
 }
 
 /**
- * Retrieve attribute value of a DOM Element
- * @param {import('puppeteer').Page} page 
- * @param {string} selector 
- * @param {string} name 
+ * Retrieve attribute value of a DOM element.
+ *
+ * @param {import('puppeteer').Page} page The puppeteer page handle.
+ * @param {string} selector Query selector for the element.
+ * @param {string} name Attribute name.
+ * @returns {Promise<string>} The attribute value
  */
 async function getAttribute(page, selector, name) {
     await page.waitForSelector(selector);
@@ -463,18 +524,21 @@ async function getAttribute(page, selector, name) {
 
 /**
  * Get the text content of a given DOM Element.
- * @param {import('puppeteer').Page} page 
- * @param {string} selector 
+ *
+ * @returns {import('puppeteer').Page} The puppeteer page handle.
+ * @param {string} selector Query selector.
+ * @returns {Promise<string>} Text content of the selected element.
  */
 async function getText(page, selector) {
     return getAttribute(page, selector, 'textContent');
 }
 
 /**
- * Get all options of a select as an array of strings, e.g. ['Option A', 'Option B(***)', 'Option C']
- * @param {import('puppeteer').Page} page 
- * @param {import('puppeteer').ElementHandle<HTMLSelectElement>} select 
- * @returns {Promise<string[]>}
+ * Get all options of a `<select>` as an array of strings. The selected option is suffixed with `(***)`.
+ *
+ * @param {import('puppeteer').Page} page  The puppeteer page handle.
+ * @param {import('puppeteer').ElementHandle<HTMLSelectElement>} select puppeteer handl eto the `<select>`.
+ * @returns {Promise<string[]>} e.g. `['Option A', 'Option B(***)', 'Option C']`
  */
 async function getSelectOptions(page, select) {
     return await page.evaluate(select => {
@@ -485,8 +549,26 @@ async function getSelectOptions(page, select) {
 }
 
 /**
- * @param {import('puppeteer').Page} page 
- * @param {{factor?: number, persistent?: boolean}} [options]
+ * Speed up all timeouts of calls to `setTimeout`/`setInterval`.
+ *
+ * @example
+ * ```javascript
+ * const page = await newPage(config);
+ * await page.setContent('<div>Hello world</div>');
+ * await speedupTimeouts(page, {factor: 1000});
+ * await page.evaluate(() => {
+ *     window.setTimeout(() => console.log("will log almost immediately"), 2000);
+ * });
+ * await restoreTimeouts(page);
+ * await page.evaluate(() => {
+ *     window.setTimeout(() => console.log("will log after 2 seconds"), 2000);
+ * });
+ * await closePage(page);
+ * ```
+ * @param {import('puppeteer').Page} page The puppeteer page handle.
+ * @param {{factor?: number, persistent?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param number? factor Speedup factor (e.g. a timeout of 20 seconds with a speedup of 100 will fire after 200ms). (default: 100)
+ * @param boolean? persistent Whether this change should persist in case of page navigation. Set this if the next line is `await page.goto(..)` or similar. (default: false)
  */
 async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
     function applyTimeouts(factor) {
@@ -509,7 +591,9 @@ async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
 }
 
 /**
- * @param {import('puppeteer').Page} page 
+ * Restore timeouts modified by [[speedupTimeouts]]
+ *
+ * @param {import('puppeteer').Page} page The puppeteer page handle.
  */
 async function restoreTimeouts(page) {
     await page.evaluate(() => {
@@ -523,8 +607,7 @@ async function restoreTimeouts(page) {
 }
 
 /**
- * @param {import('puppeteer').Page} page 
- * @param {string} html
+ * @hidden
  */
 async function workaround_setContent(page, html) {
     // Workaround for https://github.com/GoogleChrome/puppeteer/issues/4464
@@ -537,8 +620,18 @@ async function workaround_setContent(page, html) {
     await waiter;
 }
 
+
 // Render HTML code as a PDF file.
 // modifyPage can be an async function to change the page in the browser.
+
+/**
+ * Render a HTML string as a PDF file.
+ *
+ * @param {*} config The pentf configuration object.
+ * @param {string} path PDF file name to write to.
+ * @param {string} html Full HTML document to render.
+ * @param {*} modifyPage An optional async function to modify the `page` object.
+ */
 async function html2pdf(config, path, html, modifyPage=null) {
     const pdfConfig = {...config};
     pdfConfig.headless = true;

@@ -67,7 +67,7 @@ function parseHeader(name, value) {
     return libmime.decodeWords(value.trim());
 }
 
-async function _find_message(config, client, since, to, subject_contains) {
+async function _find_message(config, client, since, to, subjectContains) {
     const messages = await client.listMessages(
         'INBOX', '1:*', [
             'UID',
@@ -93,7 +93,7 @@ async function _find_message(config, client, since, to, subject_contains) {
         }
 
         const subject = parseHeader('Subject', msg['body[header.fields (subject)]']);
-        if (! subject.includes(subject_contains)) {
+        if (! subject.includes(subjectContains)) {
             continue;
         }
 
@@ -131,8 +131,27 @@ async function connect(config, user) {
     return client;
 }
 
+/**
+ * Retrieve and delete an email.
+ *
+ * @example
+ * ```javascript
+ * const email = makeRandomEmail(config, 'myTestCase');
+ * const start = new Date();
+ * await ... // register with email
+ * const welcomeMail = await getMail(config, start, email, 'Welcome');
+ * assert.strictEqual(welcomeMail.text.includes('Hello'));
+ * assert.strictEqual(welcomeMail.html.includes('<p>Hello'));
+ * ```
+ * @param {*} config The pentf configuration object.
+ * @param {Date} since Earliest time the email can be sent. (To avoid finding the email of a prior test.)
+ * @param {string} to receiveer email address (`config.email` if you have just one email address, often the result of `makeRandomEmail`)
+ * @param {string} subjectContains Search string for the subject.
+ * @param {number[]} wait_times How long to wait between checking email. By default, we wait about 3 minutes total.
+ * @returns {Object} Email object with `html` and `text` properties.
+ */
 async function getMail(
-    config, since, to, subject_contains,
+    config, since, to, subjectContains,
     wait_times=[
         200, 500, 1000, 2000, // for local setups where the email arrives immediately
         5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, // 1 minute for decent mail servers
@@ -165,9 +184,9 @@ async function getMail(
     }
 
     const msg = await utils.retry(
-        () => _find_message(config, client, since, to, subject_contains), wait_times);
+        () => _find_message(config, client, since, to, subjectContains), wait_times);
     assert(msg, (
-        'Could not find message to ' + to + ' matching ' + JSON.stringify(subject_contains) + ' since ' + since));
+        'Could not find message to ' + to + ' matching ' + JSON.stringify(subjectContains) + ' since ' + since));
 
     if (do_logout) {
         await client.close();

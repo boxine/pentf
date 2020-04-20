@@ -64,6 +64,88 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section tsd-is-external">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-external"><a href="_email_.html#getmail" class="tsd-kind-icon">get<wbr>Mail</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-external">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-external">
+					<a name="getmail" class="tsd-anchor"></a>
+					<h3>get<wbr>Mail</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-external">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mail<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, since<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Date</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, subjectContains<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, wait_times<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/4ac4bd4/email.js#L153">email.js:153</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Retrieve and delete an email.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-javascript"><span class="hljs-keyword">const</span> email = makeRandomEmail(config, <span class="hljs-string">'myTestCase'</span>);
+<span class="hljs-keyword">const</span> start = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>();
+<span class="hljs-keyword">await</span> ... <span class="hljs-comment">// register with email</span>
+<span class="hljs-keyword">const</span> welcomeMail = <span class="hljs-keyword">await</span> getMail(config, start, email, <span class="hljs-string">'Welcome'</span>);
+assert.strictEqual(welcomeMail.text.includes(<span class="hljs-string">'Hello'</span>));
+assert.strictEqual(welcomeMail.html.includes(<span class="hljs-string">'&lt;p&gt;Hello'</span>));</code></pre>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The pentf configuration object.</p>
+									</div>
+								</li>
+								<li>
+									<h5>since: <span class="tsd-signature-type">Date</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Earliest time the email can be sent. (To avoid finding the email of a prior test.)</p>
+									</div>
+								</li>
+								<li>
+									<h5>to: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>receiveer email address (<code>config.email</code> if you have just one email address, often the result of <code>makeRandomEmail</code>)</p>
+									</div>
+								</li>
+								<li>
+									<h5>subjectContains: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Search string for the subject.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> wait_times: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = [200, 500, 1000, 2000, // for local setups where the email arrives immediately5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, // 1 minute for decent mail servers10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000]</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>How long to wait between checking email. By default, we wait about 3 minutes total.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+							<p>Email object with <code>html</code> and <code>text</code> properties.</p>
+						</li>
+					</ul>
+				</section>
+			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
@@ -71,10 +153,28 @@
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="_browser_utils_.html">&quot;browser_<wbr>utils&quot;</a>
+					</li>
+					<li class="current tsd-kind-module tsd-is-external">
+						<a href="_email_.html">&quot;email&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="_net_utils_.html">&quot;net_<wbr>utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="_utils_.html">&quot;utils&quot;</a>
+					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-external">
+						<a href="_email_.html#getmail" class="tsd-kind-icon">get<wbr>Mail</a>
+					</li>
 				</ul>
 			</nav>
 		</div>

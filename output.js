@@ -4,6 +4,7 @@ const assert = require('assert');
 const readline = require('readline');
 
 const utils = require('./utils');
+const {resultCountString} = require('./results');
 
 const STATUS_STREAM = process.stderr;
 
@@ -64,39 +65,28 @@ function finish(config, state) {
 
     clean(config);
 
-    const success_count = utils.count(tasks, t => t.status === 'success');
-    const error_count = utils.count(tasks, t => t.status === 'error');
-    const skipped = tasks.filter(t => t.status === 'skipped');
-    const expectedToFail = tasks.filter(t => t.expectedToFail);
     if (tasks.length === 0 && config.filter) {
         STATUS_STREAM.write(`No test case found with filter: ${config.filter}\n`);
     }
-    STATUS_STREAM.write(`${success_count} tests passed, ${error_count - expectedToFail.length} tests failed`);
-    if (expectedToFail.length) {
-        STATUS_STREAM.write(`, ${expectedToFail.length} failed as expected`);
-    }
-    STATUS_STREAM.write('.\n');
+    STATUS_STREAM.write(resultCountString(tasks) + '.\n');
+
+    const skipped = tasks.filter(t => t.status === 'skipped');
     if (skipped.length > 0) {
         STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);
     }
+
+    const expectedToFail = tasks.filter(t => t.expectedToFail && t.status === 'error');
     if (!config.expect_nothing && (expectedToFail.length > 0)) {
         STATUS_STREAM.write(`${expectedToFail.length} tests failed as expected (${expectedToFail.map(s => s.name).join(' ')}). Pass in -E/--expect-nothing to ignore expectedToFail declarations.\n`);
     }
 
     // Internal self-check
-    const normal_count = skipped.length + success_count + error_count;
-    if (normal_count !== tasks.length) {
-        const inconsistent = tasks.filter(t => !['success', 'error', 'skipped'].includes(t.status));
-        if (inconsistent.length === 0) {
-            STATUS_STREAM.write(
-                `INTERNAL ERROR: ${normal_count} out of ${tasks.length} tasks are normal, but` +
-                ` ${inconsistent.length} are in a strange state.`);
-        } else {
-            STATUS_STREAM.write(
-                `INTERNAL ERROR: ${inconsistent.length} out of ${tasks.length} tasks` +
-                ` are in an inconsistent state. First affected task is ${inconsistent[0].name}` +
-                ` in state ${inconsistent[0].status}.`);
-        }
+    const inconsistent = tasks.filter(t => !['success', 'error', 'skipped'].includes(t.status));
+    if (inconsistent.length) {
+        STATUS_STREAM.write(
+            `INTERNAL ERROR: ${inconsistent.length} out of ${tasks.length} tasks` +
+            ` are in an inconsistent state. First affected task is ${inconsistent[0].name}` +
+            ` in state ${inconsistent[0].status}.`);
     }
 }
 

@@ -2,6 +2,7 @@ const fs = require('fs');
 const {promisify} = require('util');
 const {html2pdf} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
+const {resultCountString} = require('./results');
 
 const utils = require('./utils');
 
@@ -125,10 +126,6 @@ function markdown(results) {
         );
     }).join('\n');
 
-    const success_count = utils.count(results.tests, s => s.status === 'success');
-    const error_count = utils.count(results.tests, s => s.status === 'error');
-    const skipped_count = utils.count(results.tests, s => s.status === 'skipped');
-
     const report_header_md = (
         results.config.report_header_md ? '\n' + results.config.report_header_md + '\n' : '');
 
@@ -140,7 +137,7 @@ Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.
 Start: ${format_timestamp(results.start)}  
 
 ### Results
-Total number of tests: ${results.tests.length} (${success_count} successful, ${error_count} failures, ${skipped_count} skipped)  
+Total number of tests: ${results.tests.length} (${resultCountString(results.tests)})  
 Total test duration: ${format_duration(results.duration)}  
 
 | #     | Test              | Description       | Duration | Result  |
@@ -235,10 +232,6 @@ function html(results) {
 
         return res;
     }).join('\n');
-
-    const success_count = utils.count(results.tests, s => s.status === 'success');
-    const error_count = utils.count(results.tests, s => s.status === 'error');
-    const skipped_count = utils.count(results.tests, s => s.status === 'skipped');
 
     const report_header_html = results.config.report_header_html || '';
 
@@ -350,7 +343,7 @@ Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>
 </p>
 
 <h2>Results</h2>
-Total number of tests: ${results.tests.length} (${success_count} successful, ${error_count} failures, ${skipped_count} skipped)<br/>
+Total number of tests: ${results.tests.length} (${resultCountString(results.tests)})<br/>
 Total test duration: ${escape_html(format_duration(results.duration))}<br/>
 
 <table>

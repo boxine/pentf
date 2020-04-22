@@ -1,5 +1,8 @@
 node_modules
-results.*
+results*.pdf
+results*.html
+results*.md
+results*.json
 screenshots
 doc/
 

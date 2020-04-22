@@ -453,6 +453,95 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
 }
 
 /**
+ * Click any element by its text content.
+ * 
+ * The text can span multiple nodes compared to `clickText` which matches direct descended text nodes only.
+ * 
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string | RegExp} textOrRegExp Text or regex to match the text that the element must contain.
+ * @param {{extraMessage?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
+ */
+async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=200, extraMessage=undefined, visible=true}={}) {
+    if (typeof textOrRegExp === 'string') {
+        checkText(textOrRegExp);
+    }
+
+    const serializedMatcher = typeof textOrRegExp !== 'string' 
+        ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
+        : textOrRegExp;
+
+    let remainingTimeout = timeout;
+    while (true) { // eslint-disable-line no-constant-condition
+        const found = await page.evaluate((matcher, visible) => {
+            // Optional: Deserialize jsonified RegExp object
+            const isStringMatcher = typeof matcher == 'string';
+            if (!isStringMatcher) {
+                matcher = new RegExp(matcher.source, matcher.flags);
+            }
+
+            const stack = [document.body];
+            let item;
+            let lastFound = null;
+            while (item = stack.pop()) { // eslint-disable-line no-cond-assign
+                // Optimization: If there is only one child we can immediately
+                // continue traversing and skip `.textContent` access.
+                if (item.childNodes.length === 1) {
+                    stack.push(item.childNodes[0]);
+                    continue;
+                }
+
+                for (let i = 0; i < item.childNodes.length; i++) {
+                    const child = item.childNodes[i];
+                    
+                    // Skip text nodes as they are not clickable
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        continue;
+                    }
+
+                    const text = child.textContent;
+                    if (isStringMatcher) {
+                        if (text.includes(matcher)) {
+                            lastFound = child;
+                            stack.push(child);
+                            break;
+                        }
+                    } else {
+                        // RegExp objects are stateful in JavaScript. Reset
+                        // the last matched index to ensure we're always starting
+                        // our next match from the beginning.
+                        matcher.lastIndex = 0;
+                        if (text.match(matcher) !== null) {
+                            lastFound = child;
+                            stack.push(child);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!lastFound) return false;
+
+            if (visible && lastFound.offsetParent === null) return null; // invisible)
+
+            lastFound.click();
+            return true;
+        }, serializedMatcher, visible);
+
+        if (found) {
+            return;
+        }
+
+        if (remainingTimeout <= 0) {
+            const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
+            throw new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`);
+        }
+        await wait(Math.min(remainingTimeout, checkEvery));
+        remainingTimeout -= checkEvery;
+    }
+}
+
+/**
  * Click an element identified by a test ID (`data-testid=` attribute).
  * Selecting and clicking happens in the same tick, so this is safe to call even if the client application may currently be rerendering.
  *
@@ -656,6 +745,7 @@ async function html2pdf(config, path, html, modifyPage=null) {
 module.exports = {
     assertNotXPath,
     assertValue,
+    clickNestedText,
     clickTestId,
     clickText,
     clickXPath,

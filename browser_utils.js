@@ -483,14 +483,14 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                 matcher = new RegExp(matcher.source, matcher.flags);
             }
 
-            const stack = [document.body];
-            let item;
+            let item = document.body;
             let lastFound = null;
-            while (item = stack.pop()) { // eslint-disable-line no-cond-assign
+            while (true) { // eslint-disable-line no-constant-condition
                 // Optimization: If there is only one child we can immediately
                 // continue traversing and skip `.textContent` access.
                 if (item.childNodes.length === 1 && item.childNodes[0].nodeType !== Node.TEXT_NODE) {
-                    stack.push(item.childNodes[0]);
+                    item = item.childNodes[0];
+                    lastFound = item;
                     continue;
                 }
 
@@ -505,8 +505,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                     const text = child.textContent;
                     if (isStringMatcher) {
                         if (text.includes(matcher)) {
-                            lastFound = child;
-                            stack.push(child);
+                            item = child;
                             break;
                         }
                     } else {
@@ -515,12 +514,17 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                         // our next match from the beginning.
                         matcher.lastIndex = 0;
                         if (text.match(matcher) !== null) {
-                            lastFound = child;
-                            stack.push(child);
+                            item = child;
                             break;
                         }
                     }
                 }
+
+                if (lastFound === item) {
+                    break;
+                }
+
+                lastFound = item;
             }
 
             if (!lastFound) return false;

@@ -486,7 +486,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
             while (item = stack.pop()) { // eslint-disable-line no-cond-assign
                 // Optimization: If there is only one child we can immediately
                 // continue traversing and skip `.textContent` access.
-                if (item.childNodes.length === 1) {
+                if (item.childNodes.length === 1 && item.childNodes[0].nodeType !== Node.TEXT_NODE) {
                     stack.push(item.childNodes[0]);
                     continue;
                 }

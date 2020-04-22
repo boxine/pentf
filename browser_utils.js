@@ -459,8 +459,11 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
  * 
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string | RegExp} textOrRegExp Text or regex to match the text that the element must contain.
- * @param {{extraMessage?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{extraMessage?: string, timeout?: number, checkEvery?: number, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
+ * @param {boolean?} visibale Optional check if element is visible (default: true)
  */
 async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=200, extraMessage=undefined, visible=true}={}) {
     if (typeof textOrRegExp === 'string') {

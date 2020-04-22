@@ -513,7 +513,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                         // the last matched index to ensure we're always starting
                         // our next match from the beginning.
                         matcher.lastIndex = 0;
-                        if (text.match(matcher) !== null) {
+                        if (matcher.test(text)) {
                             item = child;
                             break;
                         }

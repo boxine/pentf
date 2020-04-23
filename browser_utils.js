@@ -502,7 +502,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                         continue;
                     }
 
-                    if (matchFunc(child.textContent)) {
+                    if (child.childNodes.length > 0 && matchFunc(child.textContent)) {
                         item = child;
                         break;
                     }

@@ -494,14 +494,6 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
             let item = document.body;
             let lastFound = null;
             while (true) { // eslint-disable-line no-constant-condition
-                // Optimization: If there is only one child we can immediately
-                // continue traversing and skip `.textContent` access.
-                if (item.childNodes.length === 1 && item.childNodes[0].nodeType !== Node.TEXT_NODE) {
-                    item = item.childNodes[0];
-                    lastFound = item;
-                    continue;
-                }
-
                 for (let i = 0; i < item.childNodes.length; i++) {
                     const child = item.childNodes[i];
                     

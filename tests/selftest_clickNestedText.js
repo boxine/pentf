@@ -47,6 +47,18 @@ async function run(config) {
     await clickNestedText(page, /span text/);
     assert.deepStrictEqual(clicks, ['first', 'nested', 'span']);
 
+    // Edge case
+    clicks = [];
+    await page.setContent(`
+        <html>
+            <body>
+                <button onclick="pentfClick('clickme')">clickme</button>
+            </body>
+        </html>
+    `);
+    await clickNestedText(page, 'clickme');
+    assert.deepStrictEqual(clicks, ['clickme']);
+
     await closePage(page);
 }
 

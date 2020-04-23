@@ -453,6 +453,103 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
 }
 
 /**
+ * Click any element by its text content.
+ * 
+ * The text can span multiple nodes compared to `clickText` which matches direct descended text nodes only.
+ * 
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string | RegExp} textOrRegExp Text or regex to match the text that the element must contain.
+ * @param {{extraMessage?: string, timeout?: number, checkEvery?: number, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
+ * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
+ * @param {boolean?} visibale Optional check if element is visible (default: true)
+ */
+async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=200, extraMessage=undefined, visible=true}={}) {
+    if (typeof textOrRegExp === 'string') {
+        checkText(textOrRegExp);
+    }
+
+    const serializedMatcher = typeof textOrRegExp !== 'string' 
+        ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
+        : textOrRegExp;
+
+    let remainingTimeout = timeout;
+    while (true) { // eslint-disable-line no-constant-condition
+        const found = await page.evaluate((matcher, visible) => {
+            // eslint-disable-next-line no-undef
+            /** @type {(text: string) => boolean} */
+            let matchFunc;
+            /** @type {null | (text: string) => boolean} */
+            let matchFuncExact = null;
+
+            if (typeof matcher == 'string') {
+                matchFunc = text => text.includes(matcher);
+            } else {
+                const regexExact = new RegExp(matcher.source, matcher.flags);
+                matchFuncExact = matchFunc = text => {
+                    // Reset regex state in case global flag was used
+                    regexExact.lastIndex = 0;
+                    return regexExact.test(text);
+                };
+
+                // Remove leading ^ and ending $, otherwise the traversal
+                // will fail at the first node.
+                const source = matcher.source
+                    .replace(/^[^]/, '')
+                    .replace(/[$]$/, '');
+                const regex = new RegExp(source, matcher.flags);
+                matchFunc = text => {
+                    // Reset regex state in case global flag was used
+                    regex.lastIndex = 0;
+                    return regex.test(text);
+                };
+            }
+
+            const stack = [document.body];
+            let item = null;
+            let lastFound = null;
+            while (item = stack.pop()) { // eslint-disable-line no-cond-assign
+                for (let i = 0; i < item.childNodes.length; i++) {
+                    const child = item.childNodes[i];
+                    
+                    // Skip text nodes as they are not clickable
+                    if (child.nodeType === Node.TEXT_NODE) {
+                        continue;
+                    }
+
+                    const text = child.textContent || '';
+                    if (child.childNodes.length > 0 && matchFunc(text)) {
+                        if (matchFuncExact === null || matchFuncExact(text)) {
+                            lastFound = child;
+                        }
+                        stack.push(child);
+                    }
+                }
+            }
+
+            if (!lastFound) return false;
+
+            if (visible && lastFound.offsetParent === null) return null; // invisible)
+
+            lastFound.click();
+            return true;
+        }, serializedMatcher, visible);
+
+        if (found) {
+            return;
+        }
+
+        if (remainingTimeout <= 0) {
+            const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
+            throw new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`);
+        }
+        await wait(Math.min(remainingTimeout, checkEvery));
+        remainingTimeout -= checkEvery;
+    }
+}
+
+/**
  * Click an element identified by a test ID (`data-testid=` attribute).
  * Selecting and clicking happens in the same tick, so this is safe to call even if the client application may currently be rerendering.
  *
@@ -656,6 +753,7 @@ async function html2pdf(config, path, html, modifyPage=null) {
 module.exports = {
     assertNotXPath,
     assertValue,
+    clickNestedText,
     clickTestId,
     clickText,
     clickXPath,

@@ -477,10 +477,18 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
     let remainingTimeout = timeout;
     while (true) { // eslint-disable-line no-constant-condition
         const found = await page.evaluate((matcher, visible) => {
-            // Optional: Deserialize jsonified RegExp object
-            const isStringMatcher = typeof matcher == 'string';
-            if (!isStringMatcher) {
-                matcher = new RegExp(matcher.source, matcher.flags);
+            // eslint-disable-next-line no-undef
+            /** @type {(text: string) => boolean} */
+            let matchFunc;
+            if (typeof matcher == 'string') {
+                matchFunc = text => text.includes(matcher);
+            } else {
+                const regex = new RegExp(matcher.source, matcher.flags);
+                matchFunc = text => {
+                    // Reset regex state in case global flag was used
+                    regex.lastIndex = 0;
+                    return regex.test(text);
+                };
             }
 
             let item = document.body;
@@ -502,21 +510,9 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                         continue;
                     }
 
-                    const text = child.textContent;
-                    if (isStringMatcher) {
-                        if (text.includes(matcher)) {
-                            item = child;
-                            break;
-                        }
-                    } else {
-                        // RegExp objects are stateful in JavaScript. Reset
-                        // the last matched index to ensure we're always starting
-                        // our next match from the beginning.
-                        matcher.lastIndex = 0;
-                        if (matcher.test(text)) {
-                            item = child;
-                            break;
-                        }
+                    if (matchFunc(child.textContent)) {
+                        item = child;
+                        break;
                     }
                 }
 

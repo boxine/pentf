@@ -480,10 +480,25 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
             // eslint-disable-next-line no-undef
             /** @type {(text: string) => boolean} */
             let matchFunc;
+            /** @type {null | (text: string) => boolean} */
+            let matchFuncExact = null;
+
             if (typeof matcher == 'string') {
                 matchFunc = text => text.includes(matcher);
             } else {
-                const regex = new RegExp(matcher.source, matcher.flags);
+                const regexExact = new RegExp(matcher.source, matcher.flags);
+                matchFuncExact = matchFunc = text => {
+                    // Reset regex state in case global flag was used
+                    regexExact.lastIndex = 0;
+                    return regexExact.test(text);
+                };
+
+                // Remove leading ^ and ending $, otherwise the traversal
+                // will fail at the first node.
+                const source = matcher.source
+                    .replace(/^[^]/, '')
+                    .replace(/[$]$/, '');
+                const regex = new RegExp(source, matcher.flags);
                 matchFunc = text => {
                     // Reset regex state in case global flag was used
                     regex.lastIndex = 0;
@@ -491,9 +506,10 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                 };
             }
 
-            let item = document.body;
+            const stack = [document.body];
+            let item = null;
             let lastFound = null;
-            while (true) { // eslint-disable-line no-constant-condition
+            while (item = stack.pop()) { // eslint-disable-line no-cond-assign
                 for (let i = 0; i < item.childNodes.length; i++) {
                     const child = item.childNodes[i];
                     
@@ -502,17 +518,14 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                         continue;
                     }
 
-                    if (child.childNodes.length > 0 && matchFunc(child.textContent)) {
-                        item = child;
-                        break;
+                    const text = child.textContent || '';
+                    if (child.childNodes.length > 0 && matchFunc(text)) {
+                        if (matchFuncExact === null || matchFuncExact(text)) {
+                            lastFound = child;
+                        }
+                        stack.push(child);
                     }
                 }
-
-                if (lastFound === item) {
-                    break;
-                }
-
-                lastFound = item;
             }
 
             if (!lastFound) return false;

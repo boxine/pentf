@@ -9,7 +9,7 @@ async function run(config) {
     await page.setContent(`
         <div>
             <button onclick="pentfClick('first')">first</button>
-            <button onclick="pentfClick('nested')">Some <span>nested <b>text</b></span></button>
+            <button onclick="pentfClick('nested')">Some <span>nested <b>foo</b></span></button>
             <div>Some <span onclick="pentfClick('span')">span <b>text</b></span></div>
             <div data-testid="invisible" style="display:none;" onclick="pentfClick('invisible')">invisible</div>
         </div>
@@ -22,7 +22,7 @@ async function run(config) {
     await clickNestedText(page, 'first');
     assert.deepStrictEqual(clicks, ['first']);
     
-    await clickNestedText(page, 'Some nested text');
+    await clickNestedText(page, 'Some nested foo');
     assert.deepStrictEqual(clicks, ['first', 'nested']);
 
     clicks = [];
@@ -41,7 +41,7 @@ async function run(config) {
     await clickNestedText(page, /first/);
     assert.deepStrictEqual(clicks, ['first']);
     
-    await clickNestedText(page, /Some.*text/);
+    await clickNestedText(page, /Some.*foo/);
     assert.deepStrictEqual(clicks, ['first', 'nested']);
 
     await clickNestedText(page, /span text/);
@@ -58,6 +58,24 @@ async function run(config) {
     `);
     await clickNestedText(page, 'clickme');
     assert.deepStrictEqual(clicks, ['clickme']);
+
+    clicks = [];
+    await page.setContent(`
+        <html>
+            <body>
+                <div>click</div>
+                foo
+                <span>
+                    foo
+                    <button onclick="pentfClick('clickme')">clickme foo</button>
+                </span>
+            </body>
+        </html>
+    `);
+    await clickNestedText(page, /^clickme/);
+    await clickNestedText(page, /foo$/);
+    assert.deepStrictEqual(clicks, ['clickme', 'clickme']);
+
 
     await closePage(page);
 }

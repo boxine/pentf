@@ -487,7 +487,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
                 matchFunc = text => text.includes(matcher);
             } else {
                 const regexExact = new RegExp(matcher.source, matcher.flags);
-                matchFuncExact = matchFunc = text => {
+                matchFuncExact = text => {
                     // Reset regex state in case global flag was used
                     regexExact.lastIndex = 0;
                     return regexExact.test(text);

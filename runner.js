@@ -13,6 +13,7 @@ const locking = require('./locking');
 const output = require('./output');
 const utils = require('./utils');
 const version = require('./version');
+const {timeoutPromise} = require('./promise_utils');
 
 
 async function run_task(config, task) {
@@ -278,16 +279,23 @@ async function run(config, testCases) {
             }
         }
 
-        await locking.shutdown(config, state);
-        await email.shutdown(config);
+        await timeoutPromise(
+            config, locking.shutdown(config, state),
+            {message: 'locking shutdown', warning: true});
+        await timeoutPromise(
+            config, email.shutdown(config),
+            {message: 'email shutdown', warning: true});
     } finally {
         if (config.afterAllTests) {
-            await config.afterAllTests(config, initData);
+            await timeoutPromise(
+                config, config.afterAllTests(config, initData),
+                {message: 'afterAllTests function', warning: true});
         }
     }
     const test_end = Date.now();
 
-    const testsVersion = await version.testsVersion(config);
+    const testsVersion = await timeoutPromise(
+        config, version.testsVersion(config), {message: 'version determination', warning: true});
     const pentfVersion = version.pentfVersion();
 
     return {

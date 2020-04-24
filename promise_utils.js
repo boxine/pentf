@@ -1,5 +1,7 @@
 const assert = require('assert');
 
+const output = require('./output');
+
 /**
  * Avoid `UnhandledPromiseRejectionWarning` if a promise fails before we `await` it.
  * @example
@@ -89,8 +91,48 @@ async function expectedToFail(config, message, asyncFunc, {expectNothing=false} 
     }
 }
 
+/**
+ * Raise an error if a promise does not finish within a certain timeframe.
+ * Note this does not cancel the promise itself (because that's impossible).
+ *
+ * @param {*} config The pentf configuration.
+ * @param {Promise} promise The promise to limit
+ * @param {{expectNothing?: boolean}} __namedParameters Options (currently not visible in output due to typedoc bug)
+ * @param {string} timeout Timeout in ms (by default 10000=10s)
+ * @param {string} message Optional error message to show when the timeout fires.
+ * @param {boolean} warning Only print an error message, do not throw.
+ */
+async function timeoutPromise(config, promise, {timeout=10000, message=undefined, warning=false} = {}) {
+    const stacktraceAr = (new Error()).stack.split('\n', 3);
+    const stacktrace = stacktraceAr[stacktraceAr.length - 1];
+
+    let resolved = false;
+    try {
+        await Promise.race([
+            promise,
+            new Promise((resolve, reject) => setTimeout(() => {
+                let wholeMessage = (
+                    `Promise did not finish within ${timeout}ms` + (message ? '. ' + message : ''));
+                if (warning) {
+                    if (resolved) {
+                        return; // Main promise done already
+                    }
+                    wholeMessage = `WARNING: ${wholeMessage}\n${stacktrace}`;
+                    output.log(config, wholeMessage);
+                    resolve();
+                } else {
+                    reject(new Error(wholeMessage));
+                }
+            }, timeout))
+        ]);
+    } finally {
+        resolved = true;
+    }
+}
+
 module.exports = {
     catchLater,
     customErrorMessage,
     expectedToFail,
+    timeoutPromise,
 };

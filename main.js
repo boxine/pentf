@@ -76,9 +76,10 @@ async function real_main(options={}) {
     }
 
     await render.doRender(config, results);
-    const any_errors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
-    if (!config.keep_open && any_errors) {
-        process.exit(config.exit_zero ? 0 : 3);
+    if (!config.keep_open) {
+        const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
+        const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
+        process.exit(retCode);
     }
 }
 

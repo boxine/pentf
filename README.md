@@ -104,7 +104,98 @@ module.exports = {
 
 Note that while the above example tests a webpage with [puppeteer](https://github.com/GoogleChrome/puppeteer) and uses pentf's has native support for HTTP requests (in `net_utils`) and email sending (in `email`), tests can be anything – they just have to fail the promise if the test fails.
 
-Have a look in the [API documentation](https://boxine.github.io/pentf/index.html) for various helper functions.
+Have a look in the [API documentation](https://boxine.github.io/pentf/) for various helper functions.
+
+## Tips for writing good tests
+
+By their very nature, end-to-end tests can be flaky, i.e. sometimes succeed and sometimes fail when run multiple times. We want the tests to only relay the flakiness of the systems we test, and not introduce any additional flakiness ourselves. Here are a few tips for that:
+
+### Use `data-testid` attributes in browser tests
+
+Unless otherwise documented, class names and document structures are subject to change. By setting an explicit attribute like `data-testid="comment-button"` in the code, the developer and tester set up a stable contract.
+
+**Avoid**: `await page.waitForSelector('h1 > div.main-container form p button.large-button');`
+
+**Use**: `await waitForTestId(page, 'comment-button');`
+
+### Always wait a bit
+
+If the tests run quick and a remote system is slow, the browser UI may not update immediately. If there is high local system load (which is necessary for the tests to run quickly), then even local updates may not be immediate:
+
+**Avoid**: `page.$('foo')`, `page.evaluate(() => document.querySelector('foo'))`
+
+**Use**: `page.waitForSelector('foo')`
+
+### Make sure you start waiting _early_
+
+Make sure that an action you are waiting on has not already happend. In particular, `await page.waitForNavigation()` calls should probably be replaced by checks for the new page.
+
+**Avoid**:
+```javascript
+await page.press('Enter');
+// If the page is quick, navigation may have already occured here!
+await page.waitForNavigation();
+await waitForText(page, 'email sent');
+
+const since = new Date(); // Too late, email may already have been sent!
+await getMail(config, since, email, 'Enter was pressed');
+```
+
+**Use**:
+```javascript
+const since = new Date(); // Too late, email may already have been sent!
+await page.press('Enter');
+await waitForText(page, 'email sent');
+
+await getMail(config, since, email, 'Enter was pressed');
+```
+
+### Click atomically if the application updates its DOM a lot
+
+If the application rerenders its DOM with JavaScript, you must take special care not to hold onto handles, because they might be invalid (the DOM nodes replaced by other ones) by the time you interact with them again.
+
+**Avoid**:
+```javascript
+const buttonHandle = await page.waitForSelector('button[data-testid="send-email"]');
+buttonHandle.click();
+```
+
+**Use** atomic clicking functions, e.g. from [`browser_utils`](https://boxine.github.io/pentf/modules/_browser_utils_.html):
+
+```javascript
+await clickTestId(page, 'send-email');
+```
+
+### Segregate tests by service
+
+While the ultimate end-to-end test tests all services, it can be very helpful to add a test naming schema so that it's immediately clear which service or application errored. Even at the cost of some redundancy, backend tests e.g. using [`fetch`](https://boxine.github.io/pentf/modules/_net_utils_.html#fetch) (tip: check out the `--print-curl` option) instead of a full browser allow anyone to quickly see whether the problem occurs in the backend .
+
+Note that this does **not** mean that test failures in other projects can be ignored: If a browser-based test often fails because a certain API endpoint, that API endpoint should get its own test and further investigation.
+
+**Use**: If suitable, get a test naming scheme, e.g. `email_deleted`, `email_notification`, `sms_notification`. That way, with `-f email_` you can run all email tests, and with `_notification` you can run all notification tests. Use a negative lookahead like `^(?!email_|carrier-pidgeon_)` to exclude some tests.
+
+### assert early and often
+
+When an error occurs, the test should abort immediately and not keep going on. This makes it clear where the error is and avoids confusion. A helpful error message is quick to write and saves a lot of debugging time later.
+
+**Avoid**:
+```javascript
+const id = data.foo.bar.id;
+const response = await fetch(`https://example.org/widget/${id}`);
+const text = await response.text();
+```
+
+What happens if the ID is not found? Then we will request `https://example.org/widget/undefined`!
+If the server is down, the text we get back may be an error page.
+
+**Use**:
+```javascript
+const id = data.foo.bar.id;
+assert(id, 'ID is not set – unrecognized error in the backend?');
+const response = await fetch(`https://example.org/widget/${id}`);
+assert.equal(response.status, 200);
+const text = await response.text();
+```
 
 ## Configuration
 

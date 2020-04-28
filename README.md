@@ -143,7 +143,7 @@ await getMail(config, since, email, 'Enter was pressed');
 
 **Use**:
 ```javascript
-const since = new Date(); // Too late, email may already have been sent!
+const since = new Date();
 await page.press('Enter');
 await waitForText(page, 'email sent');
 
@@ -170,7 +170,7 @@ await clickTestId(page, 'send-email');
 
 While the ultimate end-to-end test tests all services, it can be very helpful to add a test naming schema so that it's immediately clear which service or application errored. Even at the cost of some redundancy, backend tests e.g. using [`fetch`](https://boxine.github.io/pentf/modules/_net_utils_.html#fetch) (tip: check out the `--print-curl` option) instead of a full browser allow anyone to quickly see whether the problem occurs in the backend .
 
-Note that this does **not** mean that test failures in other projects can be ignored: If a browser-based test often fails because a certain API endpoint, that API endpoint should get its own test and further investigation.
+Note that this does **not** mean that test failures in other projects can be ignored: If a browser-based test often fails because of a certain API endpoint, that API endpoint should get its own test and further investigation.
 
 **Use**: If suitable, get a test naming scheme, e.g. `email_deleted`, `email_notification`, `sms_notification`. That way, with `-f email_` you can run all email tests, and with `_notification` you can run all notification tests. Use a negative lookahead like `^(?!email_|carrier-pidgeon_)` to exclude some tests.
 

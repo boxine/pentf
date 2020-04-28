@@ -179,7 +179,7 @@
 <span class="hljs-keyword">const</span> since = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(); <span class="hljs-comment">// Too late, email may already have been sent!</span>
 <span class="hljs-keyword">await</span> getMail(config, since, email, <span class="hljs-string">'Enter was pressed'</span>);</code></pre>
 				<p><strong>Use</strong>:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> since = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(); <span class="hljs-comment">// Too late, email may already have been sent!</span>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> since = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>();
 <span class="hljs-keyword">await</span> page.press(<span class="hljs-string">'Enter'</span>);
 <span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">'email sent'</span>);
 
@@ -197,7 +197,7 @@ buttonHandle.click();</code></pre>
 					<h3>Segregate tests by service</h3>
 				</a>
 				<p>While the ultimate end-to-end test tests all services, it can be very helpful to add a test naming schema so that it&#39;s immediately clear which service or application errored. Even at the cost of some redundancy, backend tests e.g. using <a href="https://boxine.github.io/pentf/modules/_net_utils_.html#fetch"><code>fetch</code></a> (tip: check out the <code>--print-curl</code> option) instead of a full browser allow anyone to quickly see whether the problem occurs in the backend .</p>
-				<p>Note that this does <strong>not</strong> mean that test failures in other projects can be ignored: If a browser-based test often fails because a certain API endpoint, that API endpoint should get its own test and further investigation.</p>
+				<p>Note that this does <strong>not</strong> mean that test failures in other projects can be ignored: If a browser-based test often fails because of a certain API endpoint, that API endpoint should get its own test and further investigation.</p>
 				<p><strong>Use</strong>: If suitable, get a test naming scheme, e.g. <code>email_deleted</code>, <code>email_notification</code>, <code>sms_notification</code>. That way, with <code>-f email_</code> you can run all email tests, and with <code>_notification</code> you can run all notification tests. Use a negative lookahead like <code>^(?!email_|carrier-pidgeon_)</code> to exclude some tests.</p>
 				<a href="#assert-early-and-often" id="assert-early-and-often" style="color: inherit; text-decoration: none;">
 					<h3>assert early and often</h3>

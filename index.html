@@ -149,7 +149,72 @@
     <span class="hljs-comment">// Using no shared resources? Set resources: []</span>
 };</code></pre>
 				<p>Note that while the above example tests a webpage with <a href="https://github.com/GoogleChrome/puppeteer">puppeteer</a> and uses pentf&#39;s has native support for HTTP requests (in <code>net_utils</code>) and email sending (in <code>email</code>), tests can be anything – they just have to fail the promise if the test fails.</p>
-				<p>Have a look in the <a href="https://boxine.github.io/pentf/index.html">API documentation</a> for various helper functions.</p>
+				<p>Have a look in the <a href="https://boxine.github.io/pentf/">API documentation</a> for various helper functions.</p>
+				<a href="#tips-for-writing-good-tests" id="tips-for-writing-good-tests" style="color: inherit; text-decoration: none;">
+					<h2>Tips for writing good tests</h2>
+				</a>
+				<p>By their very nature, end-to-end tests can be flaky, i.e. sometimes succeed and sometimes fail when run multiple times. We want the tests to only relay the flakiness of the systems we test, and not introduce any additional flakiness ourselves. Here are a few tips for that:</p>
+				<a href="#use-data-testid-attributes-in-browser-tests" id="use-data-testid-attributes-in-browser-tests" style="color: inherit; text-decoration: none;">
+					<h3>Use <code>data-testid</code> attributes in browser tests</h3>
+				</a>
+				<p>Unless otherwise documented, class names and document structures are subject to change. By setting an explicit attribute like <code>data-testid=&quot;comment-button&quot;</code> in the code, the developer and tester set up a stable contract.</p>
+				<p><strong>Avoid</strong>: <code>await page.waitForSelector(&#39;h1 &gt; div.main-container form p button.large-button&#39;);</code></p>
+				<p><strong>Use</strong>: <code>await waitForTestId(page, &#39;comment-button&#39;);</code></p>
+				<a href="#always-wait-a-bit" id="always-wait-a-bit" style="color: inherit; text-decoration: none;">
+					<h3>Always wait a bit</h3>
+				</a>
+				<p>If the tests run quick and a remote system is slow, the browser UI may not update immediately. If there is high local system load (which is necessary for the tests to run quickly), then even local updates may not be immediate:</p>
+				<p><strong>Avoid</strong>: <code>page.$(&#39;foo&#39;)</code>, <code>page.evaluate(() =&gt; document.querySelector(&#39;foo&#39;))</code></p>
+				<p><strong>Use</strong>: <code>page.waitForSelector(&#39;foo&#39;)</code></p>
+				<a href="#make-sure-you-start-waiting-early" id="make-sure-you-start-waiting-early" style="color: inherit; text-decoration: none;">
+					<h3>Make sure you start waiting <em>early</em></h3>
+				</a>
+				<p>Make sure that an action you are waiting on has not already happend. In particular, <code>await page.waitForNavigation()</code> calls should probably be replaced by checks for the new page.</p>
+				<p><strong>Avoid</strong>:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">await</span> page.press(<span class="hljs-string">'Enter'</span>);
+<span class="hljs-comment">// If the page is quick, navigation may have already occured here!</span>
+<span class="hljs-keyword">await</span> page.waitForNavigation();
+<span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">'email sent'</span>);
+
+<span class="hljs-keyword">const</span> since = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(); <span class="hljs-comment">// Too late, email may already have been sent!</span>
+<span class="hljs-keyword">await</span> getMail(config, since, email, <span class="hljs-string">'Enter was pressed'</span>);</code></pre>
+				<p><strong>Use</strong>:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> since = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(); <span class="hljs-comment">// Too late, email may already have been sent!</span>
+<span class="hljs-keyword">await</span> page.press(<span class="hljs-string">'Enter'</span>);
+<span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">'email sent'</span>);
+
+<span class="hljs-keyword">await</span> getMail(config, since, email, <span class="hljs-string">'Enter was pressed'</span>);</code></pre>
+				<a href="#click-atomically-if-the-application-updates-its-dom-a-lot" id="click-atomically-if-the-application-updates-its-dom-a-lot" style="color: inherit; text-decoration: none;">
+					<h3>Click atomically if the application updates its DOM a lot</h3>
+				</a>
+				<p>If the application rerenders its DOM with JavaScript, you must take special care not to hold onto handles, because they might be invalid (the DOM nodes replaced by other ones) by the time you interact with them again.</p>
+				<p><strong>Avoid</strong>:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> buttonHandle = <span class="hljs-keyword">await</span> page.waitForSelector(<span class="hljs-string">'button[data-testid="send-email"]'</span>);
+buttonHandle.click();</code></pre>
+				<p><strong>Use</strong> atomic clicking functions, e.g. from <a href="https://boxine.github.io/pentf/modules/_browser_utils_.html"><code>browser_utils</code></a>:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">await</span> clickTestId(page, <span class="hljs-string">'send-email'</span>);</code></pre>
+				<a href="#segregate-tests-by-service" id="segregate-tests-by-service" style="color: inherit; text-decoration: none;">
+					<h3>Segregate tests by service</h3>
+				</a>
+				<p>While the ultimate end-to-end test tests all services, it can be very helpful to add a test naming schema so that it&#39;s immediately clear which service or application errored. Even at the cost of some redundancy, backend tests e.g. using <a href="https://boxine.github.io/pentf/modules/_net_utils_.html#fetch"><code>fetch</code></a> (tip: check out the <code>--print-curl</code> option) instead of a full browser allow anyone to quickly see whether the problem occurs in the backend .</p>
+				<p>Note that this does <strong>not</strong> mean that test failures in other projects can be ignored: If a browser-based test often fails because a certain API endpoint, that API endpoint should get its own test and further investigation.</p>
+				<p><strong>Use</strong>: If suitable, get a test naming scheme, e.g. <code>email_deleted</code>, <code>email_notification</code>, <code>sms_notification</code>. That way, with <code>-f email_</code> you can run all email tests, and with <code>_notification</code> you can run all notification tests. Use a negative lookahead like <code>^(?!email_|carrier-pidgeon_)</code> to exclude some tests.</p>
+				<a href="#assert-early-and-often" id="assert-early-and-often" style="color: inherit; text-decoration: none;">
+					<h3>assert early and often</h3>
+				</a>
+				<p>When an error occurs, the test should abort immediately and not keep going on. This makes it clear where the error is and avoids confusion. A helpful error message is quick to write and saves a lot of debugging time later.</p>
+				<p><strong>Avoid</strong>:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> id = data.foo.bar.id;
+<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`https://example.org/widget/<span class="hljs-subst">${id}</span>`</span>);
+<span class="hljs-keyword">const</span> text = <span class="hljs-keyword">await</span> response.text();</code></pre>
+				<p>What happens if the ID is not found? Then we will request <code>https://example.org/widget/undefined</code>!
+				If the server is down, the text we get back may be an error page.</p>
+				<p><strong>Use</strong>:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> id = data.foo.bar.id;
+assert(id, <span class="hljs-string">'ID is not set – unrecognized error in the backend?'</span>);
+<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`https://example.org/widget/<span class="hljs-subst">${id}</span>`</span>);
+assert.equal(response.status, <span class="hljs-number">200</span>);
+<span class="hljs-keyword">const</span> text = <span class="hljs-keyword">await</span> response.text();</code></pre>
 				<a href="#configuration" id="configuration" style="color: inherit; text-decoration: none;">
 					<h2>Configuration</h2>
 				</a>

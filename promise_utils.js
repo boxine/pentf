@@ -25,7 +25,8 @@ function catchLater(promise) {
  * ```javascript
  * const page = newPage(config);
  * await page.goto('https://example.org/');
- * await customErrorMessage('<blink> element not found (BUG-123)', page.waitForSelector('blink'));
+ * await customErrorMessage(
+ *     page.waitForSelector('blink'), '<blink> element not found (BUG-123)');
  * await closePage(page);
  * ```
  * @param {Promise<any>} promise The promise to wait for.

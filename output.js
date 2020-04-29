@@ -115,14 +115,55 @@ function logVerbose(config, message) {
 }
 
 /**
- * Convert a value into a formatted string
+ * Indent string
+ * @param {number} n Levels of indentation
+ */
+function indent(n) {
+    return '  '.repeat(n);
+}
+
+/**
+ * Convert a value into a formatted string that can be used for
+ * comparisons. Contrary to `JSON.stringify(value, null, 2)` this
+ * will sort object properties which is necessary to get a meaningful
+ * diff.
  * @param {*} value Value to stringify
  * @returns {string}
  */
-function stringify(value) {
-    if (typeof value === 'string') return value;
-    if (value === undefined) return 'undefined';
-    return JSON.stringify(value, null, 2);
+function stringify(value, level = 0) {
+    if (typeof value === 'string') return `"${value}"`;
+    if (
+        typeof value === 'number'
+        || typeof value === 'boolean'
+        || value === undefined
+        || value === null
+    ) {
+        return '' + value;
+    }
+
+    const start = indent(level + 1);
+    const end = indent(level);
+    
+    if (Array.isArray(value)) {
+        if (value.length === 0) return '[]';
+        const items = value
+            .map(item => `${start}${stringify(item, level + 1)}`)
+            .join(',\n');
+        
+        return `[\n${items},\n${end}]`;
+    }
+
+    const keys = Object.keys(value);
+    if (!keys.length) return '{}';
+
+    const items = keys
+        .sort()
+        .map(key => {
+            return `${start}"${key}": ${stringify(value[key], level + 1)}`;
+        })
+        .join(',\n');
+    
+    return `{\n${items},\n${end}}`;
 }
 
 /**
@@ -186,4 +227,5 @@ module.exports = {
     logVerbose,
     generateDiff,
     status,
+    stringify,
 };

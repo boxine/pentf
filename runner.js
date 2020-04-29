@@ -68,7 +68,7 @@ async function run_task(config, task) {
                     config, `PASSED test case ${task.name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
             } else {
                 output.log(
-                    config, `FAILED test case ${task.name} at ${utils.localIso8601()}:\n${e.stack}\n`);
+                    config, `FAILED test case ${task.name} at ${utils.localIso8601()}:\n${output.generateDiff(e)}${e.stack}\n`);
             }
         }
         if (config.fail_fast) {

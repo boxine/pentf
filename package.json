@@ -29,6 +29,7 @@
     "eslint": "^6.2.2",
     "kolorist": "^1.2.0",
     "nodemon": "^1.18.11",
+    "prettier": "^2.0.5",
     "puppeteer": "^2.1.1",
     "rimraf": "^3.0.2",
     "typedoc": "^0.17.4",

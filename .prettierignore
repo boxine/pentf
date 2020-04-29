@@ -1,0 +1,6 @@
+extensions/
+README.md
+*.json
+*.yml
+.eslintrc.js
+doc/

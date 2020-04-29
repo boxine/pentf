@@ -12,7 +12,9 @@ async function run() {
         {status: 'error'},
     ];
     assert.strictEqual(
-        resultCountString(simple), '3 tests passed, 2 failed, 1 skipped');
+        resultCountString({}, simple), '3 tests passed, 2 failed, 1 skipped');
+    assert.strictEqual(
+        resultCountString({expect_nothing: true}, simple), '3 tests passed, 2 failed, 1 skipped');
 
     const everythingOnce = [
         {status: 'success'},
@@ -23,11 +25,15 @@ async function run() {
         {status: 'success', expectedToFail: 'expected error but passed'},
     ];
     assert.strictEqual(
-        resultCountString(everythingOnce),
+        resultCountString({}, everythingOnce),
         '1 tests passed, 1 failed, 2 skipped, 1 failed as expected, 1 were expected to fail but passed');
+    assert.strictEqual(
+        resultCountString({expect_nothing: true}, everythingOnce),
+        '2 tests passed, 2 failed, 2 skipped');
 }
 
 module.exports = {
     description: 'Testing pentf itself: counting and classifying test results',
     run,
+    expectedToFail: 'yeah',
 };

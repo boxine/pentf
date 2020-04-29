@@ -68,7 +68,7 @@ function finish(config, state) {
     if (tasks.length === 0 && config.filter) {
         STATUS_STREAM.write(`No test case found with filter: ${config.filter}\n`);
     }
-    STATUS_STREAM.write(resultCountString(tasks) + '.\n');
+    STATUS_STREAM.write(resultCountString(config, tasks) + '.\n');
 
     const skipped = tasks.filter(t => t.status === 'skipped');
     if (skipped.length > 0) {

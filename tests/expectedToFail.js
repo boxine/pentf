@@ -1,5 +1,4 @@
 const assert = require('assert');
-const kolorist = require('kolorist');
 
 const runner = require('../runner');
 
@@ -10,7 +9,7 @@ async function run() {
         concurrency: 0,
         quiet: true,
         env: 'totallybroken',
-        logFunc: (_config, msg) => output.push(kolorist.stripColors(msg)),
+        logFunc: (_config, msg) => output.push(msg),
     };
 
     const testCases = [{

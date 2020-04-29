@@ -137,7 +137,7 @@ Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.
 Start: ${format_timestamp(results.start)}  
 
 ### Results
-Total number of tests: ${results.tests.length} (${resultCountString(results.tests)})  
+Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests)})  
 Total test duration: ${format_duration(results.duration)}  
 
 | #     | Test              | Description       | Duration | Result  |
@@ -343,7 +343,7 @@ Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>
 </p>
 
 <h2>Results</h2>
-Total number of tests: ${results.tests.length} (${resultCountString(results.tests)})<br/>
+Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests)})<br/>
 Total test duration: ${escape_html(format_duration(results.duration))}<br/>
 
 <table>

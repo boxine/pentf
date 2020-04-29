@@ -1,4 +1,5 @@
 const assert = require('assert');
+const kolorist = require('kolorist');
 const {generateDiff} = require('../output');
 
 async function run() {
@@ -6,7 +7,7 @@ async function run() {
         assert.deepEqual({foo: 123,bar:23}, {bar:23});
     } catch (err) {
         assert.equal(
-            generateDiff(err).trim(),
+            kolorist.stripColors(generateDiff(err)).trim(),
             [
                 '\n',
                 ' {',

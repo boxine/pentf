@@ -5,6 +5,7 @@ const path = require('path');
 const {performance} = require('perf_hooks');
 const {promisify} = require('util');
 const mkdirp = require('mkdirp');
+const kolorist = require('kolorist');
 
 const browser_utils = require('./browser_utils');
 const email = require('./email');
@@ -24,7 +25,8 @@ async function run_task(config, task) {
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
             const etf = (typeof task.expectedToFail === 'string') ? ` (${task.expectedToFail})` : '';
-            output.log(config, `PASSED test case ${task.name}, but expectedToFail was set${etf}\n`);
+            const label = kolorist.inverse(kolorist.red(' PASSED '));
+            output.log(config, `${label} test case ${kolorist.lightCyan(task.name)}, but expectedToFail was set${etf}\n`);
         }
     } catch(e) {
         task.status = 'error';
@@ -63,12 +65,15 @@ async function run_task(config, task) {
             !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&
             (config.expect_nothing || !task.expectedToFail));
         if (show_error) {
+            const name = kolorist.lightCyan(task.name);
             if (e.pentf_expectedToSucceed) {
+                const label = kolorist.inverse(kolorist.green(' PASSED '));
                 output.log(
-                    config, `PASSED test case ${task.name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
+                    config, `${label} test case ${name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
             } else {
+                const label = kolorist.inverse(kolorist.red(' FAILED '));
                 output.log(
-                    config, `FAILED test case ${task.name} at ${utils.localIso8601()}:\n${output.generateDiff(e)}${e.stack}\n`);
+                    config, `${label} test case ${name} at ${utils.localIso8601()}:\n${output.generateDiff(e)}${e.stack}\n`);
             }
         }
         if (config.fail_fast) {

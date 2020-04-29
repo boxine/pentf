@@ -3,6 +3,7 @@
 const assert = require('assert');
 const readline = require('readline');
 const diff = require('diff');
+const kolorist = require('kolorist');
 
 const utils = require('./utils');
 const {resultCountString} = require('./results');
@@ -31,7 +32,7 @@ function status(config, state) {
     const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
     const failed_count = utils.count(tasks, t => t.status === 'error');
     const skipped_count = utils.count(tasks, t => t.status === 'skipped');
-    const failed_str = failed_count > 0 ? `${failed_count} failed, ` : '';
+    const failed_str = failed_count > 0 ? kolorist.red(`${failed_count} failed, `) : '';
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
@@ -151,7 +152,18 @@ function generateDiff(err) {
     // Remove patch meta block that's not relevant for us
     const lines = patch.split('\n').splice(5);
 
-    return `\n${lines.join('\n')}\n`;
+    const formatted = lines
+        .map(line => {
+            if (line[0] === '-') {
+                return kolorist.red(line);
+            } else if (line[0] === '+') {
+                return kolorist.green(line);
+            }
+            return line;
+        })
+        .join('\n');
+
+    return `\n${formatted}\n`;
 }
 
 module.exports = {

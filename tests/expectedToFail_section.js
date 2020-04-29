@@ -1,4 +1,5 @@
 const assert = require('assert');
+const kolorist = require('kolorist');
 
 const runner = require('../runner');
 const {expectedToFail} = require('../promise_utils');
@@ -10,7 +11,7 @@ async function run() {
         concurrency: 0,
         quiet: true,
         env: 'totallybroken',
-        logFunc: (_config, msg) => output.push(msg),
+        logFunc: (_config, msg) => output.push(kolorist.stripColors(msg)),
     };
 
     const testCases = [{
@@ -49,18 +50,18 @@ async function run() {
 
     await runner.run(runnerConfig, testCases);
     assert(! output.some(o => o.includes('test case normal_ok')));
-    assert(! output.some(o => o.includes('FAILED test case section_fail')));
-    assert(output.some(o => o.includes('PASSED test case section_ok')));
-    assert(output.some(o => o.includes('FAILED test case section_expectNothing_fail')));
+    assert(! output.some(o => o.includes(' FAILED  test case section_fail')));
+    assert(output.some(o => o.includes(' PASSED  test case section_ok')));
+    assert(output.some(o => o.includes(' FAILED  test case section_expectNothing_fail')));
     assert(! output.some(o => o.includes('test case section_expectNothing_ok')));
 
     output = [];
     runnerConfig.expect_nothing = true;
     await runner.run(runnerConfig, testCases);
     assert(! output.some(o => o.includes('test case normal_ok')));
-    assert(output.some(o => o.includes('FAILED test case section_fail')));
+    assert(output.some(o => o.includes(' FAILED  test case section_fail')));
     assert(! output.some(o => o.includes('test case section_ok')));
-    assert(output.some(o => o.includes('FAILED test case section_expectNothing_fail')));
+    assert(output.some(o => o.includes(' FAILED  test case section_expectNothing_fail')));
     assert(! output.some(o => o.includes('test case section_expectNothing_ok')));
 }
 

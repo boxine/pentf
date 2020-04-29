@@ -152,22 +152,36 @@ function generateDiff(err) {
     // Remove patch meta block that's not relevant for us
     const lines = patch.split('\n').splice(5);
 
+    const indent = '  ';
     const formatted = lines
         .map(line => {
             if (line[0] === '-') {
-                return kolorist.red(line);
+                return indent + kolorist.red(line);
             } else if (line[0] === '+') {
-                return kolorist.green(line);
+                return indent + kolorist.green(line);
             }
-            return line;
+            return indent + line;
         })
         .join('\n');
 
     return `\n${formatted}\n`;
 }
 
+/**
+ * Format the error 
+ * @param {Error} err Error object to format
+ */
+function formatError(err) {
+    return err.stack
+        .split('\n')
+        // Indent stack trace
+        .map(line => '   ' + line)
+        .join('\n');
+}
+
 module.exports = {
     finish,
+    formatError,
     log,
     logVerbose,
     generateDiff,

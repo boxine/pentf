@@ -73,7 +73,7 @@ async function run_task(config, task) {
             } else {
                 const label = kolorist.inverse(kolorist.red(' FAILED '));
                 output.log(
-                    config, `${label} test case ${name} at ${utils.localIso8601()}:\n${output.generateDiff(e)}${e.stack}\n`);
+                    config, `${label} test case ${name} at ${utils.localIso8601()}:\n${output.generateDiff(e)}${output.formatError(e)}\n`);
             }
         }
         if (config.fail_fast) {

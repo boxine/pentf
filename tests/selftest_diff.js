@@ -9,11 +9,10 @@ async function run() {
         assert.equal(
             kolorist.stripColors(generateDiff(err)).trim(),
             [
-                '\n',
-                ' {',
-                '-  "foo": 123,',
-                '   "bar": 23',
-                ' }'
+                '   {',
+                '  -  "foo": 123,',
+                '     "bar": 23',
+                '   }'
             ].join('\n').trim()
         );
     }

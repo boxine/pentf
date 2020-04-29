@@ -2,6 +2,7 @@
 // For functions to render the state _after_ the tests have finished, look in render.js .
 const assert = require('assert');
 const readline = require('readline');
+const diff = require('diff');
 
 const utils = require('./utils');
 const {resultCountString} = require('./results');
@@ -112,9 +113,51 @@ function logVerbose(config, message) {
     log(config, message);
 }
 
+/**
+ * Convert a value into a formatted string
+ * @param {*} value Value to stringify
+ * @returns {string}
+ */
+function stringify(value) {
+    if (typeof value === 'string') return value;
+    if (value === undefined) return 'undefined';
+    return JSON.stringify(value, null, 2);
+}
+
+/**
+ * Generates a diff to be printed in stdout
+ * @param {Error} err The error to generate the diff from
+ * @returns {string}
+ */
+function generateDiff(err) {
+    const showDiff = err
+        // Chaijs adds this property if the diff should be shown
+        && err.showDiff !== false
+        // Check if actual and expected are the same type
+        && Object.prototype.toString.call(err.actual) === Object.prototype.toString.call(err.expected)
+        // We can't generate a diff if the expected value is not present
+        && err.expected !== undefined;
+        
+    if (!showDiff) return '';
+
+    // The "diff" package works on strings only
+    const actual = stringify(err.actual);
+    const expected = stringify(err.expected);
+
+    // Append newline to prevent "No newline at end of file"
+    // to be included in the generated patch
+    const patch = diff.createPatch('string', actual + '\n', expected + '\n');
+
+    // Remove patch meta block that's not relevant for us
+    const lines = patch.split('\n').splice(5);
+
+    return `\n${lines.join('\n')}\n`;
+}
+
 module.exports = {
     finish,
     log,
     logVerbose,
+    generateDiff,
     status,
 };

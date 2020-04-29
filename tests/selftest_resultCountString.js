@@ -35,5 +35,4 @@ async function run() {
 module.exports = {
     description: 'Testing pentf itself: counting and classifying test results',
     run,
-    expectedToFail: 'yeah',
 };

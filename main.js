@@ -1,6 +1,7 @@
 /*eslint no-console: "off"*/
 
 const fs = require('fs');
+const kolorist = require('kolorist');
 const path = require('path');
 
 const {readConfig, parseArgs} = require('./config');
@@ -16,6 +17,7 @@ const {loadTests} = require('./loader');
 // - rootDir: Root directory (assume tests/ contains tests, config/ if exists contains config)
 // - testsDir: Test directory
 // - configDir: Configuration directory. false disables configuration.
+// - noColors: Disable colors in stdout.
 async function real_main(options={}) {
     if (options.rootDir) {
         if (! options.testsDir) {
@@ -27,6 +29,10 @@ async function real_main(options={}) {
                 options.configDir = autoConfigDir;
             }
         }
+    }
+
+    if (options.noColors) {
+        kolorist.options.enabled = false;
     }
 
     const args = parseArgs(options);

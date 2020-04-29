@@ -84,6 +84,11 @@ function parseArgs(options) {
         action: 'storeTrue',
         help: 'Ignore expectedToFail attributes on tests',
     });
+    output_group.addArgument(['--no-colors'], {
+        action: 'storeFalse',
+        dest: 'colors',
+        help: 'Disable colors in stdout'
+    });
 
     const results_group = parser.addArgumentGroup({title: 'Writing results to disk'});
     results_group.addArgument(['-J', '--json'], {

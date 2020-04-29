@@ -165,32 +165,15 @@ function localIso8601(date) {
  * await assertEventually(() => called);
  * ```
  * @param {() => any} testfunc The test function. Must return `true` to signal success.
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options] 
+ * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the condition never becomes true within the timeout.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
  *                                `false`: A thrown error/exception is treated as if the test function returned false.
  */
-async function assertEventually(testfunc, options, _options) {
-    if (typeof options === 'string') {
-        console.trace(`DEPRECATED call to assertEventually with non-option argument ${JSON.stringify(options)}`);
-        if (!_options) {
-            _options = {};
-        }
-        _options.message = options;
-        options = _options;
-    } else {
-        // Normal call
-        if (!options) {
-            options = {};
-        }
-        options.message = options.message || 'assertEventually failed';
-    }
-    options.timeout = options.timeout || 10000;
-    options.checkEvery = options.checkEvery || 200;
-    options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
-    const {timeout, checkEvery, crashOnError, message} = options;
+async function assertEventually(testfunc,
+    {message='assertEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         if (crashOnError) {
@@ -216,32 +199,15 @@ async function assertEventually(testfunc, options, _options) {
  * Assert that an asynchronously evaluated condition is eventually true.
  *
  * @param {() => Promise<any>} testfunc The async test function. Must return `true` to signal success.
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options]
+ * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the condition never becomes true within the timeout.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
  *                                `false`: A thrown error/exception is treated as if the test function returned false.
  */
-async function assertAsyncEventually(testfunc, options, _options) {
-    if (typeof options === 'string') {
-        console.trace(`DEPRECATED call to assertAsyncEventually with non-option argument ${JSON.stringify(options)}`);
-        if (!_options) {
-            _options = {};
-        }
-        _options.message = options;
-        options = _options;
-    } else {
-        // Normal call
-        if (!options) {
-            options = {};
-        }
-        options.message = options.message || 'assertAsyncEventually failed';
-    }
-    options.timeout = options.timeout || 10000;
-    options.checkEvery = options.checkEvery || 200;
-    options.crashOnError = (options.crashOnError === undefined) ? true : options.crashOnError;
-    const {timeout, checkEvery, crashOnError, message} = options;
+async function assertAsyncEventually(testfunc,
+    {message='assertAsyncEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         if (crashOnError) {
@@ -267,30 +233,12 @@ async function assertAsyncEventually(testfunc, options, _options) {
  * Assert that a condition remains true for the whole timeout.
  *
  * @param {() => any} testfunc The test function. Must return `true` to signal success.
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [options]
+ * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}}  [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the testfunc fails.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
 */
-async function assertAlways(testfunc, options, _options) {
-    if (typeof options === 'string') {
-        console.trace(`DEPRECATED call to assertAlways with non-option argument ${JSON.stringify(options)}`);
-        if (!_options) {
-            _options = {};
-        }
-        _options.message = options;
-        options = _options;
-    } else {
-        // Normal call
-        if (!options) {
-            options = {};
-        }
-    }
-    options.message = options.message || 'assertAlways failed';
-    options.timeout = options.timeout || 10000;
-    options.checkEvery = options.checkEvery || 200;
-    const {timeout, checkEvery, message} = options;
-
+async function assertAlways(testfunc, {message='assertAlways failed', timeout=10000, checkEvery=200} = {}) {
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         const res = testfunc();
         if (!res) {

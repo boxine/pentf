@@ -16,5 +16,4 @@ pentf.main({
         config.report_header_md = 'This is the end-to-end test report in *markdown* form.';
         config.report_header_html = 'This is the end-to-end test report in <strong>HTML/PDF</strong> form.';
     },
-    colors: false
 });

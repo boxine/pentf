@@ -32,7 +32,7 @@ function status(config, state) {
     const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
     const failed_count = utils.count(tasks, t => t.status === 'error');
     const skipped_count = utils.count(tasks, t => t.status === 'skipped');
-    const failed_str = failed_count > 0 ? kolorist.red(`${failed_count} failed, `) : '';
+    const failed_str = failed_count > 0 ? color(config, 'red', `${failed_count} failed, `) : '';
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
@@ -168,10 +168,13 @@ function stringify(value, level = 0) {
 
 /**
  * Generates a diff to be printed in stdout
+ * @param {*} config The pentf configuration object.
  * @param {Error} err The error to generate the diff from
  * @returns {string}
  */
-function generateDiff(err) {
+function generateDiff(config, err) {
+    assert(err);
+
     const showDiff = err
         // Chaijs adds this property if the diff should be shown
         && err.showDiff !== false
@@ -197,15 +200,31 @@ function generateDiff(err) {
     const formatted = lines
         .map(line => {
             if (line[0] === '-') {
-                return indent + kolorist.red(line);
+                return indent + color(config, 'red', line);
             } else if (line[0] === '+') {
-                return indent + kolorist.green(line);
+                return indent + color(config, 'green', line);
             }
             return indent + line;
         })
         .join('\n');
 
     return `\n${formatted}\n`;
+}
+
+function color(config, colorName, str) {
+    if (!config.colors) {
+        return str;
+    }
+
+    const m = /^inverse-(.*)$/.exec(colorName);
+    if (m) {
+        colorName = m[1];
+        assert(kolorist[colorName], `Unsupported color ${colorName}`);
+        return kolorist.inverse(kolorist[colorName](str));
+    }
+
+    assert(kolorist[colorName], `Unsupported color ${colorName}`);
+    return kolorist[colorName](str);
 }
 
 /**
@@ -221,6 +240,7 @@ function formatError(err) {
 }
 
 module.exports = {
+    color,
     finish,
     formatError,
     log,

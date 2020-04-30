@@ -107,6 +107,17 @@ async function run() {
             '       },',
         ]
     );
+
+    // Don't add diff if already present. Strict mode in assert
+    // will always add a diff
+    try {
+        assert.strict.deepEqual([1], [2]);
+    } catch (err) {
+        assert.equal(
+            generateDiff({}, err).trim(),
+            ''
+        );
+    }
 }
 
 module.exports = {

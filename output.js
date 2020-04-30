@@ -176,13 +176,19 @@ function generateDiff(config, err) {
     assert(err);
 
     const showDiff = err
-        // Chaijs adds this property if the diff should be shown
-        && err.showDiff !== false
+    && (
+        // Chaijs adds this property if the diff should be shown. Assert
+        // Will automatically append a diff to `err.stack` in strict mode.
+        err.showDiff
+            // If assert is not in strict mode or for some reason the diff
+            // is missing, we will append our own nonetheless
+            || !err.stack.slice(1).includes('+ expected')
+    )
         // Check if actual and expected are the same type
         && Object.prototype.toString.call(err.actual) === Object.prototype.toString.call(err.expected)
         // We can't generate a diff if the expected value is not present
         && err.expected !== undefined;
-        
+
     if (!showDiff) return '';
 
     // The "diff" package works on strings only

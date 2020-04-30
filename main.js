@@ -36,6 +36,11 @@ async function real_main(options={}) {
         options.defaultConfig(config);
     }
 
+    if (!config.colors) {
+        // Trick other libraries (e.g. node's assert.strict) into not using colors
+        process.env.NODE_DISABLE_COLORS = 'true';
+    }
+
     const test_cases = await loadTests(args, options.testsDir, options.testsGlob);
     config._testsDir = options.testsDir;
     if (options.rootDir) config._rootDir = options.rootDir;

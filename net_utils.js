@@ -61,6 +61,21 @@ async function fetch(config, url, init) {
     return await node_fetch(url, init);
 }
 
+/**
+* Modify fetch options for a request authenticated with a client-side TLS certificate.
+*
+* @example
+* ```javascript
+* const init = {method: 'POST', body: '{"something": "secret"}'};
+* await setupTLSClientAuth(init, 'key.pem', 'cert.crt');
+* const response = await fetch(config, 'https://protected.example.org/', init);
+* assert.equal(response.status, 200); // 401 = invalid certificate
+* ```
+* @param {Object} fetchOptions The fetch request option object to modify. (`init` parameter in [[fetch]] above)
+* @param {string} keyFilename Name of the private key file in PEM format (e.g. beginning with `-----BEGIN RSA PRIVATE KEY-----`)
+* @param {string} certFilename Name of the certificate file in PEM format (beginning with `-----BEGIN CERTIFICATE-----`)
+* @param {boolean} rejectUnauthorized to validate the server's certificate, false (=default) to accept invalid certificates as well.
+*/
 async function setupTLSClientAuth(fetchOptions, keyFilename, certFilename, rejectUnauthorized=false) {
     assert.equal(typeof fetchOptions, 'object');
     const agentOptions = {

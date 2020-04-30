@@ -88,7 +88,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/402a7e9/net_utils.js#L33">net_utils.js:33</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bc4ccc1/net_utils.js#L41">net_utils.js:41</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -130,7 +130,15 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 								<li>
 									<h5>init: <span class="tsd-signature-type">any</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>fetch options, see <a href="https://fetch.spec.whatwg.org/#requestinit"><code>RequestInit</code> in the Fetch Spec</a>.</p>
+										<p>fetch options, see <a href="https://fetch.spec.whatwg.org/#requestinit"><code>RequestInit</code> in the Fetch Spec</a>.
+										On top of the standard Fetch parameters, we support the following nonstandard parameters:</p>
+										<ul>
+											<li><code>agent</code>: node <a href="https://nodejs.org/api/https.html#https_class_https_agent">HTTP/HTTPS agent</a></li>
+											<li><code>curl_include_headers</code>: boolean (default false) of whether to include <code>-k</code> in the curl output.</li>
+											<li><code>curl_extra_options</code>: List of extra options for the curl output.</li>
+											<li><code>cookieJar</code>: A <a href="https://github.com/salesforce/tough-cookie/blob/master/README.md#cookiejar">CookieJar object</a> to use.<pre><code>        Pass <span class="hljs-keyword">in</span> <span class="hljs-keyword">the</span> <span class="hljs-keyword">string</span> `<span class="hljs-string">'create'</span>` <span class="hljs-built_in">to</span> <span class="hljs-built_in">create</span> <span class="hljs-keyword">a</span> <span class="hljs-built_in">new</span> <span class="hljs-literal">one</span> (returned <span class="hljs-keyword">as</span> `response.cookieJar`).
+        The response will have <span class="hljs-keyword">a</span> utility <span class="hljs-function"><span class="hljs-keyword">function</span> `<span class="hljs-title">async</span> <span class="hljs-title">getCookieValue</span>(<span class="hljs-title">name</span>)` <span class="hljs-title">to</span> <span class="hljs-title">quickly</span> <span class="hljs-title">retrieve</span> <span class="hljs-title">a</span> <span class="hljs-title">cookie</span> <span class="hljs-title">value</span> <span class="hljs-title">from</span> <span class="hljs-title">the</span> <span class="hljs-title">jar</span>.</span></code></pre></li>
+										</ul>
 									</div>
 								</li>
 							</ul>
@@ -148,7 +156,7 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/402a7e9/net_utils.js#L79">net_utils.js:79</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/bc4ccc1/net_utils.js#L114">net_utils.js:114</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">

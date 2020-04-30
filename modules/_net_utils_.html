@@ -70,6 +70,7 @@
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_net_utils_.html#fetch" class="tsd-kind-icon">fetch</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_net_utils_.html#setuptlsclientauth" class="tsd-kind-icon">setupTLSClient<wbr>Auth</a></li>
 							</ul>
 						</section>
 					</div>
@@ -87,7 +88,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/143325f/net_utils.js#L33">net_utils.js:33</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/264ddc1/net_utils.js#L33">net_utils.js:33</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -137,6 +138,63 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="setuptlsclientauth" class="tsd-anchor"></a>
+					<h3>setupTLSClient<wbr>Auth</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">setupTLSClient<wbr>Auth<span class="tsd-signature-symbol">(</span>fetchOptions<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, keyFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, certFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, rejectUnauthorized<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/264ddc1/net_utils.js#L79">net_utils.js:79</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Modify fetch options for a request authenticated with a client-side TLS certificate.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-javascript"><span class="hljs-keyword">const</span> init = {<span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>, <span class="hljs-attr">body</span>: <span class="hljs-string">'{"something": "secret"}'</span>};
+<span class="hljs-keyword">await</span> setupTLSClientAuth(init, <span class="hljs-string">'key.pem'</span>, <span class="hljs-string">'cert.crt'</span>);
+<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(config, <span class="hljs-string">'https://protected.example.org/'</span>, init);
+assert.equal(response.status, <span class="hljs-number">200</span>); <span class="hljs-comment">// 401 = invalid certificate</span></code></pre>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>fetchOptions: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The fetch request option object to modify. (<code>init</code> parameter in <a href="_net_utils_.html#fetch">fetch</a> above)</p>
+									</div>
+								</li>
+								<li>
+									<h5>keyFilename: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Name of the private key file in PEM format (e.g. beginning with <code>-----BEGIN RSA PRIVATE KEY-----</code>)</p>
+									</div>
+								</li>
+								<li>
+									<h5>certFilename: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Name of the certificate file in PEM format (beginning with <code>-----BEGIN CERTIFICATE-----</code>)</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> rejectUnauthorized: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>to validate the server&#39;s certificate, false (=default) to accept invalid certificates as well.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
 			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -166,6 +224,9 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_net_utils_.html#fetch" class="tsd-kind-icon">fetch</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_net_utils_.html#setuptlsclientauth" class="tsd-kind-icon">setupTLSClient<wbr>Auth</a>
 					</li>
 				</ul>
 			</nav>

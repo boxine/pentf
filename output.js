@@ -1,6 +1,6 @@
 // Functions to output the current state.
 // For functions to render the state _after_ the tests have finished, look in render.js .
-const assert = require('assert');
+const assert = require('assert').strict;
 const readline = require('readline');
 const diff = require('diff');
 const kolorist = require('kolorist');

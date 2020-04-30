@@ -1,6 +1,6 @@
 // Locking functions for communication with the lockserver
 
-const assert = require('assert');
+const assert = require('assert').strict;
 const os = require('os');
 
 const {fetch} = require('./net_utils');

@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 
 const {timeoutPromise} = require('../promise_utils');
 const {wait} = require('../utils');

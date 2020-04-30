@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 
 const output = require('./output');
 const {wait} = require('./utils');

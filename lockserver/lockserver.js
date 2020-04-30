@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const argparse = require('argparse');
-const assert = require('assert');
+const assert = require('assert').strict;
 const http = require('http');
 const he = require('he');
 

@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 
 const {speedupTimeouts, restoreTimeouts, closePage, newPage} = require('../browser_utils');
 const {assertAlways, assertEventually} = require('../utils');

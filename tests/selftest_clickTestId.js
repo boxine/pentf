@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 
 const {closePage, newPage, clickTestId} = require('../browser_utils');
 const {assertEventually} = require('../utils');

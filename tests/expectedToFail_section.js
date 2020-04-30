@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 
 const runner = require('../runner');
 const {expectedToFail} = require('../promise_utils');

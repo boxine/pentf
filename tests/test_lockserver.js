@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 
 const {fetch} = require('../net_utils');
 const {externalList, externalAcquire, externalRelease} = require('../external_locking');

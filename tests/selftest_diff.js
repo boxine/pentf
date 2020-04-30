@@ -2,14 +2,10 @@ const assert = require('assert');
 const {generateDiff} = require('../output');
 
 function assertDiff(a, b, expected) {
-    try {
-        assert.deepEqual(a, b);
-    } catch (err) {
-        assert.equal(
-            generateDiff({}, err).trim(),
-            expected.join('\n').trim()
-        );
-    }
+    assert.equal(
+        generateDiff({}, {actual: a, expected: b}).trim(),
+        expected.join('\n').trim()
+    );
 }
 
 async function run() {
@@ -107,17 +103,6 @@ async function run() {
             '       },',
         ]
     );
-
-    // Don't add diff if already present. Strict mode in assert
-    // will always add a diff
-    try {
-        assert.strict.deepEqual([1], [2]);
-    } catch (err) {
-        assert.equal(
-            generateDiff({}, err).trim(),
-            ''
-        );
-    }
 }
 
 module.exports = {

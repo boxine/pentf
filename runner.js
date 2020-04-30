@@ -77,7 +77,7 @@ async function run_task(config, task) {
                 output.log(
                     config,
                     `${label} test case ${name} at ${utils.localIso8601()}:\n` +
-                    `${output.generateDiff(config, e)}${output.formatError(e)}\n`);
+                    `${output.formatError(config, e)}\n`);
             }
         }
         if (config.fail_fast) {

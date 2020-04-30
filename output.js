@@ -166,6 +166,29 @@ function stringify(value, level = 0) {
     return `{\n${items},\n${end}}`;
 }
 
+function shouldShowDiff(err) {
+    if (err.expected === undefined || err.actual === undefined) {
+        return false;
+    }
+
+    // Check if actual and expected are the same type
+    if (Object.prototype.toString.call(err.actual) !== Object.prototype.toString.call(err.expected)) {
+        return false;
+    }
+
+    // Chaijs adds a showDiff property
+    if (err.showDiff) return true;
+    
+    if (
+        typeof err.actual === 'string' && typeof err.expected === 'string'
+        && err.actual.includes('\n') && err.expected.includes('\n')
+    ) {
+        return true;
+    }
+
+    return false;
+}
+
 /**
  * Generates a diff to be printed in stdout
  * @param {*} config The pentf configuration object.
@@ -174,22 +197,6 @@ function stringify(value, level = 0) {
  */
 function generateDiff(config, err) {
     assert(err);
-
-    const showDiff = err
-    && (
-        // Chaijs adds this property if the diff should be shown. Assert
-        // Will automatically append a diff to `err.stack` in strict mode.
-        err.showDiff
-            // If assert is not in strict mode or for some reason the diff
-            // is missing, we will append our own nonetheless
-            || !err.stack.slice(1).includes('+ expected')
-    )
-        // Check if actual and expected are the same type
-        && Object.prototype.toString.call(err.actual) === Object.prototype.toString.call(err.expected)
-        // We can't generate a diff if the expected value is not present
-        && err.expected !== undefined;
-
-    if (!showDiff) return '';
 
     // The "diff" package works on strings only
     const actual = stringify(err.actual);
@@ -235,10 +242,16 @@ function color(config, colorName, str) {
 
 /**
  * Format the error 
+ * @param {*} config Penf config object
  * @param {Error} err Error object to format
  */
-function formatError(err) {
-    return err.stack
+function formatError(config, err) {
+    let diff = '';
+    if (shouldShowDiff(err)) {
+        diff += generateDiff(config, err);
+    }
+
+    return diff + err.stack
         .split('\n')
         // Indent stack trace
         .map(line => '  ' + line)

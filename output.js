@@ -216,7 +216,7 @@ function formatError(err) {
     return err.stack
         .split('\n')
         // Indent stack trace
-        .map(line => '   ' + line)
+        .map(line => '  ' + line)
         .join('\n');
 }
 

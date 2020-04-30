@@ -34,7 +34,8 @@ async function externalAcquire(config, resources, expireIn) {
     if (response.status !== 200) {
         throw new Error(
             `Acquiry of ${resources.join(',')} at ${config.external_locking_url} ` +
-            `failed with error code ${response.status}`);
+                `failed with error code ${response.status}`
+        );
     }
     await response.json();
     return true;
@@ -66,7 +67,8 @@ async function externalRelease(config, resources, overrideClient) {
     if (response.status !== 200) {
         throw new Error(
             `Release of ${resources.join(',')} at ${config.external_locking_url} ` +
-            `failed with error code ${response.status}: ${await response.text()}`);
+                `failed with error code ${response.status}: ${await response.text()}`
+        );
     }
     await response.json();
 
@@ -85,8 +87,10 @@ async function externalList(config) {
     });
 
     assert.equal(
-        response.status, 200,
-        `Resource listing at ${config.external_locking_url} failed with error code ${response.status}`);
+        response.status,
+        200,
+        `Resource listing at ${config.external_locking_url} failed with error code ${response.status}`
+    );
     return await response.json();
 }
 
@@ -97,14 +101,16 @@ async function listLocks(config) {
 
 async function clearAllLocks(config) {
     const locks = await externalList(config);
-    await Promise.all(locks.map(async l => {
-        const res = await externalRelease(config, [l.resource], l.client);
-        assert.strictEqual(res, true);
-    }));
+    await Promise.all(
+        locks.map(async l => {
+            const res = await externalRelease(config, [l.resource], l.client);
+            assert.strictEqual(res, true);
+        })
+    );
 }
 
 function prepare(config) {
-    if (! config.external_locking_url) {
+    if (!config.external_locking_url) {
         config.no_external_locking = true;
     }
     config.external_locking_client = `${os.hostname()}-${os.userInfo().username}-${Date.now()}`;
@@ -123,7 +129,10 @@ async function refresh(state) {
             const acquireRes = await externalAcquire(config, locksArray, REQUEST_EXPIRE_IN);
             if (acquireRes !== true) {
                 state.external_locking_failed = true;
-                output.log(config, `[exlocking] Lock refresh failed: ${acquireRes.client} holds ${acquireRes.resource}, expires in ${acquireRes.expireIn} ms`);
+                output.log(
+                    config,
+                    `[exlocking] Lock refresh failed: ${acquireRes.client} holds ${acquireRes.resource}, expires in ${acquireRes.expireIn} ms`
+                );
             } else {
                 if (config.locking_verbose) {
                     const locks_str = locksArray.sort().join(',');

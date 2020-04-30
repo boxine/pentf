@@ -29,23 +29,27 @@ function status(config, state) {
     const {tasks} = state;
     const running = tasks.filter(s => s.status === 'running');
     const running_count = running.length;
-    const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
+    const done_count = utils.count(tasks, t => t.status === 'success' || t.status === 'error');
     const failed_count = utils.count(tasks, t => t.status === 'error');
     const skipped_count = utils.count(tasks, t => t.status === 'skipped');
     const failed_str = failed_count > 0 ? color(config, 'red', `${failed_count} failed, `) : '';
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
-    const terminal_width = STATUS_STREAM.getWindowSize ? STATUS_STREAM.getWindowSize()[0] : Infinity;
+    const terminal_width = STATUS_STREAM.getWindowSize
+        ? STATUS_STREAM.getWindowSize()[0]
+        : Infinity;
     let status_str;
-    for (let running_show = running.length;running_show >= 0;running_show--) {
-        const running_str = (
-            running.slice(0, running_show).map(({tc}) => tc.name).join(' ')
-            + (running_show < running.length ? '  +' + (running.length - running_show) : '')
-        );
-        status_str = (
+    for (let running_show = running.length; running_show >= 0; running_show--) {
+        const running_str =
+            running
+                .slice(0, running_show)
+                .map(({tc}) => tc.name)
+                .join(' ') +
+            (running_show < running.length ? '  +' + (running.length - running_show) : '');
+        status_str =
             `${done_count}/${tasks.length - skipped_count} done, ` +
-            `${failed_str}${running_count} running (${running_str})`);
+            `${failed_str}${running_count} running (${running_str})`;
 
         if (status_str.length < terminal_width) {
             break; // Fits!
@@ -58,7 +62,6 @@ function status(config, state) {
         STATUS_STREAM.write('\n');
     }
 }
-
 
 function finish(config, state) {
     last_state = null;
@@ -74,12 +77,18 @@ function finish(config, state) {
 
     const skipped = tasks.filter(t => t.status === 'skipped');
     if (skipped.length > 0) {
-        STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);
+        STATUS_STREAM.write(
+            `Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`
+        );
     }
 
     const expectedToFail = tasks.filter(t => t.expectedToFail && t.status === 'error');
-    if (!config.expect_nothing && (expectedToFail.length > 0)) {
-        STATUS_STREAM.write(`${expectedToFail.length} tests failed as expected (${expectedToFail.map(s => s.name).join(' ')}). Pass in -E/--expect-nothing to ignore expectedToFail declarations.\n`);
+    if (!config.expect_nothing && expectedToFail.length > 0) {
+        STATUS_STREAM.write(
+            `${expectedToFail.length} tests failed as expected (${expectedToFail
+                .map(s => s.name)
+                .join(' ')}). Pass in -E/--expect-nothing to ignore expectedToFail declarations.\n`
+        );
     }
 
     // Internal self-check
@@ -87,16 +96,17 @@ function finish(config, state) {
     if (inconsistent.length) {
         STATUS_STREAM.write(
             `INTERNAL ERROR: ${inconsistent.length} out of ${tasks.length} tasks` +
-            ` are in an inconsistent state. First affected task is ${inconsistent[0].name}` +
-            ` in state ${inconsistent[0].status}.`);
+                ` are in an inconsistent state. First affected task is ${inconsistent[0].name}` +
+                ` in state ${inconsistent[0].status}.`
+        );
     }
 }
 
 function log(config, message) {
     if (config.logFunc) return config.logFunc(config, message);
 
-    if (! config.concurrency) {
-        console.log(message);  // eslint-disable-line no-console
+    if (!config.concurrency) {
+        console.log(message); // eslint-disable-line no-console
         return;
     }
 
@@ -133,23 +143,21 @@ function indent(n) {
 function stringify(value, level = 0) {
     if (typeof value === 'string') return `"${value}"`;
     if (
-        typeof value === 'number'
-        || typeof value === 'boolean'
-        || value === undefined
-        || value === null
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        value === undefined ||
+        value === null
     ) {
         return '' + value;
     }
 
     const start = indent(level + 1);
     const end = indent(level);
-    
+
     if (Array.isArray(value)) {
         if (value.length === 0) return '[]';
-        const items = value
-            .map(item => `${start}${stringify(item, level + 1)}`)
-            .join(',\n');
-        
+        const items = value.map(item => `${start}${stringify(item, level + 1)}`).join(',\n');
+
         return `[\n${items},\n${end}]`;
     }
 
@@ -162,7 +170,7 @@ function stringify(value, level = 0) {
             return `${start}"${key}": ${stringify(value[key], level + 1)}`;
         })
         .join(',\n');
-    
+
     return `{\n${items},\n${end}}`;
 }
 
@@ -175,14 +183,16 @@ function stringify(value, level = 0) {
 function generateDiff(config, err) {
     assert(err);
 
-    const showDiff = err
+    const showDiff =
+        err &&
         // Chaijs adds this property if the diff should be shown
-        && err.showDiff !== false
+        err.showDiff !== false &&
         // Check if actual and expected are the same type
-        && Object.prototype.toString.call(err.actual) === Object.prototype.toString.call(err.expected)
+        Object.prototype.toString.call(err.actual) ===
+            Object.prototype.toString.call(err.expected) &&
         // We can't generate a diff if the expected value is not present
-        && err.expected !== undefined;
-        
+        err.expected !== undefined;
+
     if (!showDiff) return '';
 
     // The "diff" package works on strings only
@@ -228,15 +238,17 @@ function color(config, colorName, str) {
 }
 
 /**
- * Format the error 
+ * Format the error
  * @param {Error} err Error object to format
  */
 function formatError(err) {
-    return err.stack
-        .split('\n')
-        // Indent stack trace
-        .map(line => '  ' + line)
-        .join('\n');
+    return (
+        err.stack
+            .split('\n')
+            // Indent stack trace
+            .map(line => '  ' + line)
+            .join('\n')
+    );
 }
 
 module.exports = {

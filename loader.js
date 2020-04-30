@@ -15,11 +15,15 @@ async function loadTests(args, testsDir, globPattern = '*.js') {
     }
     if (args.filter_body) {
         const bodyFilterRe = new RegExp(args.filter_body);
-        tests = (await Promise.all(tests.map(async test => {
-            const filePath = path.join(testsDir, test.path);
-            const contents = await promisify(fs.readFile)(filePath, {encoding: 'utf-8'});
-            return bodyFilterRe.test(contents) ? test : null;
-        }))).filter(t => t);
+        tests = (
+            await Promise.all(
+                tests.map(async test => {
+                    const filePath = path.join(testsDir, test.path);
+                    const contents = await promisify(fs.readFile)(filePath, {encoding: 'utf-8'});
+                    return bodyFilterRe.test(contents) ? test : null;
+                })
+            )
+        ).filter(t => t);
     }
 
     return tests.map(t => {

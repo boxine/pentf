@@ -26,9 +26,10 @@ async function run(config) {
     assert.deepStrictEqual(clicks, []);
 
     await clickTestId(page, 'first');
-    await assertEventually(
-        () => assert.deepStrictEqual(clicks, ['first']),
-        {mesage: 'click should have been registered', crashOnError: false});
+    await assertEventually(() => assert.deepStrictEqual(clicks, ['first']), {
+        mesage: 'click should have been registered',
+        crashOnError: false,
+    });
     clicks.splice(0, clicks.length);
 
     await assert.rejects(clickTestId(page, 'invisible', {timeout: 43}), {
@@ -43,7 +44,8 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'The clickTestId browser_utils function clicks an element selected by its data-testid attribute, atomically',
+    description:
+        'The clickTestId browser_utils function clicks an element selected by its data-testid attribute, atomically',
     resources: [],
     run,
 };

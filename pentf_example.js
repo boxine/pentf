@@ -50,7 +50,7 @@ module.exports = {
     // Used to indicate tests for bugs/features that are not yet implemented (e.g. with TDD).
     // Strings will be reported; the URL to an issue is a good and typical value.
     // Alternatively, a function that is called with the config and returns a value as described above.
-    expectedToFail: config => (config.env === 'alwaysbroken') ? 'Known to be broken here' : false,
+    expectedToFail: config => (config.env === 'alwaysbroken' ? 'Known to be broken here' : false),
 
     // Resources is a list of strings. Tests accessing the same resources are run sequentially.
     resources: ['toniebox_1234', 'another_resource'],

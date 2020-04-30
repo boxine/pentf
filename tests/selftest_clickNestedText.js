@@ -17,18 +17,21 @@ async function run(config) {
     await page.exposeFunction('pentfClick', clickId => {
         clicks.push(clickId);
     });
-    
+
     // String variant
     await clickNestedText(page, 'first');
     assert.deepStrictEqual(clicks, ['first']);
-    
+
     await clickNestedText(page, 'Some nested foo');
     assert.deepStrictEqual(clicks, ['first', 'nested']);
 
     clicks = [];
-    await assert.rejects(clickNestedText(page, 'not-present', {timeout: 1, extraMessage: 'blabla'}), {
-        message: 'Unable to find visible text "not-present" after 1ms (blabla)',
-    });
+    await assert.rejects(
+        clickNestedText(page, 'not-present', {timeout: 1, extraMessage: 'blabla'}),
+        {
+            message: 'Unable to find visible text "not-present" after 1ms (blabla)',
+        }
+    );
     assert.deepStrictEqual(clicks, []);
 
     await assert.rejects(clickNestedText(page, 'invisible', {timeout: 43}), {
@@ -40,7 +43,7 @@ async function run(config) {
 
     await clickNestedText(page, /first/);
     assert.deepStrictEqual(clicks, ['first']);
-    
+
     await clickNestedText(page, /Some.*foo/);
     assert.deepStrictEqual(clicks, ['first', 'nested']);
 
@@ -76,12 +79,12 @@ async function run(config) {
     await clickNestedText(page, /foo$/);
     assert.deepStrictEqual(clicks, ['clickme', 'clickme']);
 
-
     await closePage(page);
 }
 
 module.exports = {
-    description: 'The clickNestedText browser_utils function clicks elements by matching text content',
+    description:
+        'The clickNestedText browser_utils function clicks elements by matching text content',
     resources: [],
     run,
 };

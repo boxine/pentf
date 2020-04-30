@@ -8,7 +8,7 @@ async function stream2buf(stream) {
         write_stream.on('finish', () => {
             resolve(write_stream.getContents());
         });
-        write_stream.on('error', (e) => {
+        write_stream.on('error', e => {
             reject(e);
         });
     });
@@ -19,7 +19,7 @@ function escape_shell(arg) {
         return arg;
     }
 
-    return '\'' + arg.replace(/'/g, '\'"\'"\'') + '\'';
+    return "'" + arg.replace(/'/g, "'\"'\"'") + "'";
 }
 
 function add_binary_data(curl_command, data_b64) {
@@ -29,7 +29,7 @@ function add_binary_data(curl_command, data_b64) {
 async function makeCurlCommand(options, url) {
     let curl_command = 'curl';
 
-    if (options.agent && (options.agent.options.rejectUnauthorized === false)) {
+    if (options.agent && options.agent.options.rejectUnauthorized === false) {
         curl_command += ' -k';
     }
 
@@ -74,7 +74,7 @@ async function makeCurlCommand(options, url) {
             curl_command += ' -d ' + escape_shell(options.body);
         }
     }
-    assert(! /^-/.test(url));
+    assert(!/^-/.test(url));
 
     if (options.curl_extra_options) {
         curl_command += ' ' + options.curl_extra_options.map(ce => escape_shell(ce)).join(' ');

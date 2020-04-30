@@ -9,7 +9,9 @@ async function run() {
     const scratchDir = path.join(__dirname, 'version_tests');
     const exampleRepo = path.join(scratchDir, 'example_repo');
 
-    await (promisify(child_process.execFile)('tar', ['xf', 'example_repo.tar.gz'], {cwd: scratchDir}));
+    await promisify(child_process.execFile)('tar', ['xf', 'example_repo.tar.gz'], {
+        cwd: scratchDir,
+    });
 
     const pseudoConfig = {
         rootDir: exampleRepo,

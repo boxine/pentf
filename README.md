@@ -237,6 +237,7 @@ The keys are up to you; for example you probably want to have a main entry point
                       Do not output error messages matching the regular expression. Example: -I 
                       "\(TOC-[0-9]+\)"
 -E, --expect-nothing  Ignore expectedToFail attributes on tests
+--no-colors           Disable colors in stdout
 ```
 
 ###### Writing results to disk

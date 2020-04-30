@@ -9,12 +9,12 @@ function readBody(request) {
             body += data;
         });
         request.on('end', () => {
-            if(done) return;
+            if (done) return;
             done = true;
             resolve(body);
         });
         request.on('error', e => {
-            if(done) return;
+            if (done) return;
             done = true;
             reject(e);
         });
@@ -26,7 +26,7 @@ async function readJSONBody(request, response) {
     let body;
     try {
         body = await readBody(request);
-    } catch(e) {
+    } catch (e) {
         requestError(response, 'Failed to read body');
         return false;
     }
@@ -34,7 +34,7 @@ async function readJSONBody(request, response) {
     let res;
     try {
         res = JSON.parse(body);
-    } catch(e) {
+    } catch (e) {
         requestError(response, 'Failed to read body');
         return false;
     }

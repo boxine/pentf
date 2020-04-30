@@ -45,7 +45,8 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'browser_utils.speedupTimeouts makes JavaScript timeouts and intervals return far earlier',
+    description:
+        'browser_utils.speedupTimeouts makes JavaScript timeouts and intervals return far earlier',
     resources: [],
     run,
 };

@@ -37,11 +37,16 @@ async function customErrorMessage(promise, message) {
         return await promise;
     } catch (e) {
         e.message += ' (' + message + ')';
-        if (! e.stack.includes(message)) {
+        if (!e.stack.includes(message)) {
             // Some exception classes generate the stack automatically
             const newline_index = e.stack.indexOf('\n');
             if (newline_index >= 0) {
-                e.stack = e.stack.slice(0, newline_index) + ' (' + message + ')' + e.stack.slice(newline_index);
+                e.stack =
+                    e.stack.slice(0, newline_index) +
+                    ' (' +
+                    message +
+                    ')' +
+                    e.stack.slice(newline_index);
             }
         }
         throw e;
@@ -67,7 +72,7 @@ async function customErrorMessage(promise, message) {
  * @param {{expectNothing?: boolean}} __namedParameters Options (currently not visible in output due to typedoc bug)
  * @param {boolean} expectNothing Do nothing – this is convenient if the code is expected to work on some environments. (default: false)
  */
-async function expectedToFail(config, message, asyncFunc, {expectNothing=false} = {}) {
+async function expectedToFail(config, message, asyncFunc, {expectNothing = false} = {}) {
     assert(message);
     assert(asyncFunc);
 
@@ -79,14 +84,15 @@ async function expectedToFail(config, message, asyncFunc, {expectNothing=false} 
 
     try {
         await asyncFunc();
-    } catch(e) {
+    } catch (e) {
         e.pentf_expectedToFail = message;
         throw e;
     }
     if (!config.expect_nothing) {
         const err = new Error(
             `Section marked as expectedToFail (${message}), but succeeded.` +
-            ' Pass in --expect-nothing/-E to ignore this message');
+                ' Pass in --expect-nothing/-E to ignore this message'
+        );
         err.pentf_expectedToSucceed = message;
         throw err;
     }
@@ -103,28 +109,35 @@ async function expectedToFail(config, message, asyncFunc, {expectNothing=false} 
  * @param {string} message Optional error message to show when the timeout fires.
  * @param {boolean} warning Only print an error message, do not throw.
  */
-async function timeoutPromise(config, promise, {timeout=10000, message=undefined, warning=false} = {}) {
-    const stacktraceAr = (new Error()).stack.split('\n', 3);
+async function timeoutPromise(
+    config,
+    promise,
+    {timeout = 10000, message = undefined, warning = false} = {}
+) {
+    const stacktraceAr = new Error().stack.split('\n', 3);
     const stacktrace = stacktraceAr[stacktraceAr.length - 1];
 
     let resolved = false;
     try {
         await Promise.race([
             promise,
-            new Promise((resolve, reject) => setTimeout(() => {
-                let wholeMessage = (
-                    `Promise did not finish within ${timeout}ms` + (message ? '. ' + message : ''));
-                if (warning) {
-                    if (resolved) {
-                        return; // Main promise done already
+            new Promise((resolve, reject) =>
+                setTimeout(() => {
+                    let wholeMessage =
+                        `Promise did not finish within ${timeout}ms` +
+                        (message ? '. ' + message : '');
+                    if (warning) {
+                        if (resolved) {
+                            return; // Main promise done already
+                        }
+                        wholeMessage = `WARNING: ${wholeMessage}\n${stacktrace}`;
+                        output.log(config, wholeMessage);
+                        resolve();
+                    } else {
+                        reject(new Error(wholeMessage));
                     }
-                    wholeMessage = `WARNING: ${wholeMessage}\n${stacktrace}`;
-                    output.log(config, wholeMessage);
-                    resolve();
-                } else {
-                    reject(new Error(wholeMessage));
-                }
-            }, timeout))
+                }, timeout)
+            ),
         ]);
     } finally {
         resolved = true;

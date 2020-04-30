@@ -78,7 +78,8 @@ function parseArgs(options) {
     });
     output_group.addArgument(['-I', '--ignore-errors'], {
         metavar: 'REGEXP',
-        help: 'Do not output error messages matching the regular expression. Example: -I "\\(TOC-[0-9]+\\)"',
+        help:
+            'Do not output error messages matching the regular expression. Example: -I "\\(TOC-[0-9]+\\)"',
     });
     output_group.addArgument(['-E', '--expect-nothing'], {
         action: 'storeTrue',
@@ -87,7 +88,7 @@ function parseArgs(options) {
     output_group.addArgument(['--no-colors'], {
         action: 'storeFalse',
         dest: 'colors',
-        help: 'Disable colors in stdout'
+        help: 'Disable colors in stdout',
     });
 
     const results_group = parser.addArgumentGroup({title: 'Writing results to disk'});
@@ -119,7 +120,7 @@ function parseArgs(options) {
     results_group.addArgument(['--no-pdf'], {
         dest: 'pdf',
         action: 'storeFalse',
-        help: 'Do not write a PDF report with test results.'
+        help: 'Do not write a PDF report with test results.',
     });
     results_group.addArgument(['--pdf-file'], {
         metavar: 'FILE.pdf',
@@ -183,11 +184,15 @@ function parseArgs(options) {
         help: 'Do not take screenshots of browser failures',
     });
     const defaultScreenshotDir = path.join(
-        options.rootDir ? options.rootDir : process.cwd(), 'screenshots');
+        options.rootDir ? options.rootDir : process.cwd(),
+        'screenshots'
+    );
     puppeteer_group.addArgument(['--screenshot-directory'], {
         metavar: 'DIR',
         defaultValue: defaultScreenshotDir,
-        help: `Directory to write screenshots to (default: ${process.env.PENTF_GENERIC_HELP ? './screenshots' : '%(defaultValue)s'})`,
+        help: `Directory to write screenshots to (default: ${
+            process.env.PENTF_GENERIC_HELP ? './screenshots' : '%(defaultValue)s'
+        })`,
     });
     puppeteer_group.addArgument(['-s', '--slow-mo'], {
         metavar: 'MS',
@@ -203,7 +208,8 @@ function parseArgs(options) {
         action: 'storeTrue',
     });
     puppeteer_group.addArgument(['--devtools-preserve'], {
-        help: 'Configure devtools to preserve logs and network requests upon navigation. Implies --devtools',
+        help:
+            'Configure devtools to preserve logs and network requests upon navigation. Implies --devtools',
         action: 'storeTrue',
     });
     puppeteer_group.addArgument(['--extensions'], {
@@ -217,7 +223,8 @@ function parseArgs(options) {
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
     runner_group.addArgument(['-C', '--concurrency'], {
         metavar: 'COUNT',
-        help: 'Maximum number of tests to run in parallel. 0 to run without a pool, sequentially. Defaults to %(defaultValue)s.',
+        help:
+            'Maximum number of tests to run in parallel. 0 to run without a pool, sequentially. Defaults to %(defaultValue)s.',
         dest: 'concurrency',
         defaultValue: 10,
         type: 'int',
@@ -237,7 +244,8 @@ function parseArgs(options) {
         action: 'storeTrue',
     });
     runner_group.addArgument(['--exit-zero'], {
-        help: 'Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still emitted in cases of internal crashes)',
+        help:
+            'Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still emitted in cases of internal crashes)',
         action: 'storeTrue',
     });
 
@@ -286,7 +294,9 @@ function parseArgs(options) {
         console.log('Warning: --json-file given, but not -j/--json. Will NOT write JSON.'); // eslint-disable-line no-console
     }
     if (args.markdown_file !== DEFAULT_MARKDOWN_NAME && !args.markdown) {
-        console.log('Warning: --markdown-file given, but not -m/--markdown. Will NOT write Markdown.'); // eslint-disable-line no-console
+        console.log(
+            'Warning: --markdown-file given, but not -m/--markdown. Will NOT write Markdown.'
+        ); // eslint-disable-line no-console
     }
     if (args.html_file !== DEFAULT_HTML_NAME && !args.html) {
         console.log('Warning: --html-file given, but not -h/--html. Will NOT write HTML.'); // eslint-disable-line no-console
@@ -319,7 +329,7 @@ function readConfigFile(configDir, env) {
     assert.equal(typeof config, 'object');
 
     if (config.extends) {
-        config = {... readConfigFile(configDir, config.extends), ...config};
+        config = {...readConfigFile(configDir, config.extends), ...config};
     }
     return config;
 }

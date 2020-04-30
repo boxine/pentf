@@ -15,7 +15,6 @@ const utils = require('./utils');
 const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
 
-
 async function run_task(config, task) {
     const task_config = {...config, _browser_pages: []};
     try {
@@ -23,14 +22,15 @@ async function run_task(config, task) {
         task.status = 'success';
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
-            const etf = (typeof task.expectedToFail === 'string') ? ` (${task.expectedToFail})` : '';
+            const etf = typeof task.expectedToFail === 'string' ? ` (${task.expectedToFail})` : '';
             const label = output.color(config, 'inverse-red', ' PASSED ');
             output.log(
                 config,
                 `${label} test case ${output.color(config, 'lightCyan', task.name)}` +
-                `, but expectedToFail was set${etf}\n`);
+                    `, but expectedToFail was set${etf}\n`
+            );
         }
-    } catch(e) {
+    } catch (e) {
         task.status = 'error';
         task.duration = performance.now() - task.start;
         task.error = e;
@@ -40,8 +40,8 @@ async function run_task(config, task) {
 
         if (config.take_screenshots) {
             try {
-                task.error_screenshots = await Promise.all(task_config._browser_pages.map(
-                    async (page, i) => {
+                task.error_screenshots = await Promise.all(
+                    task_config._browser_pages.map(async (page, i) => {
                         await promisify(mkdirp)(config.screenshot_directory);
                         const fn = path.join(config.screenshot_directory, `${task.name}-${i}.png`);
                         return await page.screenshot({
@@ -49,35 +49,49 @@ async function run_task(config, task) {
                             type: 'png',
                             fullPage: true,
                         });
-                    }));
-            } catch(e) {
-                output.log(config, `INTERNAL ERROR: failed to take screenshot of ${task.name}: ${e}`);
+                    })
+                );
+            } catch (e) {
+                output.log(
+                    config,
+                    `INTERNAL ERROR: failed to take screenshot of ${task.name}: ${e}`
+                );
             }
         }
         // Close all browser windows
-        if (! config.keep_open && task_config._browser_pages.length > 0) {
+        if (!config.keep_open && task_config._browser_pages.length > 0) {
             try {
-                await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
-            } catch(e) {
-                output.log(config, `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}`);
+                await Promise.all(
+                    task_config._browser_pages.slice().map(page => browser_utils.closePage(page))
+                );
+            } catch (e) {
+                output.log(
+                    config,
+                    `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}`
+                );
             }
         }
 
-        const show_error = (
-            !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&
-            (config.expect_nothing || !task.expectedToFail));
+        const show_error =
+            !(config.ignore_errors && new RegExp(config.ignore_errors).test(e.stack)) &&
+            (config.expect_nothing || !task.expectedToFail);
         if (show_error) {
             const name = output.color(config, 'lightCyan', task.name);
             if (e.pentf_expectedToSucceed) {
                 const label = output.color(config, 'inverse-green', ' PASSED ');
                 output.log(
-                    config, `${label} test case ${name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
+                    config,
+                    `${label} test case ${name} at ${utils.localIso8601()} but section was expected to fail:\n${
+                        e.stack
+                    }\n`
+                );
             } else {
                 const label = output.color(config, 'inverse-red', ' FAILED ');
                 output.log(
                     config,
                     `${label} test case ${name} at ${utils.localIso8601()}:\n` +
-                    `${output.generateDiff(config, e)}${output.formatError(e)}\n`);
+                        `${output.generateDiff(config, e)}${output.formatError(e)}\n`
+                );
             }
         }
         if (config.fail_fast) {
@@ -96,7 +110,7 @@ async function sequential_run(config, state) {
         if (task.status === 'skipped') continue;
         await locking.acquireEventually(config, state, task);
 
-        if (! config.quiet) {
+        if (!config.quiet) {
             console.log(task.name + ' ...');
         }
 
@@ -111,7 +125,7 @@ async function sequential_run(config, state) {
 async function run_one(config, state, task) {
     output.status(config, state);
 
-    if (task.status === 'skipped') return task;    
+    if (task.status === 'skipped') return task;
 
     task.status = 'running';
     task.start = performance.now();
@@ -138,7 +152,8 @@ async function parallel_run(config, state) {
     state.running = [];
     state.locking_backoff = 10;
     let runner_task_id = 0;
-    while (true) {  // eslint-disable-line no-constant-condition
+    while (true) {
+        // eslint-disable-line no-constant-condition
         // Add new tasks
         while (state.running.length < config.concurrency) {
             let task = undefined;
@@ -146,7 +161,7 @@ async function parallel_run(config, state) {
             for (const t of state.tasks) {
                 if (t.status !== 'todo') continue;
 
-                if (! await locking.acquire(config, state, t)) {
+                if (!(await locking.acquire(config, state, t))) {
                     anyLocked = true;
                     continue;
                 }
@@ -158,7 +173,10 @@ async function parallel_run(config, state) {
             if (!task) {
                 if (anyLocked) {
                     if (config.verbose || config.locking_verbose) {
-                        output.log(config, `[runner] All tasks are locked, sleeping for ${state.locking_backoff} ms`);
+                        output.log(
+                            config,
+                            `[runner] All tasks are locked, sleeping for ${state.locking_backoff} ms`
+                        );
                     }
                     await utils.wait(state.locking_backoff);
                     state.locking_backoff = Math.min(2 * state.locking_backoff, 10000);
@@ -168,7 +186,8 @@ async function parallel_run(config, state) {
 
             task._runner_task_id = runner_task_id;
             const promise = run_one(config, state, task);
-            if (config.verbose) output.log(config, `[runner] started task #${task._runner_task_id}: ${task.id}`);
+            if (config.verbose)
+                output.log(config, `[runner] started task #${task._runner_task_id}: ${task.id}`);
             promise._runner_task_id = runner_task_id;
             runner_task_id++;
             state.running.push(promise);
@@ -178,8 +197,14 @@ async function parallel_run(config, state) {
             if (state.tasks.some(t => t.status === 'todo')) {
                 // Still waiting for locks
                 if (config.verbose || config.locking_verbose) {
-                    const waitingTasksStr = state.tasks.filter(t => t.status === 'todo').map(t => t.id).join(',');
-                    output.log(config, `[runner] Still waiting for locks on tasks ${waitingTasksStr}`);
+                    const waitingTasksStr = state.tasks
+                        .filter(t => t.status === 'todo')
+                        .map(t => t.id)
+                        .join(',');
+                    output.log(
+                        config,
+                        `[runner] Still waiting for locks on tasks ${waitingTasksStr}`
+                    );
                 }
                 continue;
             }
@@ -190,14 +215,21 @@ async function parallel_run(config, state) {
                     `Would end testing now, but task ${task.name} is still in status ${task.status}`
                 );
             }
-            return;  // no more tasks to add, no more tasks running => we're done!
+            return; // no more tasks to add, no more tasks running => we're done!
         }
 
         // Wait for one task to finish
         const done_task = await Promise.race(state.running);
-        if (config.verbose) output.log(config, `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`);
+        if (config.verbose)
+            output.log(
+                config,
+                `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`
+            );
         await locking.release(config, state, done_task);
-        utils.remove(state.running, promise => promise._runner_task_id === done_task._runner_task_id);
+        utils.remove(
+            state.running,
+            promise => promise._runner_task_id === done_task._runner_task_id
+        );
     }
 }
 
@@ -247,7 +279,8 @@ async function run(config, testCases) {
             if (acquireRes !== true) {
                 throw new Error(
                     `Failed to lock ${acquireRes.resource}: ` +
-                    `Locked by ${acquireRes.client}, expires in ${acquireRes.expireIn}ms`);
+                        `Locked by ${acquireRes.client}, expires in ${acquireRes.expireIn}ms`
+                );
             }
         }
 
@@ -288,23 +321,28 @@ async function run(config, testCases) {
             }
         }
 
-        await timeoutPromise(
-            config, locking.shutdown(config, state),
-            {message: 'locking shutdown', warning: true});
-        await timeoutPromise(
-            config, email.shutdown(config),
-            {message: 'email shutdown', warning: true});
+        await timeoutPromise(config, locking.shutdown(config, state), {
+            message: 'locking shutdown',
+            warning: true,
+        });
+        await timeoutPromise(config, email.shutdown(config), {
+            message: 'email shutdown',
+            warning: true,
+        });
     } finally {
         if (config.afterAllTests) {
-            await timeoutPromise(
-                config, config.afterAllTests(config, initData),
-                {message: 'afterAllTests function', warning: true});
+            await timeoutPromise(config, config.afterAllTests(config, initData), {
+                message: 'afterAllTests function',
+                warning: true,
+            });
         }
     }
     const test_end = Date.now();
 
-    const testsVersion = await timeoutPromise(
-        config, version.testsVersion(config), {message: 'version determination', warning: true});
+    const testsVersion = await timeoutPromise(config, version.testsVersion(config), {
+        message: 'version determination',
+        warning: true,
+    });
     const pentfVersion = version.pentfVersion();
 
     return {

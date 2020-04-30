@@ -16,19 +16,18 @@ const {loadTests} = require('./loader');
 // - rootDir: Root directory (assume tests/ contains tests, config/ if exists contains config)
 // - testsDir: Test directory
 // - configDir: Configuration directory. false disables configuration.
-async function real_main(options={}) {
+async function real_main(options = {}) {
     if (options.rootDir) {
-        if (! options.testsDir) {
+        if (!options.testsDir) {
             options.testsDir = path.join(options.rootDir, 'tests');
         }
-        if (! options.configDir) {
+        if (!options.configDir) {
             const autoConfigDir = path.join(options.rootDir, 'config');
             if (fs.existsSync(autoConfigDir)) {
                 options.configDir = autoConfigDir;
             }
         }
     }
-
 
     const args = parseArgs(options);
     const config = readConfig(options, args);
@@ -49,9 +48,8 @@ async function real_main(options={}) {
 
     // Argparse wraps argument lists with another array
     if (config.extensions.length) {
-        config.extensions = config.extensions
-            .reduce((acc, item) => acc.concat(item), []);
-    } 
+        config.extensions = config.extensions.reduce((acc, item) => acc.concat(item), []);
+    }
 
     if (args.list) {
         for (const tc of test_cases) {
@@ -80,7 +78,7 @@ async function real_main(options={}) {
     await render.doRender(config, results);
     if (!config.keep_open) {
         const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
-        const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
+        const retCode = !anyErrors || config.exit_zero ? 0 : 3;
         process.exit(retCode);
     }
 }

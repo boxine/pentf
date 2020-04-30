@@ -6,11 +6,11 @@ const {fetch} = require('../net_utils');
 
 function escapeHTML(s) {
     // from https://stackoverflow.com/a/20403618/35070
-    return (s
+    return s
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
         .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;'));
+        .replace(/>/g, '&gt;');
 }
 
 // NOT part of the official API, this is parsing cookies on the server side.
@@ -90,7 +90,7 @@ async function run(config) {
         });
     });
     const port = await new Promise((resolve, reject) => {
-        server.listen(0, (err) => {
+        server.listen(0, err => {
             if (err) return reject(err);
 
             const {port} = server.address();
@@ -120,7 +120,7 @@ async function run(config) {
 
     response = await fetch(config, url, {cookieJar});
     assert.equal(response.status, 200);
-    const html = (await response.text());
+    const html = await response.text();
     assert(html.includes('Hello John Smith'));
     assert(html.includes('Visit count: 2'));
     assert.equal(await response.getCookieValue('name'), 'John Smith');

@@ -10,7 +10,6 @@ const utils = require('./utils');
 const output = require('./output');
 
 function parseDeep(mime_part) {
-
     let text = null;
     let html = null;
 
@@ -20,15 +19,14 @@ function parseDeep(mime_part) {
         if (mtype === 'multipart/related' || mtype === 'multipart/alternative') {
             return parseDeep(part);
         } else if (mtype === 'text/plain') {
-            text = (new TextDecoder(part.charset)).decode(part.content);
+            text = new TextDecoder(part.charset).decode(part.content);
         } else if (mtype === 'text/html') {
-            html = (new TextDecoder(part.charset)).decode(part.content);
+            html = new TextDecoder(part.charset).decode(part.content);
         }
     }
 
-    return { text, html };
+    return {text, html};
 }
-
 
 function parseBody(body) {
     assert(body instanceof Uint8Array);
@@ -43,7 +41,7 @@ function parseBody(body) {
     res.text = parse_result.text;
     res.html = parse_result.html;
 
-    const text_body = (new TextDecoder('utf-8')).decode(body);
+    const text_body = new TextDecoder('utf-8').decode(body);
     const header_end_m = /(?:\r?\n){2}/.exec(text_body);
     if (header_end_m) {
         res.header = text_body.slice(0, header_end_m.index);
@@ -69,12 +67,16 @@ function parseHeader(name, value) {
 
 async function _find_message(config, client, since, to, subjectContains) {
     const messages = await client.listMessages(
-        'INBOX', '1:*', [
+        'INBOX',
+        '1:*',
+        [
             'UID',
             'BODY.PEEK[HEADER.FIELDS (SUBJECT)]',
             'BODY.PEEK[HEADER.FIELDS (DATE)]',
-            'BODY.PEEK[HEADER.FIELDS (TO)]'
-        ], {byUid: false});
+            'BODY.PEEK[HEADER.FIELDS (TO)]',
+        ],
+        {byUid: false}
+    );
 
     const since_timestamp = since.getTime();
     let newest_timestamp = 0;
@@ -82,7 +84,7 @@ async function _find_message(config, client, since, to, subjectContains) {
     for (const msg of messages) {
         const header_date = parseHeader('Date', msg['body[header.fields (date)]']);
 
-        const timestamp = (new Date(header_date)).getTime();
+        const timestamp = new Date(header_date).getTime();
         if (timestamp < since_timestamp - 60 * 1000) {
             continue;
         }
@@ -93,13 +95,17 @@ async function _find_message(config, client, since, to, subjectContains) {
         }
 
         const subject = parseHeader('Subject', msg['body[header.fields (subject)]']);
-        if (! subject.includes(subjectContains)) {
+        if (!subject.includes(subjectContains)) {
             continue;
         }
 
         if (timestamp > newest_timestamp) {
-            const full_msg = (await client.listMessages(
-                'INBOX', msg.uid, ['UID', 'body[]'], {byUid: true, valueAsString: false}))[0];
+            const full_msg = (
+                await client.listMessages('INBOX', msg.uid, ['UID', 'body[]'], {
+                    byUid: true,
+                    valueAsString: false,
+                })
+            )[0];
             if (full_msg) {
                 newest_msg = full_msg;
                 newest_timestamp = timestamp;
@@ -108,7 +114,7 @@ async function _find_message(config, client, since, to, subjectContains) {
     }
 
     if (newest_msg) {
-        if (! config.keep_emails) {
+        if (!config.keep_emails) {
             await client.deleteMessages('INBOX', newest_msg.uid, {byUid: true});
         }
         return parseBody(newest_msg['body[]']);
@@ -119,7 +125,9 @@ async function _find_message(config, client, since, to, subjectContains) {
 
 async function connect(config, user) {
     const client = new ImapClient(config.imap.host, config.imap.port, {
-        logLevel: config.email_verbose ? imap_client_module.LOG_LEVEL_DEBUG : imap_client_module.LOG_LEVEL_NONE,
+        logLevel: config.email_verbose
+            ? imap_client_module.LOG_LEVEL_DEBUG
+            : imap_client_module.LOG_LEVEL_NONE,
         auth: {
             user,
             pass: config.imap.password,
@@ -151,11 +159,42 @@ async function connect(config, user) {
  * @returns {Object} Email object with `html` and `text` properties.
  */
 async function getMail(
-    config, since, to, subjectContains,
-    wait_times=[
-        200, 500, 1000, 2000, // for local setups where the email arrives immediately
-        5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, // 1 minute for decent mail servers
-        10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000]) { // 2 minutes for delays
+    config,
+    since,
+    to,
+    subjectContains,
+    wait_times = [
+        200,
+        500,
+        1000,
+        2000, // for local setups where the email arrives immediately
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000,
+        5000, // 1 minute for decent mail servers
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+        10000,
+    ]
+) {
+    // 2 minutes for delays
 
     assert(Array.isArray(wait_times));
 
@@ -165,7 +204,7 @@ async function getMail(
     }
 
     let {email_cached_clients} = config;
-    if (! email_cached_clients) {
+    if (!email_cached_clients) {
         email_cached_clients = config.email_cached_clients = new Map();
     }
     let client = email_cached_clients.get(user);
@@ -184,9 +223,18 @@ async function getMail(
     }
 
     const msg = await utils.retry(
-        () => _find_message(config, client, since, to, subjectContains), wait_times);
-    assert(msg, (
-        'Could not find message to ' + to + ' matching ' + JSON.stringify(subjectContains) + ' since ' + since));
+        () => _find_message(config, client, since, to, subjectContains),
+        wait_times
+    );
+    assert(
+        msg,
+        'Could not find message to ' +
+            to +
+            ' matching ' +
+            JSON.stringify(subjectContains) +
+            ' since ' +
+            since
+    );
 
     if (do_logout) {
         await client.close();
@@ -197,7 +245,7 @@ async function getMail(
 }
 
 async function shutdown(config) {
-    if (! config.email_cached_clients) return;
+    if (!config.email_cached_clients) return;
 
     const client_list = Array.from(config.email_cached_clients.values());
     if (client_list.length > 0) {

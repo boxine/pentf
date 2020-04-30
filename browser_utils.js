@@ -31,17 +31,17 @@ let tmp_home;
  * @param {string[]} [chrome_args] Additional arguments for Chrome (optional).
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
-async function newPage(config, chrome_args=[]) {
+async function newPage(config, chrome_args = []) {
     let puppeteer;
     try {
-        if(config.puppeteer_firefox) {
+        if (config.puppeteer_firefox) {
             puppeteer = require('puppeteer-firefox');
         } else {
             puppeteer = require('puppeteer');
         }
-    } catch(e) {
+    } catch (e) {
         // puppeteer/puppeteer-firefox is a peer dependency. Show a helpful error message when it's missing.
-        if(config.puppeteer_firefox) {
+        if (config.puppeteer_firefox) {
             console.error('Please install "puppeteer-firefox" package with \'npm i puppeteer\'.');
         } else {
             console.error('Please install "puppeteer" package with \'npm i puppeteer\'.');
@@ -53,7 +53,7 @@ async function newPage(config, chrome_args=[]) {
 
     const params = {
         args,
-        ignoreHTTPSErrors: (config.env === 'local'),
+        ignoreHTTPSErrors: config.env === 'local',
     };
     if (!config.headless) {
         params.headless = false;
@@ -96,7 +96,9 @@ async function newPage(config, chrome_args=[]) {
 
                 if (!exists) return;
                 await promisify(fs.copyFile)(
-                    source_file, path.join(future_tmp_home, '.pki', 'nssdb', basename));
+                    source_file,
+                    path.join(future_tmp_home, '.pki', 'nssdb', basename)
+                );
             };
             await copyNssFile('cert9.db');
             tmp_home = future_tmp_home;
@@ -110,16 +112,18 @@ async function newPage(config, chrome_args=[]) {
     const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {
-        const configureDevtools = async (target) => {
-            if (! /^(?:chrome-)?devtools:\/\//.test(await target.url())) {
+        const configureDevtools = async target => {
+            if (!/^(?:chrome-)?devtools:\/\//.test(await target.url())) {
                 return;
             }
 
             // new devtools created, configure it
             const session = await target.createCDPSession();
-            await assertAsyncEventually(async() => {
-                return (await session.send('Runtime.evaluate', {
-                    expression: `(() => {
+            await assertAsyncEventually(
+                async () => {
+                    return (
+                        await session.send('Runtime.evaluate', {
+                            expression: `(() => {
                         try {
                             Common.moduleSetting("network_log.preserve-log").set(true);
                             Common.moduleSetting("preserveConsoleLog").set(true);
@@ -129,13 +133,16 @@ async function newPage(config, chrome_args=[]) {
 
                         return Common.moduleSetting("preserveConsoleLog").get() === true;
                         })()
-                    `
-                })).result.value;
-            }, {
-                message: 'could not toggle preserve options in devtools',
-                timeout: 10000,
-                checkEvery: 100,
-            });
+                    `,
+                        })
+                    ).result.value;
+                },
+                {
+                    message: 'could not toggle preserve options in devtools',
+                    timeout: 10000,
+                    checkEvery: 100,
+                }
+            );
             await session.detach();
         };
 
@@ -179,28 +186,36 @@ async function closePage(page) {
  * @param {number?} [timeout] How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
  */
-async function waitForVisible(page, selector, {message=undefined, timeout=30000}={}) {
+async function waitForVisible(page, selector, {message = undefined, timeout = 30000} = {}) {
     // Precompute errors for nice stack trace
     const notFoundErr = new Error(
         `Failed to find element matching  ${selector}  within ${timeout}ms` +
-        (message ? `. ${message}` : ''));
+            (message ? `. ${message}` : '')
+    );
     const visibleErr = new Error(
         `Element matching  ${selector}  did not become visible within ${timeout}ms` +
-        (message ? `. ${message}` : ''));
+            (message ? `. ${message}` : '')
+    );
 
     let el;
     try {
-        el = await page.waitForFunction(qs => {
-            const all = document.querySelectorAll(qs);
-            if (all.length !== 1) return null;
-            const el = all[0];
-            if (el.offsetParent === null) return null;
-            if (el.style.visibility === 'hidden') return null;
-            return el;
-        }, {timeout}, selector);
-    } catch(e) {
+        el = await page.waitForFunction(
+            qs => {
+                const all = document.querySelectorAll(qs);
+                if (all.length !== 1) return null;
+                const el = all[0];
+                if (el.offsetParent === null) return null;
+                if (el.style.visibility === 'hidden') return null;
+                return el;
+            },
+            {timeout},
+            selector
+        );
+    } catch (e) {
         const found = await page.evaluate(
-            qs => document.querySelectorAll(qs).length === 1, selector);
+            qs => document.querySelectorAll(qs).length === 1,
+            selector
+        );
         if (found) {
             throw visibleErr;
         } else {
@@ -229,7 +244,14 @@ function escapeXPathText(text) {
         // No doubles quotes ("), simple case
         return `"${text}"`;
     }
-    return 'concat(' + text.split('"').map(part => `"${part}"`).join(', \'"\', ') + ')';
+    return (
+        'concat(' +
+        text
+            .split('"')
+            .map(part => `"${part}"`)
+            .join(", '\"', ") +
+        ')'
+    );
 }
 
 /**
@@ -240,7 +262,7 @@ function checkText(text) {
         let repr;
         try {
             repr = JSON.stringify(text);
-        } catch(e) {
+        } catch (e) {
             repr = '' + text;
         }
         throw new Error(`Invalid text argument: ${repr}`);
@@ -260,10 +282,12 @@ function checkText(text) {
  * @param {number?} timeout How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the text node.
  */
-async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={}) {
+async function waitForText(page, text, {timeout = 30000, extraMessage = undefined} = {}) {
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-    const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
+    const err = new Error(
+        `Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`
+    );
 
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
@@ -292,23 +316,35 @@ function _checkTestId(testId) {
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  * @returns {Promise<import('puppeteer').ElementHandle>} Handle to the element with the given test ID.
  */
-async function waitForTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
+async function waitForTestId(
+    page,
+    testId,
+    {extraMessage = undefined, timeout = 30000, visible = true} = {}
+) {
     _checkTestId(testId);
 
     const err = new Error(
-        `Failed to find ${visible ? 'visible ' : ''}element with data-testid "${testId}" within ${timeout}ms` +
-        (extraMessage ? `. ${extraMessage}` : ''));
+        `Failed to find ${
+            visible ? 'visible ' : ''
+        }element with data-testid "${testId}" within ${timeout}ms` +
+            (extraMessage ? `. ${extraMessage}` : '')
+    );
 
     const qs = `*[data-testid="${testId}"]`;
     let el;
     try {
-        el = await page.waitForFunction((qs, visible) => {
-            const all = document.querySelectorAll(qs);
-            if (all.length !== 1) return null;
-            const [el] = all;
-            if (visible && (el.offsetParent === null)) return null;
-            return el;
-        }, {timeout}, qs, visible);
+        el = await page.waitForFunction(
+            (qs, visible) => {
+                const all = document.querySelectorAll(qs);
+                if (all.length !== 1) return null;
+                const [el] = all;
+                if (visible && el.offsetParent === null) return null;
+                return el;
+            },
+            {timeout},
+            qs,
+            visible
+        );
     } catch (e) {
         throw err; // Do not construct error here lest stack trace gets lost
     }
@@ -326,9 +362,14 @@ async function assertValue(input, expected) {
     const page = input._page;
     assert(page);
     try {
-        await page.waitForFunction((inp, expected) => {
-            return inp.value === expected;
-        }, {timeout: 2000}, input, expected);
+        await page.waitForFunction(
+            (inp, expected) => {
+                return inp.value === expected;
+            },
+            {timeout: 2000},
+            input,
+            expected
+        );
     } catch (e) {
         if (e.name !== 'TimeoutError') throw e;
 
@@ -342,14 +383,16 @@ async function assertValue(input, expected) {
 
         if (value === expected) return; // Successful just at the last second
 
-        const input_str = (
+        const input_str =
             'input' +
             (name ? `[name=${JSON.stringify(name)}]` : '') +
-            (id ? `[id=${JSON.stringify(id)}]` : '')
-        );
+            (id ? `[id=${JSON.stringify(id)}]` : '');
 
         throw new Error(
-            `Expected ${input_str} value to be ${JSON.stringify(expected)}, but is ${JSON.stringify(value)}`);
+            `Expected ${input_str} value to be ${JSON.stringify(expected)}, but is ${JSON.stringify(
+                value
+            )}`
+        );
     }
 }
 
@@ -362,16 +405,22 @@ async function assertValue(input, expected) {
  * @param {number?} waitMs How long to wait, in milliseconds. (Default: 2s)
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
-async function assertNotXPath(page, xpath, message='', waitMs=2000, checkEvery=200) {
-    while (true) { // eslint-disable-line no-constant-condition
+async function assertNotXPath(page, xpath, message = '', waitMs = 2000, checkEvery = 200) {
+    while (true) {
+        // eslint-disable-line no-constant-condition
         const found = await page.evaluate(xpath => {
-            const element = document.evaluate(
-                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+            const element = document
+                .evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null)
+                .iterateNext();
             return !!element;
         }, xpath);
-        assert(!found,
-            'Element matching ' + xpath + ' is present, but should not be there.' +
-            (message ? ' ' + message : ''));
+        assert(
+            !found,
+            'Element matching ' +
+                xpath +
+                ' is present, but should not be there.' +
+                (message ? ' ' + message : '')
+        );
 
         if (waitMs <= 0) {
             break;
@@ -393,21 +442,31 @@ async function assertNotXPath(page, xpath, message='', waitMs=2000, checkEvery=2
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  */
-async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
+async function clickXPath(
+    page,
+    xpath,
+    {timeout = 30000, checkEvery = 200, message = undefined, visible = true} = {}
+) {
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
-    while (true) { // eslint-disable-line no-constant-condition
-        const found = await page.evaluate((xpath, visible) => {
-            const element = document.evaluate(
-                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-            if (!element) return false;
+    while (true) {
+        // eslint-disable-line no-constant-condition
+        const found = await page.evaluate(
+            (xpath, visible) => {
+                const element = document
+                    .evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null)
+                    .iterateNext();
+                if (!element) return false;
 
-            if (visible && element.offsetParent === null) return null; // invisible
+                if (visible && element.offsetParent === null) return null; // invisible
 
-            element.click();
-            return true;
-        }, xpath, visible);
+                element.click();
+                return true;
+            },
+            xpath,
+            visible
+        );
 
         if (found) {
             return;
@@ -425,8 +484,8 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
 }
 
 const DEFAULT_CLICKABLE_ELEMENTS = ['a', 'button', 'input', 'label'];
-const DEFAULT_CLICKABLE = (
-    '//*[' + DEFAULT_CLICKABLE_ELEMENTS.map(e => `local-name()="${e}"`).join(' or ') + ']');
+const DEFAULT_CLICKABLE =
+    '//*[' + DEFAULT_CLICKABLE_ELEMENTS.map(e => `local-name()="${e}"`).join(' or ') + ']';
 
 /**
  * Click a link, button, label, or input by its text content.
@@ -439,24 +498,33 @@ const DEFAULT_CLICKABLE = (
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
  */
-async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
+async function clickText(
+    page,
+    text,
+    {
+        timeout = 30000,
+        checkEvery = 200,
+        elementXPath = DEFAULT_CLICKABLE,
+        extraMessage = undefined,
+    } = {}
+) {
     checkText(text);
-    const xpath = (
-        elementXPath +
-        `[contains(text(), ${escapeXPathText(text)})]`);
+    const xpath = elementXPath + `[contains(text(), ${escapeXPathText(text)})]`;
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
     return clickXPath(page, xpath, {
         timeout,
         checkEvery,
-        message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`,
+        message: `Unable to find text ${JSON.stringify(
+            text
+        )} after ${timeout}ms${extraMessageRepr}`,
     });
 }
 
 /**
  * Click any element by its text content.
- * 
+ *
  * The text can span multiple nodes compared to `clickText` which matches direct descended text nodes only.
- * 
+ *
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string | RegExp} textOrRegExp Text or regex to match the text that the element must contain.
  * @param {{extraMessage?: string, timeout?: number, checkEvery?: number, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
@@ -465,76 +533,85 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
  * @param {boolean?} visibale Optional check if element is visible (default: true)
  */
-async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=200, extraMessage=undefined, visible=true}={}) {
+async function clickNestedText(
+    page,
+    textOrRegExp,
+    {timeout = 30000, checkEvery = 200, extraMessage = undefined, visible = true} = {}
+) {
     if (typeof textOrRegExp === 'string') {
         checkText(textOrRegExp);
     }
 
-    const serializedMatcher = typeof textOrRegExp !== 'string' 
-        ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
-        : textOrRegExp;
+    const serializedMatcher =
+        typeof textOrRegExp !== 'string'
+            ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
+            : textOrRegExp;
 
     let remainingTimeout = timeout;
-    while (true) { // eslint-disable-line no-constant-condition
-        const found = await page.evaluate((matcher, visible) => {
-            // eslint-disable-next-line no-undef
-            /** @type {(text: string) => boolean} */
-            let matchFunc;
-            /** @type {null | (text: string) => boolean} */
-            let matchFuncExact = null;
+    while (true) {
+        // eslint-disable-line no-constant-condition
+        const found = await page.evaluate(
+            (matcher, visible) => {
+                // eslint-disable-next-line no-undef
+                /** @type {(text: string) => boolean} */
+                let matchFunc;
+                /** @type {null | (text: string) => boolean} */
+                let matchFuncExact = null;
 
-            if (typeof matcher == 'string') {
-                matchFunc = text => text.includes(matcher);
-            } else {
-                const regexExact = new RegExp(matcher.source, matcher.flags);
-                matchFuncExact = text => {
-                    // Reset regex state in case global flag was used
-                    regexExact.lastIndex = 0;
-                    return regexExact.test(text);
-                };
+                if (typeof matcher == 'string') {
+                    matchFunc = text => text.includes(matcher);
+                } else {
+                    const regexExact = new RegExp(matcher.source, matcher.flags);
+                    matchFuncExact = text => {
+                        // Reset regex state in case global flag was used
+                        regexExact.lastIndex = 0;
+                        return regexExact.test(text);
+                    };
 
-                // Remove leading ^ and ending $, otherwise the traversal
-                // will fail at the first node.
-                const source = matcher.source
-                    .replace(/^[^]/, '')
-                    .replace(/[$]$/, '');
-                const regex = new RegExp(source, matcher.flags);
-                matchFunc = text => {
-                    // Reset regex state in case global flag was used
-                    regex.lastIndex = 0;
-                    return regex.test(text);
-                };
-            }
+                    // Remove leading ^ and ending $, otherwise the traversal
+                    // will fail at the first node.
+                    const source = matcher.source.replace(/^[^]/, '').replace(/[$]$/, '');
+                    const regex = new RegExp(source, matcher.flags);
+                    matchFunc = text => {
+                        // Reset regex state in case global flag was used
+                        regex.lastIndex = 0;
+                        return regex.test(text);
+                    };
+                }
 
-            const stack = [document.body];
-            let item = null;
-            let lastFound = null;
-            while (item = stack.pop()) { // eslint-disable-line no-cond-assign
-                for (let i = 0; i < item.childNodes.length; i++) {
-                    const child = item.childNodes[i];
-                    
-                    // Skip text nodes as they are not clickable
-                    if (child.nodeType === Node.TEXT_NODE) {
-                        continue;
-                    }
+                const stack = [document.body];
+                let item = null;
+                let lastFound = null;
+                while ((item = stack.pop())) {
+                    // eslint-disable-line no-cond-assign
+                    for (let i = 0; i < item.childNodes.length; i++) {
+                        const child = item.childNodes[i];
 
-                    const text = child.textContent || '';
-                    if (child.childNodes.length > 0 && matchFunc(text)) {
-                        if (matchFuncExact === null || matchFuncExact(text)) {
-                            lastFound = child;
+                        // Skip text nodes as they are not clickable
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            continue;
                         }
-                        stack.push(child);
+
+                        const text = child.textContent || '';
+                        if (child.childNodes.length > 0 && matchFunc(text)) {
+                            if (matchFuncExact === null || matchFuncExact(text)) {
+                                lastFound = child;
+                            }
+                            stack.push(child);
+                        }
                     }
                 }
-            }
 
-            if (!lastFound) return false;
+                if (!lastFound) return false;
 
-            if (visible && lastFound.offsetParent === null) return null; // invisible)
+                if (visible && lastFound.offsetParent === null) return null; // invisible)
 
-            lastFound.click();
-            return true;
-        }, serializedMatcher, visible);
+                lastFound.click();
+                return true;
+            },
+            serializedMatcher,
+            visible
+        );
 
         if (found) {
             return;
@@ -542,7 +619,11 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
 
         if (remainingTimeout <= 0) {
             const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-            throw new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`);
+            throw new Error(
+                `Unable to find${
+                    visible ? ' visible' : ''
+                } text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`
+            );
         }
         await wait(Math.min(remainingTimeout, checkEvery));
         remainingTimeout -= checkEvery;
@@ -559,12 +640,18 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
  * @param {string?} extraMessage Optional error message shown if the element is not present in time.
  * @param {number?} timeout How long to wait, in milliseconds. (default: true)
  */
-async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
+async function clickTestId(
+    page,
+    testId,
+    {extraMessage = undefined, timeout = 30000, visible = true} = {}
+) {
     _checkTestId(testId);
 
     const xpath = `//*[@data-testid="${testId}"]`;
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
-    const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
+    const message = `Failed to find${
+        visible ? ' visible' : ''
+    } element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
     return await clickXPath(page, xpath, {timeout, message, visible});
 }
 
@@ -582,16 +669,17 @@ async function setLanguage(page, lang) {
 
     // From https://stackoverflow.com/a/47292022/35070
     await page.setExtraHTTPHeaders({'Accept-Language': lang.join(',')}); // For HTTP requests
-    await page.evaluateOnNewDocument(lang => { // For JavaScript code
+    await page.evaluateOnNewDocument(lang => {
+        // For JavaScript code
         Object.defineProperty(navigator, 'language', {
-            get: function() {
+            get: function () {
                 return lang[0];
-            }
+            },
         });
         Object.defineProperty(navigator, 'languages', {
-            get: function() {
+            get: function () {
                 return lang;
-            }
+            },
         });
     }, lang);
 }
@@ -615,7 +703,7 @@ async function getAttribute(page, selector, name) {
             }
             return el.getAttribute(propName);
         },
-        name,
+        name
     );
 }
 
@@ -667,16 +755,16 @@ async function getSelectOptions(page, select) {
  * @param number? factor Speedup factor (e.g. a timeout of 20 seconds with a speedup of 100 will fire after 200ms). (default: 100)
  * @param boolean? persistent Whether this change should persist in case of page navigation. Set this if the next line is `await page.goto(..)` or similar. (default: false)
  */
-async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
+async function speedupTimeouts(page, {factor = 100, persistent = false} = {}) {
     function applyTimeouts(factor) {
         window._pentf_real_setTimeout = window._pentf_real_setTimeout || window.setTimeout;
         window.setTimeout = (func, delay, ...args) => {
-            return window._pentf_real_setTimeout(func, delay && (delay / factor), ...args);
+            return window._pentf_real_setTimeout(func, delay && delay / factor, ...args);
         };
 
         window._pentf_real_setInterval = window._pentf_real_setInterval || window.setInterval;
         window.setInterval = (func, delay, ...args) => {
-            return window._pentf_real_setInterval(func, delay && (delay / factor), ...args);
+            return window._pentf_real_setInterval(func, delay && delay / factor, ...args);
         };
     }
 
@@ -717,7 +805,6 @@ async function workaround_setContent(page, html) {
     await waiter;
 }
 
-
 // Render HTML code as a PDF file.
 // modifyPage can be an async function to change the page in the browser.
 
@@ -729,7 +816,7 @@ async function workaround_setContent(page, html) {
  * @param {string} html Full HTML document to render.
  * @param {*} modifyPage An optional async function to modify the `page` object.
  */
-async function html2pdf(config, path, html, modifyPage=null) {
+async function html2pdf(config, path, html, modifyPage = null) {
     const pdfConfig = {...config};
     pdfConfig.headless = true;
     // The headless option will be overwritten if devtools=true, leading to a

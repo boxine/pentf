@@ -24,7 +24,8 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'The waitForTestId browser_utils function finds an element by its data-testid attribute',
+    description:
+        'The waitForTestId browser_utils function finds an element by its data-testid attribute',
     resources: [],
     run,
 };

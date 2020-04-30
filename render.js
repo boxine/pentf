@@ -10,7 +10,13 @@ function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
     const {tasks} = state;
     const test_results = tasks.map(s => {
-        const res = utils.pluck(s, ['status', 'name', 'duration', 'error_screenshots', 'expectedToFail']);
+        const res = utils.pluck(s, [
+            'status',
+            'name',
+            'duration',
+            'error_screenshots',
+            'expectedToFail',
+        ]);
 
         if (s.error) {
             res.error_stack = s.error.stack;
@@ -57,12 +63,12 @@ function format_duration(ms) {
         return '';
     }
 
-    const rounded = (Math.round(10 * ms / 1000) / 10);
+    const rounded = Math.round((10 * ms) / 1000) / 10;
     if (rounded < 0.1) {
         return '<0.1s';
     }
     let rounded_str = '' + rounded;
-    if (! rounded_str.includes('.')) {
+    if (!rounded_str.includes('.')) {
         rounded_str += '\xa0\xa0\xa0';
     }
 
@@ -74,13 +80,18 @@ function format_timestamp(ts) {
     const date = new Date(ts);
 
     return (
-        date.getFullYear()
-        + '-' + _pad(date.getMonth() + 1)
-        + '-' + _pad(date.getDate())
-        + ' ' + _pad(date.getHours())
-        + ':' + _pad(date.getMinutes())
-        + ':' + _pad(date.getSeconds())
-        + timezoneOffsetString(date.getTimezoneOffset())
+        date.getFullYear() +
+        '-' +
+        _pad(date.getMonth() + 1) +
+        '-' +
+        _pad(date.getDate()) +
+        ' ' +
+        _pad(date.getHours()) +
+        ':' +
+        _pad(date.getMinutes()) +
+        ':' +
+        _pad(date.getSeconds()) +
+        timezoneOffsetString(date.getTimezoneOffset())
     );
 }
 
@@ -102,12 +113,12 @@ function linkify(str) {
 
 function escape_html(str) {
     // From https://stackoverflow.com/a/6234804/35070
-    return (str
+    return str
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;'));
+        .replace(/'/g, '&#039;');
 }
 
 function heading(results) {
@@ -115,19 +126,27 @@ function heading(results) {
 }
 
 function markdown(results) {
-    const table = results.tests.map((test_result, idx) => {
-        return (
-            '|' +
-            (idx + 1) + ' | ' +
-            test_result.name + ' | ' +
-            (test_result.description || '') + ' | ' +
-            format_duration(test_result.duration) + ' | ' +
-            test_result.status + ' |'
-        );
-    }).join('\n');
+    const table = results.tests
+        .map((test_result, idx) => {
+            return (
+                '|' +
+                (idx + 1) +
+                ' | ' +
+                test_result.name +
+                ' | ' +
+                (test_result.description || '') +
+                ' | ' +
+                format_duration(test_result.duration) +
+                ' | ' +
+                test_result.status +
+                ' |'
+            );
+        })
+        .join('\n');
 
-    const report_header_md = (
-        results.config.report_header_md ? '\n' + results.config.report_header_md + '\n' : '');
+    const report_header_md = results.config.report_header_md
+        ? '\n' + results.config.report_header_md + '\n'
+        : '';
 
     return `# ${heading(results)}
 ${report_header_md}
@@ -137,7 +156,10 @@ Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.
 Start: ${format_timestamp(results.start)}  
 
 ### Results
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests)})  
+Total number of tests: ${results.tests.length} (${resultCountString(
+        results.config,
+        results.tests
+    )})  
 Total test duration: ${format_duration(results.duration)}  
 
 | #     | Test              | Description       | Duration | Result  |
@@ -148,90 +170,101 @@ ${table}
 }
 
 function screenshots_html(result) {
-    return result.error_screenshots.map(screenshot => {
-        const dataUri = 'data:image/png;base64,' + (screenshot.toString('base64'));
-        return (
-            `<img src="${dataUri}" ` +
-            'style="display:inline-block; width:250px; margin:2px 10px 2px 0; border: 1px solid #888;"/>');
-    }).join('\n');
+    return result.error_screenshots
+        .map(screenshot => {
+            const dataUri = 'data:image/png;base64,' + screenshot.toString('base64');
+            return (
+                `<img src="${dataUri}" ` +
+                'style="display:inline-block; width:250px; margin:2px 10px 2px 0; border: 1px solid #888;"/>'
+            );
+        })
+        .join('\n');
 }
 
 function html(results) {
-    const table = results.tests.map((test_result, idx) => {
-        const errored = test_result.status === 'error';
-        const skipped = test_result.status === 'skipped';
-        const status_str = {
-            'success': '✔️',
-            'error': '✘',
-        }[test_result.status] || test_result.status;
+    const table = results.tests
+        .map((test_result, idx) => {
+            const errored = test_result.status === 'error';
+            const skipped = test_result.status === 'skipped';
+            const status_str =
+                {
+                    'success': '✔️',
+                    'error': '✘',
+                }[test_result.status] || test_result.status;
 
-        const rowspan = (
-            1 +
-            (test_result.description ? 1 : 0) +
-            (test_result.expectedToFail ? 1 : 0) +
-            (errored ? (test_result.error_screenshots ? 2 : 1) : 0));
+            const rowspan =
+                1 +
+                (test_result.description ? 1 : 0) +
+                (test_result.expectedToFail ? 1 : 0) +
+                (errored ? (test_result.error_screenshots ? 2 : 1) : 0);
 
-        let res = (
-            `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-            `<td class="test_number" rowspan="${rowspan}">` + (idx + 1) + '</td>' +
-            '<td class="test_name">' + escape_html(test_result.name) + '</td>' +
-            (skipped ? '' : '<td class="duration">' + escape_html(format_duration(test_result.duration)) + '</td>') +
-            `<td class="result result-${test_result.status}" ${skipped ? 'colspan="2"' : ''} rowspan=${test_result.description ? 2 : 1}>` +
-            '<div>' + status_str + '</div></td>' +
-            '</tr>'
-        );
-
-        if (test_result.description) {
-            res += (
+            let res =
                 `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                '<td class="description" colspan="2">' +
-                escape_html(test_result.description) +
+                `<td class="test_number" rowspan="${rowspan}">` +
+                (idx + 1) +
                 '</td>' +
-                '</tr>'
-            );
-        }
+                '<td class="test_name">' +
+                escape_html(test_result.name) +
+                '</td>' +
+                (skipped
+                    ? ''
+                    : '<td class="duration">' +
+                      escape_html(format_duration(test_result.duration)) +
+                      '</td>') +
+                `<td class="result result-${test_result.status}" ${
+                    skipped ? 'colspan="2"' : ''
+                } rowspan=${test_result.description ? 2 : 1}>` +
+                '<div>' +
+                status_str +
+                '</div></td>' +
+                '</tr>';
 
-        if (test_result.expectedToFail) {
-            res += (
-                `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                '<td class="expectedToFail" colspan="2">' +
-                ((typeof test_result.expectedToFail === 'string')
-                    ? 'Expected to fail: ' + linkify(test_result.expectedToFail)
-                    : 'Expected to fail.'
-                ) +
-                '</td>' +
-                '</tr>'
-            );
-        }
-
-        if (errored) {
-            res += (
-                `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                '<td colspan="3" class="error_stack">' +
-                escape_html(test_result.error_stack) +
-                '</td>' +
-                '</tr>'
-            );
-            if (test_result.error_screenshots) {
-                res += (
+            if (test_result.description) {
+                res +=
                     `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                    '<td colspan="3">' +
-                    screenshots_html(test_result) +
+                    '<td class="description" colspan="2">' +
+                    escape_html(test_result.description) +
                     '</td>' +
-                    '</tr>'
-                );
+                    '</tr>';
             }
-        }
 
-        res += (
-            `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-            '<td colspan="4" class="test_footer">' +
-            '</td>' +
-            '</tr>'
-        );
+            if (test_result.expectedToFail) {
+                res +=
+                    `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                    '<td class="expectedToFail" colspan="2">' +
+                    (typeof test_result.expectedToFail === 'string'
+                        ? 'Expected to fail: ' + linkify(test_result.expectedToFail)
+                        : 'Expected to fail.') +
+                    '</td>' +
+                    '</tr>';
+            }
 
-        return res;
-    }).join('\n');
+            if (errored) {
+                res +=
+                    `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                    '<td colspan="3" class="error_stack">' +
+                    escape_html(test_result.error_stack) +
+                    '</td>' +
+                    '</tr>';
+                if (test_result.error_screenshots) {
+                    res +=
+                        `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                        '<td colspan="3">' +
+                        screenshots_html(test_result) +
+                        '</td>' +
+                        '</tr>';
+                }
+            }
+
+            res +=
+                `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                '<td colspan="4" class="test_footer">' +
+                '</td>' +
+                '</tr>';
+
+            return res;
+        })
+        .join('\n');
 
     const report_header_html = results.config.report_header_html || '';
 
@@ -343,7 +376,10 @@ Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>
 </p>
 
 <h2>Results</h2>
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests)})<br/>
+Total number of tests: ${results.tests.length} (${resultCountString(
+        results.config,
+        results.tests
+    )})<br/>
 Total test duration: ${escape_html(format_duration(results.duration))}<br/>
 
 <table>
@@ -355,7 +391,6 @@ ${table}
 </html>
 
 `;
-
 }
 
 async function pdf(config, path, results) {

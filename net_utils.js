@@ -47,21 +47,21 @@ async function fetch(config, url, init) {
             keepAlive: true,
         };
         if (/^https:\/\//.test(url)) {
-            agentinit.rejectUnauthorized = (
-                (config.rejectUnauthorized === undefined) ? true : config.rejectUnauthorized);
+            agentinit.rejectUnauthorized =
+                config.rejectUnauthorized === undefined ? true : config.rejectUnauthorized;
             init.agent = new https.Agent(agentinit);
         } else {
             init.agent = new http.Agent(agentinit);
         }
     }
 
-    if (! init.headers) {
+    if (!init.headers) {
         init.headers = {};
     }
     if (init.cookieJar && init.cookieJar !== 'create') {
         init.headers.Cookie = await init.cookieJar.getCookieString(url);
     }
-    if (! Object.keys(init.headers).find(h => h.toLowerCase() === 'user-agent')) {
+    if (!Object.keys(init.headers).find(h => h.toLowerCase() === 'user-agent')) {
         init.headers['User-Agent'] = 'pentf integration test (https://github.com/boxine/pentf)';
     }
 
@@ -79,9 +79,7 @@ async function fetch(config, url, init) {
 
         const setCookie = response.headers.raw()['set-cookie'];
         if (Array.isArray(setCookie)) {
-            await Promise.all(
-                setCookie.map(c => cookieJar.setCookie(c, url))
-            );
+            await Promise.all(setCookie.map(c => cookieJar.setCookie(c, url)));
         } else {
             assert(!setCookie); // No Set-Cookie header
         }
@@ -97,21 +95,26 @@ async function fetch(config, url, init) {
 }
 
 /**
-* Modify fetch options for a request authenticated with a client-side TLS certificate.
-*
-* @example
-* ```javascript
-* const init = {method: 'POST', body: '{"something": "secret"}'};
-* await setupTLSClientAuth(init, 'key.pem', 'cert.crt');
-* const response = await fetch(config, 'https://protected.example.org/', init);
-* assert.equal(response.status, 200); // 401 = invalid certificate
-* ```
-* @param {Object} fetchOptions The fetch request option object to modify. (`init` parameter in [[fetch]] above)
-* @param {string} keyFilename Name of the private key file in PEM format (e.g. beginning with `-----BEGIN RSA PRIVATE KEY-----`)
-* @param {string} certFilename Name of the certificate file in PEM format (beginning with `-----BEGIN CERTIFICATE-----`)
-* @param {boolean} rejectUnauthorized to validate the server's certificate, false (=default) to accept invalid certificates as well.
-*/
-async function setupTLSClientAuth(fetchOptions, keyFilename, certFilename, rejectUnauthorized=false) {
+ * Modify fetch options for a request authenticated with a client-side TLS certificate.
+ *
+ * @example
+ * ```javascript
+ * const init = {method: 'POST', body: '{"something": "secret"}'};
+ * await setupTLSClientAuth(init, 'key.pem', 'cert.crt');
+ * const response = await fetch(config, 'https://protected.example.org/', init);
+ * assert.equal(response.status, 200); // 401 = invalid certificate
+ * ```
+ * @param {Object} fetchOptions The fetch request option object to modify. (`init` parameter in [[fetch]] above)
+ * @param {string} keyFilename Name of the private key file in PEM format (e.g. beginning with `-----BEGIN RSA PRIVATE KEY-----`)
+ * @param {string} certFilename Name of the certificate file in PEM format (beginning with `-----BEGIN CERTIFICATE-----`)
+ * @param {boolean} rejectUnauthorized to validate the server's certificate, false (=default) to accept invalid certificates as well.
+ */
+async function setupTLSClientAuth(
+    fetchOptions,
+    keyFilename,
+    certFilename,
+    rejectUnauthorized = false
+) {
     assert.equal(typeof fetchOptions, 'object');
     const agentOptions = {
         rejectUnauthorized,
@@ -123,10 +126,7 @@ async function setupTLSClientAuth(fetchOptions, keyFilename, certFilename, rejec
     if (!fetchOptions.curl_extra_options) {
         fetchOptions.curl_extra_options = [];
     }
-    fetchOptions.curl_extra_options.push(... [
-        '--key', keyFilename,
-        '--cert', certFilename,
-    ]);
+    fetchOptions.curl_extra_options.push(...['--key', keyFilename, '--cert', certFilename]);
 }
 
 module.exports = {

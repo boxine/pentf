@@ -89,7 +89,7 @@
 					<h2>Writing tests</h2>
 				</a>
 				<p>Plop a new <code>.js</code> file into <code>tests/</code>. Its name will be the test&#39;&#39;s name, and it should have an async <code>run</code> function, like this:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>);
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>).strict;
 <span class="hljs-keyword">const</span> {getMail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/email'</span>);
 <span class="hljs-keyword">const</span> {newPage, closePage} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/browser_utils'</span>);
 <span class="hljs-keyword">const</span> {fetch} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/net_utils'</span>);
@@ -215,6 +215,12 @@ assert(id, <span class="hljs-string">'ID is not set – unrecognized error in th
 <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`https://example.org/widget/<span class="hljs-subst">${id}</span>`</span>);
 assert.equal(response.status, <span class="hljs-number">200</span>);
 <span class="hljs-keyword">const</span> text = <span class="hljs-keyword">await</span> response.text();</code></pre>
+				<a href="#use-assert-in-strict-mode" id="use-assert-in-strict-mode" style="color: inherit; text-decoration: none;">
+					<h3>Use <code>assert</code> in strict mode</h3>
+				</a>
+				<p>In <a href="https://nodejs.org/api/assert.html#assert_strict_assertion_mode">strict assertion mode</a>, <code>assert</code> generates better errors and is generally easier to deal with.</p>
+				<p><strong>Avoid</strong>: <code>const assert = require(&#39;assert&#39;);</code></p>
+				<p><strong>Use</strong>: <code>const assert = require(&#39;assert&#39;).strict;</code></p>
 				<a href="#configuration" id="configuration" style="color: inherit; text-decoration: none;">
 					<h2>Configuration</h2>
 				</a>

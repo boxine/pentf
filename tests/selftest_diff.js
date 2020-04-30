@@ -6,7 +6,7 @@ function assertDiff(a, b, expected) {
         assert.deepEqual(a, b);
     } catch (err) {
         assert.equal(
-            generateDiff(err).trim(),
+            generateDiff({}, err).trim(),
             expected.join('\n').trim()
         );
     }

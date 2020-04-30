@@ -5,6 +5,7 @@ const runner = require('../runner');
 async function run() {
     let output = [];
     const runnerConfig = {
+        colors: false,
         no_locking: true,
         concurrency: 0,
         quiet: true,

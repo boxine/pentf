@@ -138,7 +138,8 @@ async function parallel_run(config, state) {
     state.running = [];
     state.locking_backoff = 10;
     let runner_task_id = 0;
-    while (true) {  // eslint-disable-line no-constant-condition
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
         // Add new tasks
         while (state.running.length < config.concurrency) {
             let task = undefined;

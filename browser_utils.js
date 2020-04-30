@@ -363,7 +363,8 @@ async function assertValue(input, expected) {
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
 async function assertNotXPath(page, xpath, message='', waitMs=2000, checkEvery=200) {
-    while (true) { // eslint-disable-line no-constant-condition
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
         const found = await page.evaluate(xpath => {
             const element = document.evaluate(
                 xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
@@ -397,7 +398,8 @@ async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=u
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
-    while (true) { // eslint-disable-line no-constant-condition
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
         const found = await page.evaluate((xpath, visible) => {
             const element = document.evaluate(
                 xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
@@ -475,7 +477,8 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
         : textOrRegExp;
 
     let remainingTimeout = timeout;
-    while (true) { // eslint-disable-line no-constant-condition
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
         const found = await page.evaluate((matcher, visible) => {
             // eslint-disable-next-line no-undef
             /** @type {(text: string) => boolean} */
@@ -509,7 +512,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
             const stack = [document.body];
             let item = null;
             let lastFound = null;
-            while (item = stack.pop()) { // eslint-disable-line no-cond-assign
+            while ((item = stack.pop())) {
                 for (let i = 0; i < item.childNodes.length; i++) {
                     const child = item.childNodes[i];
                     

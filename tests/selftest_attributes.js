@@ -25,7 +25,7 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'Testing browser_utils.waitForVisible.',
+    description: 'Test browser_utils.getAttribute',
     resources: [],
     run,
 };

@@ -41,7 +41,7 @@ to execute all tests. You may also want to have a look at the [options](#options
 Plop a new `.js` file into `tests/`. Its name will be the test''s name, and it should have an async `run` function, like this:
 
 ```javascript
-const assert = require('assert');
+const assert = require('assert').strict;
 const {getMail} = require('pentf/email');
 const {newPage, closePage} = require('pentf/browser_utils');
 const {fetch} = require('pentf/net_utils');
@@ -196,6 +196,14 @@ const response = await fetch(`https://example.org/widget/${id}`);
 assert.equal(response.status, 200);
 const text = await response.text();
 ```
+
+### Use `assert` in strict mode
+
+In [strict assertion mode](https://nodejs.org/api/assert.html#assert_strict_assertion_mode), `assert` generates better errors and is generally easier to deal with.
+
+**Avoid**: `const assert = require('assert');`
+
+**Use**: `const assert = require('assert').strict;`
 
 ## Configuration
 

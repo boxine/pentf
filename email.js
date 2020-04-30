@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 const {TextDecoder} = require('util');
 
 const imap_client_module = require('emailjs-imap-client');

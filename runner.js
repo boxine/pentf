@@ -1,6 +1,6 @@
 /* eslint no-console: 0 */
 
-const assert = require('assert');
+const assert = require('assert').strict;
 const path = require('path');
 const {performance} = require('perf_hooks');
 const {promisify} = require('util');

@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 
 function readBody(request) {
     return new Promise((resolve, reject) => {

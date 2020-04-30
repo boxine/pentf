@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 const child_process = require('child_process');
 const path = require('path');
 const {promisify} = require('util');

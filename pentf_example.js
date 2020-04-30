@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 const {getMail} = require('pentf/email');
 const {newPage, closePage} = require('pentf/browser_utils');
 const {fetch} = require('pentf/net_utils');

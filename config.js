@@ -1,7 +1,7 @@
 'use strict';
 
 const argparse = require('argparse');
-const assert = require('assert');
+const assert = require('assert').strict;
 const fs = require('fs');
 const path = require('path');
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const assert = require('assert');
+const assert = require('assert').strict;
 const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');

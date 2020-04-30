@@ -1,4 +1,4 @@
-const assert = require('assert');
+const assert = require('assert').strict;
 const streamBuffers = require('stream-buffers');
 
 async function stream2buf(stream) {

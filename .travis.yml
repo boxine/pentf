@@ -13,5 +13,6 @@ services:
 
 script:
   - ./run --ci
-  - make lint
+  - make eslint
+  # - make prettier-lint
   - ./run -S --ci

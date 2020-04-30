@@ -160,6 +160,11 @@ function parseArgs(options) {
         dest: 'include_slow_tests',
         help: 'Run tests that take a very long time',
     });
+    selection_group.addArgument(['-w', '--watch'], {
+        action: 'storeTrue',
+        dest: 'watch',
+        help: 'Start runner in watch mode and re-run tests when a file changes',
+    });
 
     const email_group = parser.addArgumentGroup({title: 'Email'});
     email_group.addArgument(['--keep-emails'], {
@@ -303,6 +308,10 @@ function parseArgs(options) {
     }
     if (args.devtools) {
         args.headless = false;
+    }
+
+    if (args.watch) {
+        args.keep_open = true;
     }
 
     if (args.fail_fast && !args.no_locking) {

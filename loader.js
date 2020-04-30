@@ -22,7 +22,9 @@ async function loadTests(args, testsDir, globPattern = '*.js') {
         }))).filter(t => t);
     }
 
+    
     return tests.map(t => {
+        console.log(path.join(testsDir, t.path))
         const tc = require(path.join(testsDir, t.path));
         tc.name = t.name;
         return tc;

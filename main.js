@@ -9,6 +9,8 @@ const runner = require('./runner');
 const render = require('./render');
 const {testsVersion, pentfVersion} = require('./version');
 const {loadTests} = require('./loader');
+const output = require('./output');
+const {createWatcher} = require('./watch');
 
 // Available options:
 // - defaultConfig: Function to call on the loaded configuration, to set/compute default values.
@@ -68,6 +70,30 @@ async function real_main(options={}) {
     if (args.print_config) {
         console.log(config);
         return;
+    }
+
+    if (args.watch) {
+        config.watcher = createWatcher(
+            options.testsDir,
+            options.testsGlob,
+            async filePath => {
+                if (!filePath.includes('..')) {
+                    console.log();
+                    console.log(`${output.color(config, 'blue', 'UPDATED')}: ${filePath}`);
+                    const tc = require(path.join(options.testsDir, filePath));
+                    const test_info = await runner.run(config, [{
+                        run: tc.run,
+                        name: path.basename(filePath, path.extname(filePath)),
+                        description: tc.description,
+                    }]);
+
+                    if (!test_info) return;
+
+                    results = render.craftResults(config, test_info);
+                    await render.doRender(config, results);
+                }
+            }
+        );
     }
 
     let results;

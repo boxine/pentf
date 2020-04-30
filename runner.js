@@ -31,6 +31,11 @@ async function run_task(config, task) {
                 `, but expectedToFail was set${etf}\n`);
         }
     } catch(e) {
+        if (!e || !e.stack) {
+            // eslint-disable-next-line no-ex-assign
+            e = new Error(`Non-error object thrown by ${task.name}: ${output.valueRepr(e)}`);
+        }
+
         task.status = 'error';
         task.duration = performance.now() - task.start;
         task.error = e;

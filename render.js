@@ -367,4 +367,5 @@ module.exports = {
     doRender,
     // test only
     _linkify: linkify,
+    _html: html,
 };

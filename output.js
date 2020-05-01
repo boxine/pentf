@@ -258,10 +258,36 @@ function formatError(config, err) {
         .join('\n');
 }
 
+
+/**
+ * Generate a string representation for a random value.
+ *
+ * @param {*} value A random value.
+ */
+function valueRepr(value) {
+    if (typeof value === 'symbol') {
+        return value.toString();
+    }
+
+    if (['undefined', 'boolean', 'number', 'bigint', 'string'].includes(typeof value) || (value === null) ||
+            (typeof value === 'object' && value && (Array.isArray(value) || value.constructor === Object(value)))) {
+
+        // Probably a plain object, try JSON
+        try {
+            return JSON.stringify(value);
+        } catch (jsonErr) {
+            // ignore
+        }
+    }
+    
+    return '' + value;
+}
+
 module.exports = {
     color,
     finish,
     formatError,
+    valueRepr,
     log,
     logVerbose,
     generateDiff,

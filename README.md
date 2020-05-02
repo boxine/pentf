@@ -205,6 +205,33 @@ In [strict assertion mode](https://nodejs.org/api/assert.html#assert_strict_asse
 
 **Use**: `const assert = require('assert').strict;`
 
+## Skipping tests
+
+If a test should not run within an environment – maybe the tested service is not available in that environment, or you don't want to run a DoS test against prod – you can skip it. Simply export a function `skip` that gets called with the pentf configuration object. It returns true or a non-empty string to indicate that the test should be skipped, like this:
+
+```javascript
+module.exports = {
+    run,
+    skip: config => (config.env === 'prod') && 'This test could impact customers and is therefore not run against prod',
+};
+```
+
+## Test-driven development with `expectedToFail`
+
+If you write the test before a bug is fixed or a new feature is deployed, you can mark the test as `expectedToFail`. An `expectedToFail` test is still run, but if it fails the pipeline will still be green. If an `expectedToFail` test succeeds, a warning is printed, but the test is still seen as successful. It is a good idea to include a ticket number in the output so that everybody can look up the status, like this:
+
+
+```javascript
+module.exports = {
+    run,
+    expectedToFail: config => ['stage', 'prod'].includes(config.env) && 'Not yet rolled out (BUG-1234)',
+};
+```
+
+You can also mark a code section instead of a full test with the [function `expectedToFail`](https://boxine.github.io/pentf/modules/_promise_utils_.html#expectedtofail).
+
+Use `-E`/`--expect-nothing` to disable the expectedToFail special treatment.
+
 ## Configuration
 
 pentf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the `config` subdirectory for each environment. You can also add a programatic configuration by passing a function `defaultConfig` to `pentf.main`; see [pentf's own run](run) for an example. 

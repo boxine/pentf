@@ -242,9 +242,18 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 				<a href="#configuration" id="configuration" style="color: inherit; text-decoration: none;">
 					<h2>Configuration</h2>
 				</a>
-				<p>pentf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the <code>config</code> subdirectory for each environment. You can also add a programatic configuration by passing a function <code>defaultConfig</code> to <code>pentf.main</code>; see <a href="run">pentf&#39;s own run</a> for an example. </p>
-				<p>The keys are up to you; for example you probably want to have a main entry point. Predefined keys are:</p>
+				<p>pentf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create files in the <code>config</code> subdirectory for each environment, in one of the following formats:</p>
 				<ul>
+					<li>JSON: A <code>.json</code> file with the keys and associated values. (<a href="tests/config_examples/json.json">example</a>)</li>
+					<li>Simple JavaScript: A <code>.js</code> file which exports the configuration. (<a href="tests/config_examples/simple_javascript.js">example</a>)</li>
+					<li>Async JavaScript: A <code>.js</code> file which exports an async function being called with the environment name and returning the configuration. (<a href="tests/config_examples/async_javascript.js">example</a>)</li>
+				</ul>
+				<p>You can also add a programatic configuration for multiple environments by passing a function <code>defaultConfig</code> to <code>pentf.main</code>; see <a href="run">pentf&#39;s own run</a> for an example.</p>
+				<p>The keys are up to you; for example you probably want to have a main entry point. pentf claims the following keys:</p>
+				<ul>
+					<li><strong><code>extends</code></strong> Inherit from the specified environment. It is common to have a <code>_common</code> environment (i.e. a file <code>_common.json</code> or <code>common.</code>) which all environments inherit from. You can also construct combined environments, e.g. prod backend with a development frontend.</li>
+					<li><strong><code>external_locking_url</code></strong> Base URL of the external lockserver to use to avoid test runs on different machines using shared resources (such as test accounts, limited widgets etc.) at the same time (see <em>locking</em> below).</li>
+					<li><strong><code>email</code></strong> The base email address used in <a href="https://boxine.github.io/pentf/modules/_utils_.html#makerandomemail"><code>makeRandomEmail</code></a>.</li>
 					<li><strong><code>imap</code></strong> If you are using the <code>pentf/email</code> module to fetch and test emails, configure your imap connection here, like<pre><code><span class="hljs-string">"imap"</span>: {
   <span class="hljs-string">"user"</span>: <span class="hljs-string">"user@example.com"</span>,
   <span class="hljs-string">"password"</span>: <span class="hljs-string">"secret"</span>,

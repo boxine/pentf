@@ -221,6 +221,24 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 				<p>In <a href="https://nodejs.org/api/assert.html#assert_strict_assertion_mode">strict assertion mode</a>, <code>assert</code> generates better errors and is generally easier to deal with.</p>
 				<p><strong>Avoid</strong>: <code>const assert = require(&#39;assert&#39;);</code></p>
 				<p><strong>Use</strong>: <code>const assert = require(&#39;assert&#39;).strict;</code></p>
+				<a href="#skipping-tests" id="skipping-tests" style="color: inherit; text-decoration: none;">
+					<h2>Skipping tests</h2>
+				</a>
+				<p>If a test should not run within an environment – maybe the tested service is not available in that environment, or you don&#39;t want to run a DoS test against prod – you can skip it. Simply export a function <code>skip</code> that gets called with the pentf configuration object. It returns true or a non-empty string to indicate that the test should be skipped, like this:</p>
+				<pre><code class="language-javascript"><span class="hljs-built_in">module</span>.exports = {
+    run,
+    <span class="hljs-attr">skip</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> (config.env === <span class="hljs-string">'prod'</span>) &amp;&amp; <span class="hljs-string">'This test could impact customers and is therefore not run against prod'</span>,
+};</code></pre>
+				<a href="#test-driven-development-with-expectedtofail" id="test-driven-development-with-expectedtofail" style="color: inherit; text-decoration: none;">
+					<h2>Test-driven development with <code>expectedToFail</code></h2>
+				</a>
+				<p>If you write the test before a bug is fixed or a new feature is deployed, you can mark the test as <code>expectedToFail</code>. An <code>expectedToFail</code> test is still run, but if it fails the pipeline will still be green. If an <code>expectedToFail</code> test succeeds, a warning is printed, but the test is still seen as successful. It is a good idea to include a ticket number in the output so that everybody can look up the status, like this:</p>
+				<pre><code class="language-javascript"><span class="hljs-built_in">module</span>.exports = {
+    run,
+    <span class="hljs-attr">expectedToFail</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> [<span class="hljs-string">'stage'</span>, <span class="hljs-string">'prod'</span>].includes(config.env) &amp;&amp; <span class="hljs-string">'Not yet rolled out (BUG-1234)'</span>,
+};</code></pre>
+				<p>You can also mark a code section instead of a full test with the <a href="https://boxine.github.io/pentf/modules/_promise_utils_.html#expectedtofail">function <code>expectedToFail</code></a>.</p>
+				<p>Use <code>-E</code>/<code>--expect-nothing</code> to disable the expectedToFail special treatment.</p>
 				<a href="#configuration" id="configuration" style="color: inherit; text-decoration: none;">
 					<h2>Configuration</h2>
 				</a>

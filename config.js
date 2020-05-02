@@ -4,6 +4,7 @@ const argparse = require('argparse');
 const assert = require('assert').strict;
 const fs = require('fs');
 const path = require('path');
+const {promisify} = require('util');
 
 const utils = require('./utils');
 
@@ -22,7 +23,7 @@ class AutoWidthArgumentParser extends argparse.ArgumentParser {
 function listEnvs(configDir) {
     const allFiles = fs.readdirSync(configDir);
     const res = utils.filterMap(allFiles, fn => {
-        const m = /^(?![_.])([-_A-Za-z0-9.]+)\.json$/.exec(fn);
+        const m = /^(?![_.])([-_A-Za-z0-9.]+)\.(?:json|js)$/.exec(fn);
         return m && m[1];
     });
 
@@ -312,25 +313,36 @@ function parseArgs(options) {
     return args;
 }
 
-function readConfigFile(configDir, env) {
-    const config_fn = path.join(configDir, env + '.json');
-    const config_json = fs.readFileSync(config_fn, 'utf-8');
-    let config = JSON.parse(config_json);
+async function readConfigFile(configDir, env) {
+    let config;
+
+    const jsFilename = path.join(configDir, env + '.js');
+    if (await promisify(fs.exists)(jsFilename)) {
+        config = require(jsFilename);
+
+        if (typeof config == 'function') {
+            config = await config(env);
+        }
+    } else {
+        const jsonFilename = path.join(configDir, env + '.json');
+        const config_json = await promisify(fs.readFile)(jsonFilename, 'utf-8');
+        config = JSON.parse(config_json);
+    }
     assert.equal(typeof config, 'object');
 
     if (config.extends) {
-        config = {... readConfigFile(configDir, config.extends), ...config};
+        config = {... await readConfigFile(configDir, config.extends), ...config};
     }
     return config;
 }
 
-function readConfig(options, args) {
+async function readConfig(options, args) {
     const {configDir} = options;
     assert(configDir);
     const env = args.env;
     assert(env);
 
-    const config = readConfigFile(configDir, env);
+    const config = await readConfigFile(configDir, env);
     config.beforeAllTests = options.beforeAllTests;
     config.afterAllTests = options.afterAllTests;
     if (args.override_external_locking_url) {
@@ -344,4 +356,6 @@ module.exports = {
     listEnvs,
     parseArgs,
     readConfig,
+    // tests only
+    _readConfigFile: readConfigFile,
 };

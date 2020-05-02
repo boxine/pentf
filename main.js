@@ -31,7 +31,7 @@ async function real_main(options={}) {
 
 
     const args = parseArgs(options);
-    const config = readConfig(options, args);
+    const config = await readConfig(options, args);
     if (options.defaultConfig) {
         options.defaultConfig(config);
     }

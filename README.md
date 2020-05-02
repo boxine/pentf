@@ -234,10 +234,19 @@ Use `-E`/`--expect-nothing` to disable the expectedToFail special treatment.
 
 ## Configuration
 
-pentf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create JSON files in the `config` subdirectory for each environment. You can also add a programatic configuration by passing a function `defaultConfig` to `pentf.main`; see [pentf's own run](run) for an example. 
+pentf is designed to be run against different configurations, e.g. local/dev/stage/prod. Create files in the `config` subdirectory for each environment, in one of the following formats:
 
-The keys are up to you; for example you probably want to have a main entry point. Predefined keys are:
+- JSON: A `.json` file with the keys and associated values. ([example](tests/config_examples/json.json))
+- Simple JavaScript: A `.js` file which exports the configuration. ([example](tests/config_examples/simple_javascript.js))
+- Async JavaScript: A `.js` file which exports an async function being called with the environment name and returning the configuration. ([example](tests/config_examples/async_javascript.js))
 
+You can also add a programatic configuration for multiple environments by passing a function `defaultConfig` to `pentf.main`; see [pentf's own run](run) for an example.
+
+The keys are up to you; for example you probably want to have a main entry point. pentf claims the following keys:
+
+- **`extends`** Inherit from the specified environment. It is common to have a `_common` environment (i.e. a file `_common.json` or `common.`) which all environments inherit from. You can also construct combined environments, e.g. prod backend with a development frontend.
+- **`external_locking_url`** Base URL of the external lockserver to use to avoid test runs on different machines using shared resources (such as test accounts, limited widgets etc.) at the same time (see _locking_ below).
+- **`email`** The base email address used in [`makeRandomEmail`](https://boxine.github.io/pentf/modules/_utils_.html#makerandomemail).
 - **`imap`** If you are using the `pentf/email` module to fetch and test emails, configure your imap connection here, like
 ```
   "imap": {

@@ -216,8 +216,12 @@ function testCases2tasks(config, testCases) {
             id: tc.name,
         };
 
-        if (tc.skip && tc.skip(config)) {
+        const skipReason = tc.skip && tc.skip(config);
+        if (skipReason) {
             task.status = 'skipped';
+            if (typeof skipReason === 'string') {
+                task.skipReason = skipReason;
+            }
         }
 
         if (Object.prototype.hasOwnProperty.call(tc, 'expectedToFail')) {

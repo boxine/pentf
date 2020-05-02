@@ -10,7 +10,7 @@ function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
     const {tasks} = state;
     const test_results = tasks.map(s => {
-        const res = utils.pluck(s, ['status', 'name', 'duration', 'error_screenshots', 'expectedToFail']);
+        const res = utils.pluck(s, ['status', 'name', 'duration', 'error_screenshots', 'expectedToFail', 'skipReason']);
 
         if (s.error) {
             res.error_stack = s.error.stack;
@@ -160,10 +160,13 @@ function html(results) {
     const table = results.tests.map((test_result, idx) => {
         const errored = test_result.status === 'error';
         const skipped = test_result.status === 'skipped';
-        const status_str = {
+        let status_str = {
             'success': '✔️',
             'error': '✘',
         }[test_result.status] || test_result.status;
+        if (skipped && test_result.skipReason) {
+            status_str = 'skipped: ' + test_result.skipReason;
+        }
 
         const rowspan = (
             1 +

@@ -384,8 +384,60 @@ async function assertNotXPath(page, xpath, message='', waitMs=2000, checkEvery=2
 }
 
 /**
- * Clicks an element atomically, e.g. within the same event loop run as finding it
+ * Clicks an element addressed by a query selector atomically, e.g. within the same event loop run as finding it.
  *
+ * @example
+ * ```javascript
+ * await clickSelector(page, 'div[data-id="foo"] a.view', {message: 'Could not click foo link'});
+ * ```
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
+ * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
+ * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
+ */
+async function clickSelector(page, selector, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
+    assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
+
+    let remainingTimeout = timeout;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        const found = await page.evaluate((selector, visible) => {
+            const element = document.querySelector(selector);
+            if (!element) return false;
+
+            if (visible && element.offsetParent === null) return null; // invisible
+
+            element.click();
+            return true;
+        }, selector, visible);
+
+        if (found) {
+            return;
+        }
+
+        if (remainingTimeout <= 0) {
+            if (!message) {
+                message = `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${timeout}ms`;
+            }
+            throw new Error(message);
+        }
+        await wait(Math.min(remainingTimeout, checkEvery));
+        remainingTimeout -= checkEvery;
+    }
+}
+
+/**
+ * Clicks an element addressed by XPath atomically, e.g. within the same event loop run as finding it.
+ *
+ * ```javascript
+ * await clickXPath(
+ *     page, '//article[.//h1//text()[contains(., "My form")]]/button',
+ *     {message: 'Could not find the button in the foobar form'}
+ * );
+ * ```
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string} xpath XPath selector to match the element.
  * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
@@ -757,6 +809,7 @@ module.exports = {
     assertNotXPath,
     assertValue,
     clickNestedText,
+    clickSelector,
     clickTestId,
     clickText,
     clickXPath,

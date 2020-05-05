@@ -72,6 +72,7 @@
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#assertnotxpath" class="tsd-kind-icon">assert<wbr>NotXPath</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#assertvalue" class="tsd-kind-icon">assert<wbr>Value</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#clicknestedtext" class="tsd-kind-icon">click<wbr>Nested<wbr>Text</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#clickselector" class="tsd-kind-icon">click<wbr>Selector</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#clicktestid" class="tsd-kind-icon">click<wbr>Test<wbr>Id</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#clicktext" class="tsd-kind-icon">click<wbr>Text</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#clickxpath" class="tsd-kind-icon">clickXPath</a></li>
@@ -105,7 +106,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L365">browser_utils.js:365</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L365">browser_utils.js:365</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -160,7 +161,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L325">browser_utils.js:325</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L325">browser_utils.js:325</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -197,7 +198,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L470">browser_utils.js:470</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L522">browser_utils.js:522</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -231,6 +232,53 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="clickselector" class="tsd-anchor"></a>
+					<h3>click<wbr>Selector</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">click<wbr>Selector<span class="tsd-signature-symbol">(</span>page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span>, selector<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, __namedParameters<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L401">browser_utils.js:401</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Clicks an element addressed by a query selector atomically, e.g. within the same event loop run as finding it.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-javascript"><span class="hljs-keyword">await</span> clickSelector(page, <span class="hljs-string">'div[data-id="foo"] a.view'</span>, {<span class="hljs-attr">message</span>: <span class="hljs-string">'Could not click foo link'</span>});</code></pre>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>puppeteer page object.</p>
+									</div>
+								</li>
+								<li>
+									<h5>selector: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>(<a href="https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors">https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors</a>) (aka query selector) of the targeted element.</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
 					<a name="clicktestid" class="tsd-anchor"></a>
 					<h3>click<wbr>Test<wbr>Id</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
@@ -240,7 +288,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L565">browser_utils.js:565</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L617">browser_utils.js:617</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -283,7 +331,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L444">browser_utils.js:444</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L496">browser_utils.js:496</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -325,13 +373,17 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L397">browser_utils.js:397</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L449">browser_utils.js:449</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Clicks an element atomically, e.g. within the same event loop run as finding it</p>
+									<p>Clicks an element addressed by XPath atomically, e.g. within the same event loop run as finding it.</p>
 								</div>
+								<pre><code class="language-javascript"><span class="hljs-keyword">await</span> clickXPath(
+    page, <span class="hljs-string">'//article[.//h1//text()[contains(., "My form")]]/button'</span>,
+    {<span class="hljs-attr">message</span>: <span class="hljs-string">'Could not find the button in the foobar form'</span>}
+);</code></pre>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
@@ -367,7 +419,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L159">browser_utils.js:159</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L159">browser_utils.js:159</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -398,7 +450,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L227">browser_utils.js:227</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L227">browser_utils.js:227</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -438,7 +490,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L610">browser_utils.js:610</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L662">browser_utils.js:662</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -482,7 +534,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L643">browser_utils.js:643</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L695">browser_utils.js:695</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -520,7 +572,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L632">browser_utils.js:632</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L684">browser_utils.js:684</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -555,7 +607,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L735">browser_utils.js:735</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L787">browser_utils.js:787</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -604,7 +656,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L34">browser_utils.js:34</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L34">browser_utils.js:34</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -649,7 +701,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L698">browser_utils.js:698</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L750">browser_utils.js:750</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -680,7 +732,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L580">browser_utils.js:580</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L632">browser_utils.js:632</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -717,7 +769,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L673">browser_utils.js:673</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L725">browser_utils.js:725</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -768,7 +820,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L295">browser_utils.js:295</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L295">browser_utils.js:295</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -811,7 +863,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L263">browser_utils.js:263</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L263">browser_utils.js:263</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -854,7 +906,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b229aca/browser_utils.js#L182">browser_utils.js:182</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0f219cf/browser_utils.js#L182">browser_utils.js:182</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -925,6 +977,9 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_browser_utils_.html#clicknestedtext" class="tsd-kind-icon">click<wbr>Nested<wbr>Text</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_browser_utils_.html#clickselector" class="tsd-kind-icon">click<wbr>Selector</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_browser_utils_.html#clicktestid" class="tsd-kind-icon">click<wbr>Test<wbr>Id</a>

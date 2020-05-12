@@ -24,7 +24,7 @@ async function run_task(config, task) {
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
             const etf = (typeof task.expectedToFail === 'string') ? ` (${task.expectedToFail})` : '';
-            const label = output.color(config, 'inverse-red', ' PASSED ');
+            const label = output.color(config, 'inverse-red', 'PASSED');
             output.log(
                 config,
                 `${label} test case ${output.color(config, 'lightCyan', task.name)}` +
@@ -74,11 +74,11 @@ async function run_task(config, task) {
         if (show_error) {
             const name = output.color(config, 'lightCyan', task.name);
             if (e.pentf_expectedToSucceed) {
-                const label = output.color(config, 'inverse-green', ' PASSED ');
+                const label = output.color(config, 'inverse-green', 'PASSED');
                 output.log(
                     config, `${label} test case ${name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
             } else {
-                const label = output.color(config, 'inverse-red', ' FAILED ');
+                const label = output.color(config, 'inverse-red', 'FAILED');
                 output.log(
                     config,
                     `${label} test case ${name} at ${utils.localIso8601()}:\n` +

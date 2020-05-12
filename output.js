@@ -229,6 +229,11 @@ function color(config, colorName, str) {
         return str;
     }
 
+    // Labels like "FAILED" or "PASSED" need a bit of visual padding.
+    if (['FAILED', 'PASSED'].includes(str)) {
+        str = ` ${str} `;
+    }
+
     const m = /^inverse-(.*)$/.exec(colorName);
     if (m) {
         colorName = m[1];

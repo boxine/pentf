@@ -358,11 +358,30 @@ async function assertValue(input, expected) {
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string} xpath XPath to search for.
+ * @param {{timeout?: number, message?: string, checkEvery?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the element is not visible in time.
- * @param {number?} waitMs How long to wait, in milliseconds. (Default: 2s)
+ * @param {number?} timeout How long to wait, in milliseconds. (Default: 2s)
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
-async function assertNotXPath(page, xpath, message='', waitMs=2000, checkEvery=200) {
+async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=200) {
+    assert.equal(
+        typeof xpath, 'string',
+        `XPath ${xpath} should be a string, but is of type ${typeof xpath}`);
+
+    // Legacy way of calling this function; will be deprecated and later removed
+    if (typeof options === 'string') {
+        options = {message: options};
+        options.timeout = _timeout;
+        options.checkEvery = _checkEvery;
+        assert(0);
+    } else {
+        if (!options) options = {};
+        if (!options.timeout) options.timeout = 2000;
+        if (!options.checkEvery) options.checkEvery = 200;
+    }
+    const {message, timeout, checkEvery} = options;
+
+    let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
         const found = await page.evaluate(xpath => {
@@ -374,12 +393,12 @@ async function assertNotXPath(page, xpath, message='', waitMs=2000, checkEvery=2
             'Element matching ' + xpath + ' is present, but should not be there.' +
             (message ? ' ' + message : ''));
 
-        if (waitMs <= 0) {
+        if (remainingTimeout <= 0) {
             break;
         }
 
-        await wait(Math.min(checkEvery, waitMs));
-        waitMs -= checkEvery;
+        await wait(Math.min(checkEvery, remainingTimeout));
+        remainingTimeout -= checkEvery;
     }
 }
 

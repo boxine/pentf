@@ -7,9 +7,11 @@ async function run(config) {
     const page = await newPage(config);
     await page.setContent('<div id="d1"><div id="d2">test" text \\ " a</div></div>');
 
-    await assert.rejects(assertNotXPath(page, '//div[@id="d2"]', 'extra', 10, 1), {
-        message: 'Element matching //div[@id="d2"] is present, but should not be there. extra',
-    });
+    await assert.rejects(
+        assertNotXPath(
+            page, '//div[@id="d2"]', {message: 'extra', timeout: 10, checkEvery: 1}),
+        {message: 'Element matching //div[@id="d2"] is present, but should not be there. extra'}
+    );
     await assertNotXPath(page, '//div[@id="d3"]');
 
     await waitForText(page, 'test');

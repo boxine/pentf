@@ -373,7 +373,6 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
         options = {message: options};
         options.timeout = _timeout;
         options.checkEvery = _checkEvery;
-        assert(0);
     } else {
         if (!options) options = {};
         if (!options.timeout) options.timeout = 2000;

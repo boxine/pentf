@@ -258,7 +258,7 @@ function html(results) {
         if (testResult.expectedToFail) {
             res += (
                 `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                '<td class="expectedToFail" colspan="2">' +
+                '<td class="expectedToFail" colspan="3">' +
                 ((typeof testResult.expectedToFail === 'string')
                     ? 'Expected to fail: ' + linkify(testResult.expectedToFail)
                     : 'Expected to fail.'

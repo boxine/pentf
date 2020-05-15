@@ -48,7 +48,8 @@ async function run_task(config, task) {
                 task.error_screenshots = await Promise.all(task_config._browser_pages.map(
                     async (page, i) => {
                         await promisify(mkdirp)(config.screenshot_directory);
-                        const fn = path.join(config.screenshot_directory, `${task.name}-${i}.png`);
+                        const fn = path.join(
+                            config.screenshot_directory, `${task.id || task.name}-${i}.png`);
                         return await page.screenshot({
                             path: fn,
                             type: 'png',
@@ -208,7 +209,11 @@ async function parallel_run(config, state) {
 }
 
 function testCases2tasks(config, testCases) {
-    return testCases.map(tc => {
+    const repeat = config.repeat || 1;
+    assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
+
+    const tasks = new Array(testCases.length * repeat);
+    testCases.forEach((tc, position) => {
         const task = {
             tc,
             status: 'todo',
@@ -234,8 +239,20 @@ function testCases2tasks(config, testCases) {
 
         locking.annotateTaskResources(config, task);
 
-        return task;
+        if (skipReason || (repeat === 1)) {
+            tasks[position] = task;
+            return;
+        }
+
+        for (let runId = 0;runId < repeat;runId++) {
+            tasks[runId * testCases.length + position] = {
+                ...task,
+                id: `${tc.name}_${runId}`,
+                name: `${tc.name}[${runId}]`,
+            };
+        }
     });
+    return tasks.filter(t => t);
 }
 
 async function run(config, testCases) {

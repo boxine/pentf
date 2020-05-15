@@ -40,7 +40,7 @@ function status(config, state) {
     let status_str;
     for (let running_show = running.length;running_show >= 0;running_show--) {
         const running_str = (
-            running.slice(0, running_show).map(({tc}) => tc.name).join(' ')
+            running.slice(0, running_show).map(task => task.name).join(' ')
             + (running_show < running.length ? '  +' + (running.length - running_show) : '')
         );
         status_str = (

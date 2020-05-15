@@ -241,6 +241,11 @@ function parseArgs(options) {
         help: 'Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still emitted in cases of internal crashes)',
         action: 'storeTrue',
     });
+    runner_group.addArgument(['--repeat'], {
+        type: 'int',
+        defaultValue: 1,
+        help: 'Run the tests the specified number of times (experimental)',
+    });
 
     const locking_group = parser.addArgumentGroup({title: 'Locking'});
     locking_group.addArgument(['-L', '--no-locking'], {

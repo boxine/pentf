@@ -1,3 +1,4 @@
+const assert = require('assert');
 const fs = require('fs');
 const {promisify} = require('util');
 const {html2pdf} = require('./browser_utils');
@@ -9,24 +10,48 @@ const utils = require('./utils');
 function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
     const {tasks} = state;
-    const test_results = tasks.map(s => {
-        const res = utils.pluck(s, ['status', 'name', 'duration', 'error_screenshots', 'expectedToFail', 'skipReason']);
 
-        if (s.error) {
-            res.error_stack = s.error.stack;
+    const tests = [];
+    const testsById = new Map();
+
+    for (const task of tasks) {
+        const testId = task.tc.id || task.tc.name;
+        assert(testId);
+
+        let testResult = testsById.get(testId);
+        if (!testResult) {
+            testResult = {
+                ...utils.pluck(task, ['expectedToFail', 'skipReason']),
+                name: task.tc.name,
+                id: testId,
+                description: task.tc.description,
+                skipped: task.status === 'skipped',
+                taskResults: [],
+            };
+            tests.push(testResult);
+            testsById.set(testId, testResult);
         }
 
-        if (s.tc.description) {
-            res.description = s.tc.description;
+        const taskResult = utils.pluck(task, ['status', 'duration', 'error_screenshots']);
+        if (task.error) {
+            taskResult.error_stack = task.error.stack;
         }
+        testResult.taskResults.push(taskResult);
+    }
 
-        return res;
-    });
+    for (const t of tests) {
+        if (t.taskResults.every(tr => tr.status === t.taskResults[0].status)) {
+            t.status = t.taskResults[0].status;
+        } else {
+            t.status = 'flaky';
+        }
+    }
+
     return {
         start: test_start,
         duration: test_end - test_start,
         config,
-        tests: test_results,
+        tests,
         ...moreInfo,
     };
 }
@@ -121,8 +146,8 @@ function markdown(results) {
             (idx + 1) + ' | ' +
             test_result.name + ' | ' +
             (test_result.description || '') + ' | ' +
-            format_duration(test_result.duration) + ' | ' +
-            test_result.status + ' |'
+            _calcDuration(test_result.taskResults) + ' | ' +
+            _calcSummaryStatus(test_result.taskResults) + ' |'
         );
     }).join('\n');
 
@@ -134,10 +159,12 @@ ${report_header_md}
 ### Options
 Tested Environment: **${results.config.env}**  
 Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}  
-Start: ${format_timestamp(results.start)}  
+${((results.config.repeat || 1) > 1) ?
+        'Each test repeated **' + escape_html(results.config.repeat + '') + '** times  \n' : ''
+}Start: ${format_timestamp(results.start)}  
 
 ### Results
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests)})  
+Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})  
 Total test duration: ${format_duration(results.duration)}  
 
 | #     | Test              | Description       | Duration | Result  |
@@ -156,50 +183,84 @@ function screenshots_html(result) {
     }).join('\n');
 }
 
+function _calcSingleStatusStr(status) {
+    return ({
+        'success': '✔️',
+        'error': '✘',
+    }[status] || status);
+}
+
+function _calcSummaryStatus(taskResults) {
+    if (taskResults.every(tr => tr.status === taskResults[0].status)) {
+        return _calcSingleStatusStr(taskResults[0].status);
+    }
+
+    // Flaky results, tabulate
+    const counter = new Map();
+    for (const tr of taskResults) {
+        counter.set(tr.status, (counter.get(tr.status) || 0) + 1);
+    }
+
+    return (Array.from(counter.keys())
+        .sort()
+        .map(status => counter.get(status) + _calcSingleStatusStr(status))
+        .join(' '));
+}
+
+function _calcDuration(taskResults) {
+    if (taskResults.length === 1) {
+        return format_duration(taskResults[0].duration);
+    }
+
+    const durations = taskResults.map(tr => tr.duration);
+    const max = Math.max(... durations);
+    const min = Math.min(... durations);
+    return format_duration(min) + ' - ' + format_duration(max);
+}
+
 function html(results) {
-    const table = results.tests.map((test_result, idx) => {
-        const errored = test_result.status === 'error';
-        const skipped = test_result.status === 'skipped';
-        let status_str = {
-            'success': '✔️',
-            'error': '✘',
-        }[test_result.status] || test_result.status;
-        if (skipped && test_result.skipReason) {
-            status_str = 'skipped: ' + test_result.skipReason;
+    const table = results.tests.map((testResult, idx) => {
+        const {skipped, taskResults} = testResult;
+
+        const errored = taskResults.some(tr => tr.status === 'error');
+        let statusStr = _calcSummaryStatus(taskResults);
+        if (skipped && testResult.skipReason) {
+            statusStr = 'skipped: ' + testResult.skipReason;
         }
 
         const rowspan = (
             1 +
-            (test_result.description ? 1 : 0) +
-            (test_result.expectedToFail ? 1 : 0) +
-            (errored ? (test_result.error_screenshots ? 2 : 1) : 0));
+            (testResult.description ? 1 : 0) +
+            (testResult.expectedToFail ? 1 : 0) +
+            (errored ? 1 : 0));
 
         let res = (
             `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
             `<td class="test_number" rowspan="${rowspan}">` + (idx + 1) + '</td>' +
-            '<td class="test_name">' + escape_html(test_result.name) + '</td>' +
-            (skipped ? '' : '<td class="duration">' + escape_html(format_duration(test_result.duration)) + '</td>') +
-            `<td class="result result-${test_result.status}" ${skipped ? 'colspan="2"' : ''} rowspan=${test_result.description ? 2 : 1}>` +
-            '<div>' + status_str + '</div></td>' +
+            '<td class="test_name">' + escape_html(testResult.name) + '</td>' +
+            (skipped ? '' : '<td class="duration">' + escape_html(_calcDuration(taskResults)) + '</td>') +
+            `<td class="result result-${testResult.status}"` +
+            ` ${skipped ? 'colspan="2"' : ''} rowspan=${testResult.description ? 2 : 1}>` +
+            '<div>' + statusStr + '</div></td>' +
             '</tr>'
         );
 
-        if (test_result.description) {
+        if (testResult.description) {
             res += (
                 `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
                 '<td class="description" colspan="2">' +
-                escape_html(test_result.description) +
+                escape_html(testResult.description) +
                 '</td>' +
                 '</tr>'
             );
         }
 
-        if (test_result.expectedToFail) {
+        if (testResult.expectedToFail) {
             res += (
                 `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
                 '<td class="expectedToFail" colspan="2">' +
-                ((typeof test_result.expectedToFail === 'string')
-                    ? 'Expected to fail: ' + linkify(test_result.expectedToFail)
+                ((typeof testResult.expectedToFail === 'string')
+                    ? 'Expected to fail: ' + linkify(testResult.expectedToFail)
                     : 'Expected to fail.'
                 ) +
                 '</td>' +
@@ -208,22 +269,24 @@ function html(results) {
         }
 
         if (errored) {
-            res += (
-                `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                '<td colspan="3" class="error_stack">' +
-                escape_html(test_result.error_stack) +
-                '</td>' +
-                '</tr>'
-            );
-            if (test_result.error_screenshots) {
+            res += `<tr class="${idx % 2 != 0 ? 'odd' : ''}"><td colspan="3">`;
+
+            let first = true;
+            for (const tr of taskResults) {
+                if (tr.status !== 'error') continue;
+
+                if (first) first = false;
+
                 res += (
-                    `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                    '<td colspan="3">' +
-                    screenshots_html(test_result) +
-                    '</td>' +
-                    '</tr>'
+                    '<div class="error_stack"' + (first ? '' : ' style="margin-top:2em;"') + '>' +
+                    escape_html(tr.error_stack || 'INTERNAL ERROR: no error stack') +
+                    '</div>'
                 );
+                if (tr.error_screenshots) {
+                    res += screenshots_html(tr);
+                }
             }
+            res += '</td></tr>';
         }
 
         res += (
@@ -341,12 +404,13 @@ ${report_header_html}
 <h2>Options</h2>
 <p>Tested Environment: <strong>${results.config.env}</strong><br/>
 Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}<br/>
+${((results.config.repeat || 1) > 1) ? 'Each test repeated <strong>' + escape_html(results.config.repeat + '') + '</strong> times<br/>' : ''}
 Start: ${format_timestamp(results.start)}<br/>
 Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>
 </p>
 
 <h2>Results</h2>
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests)})<br/>
+Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})<br/>
 Total test duration: ${escape_html(format_duration(results.duration))}<br/>
 
 <table>

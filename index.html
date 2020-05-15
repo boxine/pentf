@@ -282,7 +282,8 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 -I REGEXP, --ignore-errors REGEXP
                       <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">error</span> messages matching the regular expression. Example: -I 
                       <span class="hljs-string">"\(TOC-[0-9]+\)"</span>
--<span class="hljs-keyword">E</span>, --expect-nothing  Ignore expectedToFail attributes <span class="hljs-keyword">on</span> tests</code></pre>
+-<span class="hljs-keyword">E</span>, --expect-nothing  Ignore expectedToFail attributes <span class="hljs-keyword">on</span> tests
+--<span class="hljs-keyword">no</span>-colors           Disable colors <span class="hljs-keyword">in</span> stdout</code></pre>
 				<a href="#writing-results-to-disk" id="writing-results-to-disk" style="color: inherit; text-decoration: none;">
 					<h6>Writing results to disk</h6>
 				</a>
@@ -339,7 +340,8 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 --fail-fast           Abort once a test fails
 --print-tasks         Output all tasks that the runner would perform, and <span class="hljs-keyword">exit</span>
 --<span class="hljs-keyword">exit</span>-zero           Terminate with <span class="hljs-keyword">exit</span> code <span class="hljs-number">0</span> (success) even <span class="hljs-keyword">if</span> tests fail. (Exit codes != <span class="hljs-number">0</span> are still 
-                      emitted <span class="hljs-keyword">in</span> cases of internal crashes)</code></pre>
+                      emitted <span class="hljs-keyword">in</span> cases of internal crashes)
+--repeat COUNT        Run the tests the specified number of times</code></pre>
 				<a href="#locking" id="locking" style="color: inherit; text-decoration: none;">
 					<h6>Locking</h6>
 				</a>

@@ -243,8 +243,9 @@ function parseArgs(options) {
     });
     runner_group.addArgument(['--repeat'], {
         type: 'int',
+        metavar: 'COUNT',
         defaultValue: 1,
-        help: 'Run the tests the specified number of times (experimental)',
+        help: 'Run the tests the specified number of times',
     });
 
     const locking_group = parser.addArgumentGroup({title: 'Locking'});

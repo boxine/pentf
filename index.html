@@ -300,7 +300,12 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 --markdown-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.md
                       Markdown <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.md .
 --load-json INPUT.json
-                      Load test results from JSON (instead <span class="hljs-keyword">of</span> executing tests)</code></pre>
+                      Load test results from JSON (instead <span class="hljs-keyword">of</span> executing tests)
+--sentry              Enable error reporting via Sentry. By <span class="hljs-keyword">default</span>, this will be activated <span class="hljs-keyword">if</span> the CI 
+                      environment variable <span class="hljs-keyword">is</span> <span class="hljs-keyword">set</span> <span class="hljs-keyword">and</span> a SENTRY_DSN <span class="hljs-keyword">is</span> configured.
+--no-sentry           Disable error reporting via Sentry even <span class="hljs-keyword">if</span> it <span class="hljs-keyword">is</span> configured
+--sentry-dsn OVERRIDE_SENTRY_DSN
+                      <span class="hljs-keyword">Override</span> Sentry DSN. By <span class="hljs-keyword">default</span>, the SENTRY_DSN environment variable <span class="hljs-keyword">is</span> used.</code></pre>
 				<a href="#test-selection" id="test-selection" style="color: inherit; text-decoration: none;">
 					<h6>Test selection</h6>
 				</a>

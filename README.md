@@ -381,3 +381,22 @@ The keys are up to you; for example you probably want to have a main entry point
 ## License
 
 [MIT](LICENSE). Patches welcome!
+
+## Deprecation policy
+
+Sometimes, we have to deprecate or move a legacy name or feature. The pentf deprecation policy is as following:
+
+1. For 6 months, a warning is only output if the `PENTF_FUTURE_DEPRECATIONS` environment variable is set. 
+2. Deprecation warnings are output all the time, but everything continues to work for 6 more months.
+3. Afterwards, as long as we can find any usages of the legacy variant, we keep supporting it.
+4. Finally, once there are no known usages of the legacy variant, we stop support alltogether.
+
+Note that the times only apply if we cannot prove that all usages have been moved.
+
+### Currently deprecated
+
+| Feature|Replaced by|Deprecation start|
+| -------|-----------|-----------------|
+| `utils.assertEventually`|`assert_utils.assertEventually`|2020-11-19|
+| `utils.assertAsyncEventually`|`assert_utils.assertAsyncEventually`|2020-11-19|
+| `utils.assertAlways`|`assert_utils.assertAlways`|2020-11-19|

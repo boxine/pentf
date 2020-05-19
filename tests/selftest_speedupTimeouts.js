@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 
 const {speedupTimeouts, restoreTimeouts, closePage, newPage} = require('../browser_utils');
-const {assertAlways, assertEventually} = require('../utils');
+const {assertAlways, assertEventually} = require('../assert_utils');
 
 async function run(config) {
     const page = await newPage(config);

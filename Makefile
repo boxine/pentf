@@ -19,7 +19,7 @@ test:
 
 doc: *.js tsconfig.json
 	./node_modules/.bin/typedoc --out doc --noEmit --excludeNotExported --excludeNotDocumented --excludeExternals \
-		browser_utils.js email.js net_utils.js promise_utils.js utils.js
+		*.js
 
 lockserver-dev:
 	node_modules/.bin/nodemon lockserver/lockserver.js

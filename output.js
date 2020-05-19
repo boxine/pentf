@@ -117,6 +117,7 @@ function logVerbose(config, message) {
 /**
  * Indent string
  * @param {number} n Levels of indentation
+ * @hidden
  */
 function indent(n) {
     return '  '.repeat(n);
@@ -129,6 +130,7 @@ function indent(n) {
  * diff.
  * @param {*} value Value to stringify
  * @returns {string}
+ * @hidden
  */
 function stringify(value, level = 0) {
     if (typeof value === 'string') return `"${value}"`;
@@ -194,6 +196,7 @@ function shouldShowDiff(err) {
  * @param {*} config The pentf configuration object.
  * @param {Error} err The error to generate the diff from
  * @returns {string}
+ * @hidden
  */
 function generateDiff(config, err) {
     assert(err);
@@ -249,6 +252,7 @@ function color(config, colorName, str) {
  * Format the error 
  * @param {*} config Penf config object
  * @param {Error} err Error object to format
+ * @hidden
  */
 function formatError(config, err) {
     let diff = '';
@@ -268,6 +272,7 @@ function formatError(config, err) {
  * Generate a string representation for a random value.
  *
  * @param {*} value A random value.
+ * @hidden
  */
 function valueRepr(value) {
     if (typeof value === 'symbol') {

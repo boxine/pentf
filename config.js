@@ -142,6 +142,25 @@ function parseArgs(options) {
         metavar: 'INPUT.json',
         help: 'Load test results from JSON (instead of executing tests)',
     });
+    results_group.addArgument(['--sentry'], {
+        action: 'storeConst',
+        constant: true,
+        dest: 'override_sentry',
+        help: (
+            'Enable error reporting via Sentry.' +
+            ' By default, this will be activated if the CI environment variable is set and a ' +
+            ' SENTRY_DSN is configured.'),
+    });
+    results_group.addArgument(['--no-sentry'], {
+        action: 'storeConst',
+        constant: false,
+        dest: 'override_sentry',
+        help: 'Disable error reporting via Sentry even if it is configured',
+    });
+    results_group.addArgument(['--sentry-dsn'], {
+        dest: 'override_sentry_dsn',
+        help: 'Override Sentry DSN. By default, the SENTRY_DSN environment variable is used.',
+    });
 
     const selection_group = parser.addArgumentGroup({title: 'Test selection'});
     selection_group.addArgument(['-f', '--filter'], {
@@ -353,6 +372,14 @@ async function readConfig(options, args) {
     config.afterAllTests = options.afterAllTests;
     if (args.override_external_locking_url) {
         config.external_locking_url = args.override_external_locking_url;
+    }
+
+    // Configure Sentry
+    config.sentry_dsn = args.override_sentry_dsn || config.sentry_dsn || process.env.SENTRY_DSN;
+    if (args.override_sentry !== null) {
+        config.sentry = args.override_sentry;
+    } else if (process.env.CI && config.sentry_dsn) {
+        config.sentry = true;
     }
 
     return {...config, ...args};

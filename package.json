@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/diff": "^4.0.2",
     "deep-equal": "^1.0.1",
-    "eslint": "^6.2.2",
+    "eslint": "^7.0.0",
     "nodemon": "^1.18.11",
     "prettier": "^2.0.5",
     "puppeteer": "^2.1.1",

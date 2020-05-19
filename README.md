@@ -301,6 +301,11 @@ The keys are up to you; for example you probably want to have a main entry point
                       Markdown file to write a report to. Defaults to results.md .
 --load-json INPUT.json
                       Load test results from JSON (instead of executing tests)
+--sentry              Enable error reporting via Sentry. By default, this will be activated if the CI 
+                      environment variable is set and a SENTRY_DSN is configured.
+--no-sentry           Disable error reporting via Sentry even if it is configured
+--sentry-dsn OVERRIDE_SENTRY_DSN
+                      Override Sentry DSN. By default, the SENTRY_DSN environment variable is used.
 ```
 
 ###### Test selection

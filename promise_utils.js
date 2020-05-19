@@ -98,8 +98,8 @@ async function expectedToFail(config, message, asyncFunc, {expectNothing=false} 
  *
  * @param {*} config The pentf configuration.
  * @param {Promise} promise The promise to limit
- * @param {{expectNothing?: boolean}} __namedParameters Options (currently not visible in output due to typedoc bug)
- * @param {string} timeout Timeout in ms (by default 10000=10s)
+ * @param {{expectNothing?: boolean, timeout?: number, warning?: number}} __namedParameters Options (currently not visible in output due to typedoc bug)
+ * @param {number} timeout Timeout in ms (by default 10000=10s)
  * @param {string} message Optional error message to show when the timeout fires.
  * @param {boolean} warning Only print an error message, do not throw.
  */

@@ -1,0 +1,27 @@
+name: Run tests
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 11.x, 12.x, 14.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: npm install
+      - run: sudo apt-get install xvfb
+      - run: xvfb-run --auto-servernum ./run --ci
+      - run: make eslint
+      #- run: make prettier-lint
+      - run: xvfb-run --auto-servernum ./run -S --ci
+        env:
+          CI: true

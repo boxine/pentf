@@ -11,7 +11,8 @@ const path = require('path');
 const {promisify} = require('util');
 const tmp = require('tmp-promise');
 
-const {assertAsyncEventually, wait, remove} = require('./utils');
+const {assertAsyncEventually} = require('./assert_utils');
+const {wait, remove} = require('./utils');
 
 let tmp_home;
 

@@ -155,98 +155,40 @@ function localIso8601(date) {
     );
 }
 
-/**
- * Assert that a condition is eventually true.
- *
- * @example
- * ```javascript
- * let called = false;
- * setTimeout(() => {called = true;}, 2000);
- * await assertEventually(() => called);
- * ```
- * @param {() => any} testfunc The test function. Must return `true` to signal success.
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} message Error message shown if the condition never becomes true within the timeout.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {number?} checkEvery Intervals between checks, in milliseconds.
- * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
- *                                `false`: A thrown error/exception is treated as if the test function returned false.
- */
-async function assertEventually(testfunc,
-    {message='assertEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
-
-    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
-        if (crashOnError) {
-            const res = await testfunc();
-            if (res) return res;
-        } else {
-            let crashed = false;
-            let res;
-            try {
-                res = await testfunc();
-            } catch (e) {
-                crashed = true;
-            }
-            if (!crashed) return res;
-        }
-
-        await wait(checkEvery);
+function assertEventually(...args) {
+    // Deprecated here; will warn in the future, and eventually be removed
+    const assert_utils = require('./assert_utils');
+    if (process.env.PENTF_FUTURE_DEPRECATIONS) {
+        // eslint-disable-next-line no-console
+        console.log(); // new line (we can't call output.log here)
+        // eslint-disable-next-line no-console
+        console.trace('utils.assertEventually has been moved to assert_utils');
     }
-    throw new Error(`${message} (waited ${timeout}ms)`);
+    return assert_utils.assertEventually(...args);
 }
 
-/**
- * Assert that an asynchronously evaluated condition is eventually true.
- *
- * @param {() => Promise<any>} testfunc The async test function. Must return `true` to signal success.
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} message Error message shown if the condition never becomes true within the timeout.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {number?} checkEvery Intervals between checks, in milliseconds.
- * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
- *                                `false`: A thrown error/exception is treated as if the test function returned false.
- */
-async function assertAsyncEventually(testfunc,
-    {message='assertAsyncEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
-
-    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
-        if (crashOnError) {
-            const res = await testfunc();
-            if (res) return res;
-        } else {
-            let crashed = false;
-            let res;
-            try {
-                res = await testfunc();
-            } catch (e) {
-                crashed = true;
-            }
-            if (!crashed) return res;
-        }
-
-        await wait(checkEvery);
+function assertAsyncEventually(...args) {
+    // Deprecated here; will warn in the future, and eventually be removed
+    const assert_utils = require('./assert_utils');
+    if (process.env.PENTF_FUTURE_DEPRECATIONS) {
+        // eslint-disable-next-line no-console
+        console.log(); // new line (we can't call output.log here)
+        // eslint-disable-next-line no-console
+        console.trace('utils.assertAsyncEventually has been moved to assert_utils');
     }
-    throw new Error(`${message} (waited ${timeout}ms)`);
+    return assert_utils.assertAsyncEventually(...args);
 }
 
-/**
- * Assert that a condition remains true for the whole timeout.
- *
- * @param {() => any} testfunc The test function. Must return `true` to signal success.
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}}  [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} message Error message shown if the testfunc fails.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {number?} checkEvery Intervals between checks, in milliseconds.
-*/
-async function assertAlways(testfunc, {message='assertAlways failed', timeout=10000, checkEvery=200} = {}) {
-    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
-        const res = testfunc();
-        if (!res) {
-            throw new Error(`${message} (after ${timeout - remaining}ms)`);
-        }
-
-        await wait(checkEvery);
+function assertAlways(...args) {
+    // Deprecated here; will warn in the future, and eventually be removed
+    const assert_utils = require('./assert_utils');
+    if (process.env.PENTF_FUTURE_DEPRECATIONS) {
+        // eslint-disable-next-line no-console
+        console.log(); // new line (we can't call output.log here)
+        // eslint-disable-next-line no-console
+        console.trace('utils.assertAlways has been moved to assert_utils');
     }
+    return assert_utils.assertAlways(...args);
 }
 
 function cmp(a, b) {

@@ -84,6 +84,15 @@ async function run_task(config, task) {
                     config,
                     `${label} test case ${name} at ${utils.localIso8601()}:\n` +
                     `${output.formatError(config, e)}\n`);
+
+                if (config.sentry) {
+                    const Sentry = require('@sentry/node');
+                    Sentry.withScope(scope => {
+                        scope.setTag('task', task.name);
+                        scope.setTag('testcase', task.tc.name);
+                        Sentry.captureException(e);
+                    });
+                }
             }
         }
         if (config.fail_fast) {
@@ -266,6 +275,21 @@ async function run(config, testCases) {
         config,
         tasks,
     };
+
+    if (config.sentry) {
+        const sentry_dsn = config.sentry_dsn;
+        assert(
+            sentry_dsn,
+            'Sentry enabled with --sentry, but no DSN configured. Use --sentry-dsn,' +
+            ' set the configuration sentry_dsn, or the environment variable SENTRY_DSN.'
+        );
+        const Sentry = require('@sentry/node');
+        Sentry.init({
+            dsn: sentry_dsn,
+            environment: config.env,
+            integrations: [],
+        });
+    }
 
     try {
         if (config.manually_lock) {

@@ -8,6 +8,7 @@
     "test": "tests"
   },
   "dependencies": {
+    "@sentry/node": "^5.15.5",
     "@types/glob": "^7.1.1",
     "@types/puppeteer": "^2.0.1",
     "argparse": "^1.0.10",

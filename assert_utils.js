@@ -171,6 +171,20 @@ async function assertAlways(testfunc, {message='assertAlways failed', timeout=10
     }
 }
 
+/**
+ * Assert function with a message that is generated on demand.
+ * @example
+ * ```javascript
+ * lazyAssert(obj?.foo?.bar, () => `Object is missing foo.bar. Full object: ${JSON.stringify(obj)}`);
+ * ```
+ * @param {boolean} value The value to be asserted to be true.
+ * @param {() => string} makeMessage Function to generate the error message, should the value be false.
+*/
+function lazyAssert(value, makeMessage) {
+    if (! value) {
+        assert(value, makeMessage());
+    }
+}
 
 module.exports = {
     assertAlways,
@@ -181,4 +195,5 @@ module.exports = {
     assertLess,
     assertLessEqual,
     assertNumeric,
+    lazyAssert,
 };

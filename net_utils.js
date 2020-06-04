@@ -62,7 +62,7 @@ async function fetch(config, url, init) {
         init.headers.Cookie = await init.cookieJar.getCookieString(url);
     }
     if (! Object.keys(init.headers).find(h => h.toLowerCase() === 'user-agent')) {
-        init.headers['User-Agent'] = 'pentf integration test (https://github.com/boxine/pentf)';
+        init.headers['User-Agent'] = 'pentf e2etest (https://github.com/boxine/pentf)';
     }
 
     if (config.print_curl) {

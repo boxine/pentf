@@ -76,6 +76,30 @@ function assertGreaterEqual(x, y, message = undefined) {
     assert(x >= y, `Expected ${x} >= ${y}.` + (message ? ' ' + message : ''));
 }
 
+/**
+* Assert that a string is included in another, or object is included in an array.
+*
+* @example
+* ```javascript
+* assertIncludes('foobar', 'foo');
+* assertIncludes([9, 5, 3], 5);
+* ```
+* @param {string|array} haystack The thing to search in.
+* @param {string|array} needle The thing to search for.
+* @param {string?} message Optional error message if the assertion does not hold.
+*/
+function assertIncludes(haystack, needle, message = undefined) {
+    lazyAssert(
+        haystack.includes, () => `Haystack object ${haystack} does not have an includes method`);
+
+    lazyAssert(
+        haystack.includes(needle),
+        () => (
+            `Expected ${JSON.stringify(haystack)} to include ${JSON.stringify(needle)}.` +
+            (message ? ' ' + message : '')
+        )
+    );
+}
 
 /**
  * Assert that a condition is eventually true.
@@ -192,6 +216,7 @@ module.exports = {
     assertEventually,
     assertGreater,
     assertGreaterEqual,
+    assertIncludes,
     assertLess,
     assertLessEqual,
     assertNumeric,

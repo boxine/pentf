@@ -12,9 +12,13 @@ function makeEmailAddress(config, suffix) {
  *
  * @param {*} config The pentf configuration object. `config.email` needs to be set.
  * @param {string?} prefix Text to put before the random characters.
+                           If no prefix is specified, the test name is used if available.
  * @returns {string} If `config.email` is `'foo@bar.com'`, something like `foo+prefix129ad12@bar.com`
  */
-function makeRandomEmail(config, prefix='') {
+function makeRandomEmail(config, prefix=undefined) {
+    if (prefix === undefined) {
+        prefix = config._testName || '';
+    }
     return makeEmailAddress(config, prefix + Math.random().toString(36).slice(2));
 }
 

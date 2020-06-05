@@ -17,7 +17,12 @@ const {timeoutPromise} = require('./promise_utils');
 
 
 async function run_task(config, task) {
-    const task_config = {...config, _browser_pages: []};
+    const task_config = {
+        ...config,
+        _browser_pages: [],
+        _testName: task.tc.name,
+        _taskName: task.name,
+    };
     try {
         await task.tc.run(task_config);
         task.status = 'success';

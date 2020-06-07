@@ -260,8 +260,18 @@ function formatError(config, err) {
         diff += generateDiff(config, err);
     }
 
-    return diff + err.stack
-        .split('\n')
+    const stack = errorstacks.parseStackTrace(err.stack)
+        .map(frame => {
+            if (frame.name) {
+                return color(config, 'dim', `    at ${frame.name} (`) + color(config, 'cyan', frame.fileName) + color(config, 'dim', `:${frame.line}:${frame.column})`);
+            } else {
+                // Internal native code in node
+                return color(config, 'dim', frame.raw);
+            }
+        });
+
+    const message = `${err.name}: ${err.message}`;
+    return '\n' + diff + ([message, ...stack])
         // Indent stack trace
         .map(line => '  ' + line)
         .join('\n');

@@ -5,6 +5,7 @@ const readline = require('readline');
 const diff = require('diff');
 const kolorist = require('kolorist');
 const errorstacks = require('errorstacks');
+const fs = require('fs');
 
 const utils = require('./utils');
 const {resultCountString} = require('./results');
@@ -245,6 +246,13 @@ function color(config, colorName, str) {
         return kolorist.inverse(kolorist[colorName](str));
     }
 
+    const m2 = /^bold-(.*)$/.exec(colorName);
+    if (m2) {
+        colorName = m2[1];
+        assert(kolorist[colorName], `Unsupported color ${colorName}`);
+        return kolorist.bold(kolorist[colorName](str));
+    }
+
     assert(kolorist[colorName], `Unsupported color ${colorName}`);
     return kolorist[colorName](str);
 }
@@ -265,6 +273,47 @@ function link(config, text, target) {
 }
 
 /**
+ * Convert tabs indentation to two spaces.
+ * @param {string} str 
+ */
+function tabs2Spaces(str) {
+    return str.replace(/^\t+/, tabs => '  '.repeat(tabs.length));
+}
+
+/**
+ * Generate an excerpt of the location in the source around the
+ * specified position. 
+ * @param {*} config 
+ * @param {string} content Text content to generate the code frame of
+ * @param {number} lineNum zero-based line number
+ * @param {number} columnNum zero-based column number
+ * @param {number} before Number of lines to show before the marker
+ * @param {number} columnNum Number of lines to show after the marker
+ */
+function genCodeFrame(config, content, lineNum, columnNum, before, after) {
+    const lines = content.split('\n');
+    const startLine = Math.max(0, lineNum - before);
+    const endLine = Math.min(lines.length - 1, lineNum + after);
+    const maxDigits = String(endLine).length;
+    const padding = ' '.repeat(maxDigits);
+
+    return lines.slice(startLine, endLine)
+        .map((line, i) => {
+            const n = startLine + i;
+            const currentLine = (padding + n).slice(-maxDigits);
+
+            if (n === lineNum) {
+                const marker = color(config, 'bold-red', '>');
+                const formatted = `${marker} ${currentLine} | ${tabs2Spaces(line)}`;
+                return formatted + `\n  ${padding} ${color(config, 'dim', '|')} ${'  '.repeat(columnNum)}${color(config, 'bold-red', '^')}`;
+            } else {
+                return color(config, 'gray', `  ${currentLine} | ${tabs2Spaces(line)}`);
+            }
+        })
+        .join('\n');
+}
+
+/**
  * Format the error 
  * @param {*} config Penf config object
  * @param {Error} err Error object to format
@@ -276,19 +325,38 @@ function formatError(config, err) {
         diff += generateDiff(config, err);
     }
 
+    /**
+     * The nearest location where the user's code triggered the error.
+     * @type {import('errorstacks').StackFrame}
+     */
+    let nearestFrame;
+
     const stack = errorstacks.parseStackTrace(err.stack)
         .map(frame => {
             if (!config.no_clear_line && frame.name) {
+                // Only show frame for errors in the user's code
+                if (!nearestFrame && !/node_modules/.test(frame.fileName)) {
+                    nearestFrame = frame;
+                }
+
                 const location = link(config, frame.fileName, `file://${frame.fileName}`);
-                return color(config, 'dim', `    at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
+                return color(config, 'dim', `  at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
             } else {
                 // Internal native code in node (or CI system)
                 return color(config, 'dim', frame.raw);
             }
         });
 
+    
+    let codeFrame = '';
+    if (nearestFrame) {
+        const { fileName, line, column } = nearestFrame;
+        const content = fs.readFileSync(fileName, 'utf-8');
+        codeFrame = `\n${genCodeFrame(config, content, line - 1, column, 2, 3)}\n`;
+    }
+
     const message = `${err.name}: ${err.message}`;
-    return '\n' + diff + ([message, ...stack])
+    return '\n' + diff + ([message, ...codeFrame.split('\n'), ...stack])
         // Indent stack trace
         .map(line => '  ' + line)
         .join('\n');

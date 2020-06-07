@@ -15,6 +15,7 @@
     "diff": "^4.0.2",
     "emailjs-imap-client": "^3.0.7",
     "emailjs-mime-parser": "^2.0.5",
+    "errorstacks": "^1.1.5",
     "form-data": "^2.3.3",
     "glob": "^7.1.6",
     "he": "^1.2.0",

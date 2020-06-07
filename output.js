@@ -4,6 +4,7 @@ const assert = require('assert').strict;
 const readline = require('readline');
 const diff = require('diff');
 const kolorist = require('kolorist');
+const errorstacks = require('errorstacks');
 
 const utils = require('./utils');
 const {resultCountString} = require('./results');
@@ -249,6 +250,21 @@ function color(config, colorName, str) {
 }
 
 /**
+ * Mark a string as a link for terminals that support this (GNOME Terminal)
+ * @param {*} config 
+ * @param {string} text 
+ * @param {string} target 
+ * @hidden
+ */
+function link(config, text, target) {
+    if (!config.colors) {
+        return text;
+    }
+
+    return kolorist.link(text, target);
+}
+
+/**
  * Format the error 
  * @param {*} config Penf config object
  * @param {Error} err Error object to format
@@ -260,8 +276,19 @@ function formatError(config, err) {
         diff += generateDiff(config, err);
     }
 
-    return diff + err.stack
-        .split('\n')
+    const stack = errorstacks.parseStackTrace(err.stack)
+        .map(frame => {
+            if (frame.name) {
+                const location = link(config, frame.fileName, `file://${frame.fileName}`);
+                return color(config, 'dim', `    at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
+            } else {
+                // Internal native code in node
+                return color(config, 'dim', frame.raw);
+            }
+        });
+
+    const message = `${err.name}: ${err.message}`;
+    return '\n' + diff + ([message, ...stack])
         // Indent stack trace
         .map(line => '  ' + line)
         .join('\n');

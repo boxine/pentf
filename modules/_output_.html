@@ -62,6 +62,146 @@
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Functions</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_output_.html#gencodeframe" class="tsd-kind-icon">gen<wbr>Code<wbr>Frame</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_output_.html#indentlines" class="tsd-kind-icon">indent<wbr>Lines</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_output_.html#tabs2spaces" class="tsd-kind-icon">tabs2<wbr>Spaces</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="gencodeframe" class="tsd-anchor"></a>
+					<h3>gen<wbr>Code<wbr>Frame</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">gen<wbr>Code<wbr>Frame<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, content<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, lineNum<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, columnNum<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, before<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, after<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/55de6cc/output.js#L303">output.js:303</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Generate an excerpt of the location in the source around the
+									specified position.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5>content: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Text content to generate the code frame of</p>
+									</div>
+								</li>
+								<li>
+									<h5>lineNum: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>zero-based line number</p>
+									</div>
+								</li>
+								<li>
+									<h5>columnNum: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>Number of lines to show after the marker</p>
+										</div>
+									</div>
+								</li>
+								<li>
+									<h5>before: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Number of lines to show before the marker</p>
+									</div>
+								</li>
+								<li>
+									<h5>after: <span class="tsd-signature-type">any</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="indentlines" class="tsd-anchor"></a>
+					<h3>indent<wbr>Lines</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">indent<wbr>Lines<span class="tsd-signature-symbol">(</span>str<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, n<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/55de6cc/output.js#L287">output.js:287</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>str: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>String to indent</p>
+									</div>
+								</li>
+								<li>
+									<h5>n: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Indentation level</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="tabs2spaces" class="tsd-anchor"></a>
+					<h3>tabs2<wbr>Spaces</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">tabs2<wbr>Spaces<span class="tsd-signature-symbol">(</span>str<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/55de6cc/output.js#L279">output.js:279</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Convert tabs indentation to two spaces.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>str: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
@@ -69,10 +209,40 @@
 					<li class="globals  ">
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
+					<li class=" tsd-kind-module">
+						<a href="_assert_utils_.html">&quot;assert_<wbr>utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="_browser_utils_.html">&quot;browser_<wbr>utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="_email_.html">&quot;email&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="_net_utils_.html">&quot;net_<wbr>utils&quot;</a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="_output_.html">&quot;output&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="_promise_utils_.html">&quot;promise_<wbr>utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="_utils_.html">&quot;utils&quot;</a>
+					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_output_.html#gencodeframe" class="tsd-kind-icon">gen<wbr>Code<wbr>Frame</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_output_.html#indentlines" class="tsd-kind-icon">indent<wbr>Lines</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_output_.html#tabs2spaces" class="tsd-kind-icon">tabs2<wbr>Spaces</a>
+					</li>
 				</ul>
 			</nav>
 		</div>

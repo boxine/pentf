@@ -304,13 +304,13 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
     const lines = content.split('\n');
     const startLine = Math.max(0, lineNum - before);
     const endLine = Math.min(lines.length - 1, lineNum + after);
-    const maxDigits = String(endLine).length;
-    const padding = ' '.repeat(maxDigits);
+    const maxChars = String(endLine).length;
+    const padding = ' '.repeat(maxChars);
 
     return lines.slice(startLine, endLine)
         .map((line, i) => {
             const n = startLine + i;
-            const currentLine = (padding + n).slice(-maxDigits);
+            const currentLine = (padding + n).slice(-maxChars);
 
             const normalized = tabs2Spaces(line);
             if (n === lineNum) {

@@ -302,12 +302,17 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
             const n = startLine + i;
             const currentLine = (padding + n).slice(-maxDigits);
 
+            const normalized = tabs2Spaces(line);
             if (n === lineNum) {
                 const marker = color(config, 'bold-red', '>');
-                const formatted = `${marker} ${currentLine} | ${tabs2Spaces(line)}`;
-                return formatted + `\n  ${padding} ${color(config, 'dim', '|')} ${'  '.repeat(columnNum)}${color(config, 'bold-red', '^')}`;
+                const formatted = `${marker} ${currentLine} | ${normalized}`;
+                
+                // Account for possible tab indention
+                const count = (line.length - normalized.length) + columnNum - 1;
+
+                return formatted + `\n  ${padding} ${color(config, 'dim', '|')} ${' '.repeat(count)}${color(config, 'bold-red', '^')}`;
             } else {
-                return color(config, 'gray', `  ${currentLine} | ${tabs2Spaces(line)}`);
+                return color(config, 'gray', `  ${currentLine} | ${normalized}`);
             }
         })
         .join('\n');

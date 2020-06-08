@@ -281,6 +281,16 @@ function tabs2Spaces(str) {
 }
 
 /**
+ * @param {string} str String to indent
+ * @param {number} n Indentation level
+ */
+function indentLines(str, n) {
+    return str.split(/\n/g)
+        .map(line => line && line !== '\n' ? '  '.repeat(n) + line : line)
+        .join('\n');
+}
+
+/**
  * Generate an excerpt of the location in the source around the
  * specified position. 
  * @param {*} config 
@@ -337,7 +347,10 @@ async function formatError(config, err) {
      */
     let nearestFrame;
 
-    const stack = errorstacks.parseStackTrace(err.stack)
+    // Assertion libraries often add multiline messages to the error stack.
+    const actualStack = err.stack.replace(`${err.name}: ${err.message}`, '');
+
+    const stack = errorstacks.parseStackTrace(actualStack)
         .map(frame => {
             if (!config.no_clear_line && frame.name) {
                 // Only show frame for errors in the user's code
@@ -346,26 +359,28 @@ async function formatError(config, err) {
                 }
 
                 const location = link(config, frame.fileName, `file://${frame.fileName}`);
-                return color(config, 'dim', `  at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
+                return color(config, 'dim', `at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
             } else {
                 // Internal native code in node (or CI system)
-                return color(config, 'dim', `  ${frame.raw.trim()}`);
+                return color(config, 'dim', frame.raw.trim());
             }
-        });
+        })
+        .join('\n');
 
     
     let codeFrame = '';
     if (nearestFrame) {
         const { fileName, line, column } = nearestFrame;
         const content = await fs.promises.readFile(fileName, 'utf-8');
-        codeFrame = `\n${genCodeFrame(config, content, line - 1, column, 2, 3)}\n`;
+        codeFrame = `\n${genCodeFrame(config, content, line - 1, column, 2, 3)}\n\n`;
     }
 
     const message = `${err.name}: ${err.message}`;
-    return '\n' + diff + ([message, ...codeFrame.split('\n'), ...stack])
-        // Indent stack trace
-        .map(line => '  ' + line)
-        .join('\n');
+    return '\n'
+        + diff
+        + indentLines(message, 1)
+        + indentLines(codeFrame, 1)
+        + indentLines(stack, 2);
 }
 
 

@@ -88,7 +88,7 @@ async function run_task(config, task) {
                 output.log(
                     config,
                     `${label} test case ${name} at ${utils.localIso8601()}:\n` +
-                    `${output.formatError(config, e)}\n`);
+                    `${await output.formatError(config, e)}\n`);
 
                 if (config.sentry) {
                     const Sentry = require('@sentry/node');

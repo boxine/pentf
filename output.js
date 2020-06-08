@@ -5,6 +5,7 @@ const readline = require('readline');
 const diff = require('diff');
 const kolorist = require('kolorist');
 const errorstacks = require('errorstacks');
+const fs = require('fs');
 
 const utils = require('./utils');
 const {resultCountString} = require('./results');
@@ -245,6 +246,13 @@ function color(config, colorName, str) {
         return kolorist.inverse(kolorist[colorName](str));
     }
 
+    const m2 = /^bold-(.*)$/.exec(colorName);
+    if (m2) {
+        colorName = m2[1];
+        assert(kolorist[colorName], `Unsupported color ${colorName}`);
+        return kolorist.bold(kolorist[colorName](str));
+    }
+
     assert(kolorist[colorName], `Unsupported color ${colorName}`);
     return kolorist[colorName](str);
 }
@@ -265,33 +273,114 @@ function link(config, text, target) {
 }
 
 /**
+ * Convert tabs indentation to two spaces.
+ * @param {string} str 
+ */
+function tabs2Spaces(str) {
+    return str.replace(/^\t+/, tabs => '  '.repeat(tabs.length));
+}
+
+/**
+ * @param {string} str String to indent
+ * @param {number} n Indentation level
+ */
+function indentLines(str, n) {
+    return str.split(/\n/g)
+        .map(line => line && line !== '\n' ? '  '.repeat(n) + line : line)
+        .join('\n');
+}
+
+/**
+ * Generate an excerpt of the location in the source around the
+ * specified position. 
+ * @param {*} config 
+ * @param {string} content Text content to generate the code frame of
+ * @param {number} lineNum zero-based line number
+ * @param {number} columnNum zero-based column number
+ * @param {number} before Number of lines to show before the marker
+ * @param {number} columnNum Number of lines to show after the marker
+ */
+function genCodeFrame(config, content, lineNum, columnNum, before, after) {
+    const lines = content.split('\n');
+    const startLine = Math.max(0, lineNum - before);
+    const endLine = Math.min(lines.length - 1, lineNum + after);
+    const maxChars = String(endLine).length;
+    const padding = ' '.repeat(maxChars);
+
+    return lines.slice(startLine, endLine)
+        .map((line, i) => {
+            const n = startLine + i;
+            const currentLine = (padding + n).slice(-maxChars);
+
+            const normalized = tabs2Spaces(line);
+            if (n === lineNum) {
+                const marker = color(config, 'bold-red', '>');
+                const formatted = `${marker} ${currentLine} | ${normalized}`;
+                
+                // Account for possible tab indention
+                const count = (line.length - normalized.length) + columnNum - 1;
+
+                return formatted + `\n  ${padding} ${color(config, 'dim', '|')} ${' '.repeat(count)}${color(config, 'bold-red', '^')}`;
+            } else {
+                return color(config, 'gray', `  ${currentLine} | ${normalized}`);
+            }
+        })
+        .join('\n');
+}
+
+/**
  * Format the error 
  * @param {*} config Penf config object
  * @param {Error} err Error object to format
+ * @returns {Promise<string>}
  * @hidden
  */
-function formatError(config, err) {
+async function formatError(config, err) {
     let diff = '';
     if (shouldShowDiff(err)) {
         diff += generateDiff(config, err);
     }
 
-    const stack = errorstacks.parseStackTrace(err.stack)
+    /**
+     * The nearest location where the user's code triggered the error.
+     * @type {import('errorstacks').StackFrame}
+     */
+    let nearestFrame;
+
+    // Assertion libraries often add multiline messages to the error stack.
+    const actualStack = err.stack.replace(`${err.name}: ${err.message}`, '');
+
+    const stack = errorstacks.parseStackTrace(actualStack)
         .map(frame => {
             if (!config.no_clear_line && frame.name) {
+                // Only show frame for errors in the user's code
+                if (!nearestFrame && !/node_modules/.test(frame.fileName)) {
+                    nearestFrame = frame;
+                }
+
                 const location = link(config, frame.fileName, `file://${frame.fileName}`);
-                return color(config, 'dim', `    at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
+                return color(config, 'dim', `at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
             } else {
                 // Internal native code in node (or CI system)
-                return color(config, 'dim', frame.raw);
+                return color(config, 'dim', frame.raw.trim());
             }
-        });
+        })
+        .join('\n');
+
+    
+    let codeFrame = '';
+    if (nearestFrame) {
+        const { fileName, line, column } = nearestFrame;
+        const content = await fs.promises.readFile(fileName, 'utf-8');
+        codeFrame = `\n${genCodeFrame(config, content, line - 1, column, 2, 3)}\n\n`;
+    }
 
     const message = `${err.name}: ${err.message}`;
-    return '\n' + diff + ([message, ...stack])
-        // Indent stack trace
-        .map(line => '  ' + line)
-        .join('\n');
+    return '\n'
+        + diff
+        + indentLines(message, 1)
+        + indentLines(codeFrame, 1)
+        + indentLines(stack, 2);
 }
 
 

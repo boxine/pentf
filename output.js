@@ -322,9 +322,10 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
  * Format the error 
  * @param {*} config Penf config object
  * @param {Error} err Error object to format
+ * @returns {Promise<string>}
  * @hidden
  */
-function formatError(config, err) {
+async function formatError(config, err) {
     let diff = '';
     if (shouldShowDiff(err)) {
         diff += generateDiff(config, err);
@@ -356,7 +357,7 @@ function formatError(config, err) {
     let codeFrame = '';
     if (nearestFrame) {
         const { fileName, line, column } = nearestFrame;
-        const content = fs.readFileSync(fileName, 'utf-8');
+        const content = await fs.promises.readFile(fileName, 'utf-8');
         codeFrame = `\n${genCodeFrame(config, content, line - 1, column, 2, 3)}\n`;
     }
 

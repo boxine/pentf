@@ -348,7 +348,7 @@ function formatError(config, err) {
                 return color(config, 'dim', `  at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
             } else {
                 // Internal native code in node (or CI system)
-                return color(config, 'dim', frame.raw);
+                return color(config, 'dim', `  ${frame.raw.trim()}`);
             }
         });
 

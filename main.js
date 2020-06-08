@@ -7,6 +7,7 @@ const {readConfig, parseArgs} = require('./config');
 const {readFile} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
+const {color} = require('./output');
 const {testsVersion, pentfVersion} = require('./version');
 const {loadTests} = require('./loader');
 
@@ -60,7 +61,16 @@ async function real_main(options={}) {
 
     if (args.list) {
         for (const tc of test_cases) {
-            console.log(tc.name + (tc.description ? ` (${tc.description})` : ''));
+            let description = '';
+            if (tc.description) {
+                description = (
+                    ' ' + (config.colors ? '' : '(') +
+                    color(config, 'gray', tc.description) +
+                    (config.colors ? '' : ')')
+                );
+            }
+
+            console.log(color(config, 'white', tc.name) + description);
         }
         return;
     }

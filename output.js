@@ -278,11 +278,11 @@ function formatError(config, err) {
 
     const stack = errorstacks.parseStackTrace(err.stack)
         .map(frame => {
-            if (frame.name) {
+            if (!config.no_clear_line && frame.name) {
                 const location = link(config, frame.fileName, `file://${frame.fileName}`);
                 return color(config, 'dim', `    at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
             } else {
-                // Internal native code in node
+                // Internal native code in node (or CI system)
                 return color(config, 'dim', frame.raw);
             }
         });

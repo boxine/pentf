@@ -40,8 +40,9 @@ const {readFile} = require('./utils');
  *               The response will have a utility function `async getCookieValue(name)` to quickly retrieve a cookie value from the jar.
  */
 async function fetch(config, url, init) {
+    if (!init) init = {};
     const redirect = init._redirect || init.redirect || 'manual';
-    init = init ? {...init} : {};
+    init = {...init}; // make sure we don't change the object directly
     init._redirect = redirect;
     init.redirect = 'manual';
 

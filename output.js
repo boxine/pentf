@@ -6,7 +6,7 @@ const diff = require('diff');
 const kolorist = require('kolorist');
 const errorstacks = require('errorstacks');
 const fs = require('fs');
-const {isAbsolutePath} = require('path');
+const {isAbsolute} = require('path');
 
 const utils = require('./utils');
 const {resultCountString} = require('./results');
@@ -373,7 +373,7 @@ async function formatError(config, err) {
     try {
         if (nearestFrame) {
             const { fileName, line, column } = nearestFrame;
-            if (isAbsolutePath(fileName)) { // relative path = node internals
+            if (isAbsolute(fileName)) { // relative path = node internals
                 const content = await fs.promises.readFile(fileName, 'utf-8');
                 codeFrame = `\n${genCodeFrame(config, content, line - 1, column, 2, 3)}\n\n`;
             }

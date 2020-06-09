@@ -3,6 +3,7 @@ const http = require('http');
 const https = require('https');
 const node_fetch = require('node-fetch');
 const tough = require('tough-cookie');
+const {URL} = require('url');
 
 const {makeCurlCommand} = require('./curl_command');
 const output = require('./output');
@@ -39,8 +40,10 @@ const {readFile} = require('./utils');
  *               The response will have a utility function `async getCookieValue(name)` to quickly retrieve a cookie value from the jar.
  */
 async function fetch(config, url, init) {
-    if (!init) init = {};
-    if (!init.redirect) init.redirect = 'manual';
+    const redirect = init._redirect || init.redirect || 'manual';
+    init = init ? {...init} : {};
+    init._redirect = redirect;
+    init.redirect = 'manual';
 
     if (!init.agent) {
         const agentinit = {
@@ -91,6 +94,36 @@ async function fetch(config, url, init) {
             const cookie = cookies.find(c => c.key === name);
             return cookie ? cookie.value : undefined;
         };
+    }
+
+    if ([301, 302, 303, 307, 308].includes(response.status)) {
+        if (redirect === 'follow') {
+            if (!init._redirectChain) init._redirectChain = [];
+            init._redirectChain.push(url);
+            if (init._redirectChain.length > 5) {
+                throw new Error(`Too many redirects: ${init._redirectChain.join(' -> ')}`);
+            }
+            init.cookieJar = response.cookieJar;
+
+            const next = response.headers.get('location');
+            assert(next, `HTTP ${response.status} without Location header`);
+            const nextURL = (new URL(next, url)).href;
+            assert(
+                /^(data:|https?:)/.test(nextURL),
+                `Invalid redirect URL ${nextURL}`
+            );
+
+            if ([301, 302, 303].includes(response.status)) {
+                init.method = 'GET';
+                delete init.body;
+            }
+
+            const res = await fetch(config, next, init);
+            if (!res.redirectChain) res.redirectChain = init._redirectChain;
+            return res;
+        } else if (redirect !== 'manual') {
+            throw new Error(`Unsupported redirect implementation ${redirect}`);
+        }
     }
 
     return response;

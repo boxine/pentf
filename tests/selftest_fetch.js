@@ -114,11 +114,17 @@ async function run(config) {
     });
     const url = `http://localhost:${port}/`;
 
-    let response = await fetch(config, url, {cookieJar: 'create'});
+    // Start with a very simple request
+    let response = await fetch(config, url);
+    assert.equal(response.status, 200);
+
+    // Create a cookie jar
+    response = await fetch(config, url, {cookieJar: 'create'});
     assert.equal(response.status, 200);
     assert.equal(await response.getCookieValue('visitCount'), '1');
     const cookieJar = response.cookieJar;
 
+    // Use an existing cookie jar
     response = await fetch(config, url, {cookieJar});
     assert.equal(response.status, 200);
     assert.equal(await response.getCookieValue('visitCount'), '2');

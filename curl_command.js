@@ -33,10 +33,6 @@ async function makeCurlCommand(options, url) {
         curl_command += ' -k';
     }
 
-    if (options.redirect === 'follow') {
-        curl_command += ' -L';
-    }
-
     if (options.curl_include_headers) {
         curl_command += ' -i';
     }

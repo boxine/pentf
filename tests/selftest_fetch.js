@@ -26,7 +26,22 @@ function parseRequestCookies(request) {
 
 function handleRequest(request, response) {
     parseRequestCookies(request);
-    if (request.url !== '/') {
+
+    const redirectMatch = /^\/(3[0-9]{2})redirect([0-9]+)$/.exec(request.url);
+    if (redirectMatch) {
+        const httpCode = parseInt(redirectMatch[1]);
+        const redirectCount = parseInt(request.cookies.redirectCount || 0);
+        const redirectNum = parseInt(redirectMatch[2]);
+        const location = (redirectNum > 1) ? `/${httpCode}redirect${redirectNum - 1}` : '/end';
+        response.writeHead(httpCode, {
+            location,
+            'Set-Cookie': `redirectCount=${redirectCount + 1}`,
+        });
+        response.end('redirected');
+        return;
+    }
+
+    if (!['/', '/end'].includes(request.url)) {
         response.writeHead(404, {});
         response.end('404 Not Found');
         return;
@@ -120,11 +135,57 @@ async function run(config) {
 
     response = await fetch(config, url, {cookieJar});
     assert.equal(response.status, 200);
-    const html = (await response.text());
+    let html = (await response.text());
     assert(html.includes('Hello John Smith'));
     assert(html.includes('Visit count: 2'));
     assert.equal(await response.getCookieValue('name'), 'John Smith');
     assert.equal(await response.getCookieValue('visitCount'), '3');
+
+    // Follow redirect automatically
+    response = await fetch(config, url, {
+        cookieJar,
+        method: 'POST',
+        body: `name=${encodeURIComponent('Jane Johnson')}`,
+        redirect: 'follow',
+    });
+    assert.equal(response.status, 200);
+    html = (await response.text());
+    assert(html.includes('Hello Jane Johnson'));
+    assert.equal(await response.getCookieValue('name'), 'Jane Johnson');
+    assert.equal(await response.getCookieValue('visitCount'), '4');
+
+    // Follow 307 redirects
+    response = await fetch(config, url + '307redirect3', {
+        cookieJar,
+        method: 'POST',
+        body: `name=${encodeURIComponent('Aaron Aaberg')}`,
+        redirect: 'follow',
+    });
+    assert.equal(response.status, 200);
+    html = (await response.text());
+    assert(html.includes('Hello Aaron Aaberg'));
+    assert.equal(await response.getCookieValue('name'), 'Aaron Aaberg');
+    assert.equal(await response.getCookieValue('redirectCount'), '3');
+
+    // Downgrade for 302 redirects, no POST to final URL
+    response = await fetch(config, url + '302redirect4', {
+        cookieJar,
+        method: 'POST',
+        body: `name=${encodeURIComponent('Xenia Xenomorph')}`,
+        redirect: 'follow',
+    });
+    assert.equal(response.status, 200);
+    html = (await response.text());
+    assert(html.includes('Hello Aaron Aaberg'));
+    assert.equal(await response.getCookieValue('name'), 'Aaron Aaberg');
+    assert.equal(await response.getCookieValue('redirectCount'), '7');
+
+    // Abort if loop is too long
+    await assert.rejects(
+        fetch(config, url + '302redirect40', {redirect: 'follow'}),
+        err => {
+            return err.message.startsWith('Too many redirects:');
+        });
 
     // Terminate server
     server.close(); // No new connections

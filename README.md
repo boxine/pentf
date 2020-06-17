@@ -126,6 +126,10 @@ If the tests run quick and a remote system is slow, the browser UI may not updat
 
 **Use**: `page.waitForSelector('foo')`
 
+**Avoid**: `page.type('#foo', 'bar')`
+
+**Use**: `browser_utils.typeSelector(page, '#foo', 'bar')`
+
 ### Make sure you start waiting _early_
 
 Make sure that an action you are waiting on has not already happend. In particular, `await page.waitForNavigation()` calls should probably be replaced by checks for the new page.

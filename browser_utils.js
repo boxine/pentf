@@ -536,7 +536,7 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
- * @param {boolean?} visibale Optional check if element is visible (default: true)
+ * @param {boolean?} visible Optional check if element is visible (default: true)
  */
 async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=200, extraMessage=undefined, visible=true}={}) {
     if (typeof textOrRegExp === 'string') {
@@ -640,6 +640,20 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000,
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
     const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
     return await clickXPath(page, xpath, {timeout, message, visible});
+}
+
+/**
+ * Type text into an element identified by a query selector.
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} selector selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the element to type in.
+ * @param {{message?: string, timeout?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {string?} message Message shown if the element can not be found.
+ */
+async function typeSelector(page, selector, text, {message=undefined, timeout=30000}={}) {
+    const el = await waitForVisible(page, selector, {timeout, message});
+    await el.type(text);
 }
 
 /**
@@ -842,6 +856,7 @@ module.exports = {
     restoreTimeouts,
     setLanguage,
     speedupTimeouts,
+    typeSelector,
     waitForTestId,
     waitForText,
     waitForVisible,

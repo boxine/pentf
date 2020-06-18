@@ -166,6 +166,8 @@
 				<p>If the tests run quick and a remote system is slow, the browser UI may not update immediately. If there is high local system load (which is necessary for the tests to run quickly), then even local updates may not be immediate:</p>
 				<p><strong>Avoid</strong>: <code>page.$(&#39;foo&#39;)</code>, <code>page.evaluate(() =&gt; document.querySelector(&#39;foo&#39;))</code></p>
 				<p><strong>Use</strong>: <code>page.waitForSelector(&#39;foo&#39;)</code></p>
+				<p><strong>Avoid</strong>: <code>page.type(&#39;#foo&#39;, &#39;bar&#39;)</code></p>
+				<p><strong>Use</strong>: <code>browser_utils.typeSelector(page, &#39;#foo&#39;, &#39;bar&#39;)</code></p>
 				<a href="#make-sure-you-start-waiting-early" id="make-sure-you-start-waiting-early" style="color: inherit; text-decoration: none;">
 					<h3>Make sure you start waiting <em>early</em></h3>
 				</a>

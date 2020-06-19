@@ -1,6 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const {promisify} = require('util');
+const {stripColors} = require('kolorist');
 const {html2pdf} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
 const {resultCountString} = require('./results');
@@ -34,7 +35,12 @@ function craftResults(config, test_info) {
 
         const taskResult = utils.pluck(task, ['status', 'duration', 'error_screenshots']);
         if (task.error) {
-            taskResult.error_stack = task.error.stack;
+            // Node's assert module modifies the Error's stack property and
+            // adds ansi color codes. These can only be disabled globally via
+            // an environment variable, but we want to keep colorized output
+            // for the cli. So we need to strip the ansi codes from the assert
+            // stack.
+            taskResult.error_stack = stripColors(task.error.stack);
         }
         testResult.taskResults.push(taskResult);
     }

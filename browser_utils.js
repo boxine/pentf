@@ -12,6 +12,7 @@ const {promisify} = require('util');
 const tmp = require('tmp-promise');
 
 const {assertAsyncEventually} = require('./assert_utils');
+const {parseConsoleArg, patchBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
 
 let tmp_home;
@@ -143,6 +144,18 @@ async function newPage(config, chrome_args=[]) {
         browser.on('targetcreated', configureDevtools);
         const targets = await browser.targets();
         await Promise.all(targets.map(t => configureDevtools(t)));
+    }
+
+    if (config.forward_console) {
+        await patchBrowserConsole(page);
+        page.on('console', async message => {
+            let type = message.type();
+            // Correct log type for warning messages
+            type = type === 'warning' ? 'warn' : type;
+            
+            const args = JSON.parse(message._text).map(arg => parseConsoleArg(arg));
+            console[type].apply(console, args);
+        });
     }
 
     if (config._browser_pages) {

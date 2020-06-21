@@ -12,7 +12,7 @@ const {promisify} = require('util');
 const tmp = require('tmp-promise');
 
 const {assertAsyncEventually} = require('./assert_utils');
-const {parseConsoleArg, patchBrowserConsole} = require('./browser_console');
+const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
 
 let tmp_home;
@@ -147,26 +147,7 @@ async function newPage(config, chrome_args=[]) {
     }
 
     if (config.forward_console) {
-        await patchBrowserConsole(page);
-        page.on('console', async message => {
-            let type = message.type();
-            // Correct log type for warning messages
-            type = type === 'warning' ? 'warn' : type;
-     
-            let args = [];
-            try {
-                args = JSON.parse(message._text).map(arg => parseConsoleArg(arg));
-            } catch(err) {
-                // Messages originating from browser extensions bypass our
-                // patched console, so we'll just print the raw value.
-                args = [message._text];
-            }
-            if (type === 'trace') {
-                console.log(`Trace: ${args[1] || ''}${args[0]}`);
-            } else {
-                console[type].apply(console, args);
-            }
-        });
+        await forwardBrowserConsole(page);
     }
 
     if (config._browser_pages) {

@@ -45,10 +45,10 @@ function parseConsoleArg(value) {
  * are lossy. They turn Error objects into `{}` and `null` to `undefined`.
  * The passed "preview" object is incomplete and truncates all data for nested
  * objects or other complex values.
- * 
+ *
  * The only way to keep the data intact is to use a custom serialization format
  * and pass it around as a string.
- * 
+ *
  * @param {import('puppeteer').Page} page
  */
 async function patchBrowserConsole(page) {
@@ -120,6 +120,10 @@ async function patchBrowserConsole(page) {
         for (const key in console) {
             native[key] = console[key];
             console[key] = (...args) => {
+                if (key === 'trace') {
+                    const stack = new Error().stack.split('\n').slice(2).join('\n');
+                    args = ['\n' + stack, ...args];
+                }
                 native[key].call(null, JSON.stringify(args.map(arg => serialize(arg))));
             };
         }

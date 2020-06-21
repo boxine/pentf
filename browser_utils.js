@@ -154,7 +154,11 @@ async function newPage(config, chrome_args=[]) {
             type = type === 'warning' ? 'warn' : type;
             
             const args = JSON.parse(message._text).map(arg => parseConsoleArg(arg));
-            console[type].apply(console, args);
+            if (type === 'trace') {
+                console.log(`Trace: ${args[1] || ''}${args[0]}`);
+            } else {
+                console[type].apply(console, args);
+            }
         });
     }
 

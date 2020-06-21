@@ -48,6 +48,9 @@ async function run(config) {
             console.log(function foo() {});
             console.log(class Foo {});
 
+            console.log('foo');
+            console.log([1,2]);
+
             console.trace();
             console.trace('bar');
         }

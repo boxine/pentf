@@ -152,8 +152,15 @@ async function newPage(config, chrome_args=[]) {
             let type = message.type();
             // Correct log type for warning messages
             type = type === 'warning' ? 'warn' : type;
-            
-            const args = JSON.parse(message._text).map(arg => parseConsoleArg(arg));
+     
+            let args = [];
+            try {
+                args = JSON.parse(message._text).map(arg => parseConsoleArg(arg));
+            } catch(err) {
+                // Messages originating from browser extensions bypass our
+                // patched console, so we'll just print the raw value.
+                args = [message._text];
+            }
             if (type === 'trace') {
                 console.log(`Trace: ${args[1] || ''}${args[0]}`);
             } else {

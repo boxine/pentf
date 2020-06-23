@@ -59,6 +59,8 @@ function serialize(value, seen) {
     } else if (value === null) {
         return null;
     } else if (typeof value === 'object') {
+        seen.add(value);
+
         if (value instanceof Error) {
             // TODO: check fur custom keys
             return {
@@ -83,7 +85,6 @@ function serialize(value, seen) {
             };
         }
 
-        seen.add(value);
         let out = {};
         Object.keys(value).forEach(key => {
             out[key] = serialize(value[key], seen);

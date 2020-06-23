@@ -53,6 +53,14 @@ async function run(config) {
 
             console.trace();
             console.trace('bar');
+
+            const map = new Map();
+            map.set('map', map);
+            console.log(map);
+
+            const set = new Set();
+            set.add(set);
+            console.log(set);
         }
         foo();
     });

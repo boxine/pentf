@@ -116,7 +116,7 @@ function serialize(value, seen) {
  */
 async function forwardBrowserConsole(page) {
     // The stack is not present on the trace method, so we need to patch it in
-    await page.evaluate((fn) => {
+    await page.evaluateOnNewDocument((fn) => {
         const serialize = new Function(`return ${fn}`)();
         const native = {};
         native.trace = console.trace;

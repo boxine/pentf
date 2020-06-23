@@ -126,6 +126,7 @@ async function connect(config, user) {
         },
         useSecureTransport: config.imap.tls,
     });
+    client.client.timeoutSocketLowerBound = config.imap.socket_timeout || (5 * 60000);
     await client.connect();
     await client.selectMailbox('INBOX', {});
     return client;

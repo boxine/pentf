@@ -128,6 +128,9 @@ async function forwardBrowserConsole(page) {
     }, serialize.toString());
 
     page.on('console', async message => {
+        let resolve;
+        page._logs.push(new Promise(r => resolve = r));
+
         let type = message.type();
         // Correct log type for warning messages
         type = type === 'warning' ? 'warn' : type;
@@ -150,6 +153,8 @@ async function forwardBrowserConsole(page) {
             }
         } catch (err) {
             console.log(err);
+        } finally {
+            resolve();
         }
     });
 }

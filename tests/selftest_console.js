@@ -65,6 +65,9 @@ async function run(config) {
         foo();
     });
 
+    await page.goto('https://example.com');
+    await page.evaluate(() => console.log('Log from Example'));
+
     await closePage(page);
 }
 

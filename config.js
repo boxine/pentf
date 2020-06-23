@@ -233,6 +233,10 @@ function parseArgs(options) {
         defaultValue: [],
         metavar: 'EXTENSION_DIR',
     });
+    puppeteer_group.addArgument(['--forward-console'], {
+        help: 'Forward browser console logs',
+        action: 'storeTrue',
+    });
 
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
     runner_group.addArgument(['-C', '--concurrency'], {

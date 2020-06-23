@@ -12,6 +12,7 @@ const {promisify} = require('util');
 const tmp = require('tmp-promise');
 
 const {assertAsyncEventually} = require('./assert_utils');
+const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
 
 let tmp_home;
@@ -145,6 +146,11 @@ async function newPage(config, chrome_args=[]) {
         await Promise.all(targets.map(t => configureDevtools(t)));
     }
 
+    page._logs = [];
+    if (config.forward_console) {
+        await forwardBrowserConsole(page);
+    }
+
     if (config._browser_pages) {
         page._pentf_browser_pages = config._browser_pages;
         config._browser_pages.push(page);
@@ -158,6 +164,9 @@ async function newPage(config, chrome_args=[]) {
  * @param {import('puppeteer').Page} page puppeteer page object returned by `newPage`.
  */
 async function closePage(page) {
+    // Wait for all pending logging tasks to finish before closing browser
+    await Promise.all(page._logs);
+
     if (page._pentf_browser_pages) {
         remove(page._pentf_browser_pages, p => p === page);
     }

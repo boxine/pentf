@@ -3,6 +3,7 @@
 const argparse = require('argparse');
 const assert = require('assert').strict;
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const {promisify} = require('util');
 
@@ -28,6 +29,29 @@ function listEnvs(configDir) {
     });
 
     return res;
+}
+
+function computeConcurrency(spec, {cpuCount=undefined}={}) {
+    if (typeof spec === 'number') { // Somebody passed in result value directly
+        return spec;
+    }
+    if (cpuCount === undefined) {
+        cpuCount = os.cpus().length;
+    }
+
+    return spec.split('+').map(
+        subSpec => subSpec.split('*').map(
+            numeric => {
+                numeric = numeric.trim();
+                if (numeric === 'cpus') {
+                    return cpuCount;
+                }
+                assert(
+                    /^[0-9]+$/.test(numeric), `Invalid concurrency spec ${JSON.stringify(spec)}`);
+                return parseInt(numeric);
+            }
+        ).reduce((x, y) => x * y, 1)
+    ).reduce((x, y) => x + y, 0);
 }
 
 function parseArgs(options) {
@@ -241,10 +265,14 @@ function parseArgs(options) {
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
     runner_group.addArgument(['-C', '--concurrency'], {
         metavar: 'COUNT',
-        help: 'Maximum number of tests to run in parallel. 0 to run without a pool, sequentially. Defaults to %(defaultValue)s.',
+        help: (
+            'Maximum number of tests to run in parallel.' +
+            ' 0 to run without a pool, sequentially.' +
+            ' Can include *, +, and cpus for the number of CPUs.' +
+            ' Defaults to %(defaultValue)s.'
+        ),
         dest: 'concurrency',
-        defaultValue: 10,
-        type: 'int',
+        defaultValue: '4+cpus',
     });
     runner_group.addArgument(['-S', '--sequential'], {
         help: 'Do not run tests in parallel (same as -C 0)',
@@ -339,6 +367,8 @@ function parseArgs(options) {
         parser.error('At the moment, --fail-fast does not work with locking. Pass in --no-locking');
     }
 
+    args.concurrency = computeConcurrency(args.concurrency);
+
     return args;
 }
 
@@ -395,4 +425,5 @@ module.exports = {
     readConfig,
     // tests only
     _readConfigFile: readConfigFile,
+    _computeConcurrency: computeConcurrency,
 };

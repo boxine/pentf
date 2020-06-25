@@ -298,6 +298,10 @@ function parseArgs(options) {
         defaultValue: 1,
         help: 'Run the tests the specified number of times',
     });
+    runner_group.addArgument(['--coverage'], {
+        help: 'Collect code coverage information',
+        action: 'storeTrue',
+    });
 
     const locking_group = parser.addArgumentGroup({title: 'Locking'});
     locking_group.addArgument(['-L', '--no-locking'], {

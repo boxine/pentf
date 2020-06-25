@@ -14,6 +14,7 @@ const tmp = require('tmp-promise');
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
+const {logCoverage} = require('./browser_coverage');
 
 let tmp_home;
 
@@ -109,6 +110,7 @@ async function newPage(config, chrome_args=[]) {
         };
     }
     const browser = await puppeteer.launch(params);
+    /** @type {import('puppeteer').Page} */
     const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {
@@ -151,6 +153,12 @@ async function newPage(config, chrome_args=[]) {
         await forwardBrowserConsole(page);
     }
 
+    if (config.coverage) {
+        page._pentf_coverage = true;
+        await page.coverage.startJSCoverage();
+        await page.coverage.startCSSCoverage();
+    }
+
     if (config._browser_pages) {
         page._pentf_browser_pages = config._browser_pages;
         config._browser_pages.push(page);
@@ -169,6 +177,14 @@ async function closePage(page) {
 
     if (page._pentf_browser_pages) {
         remove(page._pentf_browser_pages, p => p === page);
+    }
+
+    if (page._pentf_coverage) {
+        const [jsCoverage, cssCoverage] = await Promise.all([
+            page.coverage.stopJSCoverage(),
+            page.coverage.stopCSSCoverage(),
+        ]);
+        logCoverage({colors: true}, [...jsCoverage, ...cssCoverage]);
     }
 
     const browser = await page.browser();

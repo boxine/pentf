@@ -345,6 +345,7 @@ The keys are up to you; for example you probably want to have a main entry point
                       --devtools
 --extensions [EXTENSION_DIR [EXTENSION_DIR ...]]
                       Load unpacked browser extensions
+--forward-console     Forward browser console logs
 ```
 
 ###### Test runner

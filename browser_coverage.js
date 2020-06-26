@@ -18,11 +18,12 @@ function getColor(value) {
 function logCoverage(config, entries) {
     entries.sort((a, b) => a.url.localeCompare(b.url));
 
-    let maxUrlLength = 0;
     let totalBytes = 0;
     let totalUsedBytes = 0;
 
-    let rows = '';
+    let rows = [
+        ['Url', 'Covered', 'Uncovered Lines']
+    ];
     for (const entry of entries) {
         const used = entry.ranges.reduce((acc, range) => acc + range.end - range.start - 1, 0);
         const percent = (used / entry.text.length) * 100;
@@ -31,30 +32,22 @@ function logCoverage(config, entries) {
         totalBytes += entry.text.length;
         totalUsedBytes += used;
 
-        if (entry.url.length > maxUrlLength) {
-            maxUrlLength = entry.url.length;
-        }
-
-        const url = entry.url + ' '.repeat(maxUrlLength - entry.url.length);
-        const usedPercent = String(rounded).padStart(6, ' ');
         const color = getColor(rounded);
-
-        rows += `| ${output.color(config, color, url)} | ${output.color(config, color, usedPercent + '%')} |                 |\n`;
+        rows.push([
+            output.color(config, color, entry.url),
+            output.color(config, color, rounded + '%'),
+            ''
+        ]);
     }
-
+    
+    
     const totalUsed =
         Math.round(((totalUsedBytes / totalBytes) * 100 + Number.EPSILON) * 100) / 100;
+    const totalFormatted = output.color(config, getColor(totalUsed), totalUsed + '%');
+    rows.push(['', totalFormatted, '']);
 
-    const divider = `|-${'-'.repeat(maxUrlLength)}-|---------|-----------------|`;
-    const msg = `${divider}
-| Url${' '.repeat(maxUrlLength - 3)} | Covered | Uncovered Lines |
-${divider}
-${rows}${divider}
-| ${' '.repeat(maxUrlLength)} |  ${output.color(config, getColor(totalUsed), totalUsed + '%')} |                 |
-${divider}
-`;
-    console.log()
-    output.log(config, msg);
+    console.log();
+    console.log(output.formatTable(rows, { showHeaderDivider: true, showFooterDivider: true, showDivider: false}));
 }
 
 module.exports = {

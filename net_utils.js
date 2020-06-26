@@ -41,16 +41,23 @@ const {readFile} = require('./utils');
  */
 async function fetch(config, url, init) {
     if (!init) init = {};
+    if (!init._redirectChain && init.agent) {
+        init._agentIsForced = true;
+    }
     const redirect = init._redirect || init.redirect || 'manual';
     init = {...init}; // make sure we don't change the object directly
     init._redirect = redirect;
     init.redirect = 'manual';
 
-    if (!init.agent) {
+    const needAgent = (
+        !init._agentIsForced &&
+        (!init.agent || (url.startsWith('http://') !== (init.agent instanceof http.Agent)))
+    );
+    if (needAgent) {
         const agentinit = {
             keepAlive: true,
         };
-        if (/^https:\/\//.test(url)) {
+        if (url.startsWith('https://')) {
             agentinit.rejectUnauthorized = (
                 (config.rejectUnauthorized === undefined) ? true : config.rejectUnauthorized);
             init.agent = new https.Agent(agentinit);

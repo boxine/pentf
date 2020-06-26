@@ -41,6 +41,14 @@ function handleRequest(request, response) {
         return;
     }
 
+    if (request.url === '/https-redirect') {
+        response.writeHead(302, {
+            location: 'https://example.org/',
+        });
+        response.end('redirected to https://example.org/');
+        return;
+    }
+
     if (!['/', '/end'].includes(request.url)) {
         response.writeHead(404, {});
         response.end('404 Not Found');
@@ -192,6 +200,22 @@ async function run(config) {
         err => {
             return err.message.startsWith('Too many redirects:');
         });
+
+    // Redirect from HTTP to HTTPS
+    response = await fetch(config, url + 'https-redirect', {
+        redirect: 'follow',
+    });
+    assert.equal(response.status, 200);
+    assert.equal(response.url, 'https://example.org/');
+
+    // Force a specific agent (Redirects should fail)
+    await assert.rejects(
+        fetch(config, url + 'https-redirect', {
+            redirect: 'follow',
+            agent: new http.Agent(),
+        }),
+        {message: 'Protocol "https:" not supported. Expected "http:"'}
+    );
 
     // Terminate server
     server.close(); // No new connections

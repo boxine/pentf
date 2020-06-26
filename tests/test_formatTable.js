@@ -1,92 +1,19 @@
 const assert = require('assert').strict;
-const output = require('../output');
+const {formatTable} = require('../output');
 
-async function run(config) {
+async function run() {
     assert.equal(
-        output.formatTable([
+        formatTable([
             ['Used', 'Covered', 'Uncovered Lines'],
-            ['https://preactjs.com/', '93.75%', ''],
-            ['https://preactjs.com/bundle.1d040.esm.js', '34.87%', ''],
-            ['https://preactjs.com/bundle.8cae9.css', '17.8%', ''],
+            ['foo', '93.75%', ''],
+            ['foo bar bob boof baz', '34.87%', ''],
+            ['foo bar bob', '17.8%', ''],
         ]),
-        `
-┌──────────────────────────────────────────┬─────────┬─────────────────┐
-| Used                                     │ Covered │ Uncovered Lines │
-├──────────────────────────────────────────┼─────────┼─────────────────┤
-| https://preactjs.com/                    │  93.75% │                 │
-├──────────────────────────────────────────┼─────────┼─────────────────┤
-| https://preactjs.com/bundle.1d040.esm.js │  34.87% │                 │
-├──────────────────────────────────────────┼─────────┼─────────────────┤
-| https://preactjs.com/bundle.8cae9.css    │   17.8% │                 │
-└──────────────────────────────────────────┴─────────┴─────────────────┘
-`.trim() + '\n'
-    );
-
-    assert.equal(
-        output.formatTable(
-            [
-                ['Used', 'Covered', 'Uncovered Lines'],
-                ['https://preactjs.com/', '93.75%', ''],
-                ['https://preactjs.com/bundle.1d040.esm.js', '34.87%', ''],
-                ['https://preactjs.com/bundle.8cae9.css', '17.8%', ''],
-            ],
-            { showDivider: false, showHeaderDivider: true }
-        ),
-        `
-┌──────────────────────────────────────────┬─────────┬─────────────────┐
-| Used                                     │ Covered │ Uncovered Lines │
-├──────────────────────────────────────────┼─────────┼─────────────────┤
-| https://preactjs.com/                    │  93.75% │                 │
-| https://preactjs.com/bundle.1d040.esm.js │  34.87% │                 │
-| https://preactjs.com/bundle.8cae9.css    │   17.8% │                 │
-└──────────────────────────────────────────┴─────────┴─────────────────┘
-`.trim() + '\n'
-    );
-
-    assert.equal(
-        output.formatTable(
-            [
-                ['Used', 'Covered', 'Uncovered Lines'],
-                ['https://preactjs.com/', '93.75%', ''],
-                ['https://preactjs.com/bundle.1d040.esm.js', '34.87%', ''],
-                ['https://preactjs.com/bundle.8cae9.css', '17.8%', ''],
-                ['', '100%', ''],
-            ],
-            { showDivider: false, showHeaderDivider: true, showFooterDivider: true }
-        ),
-        `
-┌──────────────────────────────────────────┬─────────┬─────────────────┐
-| Used                                     │ Covered │ Uncovered Lines │
-├──────────────────────────────────────────┼─────────┼─────────────────┤
-| https://preactjs.com/                    │  93.75% │                 │
-| https://preactjs.com/bundle.1d040.esm.js │  34.87% │                 │
-| https://preactjs.com/bundle.8cae9.css    │   17.8% │                 │
-├──────────────────────────────────────────┼─────────┼─────────────────┤
-|                                          │    100% │                 │
-└──────────────────────────────────────────┴─────────┴─────────────────┘
-`.trim() + '\n'
-    );
-
-    assert.equal(
-        output.formatTable(
-            [
-                ['Used', 'Covered', 'Uncovered Lines'],
-                [output.color(config, 'red', 'red color'), output.color(config, 'red', '1.77%'), ''],
-                ['https://preactjs.com/', '93.75%', ''],
-                ['', output.color(config, 'green', '100%'), ''],
-            ],
-            { showDivider: false, showHeaderDivider: true, showFooterDivider: true }
-        ),
-        `
-┌───────────────────────┬─────────┬─────────────────┐
-| Used                  │ Covered │ Uncovered Lines │
-├───────────────────────┼─────────┼─────────────────┤
-| ${output.color(config, 'red', 'red color')}             │   ${output.color(config, 'red', '1.77%')} │                 │
-| https://preactjs.com/ │  93.75% │                 │
-├───────────────────────┼─────────┼─────────────────┤
-|                       │    ${output.color(config, 'green', '100%')} │                 │
-└───────────────────────┴─────────┴─────────────────┘
-`.trim() + '\n'
+        `Used                  Covered  Uncovered Lines 
+foo                    93.75%                  
+foo bar bob boof baz   34.87%                  
+foo bar bob             17.8%                  
+`
     );
 }
 

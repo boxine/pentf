@@ -419,9 +419,8 @@ function valueRepr(value) {
 /**
  * Log a table to console
  * @param {any[][]} data Array of rows that contains array of column data
- * @param {{showDivider?: boolean, showHeaderDivider?: boolean, showFooterDivider?: boolean}} options Array of rows that contains array of column data
  */
-function formatTable(data, {showHeaderDivider, showFooterDivider, showDivider = true} = {}) {
+function formatTable(data) {
     const maxColumnChars = [];
     const rawData = [];
 
@@ -446,22 +445,8 @@ function formatTable(data, {showHeaderDivider, showFooterDivider, showDivider = 
 
     const indent = ' '.repeat(Math.max(...maxColumnChars));
 
-    let topLine = '┌';
-    let divider = '├';
-    let bottomLine = '└';
-    for (let i = 0; i < maxColumnChars.length; i++) {
-        const str = '─'.repeat(maxColumnChars[i] + 2);
-        const notLast = i + 1 < maxColumnChars.length;
-        topLine += str + (notLast ? '┬' : '┐\n');
-        divider += str + (notLast ? '┼' : '┤\n'); 
-        bottomLine += str + (notLast ? '┴' : '┘\n');
-    }
-
-    let out = topLine;
-
+    let out = '';
     for (let i = 0; i < data.length; i++) {
-        out += '|';
-
         const row = data[i];
         for (let j = 0; j < row.length; j++) {
             const col = String(row[j]);
@@ -469,19 +454,10 @@ function formatTable(data, {showHeaderDivider, showFooterDivider, showDivider = 
             const formatted = j > 0
                 ? space + col
                 : col + space;
-            out += ` ${formatted} │`;
+            out += (j > 0 ? ' ' : '') + formatted + ' ';
         }
 
         out += '\n';
-        if ((i === 0 && showHeaderDivider) || (i < data.length - 1 && showDivider)) {
-            out += divider;
-        } else if (showFooterDivider && i === data.length - 2) {
-            out += divider;
-        }
-
-        if (i === data.length - 1) {
-            out += bottomLine;
-        }
     }
 
     return out;

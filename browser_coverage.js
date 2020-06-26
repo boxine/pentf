@@ -22,7 +22,8 @@ function logCoverage(config, entries) {
     let totalUsedBytes = 0;
 
     let rows = [
-        ['Url', 'Covered', 'Uncovered Lines']
+        ['Url', 'Covered', 'Uncovered Lines'],
+        ['', '', '']
     ];
     for (const entry of entries) {
         const used = entry.ranges.reduce((acc, range) => acc + range.end - range.start - 1, 0);
@@ -44,6 +45,7 @@ function logCoverage(config, entries) {
     const totalUsed =
         Math.round(((totalUsedBytes / totalBytes) * 100 + Number.EPSILON) * 100) / 100;
     const totalFormatted = output.color(config, getColor(totalUsed), totalUsed + '%');
+    rows.push(['', '-'.repeat(String(totalUsed).length + 1), '']);
     rows.push(['', totalFormatted, '']);
 
     console.log();

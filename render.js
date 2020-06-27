@@ -438,6 +438,7 @@ async function pdf(config, path, results) {
 module.exports = {
     craftResults,
     doRender,
+    escape_html,
     // test only
     _linkify: linkify,
     _html: html,

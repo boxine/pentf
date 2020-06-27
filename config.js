@@ -420,6 +420,8 @@ async function readConfig(options, args) {
         config.sentry = true;
     }
 
+    config.coverage_data = [];
+
     return {...config, ...args};
 }
 

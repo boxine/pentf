@@ -14,6 +14,7 @@ const output = require('./output');
 const utils = require('./utils');
 const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
+const { logCoverage, reportCoverageHtml } = require('./browser_coverage');
 
 
 async function run_task(config, task) {
@@ -34,6 +35,11 @@ async function run_task(config, task) {
                 config,
                 `${label} test case ${output.color(config, 'lightCyan', task.name)}` +
                 `, but expectedToFail was set${etf}\n`);
+        }
+
+        if (config.coverage) {
+            // TODO: Merge coverage
+            config.coverage_data.push(...task_config.coverage_data);
         }
     } catch(e) {
         if (!e || !e.stack) {
@@ -350,6 +356,12 @@ async function run(config, testCases) {
         await timeoutPromise(
             config, email.shutdown(config),
             {message: 'email shutdown', warning: true});
+        
+        if (config.coverage) {
+            config.coverage_data.sort((a, b) => a.url.localeCompare(b.url));
+            logCoverage(config, config.coverage_data);
+            await reportCoverageHtml(config.coverage_data, __dirname + '/coverage-example');
+        }
     } finally {
         if (config.afterAllTests) {
             await timeoutPromise(

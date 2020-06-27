@@ -14,7 +14,6 @@ const tmp = require('tmp-promise');
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
-const {logCoverage} = require('./browser_coverage');
 
 let tmp_home;
 
@@ -154,7 +153,7 @@ async function newPage(config, chrome_args=[]) {
     }
 
     if (config.coverage) {
-        page._pentf_coverage = true;
+        config.coverage_data = [];
         await page.coverage.startJSCoverage();
         await page.coverage.startCSSCoverage();
     }
@@ -163,6 +162,8 @@ async function newPage(config, chrome_args=[]) {
         page._pentf_browser_pages = config._browser_pages;
         config._browser_pages.push(page);
     }
+
+    page._pentf_config = config;
 
     return page;
 }
@@ -179,12 +180,17 @@ async function closePage(page) {
         remove(page._pentf_browser_pages, p => p === page);
     }
 
-    if (page._pentf_coverage) {
+    const config = page._pentf_config;
+    if (config.coverage) {
         const [jsCoverage, cssCoverage] = await Promise.all([
             page.coverage.stopJSCoverage(),
             page.coverage.stopCSSCoverage(),
         ]);
-        logCoverage({colors: true}, [...jsCoverage, ...cssCoverage]);
+        
+        config.coverage_data.push(
+            ...jsCoverage.map(entry => ({...entry, type: 'js'})),
+            ...cssCoverage.map(entry => ({...entry, type: 'css'}))
+        );
     }
 
     const browser = await page.browser();

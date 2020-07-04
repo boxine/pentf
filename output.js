@@ -9,7 +9,7 @@ const fs = require('fs');
 const {isAbsolute} = require('path');
 
 const utils = require('./utils');
-const {resultCountString} = require('./results');
+const {getResults} = require('./results');
 
 const STATUS_STREAM = process.stderr;
 
@@ -62,6 +62,50 @@ function status(config, state) {
     }
 }
 
+/**
+* Summarize test results.
+* @hidden
+* @param {*} config The pentf configuration object.
+* @param {Array<Object>} tasks All finished tasks.
+* @param {boolean} onTests Summarize tests instead of tasks.
+* @returns {string} A string with counts of the results.
+**/
+function resultSummary(config, tasks, onTests=false) {
+    const {
+        success,
+        errored,
+        flaky,
+        skipped,
+        expectedToFail,
+        expectedToFailButPassed,
+        itemName
+    } = getResults(config, tasks, onTests);
+
+    const maxChars = Math.max(
+        ...[success, errored, flaky, skipped, expectedToFail, expectedToFailButPassed]
+            .map(x => ('' + x).length)
+    );
+    const pad = str => (' '.repeat(maxChars) + str).slice(-maxChars);
+
+    let res = color(config, 'green', `  ${pad(success)} ${itemName} passed\n`);
+    res += color(config, 'red', `  ${pad(errored)} failed\n`);
+    if (flaky) {
+        res += `  ${pad(flaky)} flaky\n`;
+    }
+    if (skipped) {
+        const skippedTasks = tasks.filter(t => t.status === 'skipped');
+        res += color(config, 'cyan',`  ${pad(skipped)} skipped (${skippedTasks.map(s => s.name).join(', ')})\n`);
+    }
+    if (expectedToFail) {
+        const expectedToFailTasks = tasks.filter(t => t.expectedToFail && t.status === 'error');
+        res += `  ${pad(expectedToFail)} failed as expected (${expectedToFailTasks.map(s => s.name).join(', ')})\n`;
+    }
+    if (expectedToFailButPassed) {
+        res += `  ${pad(expectedToFailButPassed)} were expected to fail but passed\n`;
+    }
+    return res;
+}
+
 
 function finish(config, state) {
     last_state = null;
@@ -73,16 +117,13 @@ function finish(config, state) {
     if (tasks.length === 0 && config.filter) {
         STATUS_STREAM.write(`No test case found with filter: ${config.filter}\n`);
     }
-    STATUS_STREAM.write(resultCountString(config, tasks) + '.\n');
-
-    const skipped = tasks.filter(t => t.status === 'skipped');
-    if (skipped.length > 0) {
-        STATUS_STREAM.write(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})\n`);
-    }
+    STATUS_STREAM.write(resultSummary(config, tasks) + '\n');
 
     const expectedToFail = tasks.filter(t => t.expectedToFail && t.status === 'error');
     if (!config.expect_nothing && (expectedToFail.length > 0)) {
-        STATUS_STREAM.write(`${expectedToFail.length} tests failed as expected (${expectedToFail.map(s => s.name).join(' ')}). Pass in -E/--expect-nothing to ignore expectedToFail declarations.\n`);
+        let msg = color(config, 'gray', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
+        msg += '\n\n';
+        STATUS_STREAM.write(msg);
     }
 
     // Internal self-check

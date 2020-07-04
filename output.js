@@ -7,6 +7,7 @@ const kolorist = require('kolorist');
 const errorstacks = require('errorstacks');
 const fs = require('fs');
 const {isAbsolute} = require('path');
+const {createCodeFrame} = require('simple-code-frame');
 
 const utils = require('./utils');
 const {resultCountString} = require('./results');
@@ -274,14 +275,6 @@ function link(config, text, target) {
 }
 
 /**
- * Convert tabs indentation to two spaces.
- * @param {string} str 
- */
-function tabs2Spaces(str) {
-    return str.replace(/^\t+/, tabs => '  '.repeat(tabs.length));
-}
-
-/**
  * @param {string} str String to indent
  * @param {number} n Indentation level
  */
@@ -302,31 +295,22 @@ function indentLines(str, n) {
  * @param {number} columnNum Number of lines to show after the marker
  */
 function genCodeFrame(config, content, lineNum, columnNum, before, after) {
-    const lines = content.split('\n');
-    const startLine = Math.max(0, lineNum - before);
-    const endLine = Math.min(lines.length - 1, lineNum + after);
-    const maxChars = String(endLine).length;
-    const padding = ' '.repeat(maxChars);
+    const frame = createCodeFrame(content, lineNum, columnNum, {
+        before,
+        after
+    });
 
-    return lines.slice(startLine, endLine)
-        .map((line, i) => {
-            const n = startLine + i;
-            const currentLine = (padding + n).slice(-maxChars);
-
-            const normalized = tabs2Spaces(line);
-            if (n === lineNum) {
-                const marker = color(config, 'bold-red', '>');
-                const formatted = `${marker} ${currentLine} | ${normalized}`;
-                
-                // Account for possible tab indention
-                const count = (line.length - normalized.length) + columnNum - 1;
-
-                return formatted + `\n  ${padding} ${color(config, 'dim', '|')} ${' '.repeat(count)}${color(config, 'bold-red', '^')}`;
-            } else {
-                return color(config, 'gray', `  ${currentLine} | ${normalized}`);
-            }
-        })
-        .join('\n');
+    // Colorize code frame
+    return frame.split('\n').map(line => {
+        if (/^>\s(.*)/.test(line)) {
+            return line.replace(/^>(.*)/, (_, content) => {
+                return color(config, 'bold-red', '>') + color(config, 'white', content) ;
+            });
+        } else if (/^\s+\|\s+\^/.test(line)) {
+            return line.replace('|', color(config, 'gray', '|')).replace('^', color(config, 'bold-red', '^'));
+        }
+        return color(config, 'gray', line);
+    }).join('\n');
 }
 
 /**
@@ -375,7 +359,7 @@ async function formatError(config, err) {
             const { fileName, line, column } = nearestFrame;
             if (isAbsolute(fileName)) { // relative path = node internals
                 const content = await fs.promises.readFile(fileName, 'utf-8');
-                codeFrame = `\n${genCodeFrame(config, content, line - 1, column, 2, 3)}\n\n`;
+                codeFrame = `\n${genCodeFrame(config, content, line - 1, column - 1, 2, 3)}\n`;
             }
         }
     } catch (readError) {

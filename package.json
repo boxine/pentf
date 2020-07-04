@@ -23,6 +23,7 @@
     "libmime": "^4.0.1",
     "mkdirp": "^0.5.1",
     "node-fetch": "^2.3.0",
+    "simple-code-frame": "^1.0.0",
     "stream-buffers": "^3.0.2",
     "tmp-promise": "^2.0.2",
     "tough-cookie": "^4.0.0"

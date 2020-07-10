@@ -814,6 +814,35 @@ async function workaround_setContent(page, html) {
     await waiter;
 }
 
+/**
+ * Intercept browser requests
+ * @param {import('puppeteer').Page} page
+ * @param {(request: import('puppeteer').Request) => Promise<void> | void} fn
+ */
+async function interceptRequest(page, fn) {
+    if (!page._pentf_intercept_handlers) {
+        await page.setRequestInterception(true);
+
+        page._pentf_intercept_handlers = [];
+        page.on('request', async request => {
+            for (const handler of page._pentf_intercept_handlers) {
+                await handler(request);
+
+                if (request._interceptionHandled) {
+                    break;
+                }
+            }
+
+            // Don't stall requests
+            if (!request._interceptionHandled) {
+                request.continue();
+            }
+        });
+    }
+
+    page._pentf_intercept_handlers.push(fn);
+}
+
 
 // Render HTML code as a PDF file.
 // modifyPage can be an async function to change the page in the browser.
@@ -861,6 +890,7 @@ module.exports = {
     getSelectOptions,
     getText,
     html2pdf,
+    interceptRequest,
     newPage,
     restoreTimeouts,
     setLanguage,

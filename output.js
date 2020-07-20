@@ -87,8 +87,13 @@ function resultSummary(config, tasks, onTests=false) {
     );
     const pad = str => (' '.repeat(maxChars) + str).slice(-maxChars);
 
-    let res = color(config, 'green', `  ${pad(success)} ${itemName} passed\n`);
-    res += color(config, 'red', `  ${pad(errored)} failed\n`);
+    let res = '';
+    if (success > 0) {
+        res += color(config, 'green', `  ${pad(success)} ${itemName} passed\n`);
+    }
+    if (errored > 0) {
+        res += color(config, 'red', `  ${pad(errored)} failed\n`);
+    }
     if (flaky) {
         res += `  ${pad(flaky)} flaky\n`;
     }
@@ -352,7 +357,7 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
     return lines.slice(startLine, endLine)
         .map((line, i) => {
             const n = startLine + i;
-            const currentLine = (padding + n).slice(-maxChars);
+            const currentLine = (padding + (n + 1)).slice(-maxChars);
 
             const normalized = tabs2Spaces(line);
             if (n === lineNum) {
@@ -396,7 +401,7 @@ async function formatError(config, err) {
         .map(frame => {
             if (!config.no_clear_line && frame.name) {
                 // Only show frame for errors in the user's code
-                if (!nearestFrame && !/node_modules/.test(frame.fileName)) {
+                if (!nearestFrame && !/node_modules/.test(frame.fileName) && frame.fileName.startsWith(config._rootDir)) {
                     nearestFrame = frame;
                 }
 
@@ -423,7 +428,9 @@ async function formatError(config, err) {
         log(config, 'INTERNAL WARNING: Failed to read stack frame code: ' + readError);
     }
 
-    const message = `${err.name}: ${err.message}`;
+    let message = `${err.name}: ${err.message}`;
+    if (!message.endsWith('\n')) message +='\n';
+
     return '\n'
         + diff
         + indentLines(message, 1)

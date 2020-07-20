@@ -184,10 +184,12 @@ async function getMail(
         }
     }
 
+    output.logVerbose(config, '[email] Waiting for message to arrive...');
     const msg = await utils.retry(
         () => _find_message(config, client, since, to, subjectContains), wait_times);
     assert(msg, (
         'Could not find message to ' + to + ' matching ' + JSON.stringify(subjectContains) + ' since ' + since));
+    output.logVerbose(config, '[email] Message arrived');
 
     if (do_logout) {
         await client.close();

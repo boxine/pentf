@@ -423,7 +423,9 @@ async function formatError(config, err) {
         log(config, 'INTERNAL WARNING: Failed to read stack frame code: ' + readError);
     }
 
-    const message = `${err.name}: ${err.message}`;
+    let message = `${err.name}: ${err.message}`;
+    if (!message.endsWith('\n')) message +='\n';
+
     return '\n'
         + diff
         + indentLines(message, 1)

@@ -87,7 +87,10 @@ function resultSummary(config, tasks, onTests=false) {
     );
     const pad = str => (' '.repeat(maxChars) + str).slice(-maxChars);
 
-    let res = color(config, 'green', `  ${pad(success)} ${itemName} passed\n`);
+    let res = '';
+    if (success > 0) {
+        res += color(config, 'green', `  ${pad(success)} ${itemName} passed\n`);
+    }
     if (errored > 0) {
         res += color(config, 'red', `  ${pad(errored)} failed\n`);
     }

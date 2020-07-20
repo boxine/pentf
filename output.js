@@ -357,7 +357,7 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
     return lines.slice(startLine, endLine)
         .map((line, i) => {
             const n = startLine + i;
-            const currentLine = (padding + n).slice(-maxChars);
+            const currentLine = (padding + (n + 1)).slice(-maxChars);
 
             const normalized = tabs2Spaces(line);
             if (n === lineNum) {

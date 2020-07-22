@@ -176,6 +176,11 @@ async function parallel_run(config, state) {
         process.setMaxListeners(10 + 2 * config.concurrency);
     }
 
+    const statusInterval = setInterval(
+        () => output.detailedStatus(config, state),
+        10000
+    );
+
     state.running = [];
     state.locking_backoff = 10;
     let runner_task_id = 0;
@@ -225,6 +230,9 @@ async function parallel_run(config, state) {
                 }
                 continue;
             }
+
+            // Unsubscribe from status updates
+            clearInterval(statusInterval);
 
             for (const task of state.tasks) {
                 assert(
@@ -290,6 +298,10 @@ function testCases2tasks(config, testCases) {
     return tasks.filter(t => t);
 }
 
+/**
+ * @typedef {{ config: any, tasks: any[], locks?: Set<string>, failed_locks?: Map<string, number[]>}} RunnerState
+ */
+
 async function run(config, testCases) {
     const test_start = Date.now();
 
@@ -297,6 +309,7 @@ async function run(config, testCases) {
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
     const tasks = testCases2tasks(config, testCases);
+    /** @type {RunnerState} */
     const state = {
         config,
         tasks,

@@ -1,3 +1,4 @@
+
 const assert = require('assert').strict;
 
 const output = require('./output');
@@ -21,10 +22,14 @@ function annotateTaskResources(config, task) {
     }
 }
 
+/**
+ * @param {RunnerState} state 
+ */
 async function init(state) {
     assert(state);
     assert(state.config);
     state.locks = new Set();
+    state.failed_locks = new Map();
     external_locking.init(state);
 }
 
@@ -45,7 +50,7 @@ async function acquire(config, state, task) {
         return true;
     }
 
-    const {locks} = state;
+    const {locks, failed_locks} = state;
     assert(locks);
     if (task.resources.some(r => locks.has(r))) {
         if (config.locking_verbose) {

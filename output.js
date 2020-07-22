@@ -75,9 +75,9 @@ function formatDuration(config, duration) {
   
     let str = '';
     if (hours > 0) {
-        str += `${hours}h, ${minutes}min, ${seconds}s`;
+        str += `${hours}h ${minutes}min ${seconds}s`;
     } else if (minutes > 0) {
-        str += `${minutes}min, ${seconds}s`;
+        str += `${minutes}min ${seconds}s`;
     } else {
         str += `${seconds}s`;
     }
@@ -112,10 +112,25 @@ function detailedStatus(config, state) {
             .sort((a, b) => a.start - b.start)
             .map(t => {
                 let out = `  ${t.name} ${formatDuration(config, now - t.start)}`;
-                if (t.resources.length) {
-                    out += `, ${color(config, 'cyan', t.resources.join(', '))}`;
-                }
 
+                if (t.resources.length) {
+                    let waiting = [];
+                    let aquired = [];
+                    for (const r of t.resources) {
+                        const pending = state.pending_locks ? state.pending_locks.get(r) : null;
+                        if (pending) {
+                            waiting.push(r);
+                        } else {
+                            aquired.push(r);
+                        }
+                        
+                    }
+                    
+                    const waiting_format = waiting.length ? `, waiting: ${color(config, 'red', waiting.join(', '))}` : '';
+                    const aquired_format = aquired.length ? `, ${color(config, 'cyan', aquired.join(', '))}` : '';
+                    out += aquired_format + waiting_format;
+                }
+                
                 return out;
             })
             .join('\n') + '\n';

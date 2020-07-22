@@ -178,7 +178,7 @@ async function parallel_run(config, state) {
 
     const statusInterval = setInterval(
         () => output.detailedStatus(config, state),
-        10000
+        1000
     );
 
     state.running = [];
@@ -299,7 +299,7 @@ function testCases2tasks(config, testCases) {
 }
 
 /**
- * @typedef {{ config: any, tasks: any[], locks?: Set<string>, failed_locks?: Map<string, number[]>}} RunnerState
+ * @typedef {{ config: any, tasks: any[], locks?: Set<string>, pending_locks?: Map<string, Lock[]>}} RunnerState
  */
 
 async function run(config, testCases) {

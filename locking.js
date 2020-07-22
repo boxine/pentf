@@ -29,7 +29,7 @@ async function init(state) {
     assert(state);
     assert(state.config);
     state.locks = new Set();
-    state.failed_locks = new Map();
+    state.pending_locks = new Map();
     external_locking.init(state);
 }
 
@@ -41,6 +41,16 @@ async function shutdown(config, state) {
         `Still got some locks on shutdown: ${Array.from(state.locks).sort().join(',')}`);
 }
 
+/**
+ * @typedef {{ resource: string, expireIn: number, client: string }} Lock
+ */
+
+/**
+ * 
+ * @param {*} config 
+ * @param {import('./runner').RunnerState} state 
+ * @param {*} task 
+ */
 async function acquire(config, state, task) {
     if (config.no_locking) return true;
 
@@ -50,11 +60,12 @@ async function acquire(config, state, task) {
         return true;
     }
 
-    const {locks, failed_locks} = state;
+    const {locks, pending_locks} = state;
     assert(locks);
     if (task.resources.some(r => locks.has(r))) {
         if (config.locking_verbose) {
             const failed = task.resources.filter(r => locks.has(r));
+            pending_locks.set(task.id, failed.map(l => ({ resource: l, expireIn: -1, client: 'unknown' })));
 
             output.log(config, `[locking] ${task.id}: Failed to acquire ${failed.join(',')}`);
         }
@@ -63,6 +74,7 @@ async function acquire(config, state, task) {
 
     if (! config.no_external_locking) {
         try {
+            /** @type {Lock} */
             const acquireRes = await external_locking.externalAcquire(config, task.resources, 40000);
             if (acquireRes !== true) {
                 if (config.locking_verbose) {
@@ -70,6 +82,8 @@ async function acquire(config, state, task) {
                         `[exlocking] ${task.id}: Failed to acquire ${acquireRes.resource}`  +
                         `, held by ${acquireRes.client}, expires in ${acquireRes.expireIn} ms`);
                 }
+                pending_locks.set(task.id, [acquireRes]);
+
                 return false;
             }
         } catch(e) {
@@ -77,6 +91,8 @@ async function acquire(config, state, task) {
             return false;
         }
     }
+
+    pending_locks.delete(task.id);
 
     for (const r of task.resources) {
         locks.add(r);

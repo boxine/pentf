@@ -298,6 +298,12 @@ function parseArgs(options) {
         defaultValue: 1,
         help: 'Run the tests the specified number of times',
     });
+    runner_group.addArgument(['--timeout'], {
+        type: 'int',
+        metavar: 'MS',
+        dest: 'timeout',
+        help: 'Set a maximum duration for a test case in ms before timing out. (Default: 1h)',
+    });
 
     const locking_group = parser.addArgumentGroup({title: 'Locking'});
     locking_group.addArgument(['-L', '--no-locking'], {

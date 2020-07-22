@@ -23,8 +23,29 @@ async function run_task(config, task) {
         _testName: task.tc.name,
         _taskName: task.name,
     };
+    let timeout;
     try {
-        await task.tc.run(task_config);
+        const timeoutMs = config.timeout || 3600000;
+        // Prevent task from hanging indefinitely
+        const timeoutPromise = new Promise(resolve => {
+            timeout = setTimeout(resolve, timeoutMs);
+        });
+
+        let finished = false;
+        const testPromise = task.tc.run(task_config)
+            .finally(() => (finished = true));
+
+        await Promise.race([
+            testPromise,
+            timeoutPromise
+        ]);
+
+        if (!finished) {
+            throw new Error(`Timeout: Test case "${task.tc.name}" didn't finish in ${timeoutMs}ms.`);
+        }
+
+        clearTimeout(timeout);
+
         task.status = 'success';
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {

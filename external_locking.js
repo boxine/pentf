@@ -103,11 +103,33 @@ async function clearAllLocks(config) {
     }));
 }
 
+
+function generateClientName() {
+    const _prefixDash = s => s ? `${s}-` : '';
+    const {env} = process;
+
+    if (env.CI_PROJECT_NAME && env.CI_COMMIT_SHA) {
+        // Running in CI
+        const commitName = (env.CI_COMMIT_TAG || env.CI_BRANCH || '').slice(0, 30);
+        const commitHash = env.CI_COMMIT_SHORT_SHA || env.CI_COMMIT_SHA;
+        const envName = env.CI_ENVIRONMENT_NAME || '';
+
+        return (
+            `ci-${env.CI_PROJECT_NAME.slice(0, 20)}` +
+            `${_prefixDash(commitName)}-${commitHash}${_prefixDash(envName)}
+            ${_prefixDash(env.CI_PIPELINE_ID)}-${Date.now()}`
+        );
+    }
+
+    return `${os.hostname()}-${os.userInfo().username}-${Date.now()}`;
+}
+
 function prepare(config) {
     if (! config.external_locking_url) {
         config.no_external_locking = true;
     }
-    config.external_locking_client = `${os.hostname()}-${os.userInfo().username}-${Date.now()}`;
+
+    config.external_locking_client = generateClientName();
     if (config.locking_verbose) {
         output.log(config, `[exlocking] Client id: ${config.external_locking_client}`);
     }

@@ -1,0 +1,20 @@
+{
+  "name": "pentf-lockserver",
+  "version": "1.0.0",
+  "description": "Enable end-to-end tests to lock a resource",
+  "main": "lockserver.js",
+  "dependencies": {
+    "argparse": "^1.0.10",
+    "he": "^1.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boxine/pentf.git"
+  },
+  "author": "Philipp Hagemeister, Boxine GmbH",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/boxine/pentf/issues"
+  },
+  "homepage": "https://github.com/boxine/pentf#readme"
+}

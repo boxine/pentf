@@ -176,6 +176,14 @@ async function parallel_run(config, state) {
         process.setMaxListeners(10 + 2 * config.concurrency);
     }
 
+    let statusInterval;
+    if (config.status_interval) {
+        statusInterval = setInterval(
+            () => output.detailedStatus(config, state),
+            config.status_interval
+        );
+    }
+
     state.running = [];
     state.locking_backoff = 10;
     let runner_task_id = 0;
@@ -224,6 +232,11 @@ async function parallel_run(config, state) {
                     output.log(config, `[runner] Still waiting for locks on tasks ${waitingTasksStr}`);
                 }
                 continue;
+            }
+
+            // Unsubscribe from status updates
+            if (statusInterval) {
+                clearInterval(statusInterval);
             }
 
             for (const task of state.tasks) {

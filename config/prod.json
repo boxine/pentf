@@ -1,0 +1,6 @@
+{
+	"extends": "_common",
+
+	"pentf_lockserver_url": "https://lockserver.pentf.org/pentf/",
+	"pentf_boot_lockserver": false
+}

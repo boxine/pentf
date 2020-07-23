@@ -401,6 +401,16 @@ async function readConfigFile(configDir, env) {
     return config;
 }
 
+/**
+ * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string}} Config
+ */
+
+/**
+ * 
+ * @param {*} options 
+ * @param {*} args
+ * @returns {Config}
+ */
 async function readConfig(options, args) {
     const {configDir} = options;
     assert(configDir);

@@ -243,6 +243,11 @@ async function parallel_run(config, state) {
     }
 }
 
+
+/**
+ * @typedef {{tc: any, status: string, name: string, id: string, skipReason?: string, expectedToFail?: boolean | ((config: any) => boolean)}} Task
+ */
+
 function testCases2tasks(config, testCases) {
     const repeat = config.repeat || 1;
     assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
@@ -290,6 +295,10 @@ function testCases2tasks(config, testCases) {
     return tasks.filter(t => t);
 }
 
+/**
+ * @typedef {{config: any, tasks: Task[], locks?: Set<string> }} RunnerState
+ */
+
 async function run(config, testCases) {
     const test_start = Date.now();
 
@@ -297,6 +306,7 @@ async function run(config, testCases) {
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
     const tasks = testCases2tasks(config, testCases);
+    /** @type {RunnerState} */
     const state = {
         config,
         tasks,

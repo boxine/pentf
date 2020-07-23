@@ -16,12 +16,15 @@ const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
 
 
-async function run_task(config, task) {
+async function run_task(config, task, state) {
     const task_config = {
         ...config,
+        _locking: state.locking,
+        _taskLocks: new Set(),
         _browser_pages: [],
         _testName: task.tc.name,
         _taskName: task.name,
+        _taskId: task.id,
     };
     let timeout;
     try {
@@ -143,7 +146,7 @@ async function sequential_run(config, state) {
 
         task.status = 'running';
         task.start = performance.now();
-        await run_task(config, task);
+        await run_task(config, task, state);
 
         await locking.release(config, state, task);
     }
@@ -158,7 +161,7 @@ async function run_one(config, state, task) {
     task.start = performance.now();
     output.status(config, state);
 
-    await run_task(config, task);
+    await run_task(config, task, state);
 
     output.status(config, state);
     return task;
@@ -245,7 +248,7 @@ async function parallel_run(config, state) {
 
 
 /**
- * @typedef {{tc: any, status: string, name: string, id: string, skipReason?: string, expectedToFail?: boolean | ((config: any) => boolean)}} Task
+ * @typedef {{tc: any, status: string, name: string, id: string, skipReason?: string, expectedToFail?: boolean | ((config: any) => boolean), locks?: Set<string>}} Task
  */
 
 function testCases2tasks(config, testCases) {
@@ -296,7 +299,7 @@ function testCases2tasks(config, testCases) {
 }
 
 /**
- * @typedef {{config: any, tasks: Task[], locks?: Set<string> }} RunnerState
+ * @typedef {{config: any, tasks: Task[], locking?: import('./locking').LockingState }} RunnerState
  */
 
 async function run(config, testCases) {

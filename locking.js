@@ -4,6 +4,13 @@ const output = require('./output');
 const {wait} = require('./utils');
 const external_locking = require('./external_locking');
 
+/**
+ * @typedef {{resource: string, client: string, expireIn: number}} Lock
+ */
+
+/**
+ * @typedef {{locks: Set<string>, by_task: Map<string, Set<string>>, pending: Set<string>}} LockingState
+ */
 
 function annotateTaskResources(config, task) {
     if (config.no_locking) {
@@ -27,7 +34,11 @@ function annotateTaskResources(config, task) {
 async function init(state) {
     assert(state);
     assert(state.config);
-    state.locks = new Set();
+    state.locking = {
+        locks: new Set(),
+        by_task: new Map(),
+        pending: new Set(),
+    };
     external_locking.init(state);
 }
 
@@ -37,10 +48,9 @@ async function init(state) {
  */
 async function shutdown(config, state) {
     external_locking.shutdown(state);
-    state.locks.length = 0;
     assert.equal(
-        state.locks.size, 0,
-        `Still got some locks on shutdown: ${Array.from(state.locks).sort().join(',')}`);
+        state.locking.locks.size, 0,
+        `Still got some locks on shutdown: ${Array.from(state.locking.locks).sort().join(',')}`);
 }
 
 /**
@@ -58,8 +68,9 @@ async function acquire(config, state, task) {
         return true;
     }
 
-    const {locks} = state;
-    assert(locks);
+    assert(state.locking);
+
+    const {locks, by_task, pending} = state.locking;
     if (task.resources.some(r => locks.has(r))) {
         if (config.locking_verbose) {
             const failed = task.resources.filter(r => locks.has(r));
@@ -70,7 +81,11 @@ async function acquire(config, state, task) {
     }
 
     if (! config.no_external_locking) {
+        task.resources.forEach(r => pending.add(r));
         try {
+            // TODO: There is no guarantee that all locking attempts are successful.
+            // I have the suspicion that only some of those may be acquired and if
+            // everybody has a lock someone else needs, we will starve each other indefinitely
             const acquireRes = await external_locking.externalAcquire(config, task.resources, 40000);
             if (acquireRes !== true) {
                 if (config.locking_verbose) {
@@ -83,16 +98,34 @@ async function acquire(config, state, task) {
         } catch(e) {
             output.log(config, `[exlocking] Failed to acquire locks for ${task.id}: ${e.stack}`);
             return false;
+        } finally {
+            task.resources.forEach(r => pending.delete(r));
         }
     }
 
+    if (! by_task.has(task.id)) {
+        by_task.set(task.id, new Set());
+    }
+    const taskLocks = by_task.get(task.id);
     for (const r of task.resources) {
         locks.add(r);
+        taskLocks.add(r);
     }
     if (config.locking_verbose) {
         output.log(config, `[locking] ${task.id}: Acquired ${task.resources.join(',')}`);
     }
     return true;
+}
+
+/**
+ * @param {(waitTime: number) => Promise<boolean>} fn 
+ */
+async function runEventually(fn) {
+    let waitTime = 50;
+    while (! await fn(waitTime)) {
+        await wait(waitTime);
+        waitTime = Math.min(10000, waitTime * 2);
+    }
 }
 
 /**
@@ -105,12 +138,66 @@ async function acquireEventually(config, state, task) {
     if (config.locking_verbose) {
         output.log(config, `[locking] ${task.id}: Trying to eventually acquire ${task.resources.join(',')}`);
     }
-    let waitTime = 50;
-    while (! await acquire(config, state, task)) {
-        await wait(waitTime);
-        waitTime = Math.min(10000, waitTime * 2);
+    return await runEventually(
+        () => acquire(config, state, task)
+    );
+}
+
+/**
+ * @param {import('./config').Config} config 
+ * @param {string[]} pool 
+ * @param {number} [count=1] Amount of resources to lock from pool 
+ * @returns {Promise<string[]>} Array with successfully locked ids
+ */
+async function acquireFromPool(config, pool, count = 1) {
+    if (config.no_locking) return true;
+
+    const taskId = config._taskId;
+
+    if (config.locking_verbose) {
+        output.log(config, `[locking] ${taskId}: Trying to eventually acquire one of ${pool.join(',')}`);
     }
-    return true;
+
+    let out = [];
+    await runEventually(
+        async (waitTime) => {
+            /** @type {LockingState} */
+            const locking = config._locking;
+
+            let currentLocks = locking.locks;
+            if (! config.no_external_locking) {
+                const used = await external_locking.externalList(config);
+                currentLocks = new Set(used.map(l => l.resource));
+            }
+
+            const available = [];
+            for (let i = 0; i < pool.length; i++) {
+                const r = pool[i];
+                if (! currentLocks.has(r) && ! locking.pending.has(r)) {
+                    available.push(r);
+                }
+                
+                if (available.length >= count) {
+                    break;
+                }
+            }
+
+            if (available.length < count) {
+                if (config.locking_verbose) {
+                    output.log(config, `[locking] Failed to acquire lock. Sleeping for ${waitTime}ms. Pool: ${pool.join(', ')}`);
+                }
+                return false;
+            }
+
+            const result = acquire(config, {locking}, {id: taskId, resources: available});
+            if (result) {
+                out = available;
+            }
+            return result;
+        }
+    );
+
+    return out;
 }
 
 /**
@@ -121,13 +208,16 @@ async function acquireEventually(config, state, task) {
  */
 async function release(config, state, task) {
     if (config.no_locking) return true;
-    if (! task.resources.length) {
+    if (! state.locking.by_task.has(task.id)) {
         return;
     }
 
+    const {locks, by_task} = state.locking;
+    const taskLocks = by_task.get(task.id);
+
     if (! config.no_external_locking) {
         try {
-            const response = await external_locking.externalRelease(config, task.resources);
+            const response = await external_locking.externalRelease(config, Array.from(taskLocks));
             if (response !== true) {
                 if (config.locking_verbose) {
                     output.log(config,
@@ -140,13 +230,14 @@ async function release(config, state, task) {
         }
     }
 
-    const {locks} = state;
-    for (const r of task.resources) {
-        assert(locks.has(r), `Trying to release ${r} for ${task.id}, but not in current locks ${Array.from(locks).sort().join(',')}`);
+    
+    for (const r of taskLocks) {
+        assert(locks.has(r), `Trying to release ${r} for ${task.id}, but not in current locks ${Array.from(taskLocks).sort().join(',')}`);
         locks.delete(r);
+        taskLocks.delete(r);
     }
     if (config.locking_verbose) {
-        output.log(config, `[locking] ${task.id}: Released ${task.resources.join(',')}`);
+        output.log(config, `[locking] ${task.id}: Released ${Array.from(taskLocks).join(',')}`);
     }
 }
 
@@ -178,6 +269,7 @@ function listConflicts(config, tasks) {
 module.exports = {
     acquire,
     acquireEventually,
+    acquireFromPool,
     annotateTaskResources,
     init,
     listConflicts,

@@ -155,7 +155,10 @@ function prepare(config) {
  * @param {import('./runner').RunnerState} state 
  */
 async function refresh(state) {
-    const {config, locks} = state;
+    const {config} = state;
+    assert(state.locking);
+    
+    const {locks} = state.locking;
     assert(locks);
     if (locks.size > 0) {
         const locksArray = Array.from(locks);

@@ -9,6 +9,12 @@ const output = require('./output');
 const REFRESH_INTERVAL = 30000;
 const REQUEST_EXPIRE_IN = 40000;
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {string[]} resources 
+ * @param {number} expireIn 
+ * @returns {Promise<boolean | any>}
+ */
 async function externalAcquire(config, resources, expireIn) {
     assert(config.external_locking_client);
     assert(config.external_locking_url);
@@ -40,6 +46,12 @@ async function externalAcquire(config, resources, expireIn) {
     return true;
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {string[]} resources 
+ * @param {string} [overrideClient] 
+ * @returns {Promise<true | any>}
+ */
 async function externalRelease(config, resources, overrideClient) {
     const client = overrideClient || config.external_locking_client;
     assert(client);
@@ -73,6 +85,10 @@ async function externalRelease(config, resources, overrideClient) {
     return true;
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @returns {Promise<Array<import('./locking').Lock>>}
+ */
 async function externalList(config) {
     assert(config.external_locking_client);
     assert(config.external_locking_url);
@@ -135,6 +151,9 @@ function prepare(config) {
     }
 }
 
+/**
+ * @param {import('./runner').RunnerState} state 
+ */
 async function refresh(state) {
     const {config, locks} = state;
     assert(locks);
@@ -161,11 +180,17 @@ async function refresh(state) {
     state.external_locking_refresh_timeout = setTimeout(() => refresh(state), REFRESH_INTERVAL);
 }
 
+/**
+ * @param {import('./runner').RunnerState} state 
+ */
 async function init(state) {
     if (state.config.no_external_locking) return;
     state.external_locking_refresh_timeout = setTimeout(() => refresh(state), REFRESH_INTERVAL);
 }
 
+/**
+ * @param {import('./runner').RunnerState} state 
+ */
 async function shutdown(state) {
     if (state.config.no_external_locking) return;
     assert(state.external_locking_refresh_timeout);

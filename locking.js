@@ -21,6 +21,9 @@ function annotateTaskResources(config, task) {
     }
 }
 
+/**
+ * @param {import('./runner').RunnerState} state 
+ */
 async function init(state) {
     assert(state);
     assert(state.config);
@@ -28,6 +31,10 @@ async function init(state) {
     external_locking.init(state);
 }
 
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./runner').RunnerState} state 
+ */
 async function shutdown(config, state) {
     external_locking.shutdown(state);
     state.locks.length = 0;
@@ -36,6 +43,12 @@ async function shutdown(config, state) {
         `Still got some locks on shutdown: ${Array.from(state.locks).sort().join(',')}`);
 }
 
+/**
+ * Aquire locks on resources
+ * @param {import('./config').Config} config 
+ * @param {import('./runner').RunnerState} state 
+ * @param {import('./runner').Task} task 
+ */
 async function acquire(config, state, task) {
     if (config.no_locking) return true;
 
@@ -82,6 +95,11 @@ async function acquire(config, state, task) {
     return true;
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {import('./runner').RunnerState} state 
+ * @param {import('./runner').Task} task 
+ */
 async function acquireEventually(config, state, task) {
     if (config.no_locking) return true;
     if (config.locking_verbose) {
@@ -95,6 +113,12 @@ async function acquireEventually(config, state, task) {
     return true;
 }
 
+/**
+ * Release locks on resources
+ * @param {import('./config').Config} config 
+ * @param {import('./runner').RunnerState} state 
+ * @param {import('./runner').Task} task
+ */
 async function release(config, state, task) {
     if (config.no_locking) return true;
     if (! task.resources.length) {

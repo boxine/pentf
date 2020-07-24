@@ -7,6 +7,7 @@ const kolorist = require('kolorist');
 const errorstacks = require('errorstacks');
 const fs = require('fs');
 const {isAbsolute} = require('path');
+const {performance} = require('perf_hooks');
 
 const utils = require('./utils');
 const {getResults} = require('./results');
@@ -59,6 +60,83 @@ function status(config, state) {
     if (!STATUS_STREAM.isTTY || config.no_clear_line) {
         STATUS_STREAM.write('\n');
     }
+}
+
+/**
+ * Convert a time to a human readable string
+ * @param {*} config
+ * @param {number} duration Time in ms
+ */
+function formatDuration(config, duration) {
+    let seconds = Math.floor((duration / 1000) % 60);
+    let minutes = Math.floor((duration / (1000 * 60)) % 60);
+    let hours = Math.floor(duration / (1000 * 60 * 60));
+  
+    let str = '';
+    if (hours > 0) {
+        str += `${hours}h `;
+    }
+    if (minutes > 0) {
+        str += `${minutes}min `;
+    }
+
+    str += `${seconds}s`;
+
+    let timeColor = 'gray';
+    if (duration > 60000) timeColor = 'red';
+    else if (duration > 30000) timeColor = 'yellow';
+  
+    return color(config, timeColor, str);
+}
+
+/**
+ * 
+ * @param {*} config 
+ * @param {import('./runner').RunnerState} state 
+ */
+function detailedStatus(config, state) {
+    const {tasks} = state;
+    const running = tasks.filter(s => s.status === 'running');
+    const running_count = running.length;
+    const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
+    const skipped_count = utils.count(tasks, t => t.status === 'skipped');
+
+    const label = color(config, 'inverse-blue', 'STATUS');
+    const progress = color(config, 'yellow', `${done_count}/${tasks.length - skipped_count} done`)+ `, ${running_count} running`;
+    let str = `${label} at ${utils.localIso8601()}: ${progress}`;
+
+    if (running_count > 0) {
+        const now = performance.now();
+        str += '\n';
+        str += running
+            .sort((a, b) => a.start - b.start)
+            .map(t => {
+                let out = `  ${t.name} ${formatDuration(config, now - t.start)}`;
+
+                if (t.resources.length) {
+                    let waiting = [];
+                    let aquired = [];
+                    for (const r of t.resources) {
+                        const pending = state.pending_locks ? state.pending_locks.get(r) : null;
+                        if (pending) {
+                            waiting.push(r);
+                        } else {
+                            aquired.push(r);
+                        }
+                        
+                    }
+                    
+                    const waiting_format = waiting.length ? `, waiting: ${color(config, 'red', waiting.join(', '))}` : '';
+                    const aquired_format = aquired.length ? `, ${color(config, 'cyan', aquired.join(', '))}` : '';
+                    out += aquired_format + waiting_format;
+                }
+                
+                return out;
+            })
+            .join('\n');
+    }
+
+    log(config, str);
 }
 
 /**
@@ -281,7 +359,7 @@ function color(config, colorName, str) {
     }
 
     // Labels like "FAILED" or "PASSED" need a bit of visual padding.
-    if (['FAILED', 'PASSED'].includes(str)) {
+    if (['FAILED', 'PASSED', 'STATUS'].includes(str)) {
         str = ` ${str} `;
     }
 
@@ -465,6 +543,7 @@ function valueRepr(value) {
 
 module.exports = {
     color,
+    detailedStatus,
     finish,
     formatError,
     valueRepr,

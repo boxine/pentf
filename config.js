@@ -304,6 +304,12 @@ function parseArgs(options) {
         dest: 'timeout',
         help: 'Set a maximum duration for a test case in ms before timing out. (Default: 1h)',
     });
+    runner_group.addArgument(['--status-interval'], {
+        type: 'int',
+        metavar: 'MS',
+        dest: 'status_interval',
+        help: 'Interval in MS to print a detailed list of the current runner state.',
+    });
 
     const locking_group = parser.addArgumentGroup({title: 'Locking'});
     locking_group.addArgument(['-L', '--no-locking'], {

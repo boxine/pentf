@@ -313,6 +313,7 @@ function parseArgs(options) {
     locking_group.addArgument(['--locking-verbose'], {
         help: 'Output status messages about locking',
         action: 'storeTrue',
+        dest: 'locking_verbose'
     });
     locking_group.addArgument(['--list-conflicts'], {
         help: 'Show which tasks conflict on which resources, and exit immediately',

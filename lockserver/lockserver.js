@@ -61,7 +61,7 @@ async function acquireLocks(locks, request, response) {
     if (!data.client) {
         return requestError(response, 'client is empty');
     }
-    if (data.client.length > 100) {
+    if (data.client.length > 256) {
         return requestError(response, 'client is too long');
     }
     if (! Array.isArray(data.resources)) {
@@ -128,7 +128,7 @@ async function releaseLocks(locks, request, response) {
     if (!data.client) {
         return requestError(response, 'client is empty');
     }
-    if (data.client.length > 100) {
+    if (data.client.length > 256) {
         return requestError(response, 'client is too long');
     }
     if (! Array.isArray(data.resources)) {

@@ -375,21 +375,29 @@ async function run(config, testCases) {
             }
         }
 
-        await timeoutPromise(
+        output.logVerbose(config, 'Test run complete, shutting down locks & email connections ...');
+
+        const lockPromise = timeoutPromise(
             config, locking.shutdown(config, state),
             {message: 'locking shutdown', warning: true});
-        await timeoutPromise(
+        const emailPromise = timeoutPromise(
             config, email.shutdown(config),
             {message: 'email shutdown', warning: true});
+        await Promise.all([lockPromise, emailPromise]);
+
+        output.logVerbose(config, 'lock & email shutdown complete');
     } finally {
         if (config.afterAllTests) {
+            output.logVerbose(config, 'running custom per-project teardown ...');
             await timeoutPromise(
                 config, config.afterAllTests(config, initData),
                 {message: 'afterAllTests function', warning: true});
         }
     }
-    const test_end = Date.now();
+    const now = new Date();
+    const test_end = now.getTime();
 
+    output.logVerbose(config, `Test ended at ${utils.localIso8601(now)}, crafting results`);
     const testsVersion = await timeoutPromise(
         config, version.testsVersion(config), {message: 'version determination', warning: true});
     const pentfVersion = version.pentfVersion();

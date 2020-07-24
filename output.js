@@ -29,13 +29,12 @@ function status(config, state) {
 
     last_state = state;
 
+    const status = getResults(config, state.tasks, false);
     const {tasks} = state;
     const running = tasks.filter(s => s.status === 'running');
-    const running_count = running.length;
     const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
-    const failed_count = utils.count(tasks, t => t.status === 'error');
-    const skipped_count = utils.count(tasks, t => t.status === 'skipped');
-    const failed_str = failed_count > 0 ? color(config, 'red', `${failed_count} failed, `) : '';
+    const failed_str = status.errored > 0 ? color(config, 'red', `${status.errored} failed, `) : '';
+    const expected_fail_str = status.expectedToFail > 0 ? `${status.expectedToFail} failed as expected, ` : '';
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
@@ -47,8 +46,8 @@ function status(config, state) {
             + (running_show < running.length ? '  +' + (running.length - running_show) : '')
         );
         status_str = (
-            `${done_count}/${tasks.length - skipped_count} done, ` +
-            `${failed_str}${running_count} running (${running_str})`);
+            `${done_count}/${tasks.length - status.skipped} done, ` +
+            `${failed_str}${expected_fail_str}${running.length} running (${running_str})`);
 
         if (status_str.length < terminal_width) {
             break; // Fits!

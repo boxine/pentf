@@ -7,7 +7,7 @@ const {readConfig, parseArgs} = require('./config');
 const {readFile} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
-const {color} = require('./output');
+const {color, logVerbose} = require('./output');
 const {testsVersion, pentfVersion} = require('./version');
 const {loadTests} = require('./loader');
 
@@ -96,6 +96,7 @@ async function real_main(options={}) {
     if (!config.keep_open) {
         const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
         const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
+        logVerbose(`Terminating with exit code ${retCode}`);
         process.exit(retCode);
     }
 }

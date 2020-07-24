@@ -6,6 +6,7 @@ const {html2pdf} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
 const {resultCountString} = require('./results');
 
+const output = require('./output');
 const utils = require('./utils');
 
 function craftResults(config, test_info) {
@@ -64,21 +65,25 @@ function craftResults(config, test_info) {
 
 async function doRender(config, results) {
     if (config.json) {
+        output.logVerbose('Rendering to JSON ...');
         const json = JSON.stringify(results, undefined, 2) + '\n';
         await promisify(fs.writeFile)(config.json_file, json, {encoding: 'utf-8'});
     }
 
     if (config.markdown) {
+        output.logVerbose('Rendering to Markdown ...');
         const md = markdown(results);
         await promisify(fs.writeFile)(config.markdown_file, md, {encoding: 'utf-8'});
     }
 
     if (config.html) {
+        output.logVerbose('Rendering to HTML ...');
         const html_code = html(results);
         await promisify(fs.writeFile)(config.html_file, html_code, {encoding: 'utf-8'});
     }
 
     if (config.pdf) {
+        output.logVerbose('Rendering to PDF ...');
         await pdf(config, config.pdf_file, results);
     }
 }

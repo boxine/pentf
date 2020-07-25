@@ -116,6 +116,9 @@ async function run_task(config, task) {
                     Sentry.withScope(scope => {
                         scope.setTag('task', task.name);
                         scope.setTag('testcase', task.tc.name);
+                        if (process.env.CI_JOB_URL) {
+                            scope.setTag('jobUrl', process.env.CI_JOB_URL);
+                        }
                         Sentry.captureException(e);
                     });
                 }

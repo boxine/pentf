@@ -103,7 +103,7 @@ function detailedStatus(config, state) {
 
     const label = color(config, 'inverse-blue', 'STATUS');
     const progress = color(config, 'yellow', `${done_count}/${tasks.length - skipped_count} done`)+ `, ${running_count} running`;
-    let str = `${label} at ${utils.localIso8601()}: ${progress}`;
+    let str = `\n${label} at ${utils.localIso8601()}: ${progress}`;
 
     if (running_count > 0) {
         const now = performance.now();
@@ -136,7 +136,9 @@ function detailedStatus(config, state) {
             .join('\n');
     }
 
-    log(config, str);
+    // detailedStatus replaces the normal status string, so circumvent printing the status again
+    if (config.logFunc) return config.logFunc(config, str);
+    console.log(str); // eslint-disable-line no-console
 }
 
 /**

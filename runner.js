@@ -270,12 +270,12 @@ async function parallel_run(config, state) {
  * @typedef {{tc: any, status: string, name: string, id: string, skipReason?: string, expectedToFail?: boolean | ((config: any) => boolean)}} Task
  */
 
-function testCases2tasks(config, testCases) {
+async function testCases2tasks(config, testCases) {
     const repeat = config.repeat || 1;
     assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
 
     const tasks = new Array(testCases.length * repeat);
-    testCases.forEach((tc, position) => {
+    await Promise.all(testCases.map(async (tc, position) => {
         const task = {
             tc,
             status: 'todo',
@@ -283,7 +283,7 @@ function testCases2tasks(config, testCases) {
             id: tc.name,
         };
 
-        const skipReason = tc.skip && tc.skip(config);
+        const skipReason = tc.skip && await tc.skip(config);
         if (skipReason) {
             task.status = 'skipped';
             if (typeof skipReason === 'string') {
@@ -313,7 +313,7 @@ function testCases2tasks(config, testCases) {
                 name: `${tc.name}[${runId}]`,
             };
         }
-    });
+    }));
     return tasks.filter(t => t);
 }
 
@@ -327,7 +327,7 @@ async function run(config, testCases) {
     external_locking.prepare(config);
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
-    const tasks = testCases2tasks(config, testCases);
+    const tasks = await testCases2tasks(config, testCases);
     /** @type {RunnerState} */
     const state = {
         config,

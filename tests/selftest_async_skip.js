@@ -1,0 +1,27 @@
+const assert = require('assert').strict;
+const path = require('path');
+const child_process = require('child_process');
+
+async function run() {
+    // Run in subprocess so that handle exhaustion does not affect this process
+    const sub_run = path.join(__dirname, 'skip_tests', 'run');
+    const {stderr} = await new Promise((resolve, reject) => {
+        child_process.execFile(
+            sub_run,
+            ['--exit-zero', '--no-screenshots'],
+            (err, stdout, stderr) => {
+                if (err) reject(err);
+                else resolve({stdout, stderr});
+            }
+        );
+    });
+
+    assert(/1 tests passed/.test(stderr), 'Should print "1 passed"');
+    assert(/1 skipped/.test(stderr), 'Should print "1 skipped"');
+}
+
+module.exports = {
+    description: 'Test async skip call',
+    resources: [],
+    run,
+};

@@ -14,7 +14,7 @@ async function run() {
         },
         nowStr: '2020-07-25T12:44:51.305+02:00',
     }),
-        'ci a-project-with-an-extremely-un de2b4c3 dev' +
+    'ci a-project-with-an-extremely-un de2b4c3 dev' +
         ` https://gitlab.example.org/group/project/-/jobs/1234567 ${pentfVersion()}` +
         ' 2020-07-25T12:44:51.305+02:00'
     );

@@ -189,6 +189,11 @@ async function parallel_run(config, state) {
     let runner_task_id = 0;
     // eslint-disable-next-line no-constant-condition
     while (true) {
+        if (config.verbose) {
+            const tasksStr = state.running.map(t => `#${t._runner_task_id}`).join(' ');
+            output.log(config, `[runner] running tasks: ${tasksStr}`);
+        }
+
         // Add new tasks
         while (state.running.length < config.concurrency) {
             let task = undefined;
@@ -249,6 +254,10 @@ async function parallel_run(config, state) {
         }
 
         // Wait for one task to finish
+        if (config.verbose) {
+            const tasksStr = state.running.map(t => `#${t._runner_task_id}`).join(' ');
+            output.log(config, `[runner] waiting for one of the tasks ${tasksStr} to finish`);
+        }
         const done_task = await Promise.race(state.running);
         if (config.verbose) output.log(config, `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`);
         await locking.release(config, state, done_task);

@@ -5,6 +5,8 @@ const os = require('os');
 
 const {fetch} = require('./net_utils');
 const output = require('./output');
+const {localIso8601} = require('./utils');
+const {pentfVersion} = require('./version');
 
 const REFRESH_INTERVAL = 30000;
 const REQUEST_EXPIRE_IN = 40000;
@@ -119,25 +121,28 @@ async function clearAllLocks(config) {
     }));
 }
 
-
-function generateClientName() {
-    const _prefixDash = s => s ? `${s}-` : '';
-    const {env} = process;
+function generateClientName({env=process.env, nowStr=localIso8601(new Date())} = {}) {
+    function _format(s, maxLen=30) {
+        if (!s) return '';
+        s = s.trim().slice(0, maxLen);
+        return ' ' + s;
+    }
 
     if (env.CI_PROJECT_NAME && env.CI_COMMIT_SHA) {
         // Running in CI
-        const commitName = (env.CI_COMMIT_TAG || env.CI_BRANCH || '').slice(0, 30);
-        const commitHash = env.CI_COMMIT_SHORT_SHA || env.CI_COMMIT_SHA;
-        const envName = env.CI_ENVIRONMENT_NAME || '';
+        const projectName = _format(env.CI_PROJECT_NAME);
+        const commitName = _format(env.CI_COMMIT_TAG || env.CI_BRANCH, 50);
+        const commitHash = _format(env.CI_COMMIT_SHORT_SHA || env.CI_COMMIT_SHA);
+        const envName = _format(env.CI_ENVIRONMENT_NAME);
+        const jobURL = _format(env.CI_JOB_URL, 100);
 
         return (
-            `ci-${env.CI_PROJECT_NAME.slice(0, 20)}` +
-            `${_prefixDash(commitName)}-${commitHash}${_prefixDash(envName)}
-            ${_prefixDash(env.CI_PIPELINE_ID)}-${Date.now()}`
-        );
+            `ci${projectName}${commitName}${commitHash}${envName}${jobURL} ${pentfVersion()}` +
+            ` ${nowStr}`
+        ).slice(0, 256);
     }
 
-    return `${os.hostname()}-${os.userInfo().username}-${Date.now()}`;
+    return `${os.userInfo().username}@${os.hostname()} ${pentfVersion()} ${nowStr}`;
 }
 
 function prepare(config) {
@@ -206,4 +211,6 @@ module.exports = {
     listLocks,
     prepare,
     shutdown,
+    // Tests only
+    _generateClientName: generateClientName,
 };

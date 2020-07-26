@@ -69,12 +69,15 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_external_locking_.html#clearalllocks" class="tsd-kind-icon">clear<wbr>All<wbr>Locks</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_external_locking_.html#externalacquire" class="tsd-kind-icon">external<wbr>Acquire</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_external_locking_.html#externallist" class="tsd-kind-icon">external<wbr>List</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_external_locking_.html#externalrelease" class="tsd-kind-icon">external<wbr>Release</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_external_locking_.html#init" class="tsd-kind-icon">init</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_external_locking_.html#refresh" class="tsd-kind-icon">refresh</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_external_locking_.html#shutdown" class="tsd-kind-icon">shutdown</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_external_locking_.html#init" class="tsd-kind-icon">init</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_external_locking_.html#listlocks" class="tsd-kind-icon">list<wbr>Locks</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_external_locking_.html#prepare" class="tsd-kind-icon">prepare</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_external_locking_.html#refresh" class="tsd-kind-icon">refresh</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_external_locking_.html#shutdown" class="tsd-kind-icon">shutdown</a></li>
 							</ul>
 						</section>
 					</div>
@@ -82,6 +85,35 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="clearalllocks" class="tsd-anchor"></a>
+					<h3>clear<wbr>All<wbr>Locks</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">clear<wbr>All<wbr>Locks<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L123">external_locking.js:123</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-symbol">{}</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
 					<a name="externalacquire" class="tsd-anchor"></a>
 					<h3>external<wbr>Acquire</h3>
@@ -92,7 +124,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/8b1251f/external_locking.js#L20">external_locking.js:20</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L20">external_locking.js:20</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -125,7 +157,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/8b1251f/external_locking.js#L94">external_locking.js:94</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L94">external_locking.js:94</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -152,7 +184,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/8b1251f/external_locking.js#L57">external_locking.js:57</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L57">external_locking.js:57</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -175,17 +207,17 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
 					<a name="init" class="tsd-anchor"></a>
-					<h3>init</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> init</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<li class="tsd-signature tsd-kind-icon">init<span class="tsd-signature-symbol">(</span>state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/8b1251f/external_locking.js#L191">external_locking.js:191</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L204">external_locking.js:204</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -194,8 +226,6 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 									<ul class="tsd-parameters">
 									</ul>
 								</li>
@@ -204,17 +234,71 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
+					<a name="listlocks" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> list<wbr>Locks</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">list<wbr>Locks<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L115">external_locking.js:115</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-symbol">{}</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
+					<a name="prepare" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> prepare</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">prepare<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L159">external_locking.js:159</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-symbol">{}</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
 					<a name="refresh" class="tsd-anchor"></a>
-					<h3>refresh</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> refresh</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<li class="tsd-signature tsd-kind-icon">refresh<span class="tsd-signature-symbol">(</span>state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/8b1251f/external_locking.js#L162">external_locking.js:162</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L174">external_locking.js:174</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -223,8 +307,6 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 									<ul class="tsd-parameters">
 									</ul>
 								</li>
@@ -233,17 +315,17 @@
 						</li>
 					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
 					<a name="shutdown" class="tsd-anchor"></a>
-					<h3>shutdown</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> shutdown</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<li class="tsd-signature tsd-kind-icon">shutdown<span class="tsd-signature-symbol">(</span>state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/8b1251f/external_locking.js#L199">external_locking.js:199</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/60aa650/external_locking.js#L213">external_locking.js:213</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -252,8 +334,6 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
 									<ul class="tsd-parameters">
 									</ul>
 								</li>
@@ -338,6 +418,9 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_external_locking_.html#clearalllocks" class="tsd-kind-icon">clear<wbr>All<wbr>Locks</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_external_locking_.html#externalacquire" class="tsd-kind-icon">external<wbr>Acquire</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
@@ -346,13 +429,19 @@
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_external_locking_.html#externalrelease" class="tsd-kind-icon">external<wbr>Release</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<a href="_external_locking_.html#init" class="tsd-kind-icon">init</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
+						<a href="_external_locking_.html#listlocks" class="tsd-kind-icon">list<wbr>Locks</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
+						<a href="_external_locking_.html#prepare" class="tsd-kind-icon">prepare</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<a href="_external_locking_.html#refresh" class="tsd-kind-icon">refresh</a>
 					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<a href="_external_locking_.html#shutdown" class="tsd-kind-icon">shutdown</a>
 					</li>
 				</ul>

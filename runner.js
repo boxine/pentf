@@ -15,7 +15,11 @@ const utils = require('./utils');
 const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
 
-
+/**
+ * @param {import('./config').Config} config 
+ * @param {Task} task 
+ * @private
+ */
 async function run_task(config, task) {
     const task_config = {
         ...config,
@@ -130,6 +134,11 @@ async function run_task(config, task) {
     }
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {RunnerState} state 
+ * @private
+ */
 async function sequential_run(config, state) {
     const skipped = state.tasks.filter(s => s.status === 'skipped');
     if (!config.quiet && skipped.length > 0) {
@@ -152,6 +161,12 @@ async function sequential_run(config, state) {
     }
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {RunnerState} state 
+ * @param {Task} task 
+ * @private
+ */
 async function run_one(config, state, task) {
     output.status(config, state);
 
@@ -167,6 +182,11 @@ async function run_one(config, state, task) {
     return task;
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {RunnerState} state 
+ * @private
+ */
 async function parallel_run(config, state) {
     output.status(config, state);
 
@@ -268,17 +288,41 @@ async function parallel_run(config, state) {
     }
 }
 
-
 /**
- * @typedef {{tc: any, status: string, name: string, id: string, skipReason?: string, expectedToFail?: boolean | ((config: any) => boolean)}} Task
+ * @typedef {Object} TestCase
+ * @param {string} name 
+ * @param {(config: import('./config').Config) => Promise<void> | void} run 
+ * @param {(config: import('./config').Config) => Promise<boolean> | boolean} [skip]
+ * @param {string} [expectedToFail] 
  */
 
+/**
+ * @typedef {"success" | "running" | "error" | "todo"} TaskStatus
+ */
+
+/**
+ * @typedef {Object} Task
+ * @property {string} id
+ * @property {string} name
+ * @property {TestCase} tc
+ * @property {TaskStatus} status
+ * @property {boolean} [skipReason]
+ * @property {boolean | ((config: import('./config').Config) => boolean)} [expectedToFail]
+ */
+
+/**
+ * @param {import('./config').Config} config 
+ * @param {TestCase[]} testCases 
+ * @returns {Promise<Task[]>}
+ * @private
+ */
 async function testCases2tasks(config, testCases) {
     const repeat = config.repeat || 1;
     assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
 
     const tasks = new Array(testCases.length * repeat);
     await Promise.all(testCases.map(async (tc, position) => {
+        /** @type {Task} */
         const task = {
             tc,
             status: 'todo',
@@ -321,9 +365,17 @@ async function testCases2tasks(config, testCases) {
 }
 
 /**
- * @typedef {{config: any, tasks: Task[], locks?: Set<string> }} RunnerState
+ * @typedef {Object} RunnerState
+ * @property {import('./config').Config} config
+ * @property {Task[]} tasks
+ * @property {Set<string>} locks
  */
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {TestCase[]} testCases 
+ * @private
+ */
 async function run(config, testCases) {
     const test_start = Date.now();
 

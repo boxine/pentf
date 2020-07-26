@@ -108,11 +108,18 @@ async function externalList(config) {
     return await response.json();
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @private
+ */
 async function listLocks(config) {
     const locks = await externalList(config);
     console.table(locks); // eslint-disable-line no-console
 }
 
+/**
+ * @param {import('./config').Config} config 
+ */
 async function clearAllLocks(config) {
     const locks = await externalList(config);
     await Promise.all(locks.map(async l => {
@@ -145,6 +152,10 @@ function generateClientName({env=process.env, nowStr=localIso8601(new Date())} =
     return `${os.userInfo().username}@${os.hostname()} ${pentfVersion()} ${nowStr}`;
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @private
+ */
 function prepare(config) {
     if (! config.external_locking_url) {
         config.no_external_locking = true;
@@ -158,6 +169,7 @@ function prepare(config) {
 
 /**
  * @param {import('./runner').RunnerState} state 
+ * @private
  */
 async function refresh(state) {
     const {config, locks} = state;
@@ -187,6 +199,7 @@ async function refresh(state) {
 
 /**
  * @param {import('./runner').RunnerState} state 
+ * @private
  */
 async function init(state) {
     if (state.config.no_external_locking) return;
@@ -195,6 +208,7 @@ async function init(state) {
 
 /**
  * @param {import('./runner').RunnerState} state 
+ * @private
  */
 async function shutdown(state) {
     if (state.config.no_external_locking) return;

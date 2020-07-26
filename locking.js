@@ -4,7 +4,11 @@ const output = require('./output');
 const {wait} = require('./utils');
 const external_locking = require('./external_locking');
 
-
+/**
+ * @param {import('./config').Config} config 
+ * @param {import('./runner').Task} task 
+ * @private
+ */
 function annotateTaskResources(config, task) {
     if (config.no_locking) {
         return;
@@ -23,6 +27,7 @@ function annotateTaskResources(config, task) {
 
 /**
  * @param {import('./runner').RunnerState} state 
+ * @private
  */
 async function init(state) {
     assert(state);
@@ -34,6 +39,7 @@ async function init(state) {
 /**
  * @param {import('./config').Config} config
  * @param {import('./runner').RunnerState} state 
+ * @private
  */
 async function shutdown(config, state) {
     external_locking.shutdown(state);
@@ -150,6 +156,11 @@ async function release(config, state, task) {
     }
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {import('./runner').Task[]} tasks 
+ * @private
+ */
 function listConflicts(config, tasks) {
     const tasksByResource = new Map();
     for (const t of tasks) {

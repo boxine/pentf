@@ -25,8 +25,17 @@ async function testsVersion(config) {
 
         return tagsRepr + gitVersion + suffix;
     } catch(e) {
-        return 'unknown';
+        // go on
     }
+
+    // Are we in a CI pipeline? Use these values instead
+    const {env} = process;
+    if (env.CI_COMMIT_SHORT_SHA) {
+        const name = (env.CI_COMMIT_TAG || env.CI_COMMIT_BRANCH || '').trim();
+        return (name ? name + ' ' : '') + env.CI_COMMIT_SHORT_SHA.trim();
+    }
+
+    return 'unknown';
 }
 
 function pentfVersion() {

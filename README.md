@@ -353,13 +353,15 @@ The keys are up to you; for example you probably want to have a main entry point
 ```
 -C COUNT, --concurrency COUNT
                       Maximum number of tests to run in parallel. 0 to run without a pool, sequentially. 
-                      Defaults to 10.
+                      Can include *, +, and cpus for the number of CPUs. Defaults to 4+cpus.
 -S, --sequential      Do not run tests in parallel (same as -C 0)
 --fail-fast           Abort once a test fails
 --print-tasks         Output all tasks that the runner would perform, and exit
 --exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still 
                       emitted in cases of internal crashes)
 --repeat COUNT        Run the tests the specified number of times
+--timeout MS          Set a maximum duration for a test case in ms before timing out. (Default: 1h)
+--status-interval MS  Interval in MS to print a detailed list of the current runner state.
 ```
 
 ###### Locking

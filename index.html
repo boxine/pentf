@@ -343,13 +343,15 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 				</a>
 				<pre><code>-C COUNT, --concurrency COUNT
                       Maximum number of tests to run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> to run without a pool, sequentially. 
-                      Defaults to <span class="hljs-number">10</span>.
+                      Can include *, +, and cpus <span class="hljs-keyword">for</span> the number of CPUs. Defaults to <span class="hljs-number">4</span>+cpus.
 -S, --sequential      Do not run tests <span class="hljs-keyword">in</span> parallel (same as -C <span class="hljs-number">0</span>)
 --fail-fast           Abort once a test fails
 --print-tasks         Output all tasks that the runner would perform, and <span class="hljs-keyword">exit</span>
 --<span class="hljs-keyword">exit</span>-zero           Terminate with <span class="hljs-keyword">exit</span> code <span class="hljs-number">0</span> (success) even <span class="hljs-keyword">if</span> tests fail. (Exit codes != <span class="hljs-number">0</span> are still 
                       emitted <span class="hljs-keyword">in</span> cases of internal crashes)
---repeat COUNT        Run the tests the specified number of times</code></pre>
+--repeat COUNT        Run the tests the specified number of times
+--timeout MS          Set a maximum duration <span class="hljs-keyword">for</span> a test case <span class="hljs-keyword">in</span> ms before timing out. (Default: <span class="hljs-number">1</span>h)
+--status-interval MS  Interval <span class="hljs-keyword">in</span> MS to print a detailed list of the current runner state.</code></pre>
 				<a href="#locking" id="locking" style="color: inherit; text-decoration: none;">
 					<h6>Locking</h6>
 				</a>

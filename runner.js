@@ -366,9 +366,9 @@ async function testCases2tasks(config, testCases) {
 
 /**
  * @typedef {Object} RunnerState
- * @property {import('./config').Config} config
  * @property {Task[]} tasks
- * @property {Set<string>} locks
+ * @property {Set<string>} [locks]
+ * @property {NodeJS.Timeout} [external_locking_refresh_timeout]
  */
 
 /**
@@ -385,7 +385,6 @@ async function run(config, testCases) {
     const tasks = await testCases2tasks(config, testCases);
     /** @type {RunnerState} */
     const state = {
-        config,
         tasks,
     };
 
@@ -440,7 +439,7 @@ async function run(config, testCases) {
             return;
         }
 
-        await locking.init(state);
+        await locking.init(config, state);
 
         if (config.concurrency === 0) {
             await sequential_run(config, state);

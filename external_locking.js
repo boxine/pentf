@@ -198,20 +198,22 @@ async function refresh(state) {
 }
 
 /**
+ * @param {import('./config').Config} state 
  * @param {import('./runner').RunnerState} state 
  * @private
  */
-async function init(state) {
-    if (state.config.no_external_locking) return;
+async function init(config, state) {
+    if (config.no_external_locking) return;
     state.external_locking_refresh_timeout = setTimeout(() => refresh(state), REFRESH_INTERVAL);
 }
 
 /**
+ * @param {import('./config').Config} config 
  * @param {import('./runner').RunnerState} state 
  * @private
  */
-async function shutdown(state) {
-    if (state.config.no_external_locking) return;
+async function shutdown(config, state) {
+    if (config.no_external_locking) return;
     assert(state.external_locking_refresh_timeout);
     clearTimeout(state.external_locking_refresh_timeout);
 }

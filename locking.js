@@ -26,14 +26,15 @@ function annotateTaskResources(config, task) {
 }
 
 /**
+ * @param {import('./config').Config} config 
  * @param {import('./runner').RunnerState} state 
  * @private
  */
-async function init(state) {
+async function init(config, state) {
+    assert(config);
     assert(state);
-    assert(state.config);
     state.locks = new Set();
-    external_locking.init(state);
+    external_locking.init(config, state);
 }
 
 /**
@@ -42,7 +43,7 @@ async function init(state) {
  * @private
  */
 async function shutdown(config, state) {
-    external_locking.shutdown(state);
+    external_locking.shutdown(config, state);
     state.locks.length = 0;
     assert.equal(
         state.locks.size, 0,

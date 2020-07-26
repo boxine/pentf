@@ -11,12 +11,21 @@ const {color, logVerbose} = require('./output');
 const {testsVersion, pentfVersion} = require('./version');
 const {loadTests} = require('./loader');
 
-// Available options:
-// - defaultConfig: Function to call on the loaded configuration, to set/compute default values.
-// - description: program description in the --help output
-// - rootDir: Root directory (assume tests/ contains tests, config/ if exists contains config)
-// - testsDir: Test directory
-// - configDir: Configuration directory. false disables configuration.
+/**
+ * @typedef {Object} PentfOptions
+ * @property {(config: import('./config').Config) => import('./config').Config} [defaultConfig]
+ * Function to call on the loaded configuration, to set/compute default values.
+ * @property {string} [description] program description in the --help output
+ * @property {string} [rootDir] Root directory (assume tests/ contains tests,
+ * config/ if exists contains config)
+ * @property {string} [testsDir] Test directory
+ * @property {string} [configDir] Configuration directory. false disables
+ * configuration.
+ */
+
+/**
+ * @param {PentfOptions} options 
+ */
 async function real_main(options={}) {
     if (options.rootDir) {
         if (! options.testsDir) {

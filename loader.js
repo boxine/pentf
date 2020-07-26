@@ -3,6 +3,12 @@ const path = require('path');
 const glob = require('glob');
 const {promisify} = require('util');
 
+/**
+ * @param {*} args 
+ * @param {string} testsDir 
+ * @param {string} [globPattern] 
+ * @private
+ */
 async function loadTests(args, testsDir, globPattern = '*.js') {
     const testFiles = await promisify(glob.glob)(globPattern, {cwd: testsDir});
     let tests = testFiles.map(n => ({

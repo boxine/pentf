@@ -102,8 +102,10 @@ async function real_main(options={}) {
     }
 
     await render.doRender(config, results);
-    if (!config.keep_open) {
-        const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
+    
+    const anyErrors = results.tests.some(s => s.status === 'error' && (!s.expectedToFail || config.expect_nothing));
+    // Only exit if there are no errors or the user has passed `--keep_open`
+    if (!config.keep_open || !anyErrors) {
         const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
         logVerbose(`Terminating with exit code ${retCode}`);
         process.exit(retCode);

@@ -107,8 +107,8 @@ async function run_task(config, task) {
                     `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}`);
             }
         }
-        // Close all browser windows
-        if (! config.keep_open && task_config._browser_pages.length > 0) {
+        // Close all browser windows, except when keep_open is set and we have a failure.
+        if ((task.expectedToFail && !config.expect_nothing || ! config.keep_open) && task_config._browser_pages.length > 0) {
             if (config.verbose) {
                 output.log(
                     config,

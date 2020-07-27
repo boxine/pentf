@@ -51,6 +51,12 @@ async function run_task(config, task) {
         clearTimeout(timeout);
 
         task.status = 'success';
+        if (config.verbose) {
+            output.log(
+                config,
+                `[task] Marked #${task._runner_task_id} (${task.name}) as success`
+            );
+        }
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
             const etf = (typeof task.expectedToFail === 'string') ? ` (${task.expectedToFail})` : '';
@@ -74,6 +80,12 @@ async function run_task(config, task) {
         }
 
         if (config.take_screenshots) {
+            if (config.verbose) {
+                output.log(
+                    config,
+                    `[task] Taking ${task_config._browser_pages.length} screenshots for task` +
+                    ` #${task._runner_task_id} (${task.name})`);
+            }
             try {
                 task.error_screenshots = await Promise.all(task_config._browser_pages.map(
                     async (page, i) => {
@@ -92,6 +104,12 @@ async function run_task(config, task) {
         }
         // Close all browser windows
         if (! config.keep_open && task_config._browser_pages.length > 0) {
+            if (config.verbose) {
+                output.log(
+                    config,
+                    `[task] Closing ${task_config._browser_pages.length} browser pages for task` +
+                    ` #${task._runner_task_id} (${task.name})`);
+            }
             try {
                 await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
             } catch(e) {
@@ -102,6 +120,13 @@ async function run_task(config, task) {
         const show_error = (
             !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&
             (config.expect_nothing || !task.expectedToFail));
+        if (config.verbose) {
+            output.log(
+                config,
+                '[task] Decided whether to show error for task ' +
+                `${task._runner_task_id} (${task.name}): ${JSON.stringify(show_error)}`
+            );
+        }
         if (show_error) {
             const name = output.color(config, 'lightCyan', task.name);
             if (e.pentf_expectedToSucceed) {
@@ -116,18 +141,38 @@ async function run_task(config, task) {
                     `${await output.formatError(config, e)}\n`);
 
                 if (config.sentry) {
-                    const Sentry = require('@sentry/node');
-                    Sentry.withScope(scope => {
-                        scope.setTag('task', task.name);
-                        scope.setTag('testcase', task.tc.name);
-                        if (process.env.CI_JOB_URL) {
-                            scope.setTag('jobUrl', process.env.CI_JOB_URL);
-                        }
-                        Sentry.captureException(e);
-                    });
+                    if (config.verbose) {
+                        output.log(
+                            config,
+                            '[task] Reporting error to sentry for ' +
+                            `${task._runner_task_id} (${task.name})`
+                        );
+                    }
+
+                    try {
+                        const Sentry = require('@sentry/node');
+                        Sentry.withScope(scope => {
+                            scope.setTag('task', task.name);
+                            scope.setTag('testcase', task.tc.name);
+                            if (process.env.CI_JOB_URL) {
+                                scope.setTag('jobUrl', process.env.CI_JOB_URL);
+                            }
+                            Sentry.captureException(e);
+                        });
+                    } catch (sentryErr) {
+                        output.log(
+                            config,
+                            `INTERNAL ERROR: Sentry reporting failed for ${task.name}: ${sentryErr}`);
+                    }
                 }
             }
         }
+
+        if (config.verbose) {
+            output.log(
+                config, `[task] Error teardown done for ${task._runner_task_id} (${task.name})`);
+        }
+
         if (config.fail_fast) {
             process.exit(3);
         }

@@ -87,7 +87,7 @@ async function run_task(config, task) {
                     ` #${task._runner_task_id} (${task.name})`);
             }
             try {
-                task.error_screenshots = await Promise.all(task_config._browser_pages.map(
+                const screenshotPromise = Promise.all(task_config._browser_pages.map(
                     async (page, i) => {
                         await promisify(mkdirp)(config.screenshot_directory);
                         const fn = path.join(
@@ -97,9 +97,15 @@ async function run_task(config, task) {
                             type: 'png',
                             fullPage: true,
                         });
-                    }));
+                    })
+                );
+                task.error_screenshots = await timeoutPromise(
+                    config, screenshotPromise,
+                    {timeout: 30000, message: 'screenshots took too long'});
             } catch(e) {
-                output.log(config, `INTERNAL ERROR: failed to take screenshot of ${task.name}: ${e}`);
+                output.log(
+                    config,
+                    `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}`);
             }
         }
         // Close all browser windows

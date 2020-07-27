@@ -1,28 +1,29 @@
 const assert = require('assert').strict;
 
-const utils = require('./utils');
-
 /**
  * Get tests result summary data
- * @param {*} config 
- * @param {object[]} tasks 
+ * @param {import('./config').Config} config 
+ * @param {import('./runner').Task[]} tasks 
  * @param {boolean} onTests 
+ * @private
  */
 function getResults(config, tasks, onTests=false) {
     const expectNothing = config.expect_nothing;
     assert(Array.isArray(tasks));
 
-    const success = utils.count(
-        tasks, t => t.status === 'success' && (!t.expectedToFail || expectNothing));
-    const errored = utils.count(
-        tasks, t => t.status === 'error' && (!t.expectedToFail || expectNothing));
-    const flaky = utils.count(tasks, t => t.status === 'flaky');
-    const skipped = utils.count(tasks, t => t.status === 'skipped');
-    const expectedToFail = !expectNothing && utils.count(
-        tasks, t => t.expectedToFail && t.status === 'error');
-    const expectedToFailButPassed = !expectNothing && utils.count(
-        tasks, t => t.expectedToFail && t.status === 'success');
-    
+    const success = tasks.filter(t => t.status === 'success' && (!t.expectedToFail || expectNothing));
+    const errored = tasks.filter(
+        t => t.status === 'error' && (!t.expectedToFail || expectNothing));
+    const flaky = tasks.filter(t => t.status === 'flaky');
+    const skipped = tasks.filter(t => t.status === 'skipped');
+    const expectedToFail = !expectNothing && tasks.filter(
+        t => t.expectedToFail && t.status === 'error');
+    const expectedToFailButPassed = !expectNothing && tasks.filter(
+        t => t.expectedToFail && t.status === 'success');
+    const running = tasks.filter(t => t.status === 'running');
+    const done = tasks.filter(t => (t.status === 'success') || (t.status === 'error'));
+    const todo = tasks.filter(t => t.status === 'todo');
+
     const itemName = (onTests || ((config.repeat || 1) === 1)) ? 'tests' : 'tasks';
 
     return {
@@ -33,6 +34,9 @@ function getResults(config, tasks, onTests=false) {
         expectedToFail,
         expectedToFailButPassed,
         itemName,
+        running,
+        done,
+        todo,
     };
 }
 
@@ -51,22 +55,22 @@ function resultCountString(config, tasks, onTests=false) {
         flaky,
         skipped,
         expectedToFail,
-        expectedToFailButPassed
+        expectedToFailButPassed,
+        itemName
     } = getResults(config, tasks, onTests);
 
-    const itemName = (onTests || ((config.repeat || 1) === 1)) ? 'tests' : 'tasks';
-    let res = `${success} ${itemName} passed, ${errored} failed`;
-    if (flaky) {
-        res += `, ${flaky} flaky`;
+    let res = `${success.length} ${itemName} passed, ${errored.length} failed`;
+    if (flaky.length) {
+        res += `, ${flaky.length} flaky`;
     }
-    if (skipped) {
-        res += `, ${skipped} skipped`;
+    if (skipped.length) {
+        res += `, ${skipped.length} skipped`;
     }
-    if (expectedToFail) {
-        res += `, ${expectedToFail} failed as expected`;
+    if (expectedToFail.length) {
+        res += `, ${expectedToFail.length} failed as expected`;
     }
-    if (expectedToFailButPassed) {
-        res += `, ${expectedToFailButPassed} were expected to fail but passed`;
+    if (expectedToFailButPassed.length) {
+        res += `, ${expectedToFailButPassed.length} were expected to fail but passed`;
     }
     return res;
 }

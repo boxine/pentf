@@ -24,18 +24,21 @@ function clean(config) {
     readline.clearLine(STATUS_STREAM, 0);
 }
 
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./runner').RunnerState} state
+ * @private
+ */
 function status(config, state) {
     if (config.quiet) return;
     assert(state.tasks);
 
     last_state = state;
 
-    const status = getResults(config, state.tasks, false);
+    const {errored, done, expectedToFail, skipped, running} = getResults(config, state.tasks, false);
     const {tasks} = state;
-    const running = tasks.filter(s => s.status === 'running');
-    const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
-    const failed_str = status.errored > 0 ? color(config, 'red', `${status.errored} failed, `) : '';
-    const expected_fail_str = status.expectedToFail > 0 ? `${status.expectedToFail} failed as expected, ` : '';
+    const failed_str = errored.length > 0 ? color(config, 'red', `${errored.length} failed, `) : '';
+    const expected_fail_str = expectedToFail.length > 0 ? `${expectedToFail.length} failed as expected, ` : '';
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
@@ -47,7 +50,7 @@ function status(config, state) {
             + (running_show < running.length ? '  +' + (running.length - running_show) : '')
         );
         status_str = (
-            `${done_count}/${tasks.length - status.skipped} done, ` +
+            `${done.length}/${tasks.length - skipped.length} done, ` +
             `${failed_str}${expected_fail_str}${running.length} running (${running_str})`);
 
         if (status_str.length < terminal_width) {
@@ -90,22 +93,19 @@ function formatDuration(config, duration) {
 }
 
 /**
- * 
  * @param {*} config 
  * @param {import('./runner').RunnerState} state 
+ * @private
  */
 function detailedStatus(config, state) {
     const {tasks} = state;
-    const running = tasks.filter(s => s.status === 'running');
-    const running_count = running.length;
-    const done_count = utils.count(tasks, t => (t.status === 'success') || (t.status === 'error'));
-    const skipped_count = utils.count(tasks, t => t.status === 'skipped');
+    const {done, skipped, running} = getResults(config, state.tasks, false);
 
     const label = color(config, 'inverse-blue', 'STATUS');
-    const progress = color(config, 'yellow', `${done_count}/${tasks.length - skipped_count} done`)+ `, ${running_count} running`;
+    const progress = color(config, 'yellow', `${done.length}/${tasks.length - skipped.length} done`)+ `, ${running.length} running`;
     let str = `\n${label} at ${utils.localIso8601()}: ${progress}`;
 
-    if (running_count > 0) {
+    if (running.length > 0) {
         const now = performance.now();
         str += '\n';
         str += running
@@ -161,31 +161,29 @@ function resultSummary(config, tasks, onTests=false) {
     } = getResults(config, tasks, onTests);
 
     const maxChars = Math.max(
-        ...[success, errored, flaky, skipped, expectedToFail, expectedToFailButPassed]
+        ...[success.length, errored.length, flaky.length, skipped.length, expectedToFail.length, expectedToFailButPassed.length]
             .map(x => ('' + x).length)
     );
     const pad = str => (' '.repeat(maxChars) + str).slice(-maxChars);
 
     let res = '';
-    if (success > 0) {
-        res += color(config, 'green', `  ${pad(success)} ${itemName} passed\n`);
+    if (success.length > 0) {
+        res += color(config, 'green', `  ${pad(success.length)} ${itemName} passed\n`);
     }
-    if (errored > 0) {
-        res += color(config, 'red', `  ${pad(errored)} failed\n`);
+    if (errored.length > 0) {
+        res += color(config, 'red', `  ${pad(errored.length)} failed\n`);
     }
-    if (flaky) {
-        res += `  ${pad(flaky)} flaky\n`;
+    if (flaky.length) {
+        res += `  ${pad(flaky.length)} flaky\n`;
     }
-    if (skipped) {
-        const skippedTasks = tasks.filter(t => t.status === 'skipped');
-        res += color(config, 'cyan',`  ${pad(skipped)} skipped (${skippedTasks.map(s => s.name).join(', ')})\n`);
+    if (skipped.length) {
+        res += color(config, 'cyan',`  ${pad(skipped.length)} skipped (${skipped.map(s => s.name).join(', ')})\n`);
     }
-    if (expectedToFail) {
-        const expectedToFailTasks = tasks.filter(t => t.expectedToFail && t.status === 'error');
-        res += `  ${pad(expectedToFail)} failed as expected (${expectedToFailTasks.map(s => s.name).join(', ')})\n`;
+    if (expectedToFail.length) {
+        res += `  ${pad(expectedToFail.length)} failed as expected (${expectedToFail.map(s => s.name).join(', ')})\n`;
     }
-    if (expectedToFailButPassed) {
-        res += `  ${pad(expectedToFailButPassed)} were expected to fail but passed\n`;
+    if (expectedToFailButPassed.length) {
+        res += `  ${pad(expectedToFailButPassed.length)} were expected to fail but passed\n`;
     }
     return res;
 }

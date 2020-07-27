@@ -4,6 +4,23 @@ const glob = require('glob');
 const {promisify} = require('util');
 
 /**
+ * Check if the current running node version supports import statements.
+ * Node doesn't have a native way to check for this.
+ */
+async function supportsImports() {
+    let canUseImport = true;
+    try {
+        await import('./file-that-does-not-exist');
+    } catch (err) {
+        if (/Not\ssupported/.test(err.message)) {
+            canUseImport = false;
+        }
+    }
+
+    return canUseImport;
+}
+
+/**
  * @param {*} args 
  * @param {string} testsDir 
  * @param {string} [globPattern] 
@@ -28,13 +45,34 @@ async function loadTests(args, testsDir, globPattern = '*.js') {
         }))).filter(t => t);
     }
 
-    return tests.map(t => {
-        const tc = require(path.join(testsDir, t.path));
-        tc.name = t.name;
-        return tc;
-    });
+    let canUseImport = await supportsImports();
+    return await Promise.all(
+        tests.map(async t => {
+            const file = path.join(testsDir, t.path);
+
+            let tc;
+            if (canUseImport) {
+                // Use dynamic import statement to be able to load both native esm
+                // and commonjs modules.
+                tc = await import(file);
+
+                // If we're importing a commonjs file the exports will be defined
+                // as an esm default export
+                if (tc.default) {
+                    tc = tc.default;
+                }
+            } else {
+                tc = require(file);
+            }
+
+            // ESM modules are readonly, so we need to create our own writable
+            // object.
+            return {...tc, name: t.name};
+        })
+    );
 }
 
 module.exports = {
     loadTests,
+    supportsImports,
 };

@@ -40,7 +40,7 @@ async function real_main(options={}) {
     }
 
 
-    const args = parseArgs(options);
+    const args = parseArgs(options, process.argv.slice(2));
     const config = await readConfig(options, args);
     if (options.defaultConfig) {
         options.defaultConfig(config);

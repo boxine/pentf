@@ -1,79 +1,57 @@
-const {closePage, newPage} = require('../browser_utils');
+const assert = require('assert').strict;
+const path = require('path');
+const child_process = require('child_process');
 
-async function run(config) {
-    const page = await newPage({...config, forward_console: true});
-    await page.evaluate(() => {
-        function foo() {
-            console.log([
-                [123, new Error('foo')],
-                {
-                    foo: {
-                        bar: {
-                            bob: {
-                                boof: {
-                                    baz: {
-                                        sha: {
-                                            fasd: {
-                                                asd: 123,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                null,
-                undefined,
-                'foo',
-                new Error('fail'),
-            ]);
+async function run() {
+    const sub_run = path.join(__dirname, 'console', 'run');
 
-            console.log([{'foo': null}]);
-
-            // Circular
-            const a = {foo: null};
-            a.foo = a;
-            console.log(a);
-
-            console.log(new Set([1, 2, {foo: 123}]));
-            console.log(
-                new Map([
-                    [{foo: 123}, [1, 2]],
-                    [{foo: 123}, [1, 2]],
-                ])
-            );
-
-            console.log(() => null);
-            console.log(function foo() {});
-            console.log(class Foo {});
-
-            console.log('foo');
-            console.log([1,2]);
-
-            console.trace();
-            console.trace('bar');
-
-            const map = new Map();
-            map.set('map', map);
-            console.log(map);
-
-            const set = new Set();
-            set.add(set);
-            console.log(set);
-        }
-        foo();
+    const {stdout} = await new Promise((resolve, reject) => {
+        child_process.execFile(
+            sub_run,
+            ['--exit-zero', '--no-screenshots', '--forward-console'],
+            (err, stdout, stderr) => {
+                if (err) reject(err);
+                else resolve({stdout, stderr});
+            }
+        );
     });
 
-    await page.goto('https://example.com');
-    await page.evaluate(() => console.log('Log from Example'));
-
-    await closePage(page);
+    assert.equal(`[
+  [
+    123,
+    Error: foo
+        at foo (__puppeteer_evaluation_script__:4:23)
+        at __puppeteer_evaluation_script__:61:9
+  ],
+  { foo: { bar: [Object] } },
+  null,
+  undefined,
+  'foo',
+  Error: fail
+      at foo (__puppeteer_evaluation_script__:25:17)
+      at __puppeteer_evaluation_script__:61:9
+]
+[ { foo: null } ]
+{ foo: '[[Circular]]' }
+Set(3) { 1, 2, { foo: 123 } }
+Map(2) { { foo: 123 } => [ 1, 2 ], { foo: 123 } => [ 1, 2 ] }
+[Function (anonymous)]
+[Function: foo]
+[Function: Foo]
+foo
+[ 1, 2 ]
+Trace: console.trace
+Trace: bar
+Map(1) { 'map' => '[[Circular]]' }
+Set(1) { '[[Circular]]' }
+Log from Example
+`,
+    stdout
+    );
 }
 
 module.exports = {
     description: 'Test console forwarding',
     resources: [],
-    skip: () => true,
     run,
 };

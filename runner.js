@@ -72,7 +72,6 @@ async function run_task(config, task) {
             e = new Error(`Non-error object thrown by ${task.name}: ${output.valueRepr(e)}`);
         }
 
-        task.status = 'error';
         task.duration = performance.now() - task.start;
         task.error = e;
         if (e.pentf_expectedToFail) {
@@ -179,6 +178,8 @@ async function run_task(config, task) {
                 config, `[task] Error teardown done for ${task._runner_task_id} (${task.name})`);
         }
 
+        task.status = 'error';
+        
         if (config.fail_fast) {
             process.exit(3);
         }

@@ -183,7 +183,7 @@ function resultSummary(config, tasks, onTests=false) {
         res += `  ${pad(expectedToFail.length)} failed as expected (${expectedToFail.map(s => s.name).join(', ')})\n`;
     }
     if (expectedToFailButPassed.length) {
-        res += `  ${pad(expectedToFailButPassed.length)} were expected to fail but passed\n`;
+        res += `  ${pad(expectedToFailButPassed.length)} were expected to fail but passed (${expectedToFailButPassed.map(s => s.name).join(', ')})\n`;
     }
     return res;
 }

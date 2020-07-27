@@ -54,7 +54,7 @@ function computeConcurrency(spec, {cpuCount=undefined}={}) {
     ).reduce((x, y) => x + y, 0);
 }
 
-function parseArgs(options) {
+function parseArgs(options, raw_args) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
@@ -261,6 +261,10 @@ function parseArgs(options) {
         help: 'Forward browser console logs',
         action: 'storeTrue',
     });
+    puppeteer_group.addArgument(['-d', '--debug'], {
+        help: 'Shorthand for "--keep-open --devtools-preserve --forward-console"',
+        action: 'storeTrue',
+    });
 
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
     runner_group.addArgument(['-C', '--concurrency'], {
@@ -352,7 +356,7 @@ function parseArgs(options) {
         help: 'Display the locking client ID we would use if we would lock something now',
     });
 
-    const args = parser.parseArgs();
+    const args = parser.parseArgs(raw_args);
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {
         console.log('Warning: --json-file given, but not -j/--json. Will NOT write JSON.'); // eslint-disable-line no-console
     }
@@ -366,6 +370,11 @@ function parseArgs(options) {
         console.log('Warning: --pdf-file given, but not --pdf. Will NOT write PDF.'); // eslint-disable-line no-console
     }
 
+    if (args.debug) {
+        args.devtools_preserve = true;
+        args.keep_open = true;
+        args.forward_console = true;
+    }
     if (args.keep_open) {
         args.headless = false;
     }

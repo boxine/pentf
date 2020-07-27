@@ -72,13 +72,6 @@ async function run_task(config, task) {
             e = new Error(`Non-error object thrown by ${task.name}: ${output.valueRepr(e)}`);
         }
 
-        task.status = 'error';
-        task.duration = performance.now() - task.start;
-        task.error = e;
-        if (e.pentf_expectedToFail) {
-            task.expectedToFail = e.pentf_expectedToFail;
-        }
-
         if (config.take_screenshots) {
             if (config.verbose) {
                 output.log(
@@ -177,6 +170,13 @@ async function run_task(config, task) {
         if (config.verbose) {
             output.log(
                 config, `[task] Error teardown done for ${task._runner_task_id} (${task.name})`);
+        }
+
+        task.status = 'error';
+        task.duration = performance.now() - task.start;
+        task.error = e;
+        if (e.pentf_expectedToFail) {
+            task.expectedToFail = e.pentf_expectedToFail;
         }
 
         if (config.fail_fast) {

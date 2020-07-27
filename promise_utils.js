@@ -102,6 +102,7 @@ async function expectedToFail(config, message, asyncFunc, {expectNothing=false} 
  * @param {number} timeout Timeout in ms (by default 10000=10s)
  * @param {string} message Optional error message to show when the timeout fires.
  * @param {boolean} warning Only print an error message, do not throw.
+ * @returns {*} Whatever the promise returned, if it is successful
  */
 async function timeoutPromise(config, promise, {timeout=10000, message=undefined, warning=false} = {}) {
     const stacktraceAr = (new Error()).stack.split('\n', 3);
@@ -109,7 +110,7 @@ async function timeoutPromise(config, promise, {timeout=10000, message=undefined
 
     let resolved = false;
     try {
-        await Promise.race([
+        return await Promise.race([
             promise,
             new Promise((resolve, reject) => setTimeout(() => {
                 let wholeMessage = (

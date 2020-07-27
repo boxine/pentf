@@ -688,11 +688,15 @@ async function setLanguage(page, lang) {
     await page.setExtraHTTPHeaders({'Accept-Language': lang.join(',')}); // For HTTP requests
     await page.evaluateOnNewDocument(lang => { // For JavaScript code
         Object.defineProperty(navigator, 'language', {
+            // Allow future setLanguage() calls to overwrite this property
+            configurable: true,
             get: function() {
                 return lang[0];
             }
         });
         Object.defineProperty(navigator, 'languages', {
+            // Allow future setLanguage() calls to overwrite this property
+            configurable: true,
             get: function() {
                 return lang;
             }

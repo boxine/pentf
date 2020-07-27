@@ -168,11 +168,12 @@ function prepare(config) {
 }
 
 /**
+ * @param {import('./confg').Config} config 
  * @param {import('./runner').RunnerState} state 
  * @private
  */
-async function refresh(state) {
-    const {config, locks} = state;
+async function refresh(config, state) {
+    const {locks} = state;
     assert(locks);
     if (locks.size > 0) {
         const locksArray = Array.from(locks);
@@ -194,7 +195,7 @@ async function refresh(state) {
         }
     }
 
-    state.external_locking_refresh_timeout = setTimeout(() => refresh(state), REFRESH_INTERVAL);
+    state.external_locking_refresh_timeout = setTimeout(() => refresh(config, state), REFRESH_INTERVAL);
 }
 
 /**
@@ -204,7 +205,7 @@ async function refresh(state) {
  */
 async function init(config, state) {
     if (config.no_external_locking) return;
-    state.external_locking_refresh_timeout = setTimeout(() => refresh(state), REFRESH_INTERVAL);
+    state.external_locking_refresh_timeout = setTimeout(() => refresh(config, state), REFRESH_INTERVAL);
 }
 
 /**

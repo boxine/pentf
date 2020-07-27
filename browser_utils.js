@@ -14,6 +14,7 @@ const tmp = require('tmp-promise');
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
+const {timeoutPromise} = require('./promise_utils');
 
 let tmp_home;
 
@@ -156,6 +157,8 @@ async function newPage(config, chrome_args=[]) {
         config._browser_pages.push(page);
     }
 
+    page._pentf_config = config;
+
     return page;
 }
 
@@ -164,16 +167,20 @@ async function newPage(config, chrome_args=[]) {
  * @param {import('puppeteer').Page} page puppeteer page object returned by `newPage`.
  */
 async function closePage(page) {
+    const config = page._pentf_config;
+
     // Wait for all pending logging tasks to finish before closing browser
-    await Promise.all(page._logs);
+    await timeoutPromise(
+        config, Promise.all(page._logs), {message: 'Aborting waiting on page logs'});
 
     if (page._pentf_browser_pages) {
         remove(page._pentf_browser_pages, p => p === page);
     }
 
-    const browser = await page.browser();
-    await page.close();
-    await browser.close();
+    const browser = await timeoutPromise(
+        config, page.browser(), {message: 'browser retrieval took too long'});
+    await timeoutPromise(config, page.close(), {message: 'Closing the page took too long'});
+    await timeoutPromise(config, browser.close(), {message: 'Closing the browser took too long'});
 }
 
 /**

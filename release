@@ -1,0 +1,13 @@
+#!/bin/sh
+set -ex
+
+CURRENT_VERSION=$(node -e 'console.log(require("./package.json").version)')
+echo "Enter new version number (current: $CURRENT_VERSION):"
+read VERSION
+
+# "npm version <VERSION>" updates the version number in package.json
+# and package-lock.json, creates a git commit and the tag in one command
+npm version $VERSION -m "release v%s"
+git push
+git push --tags
+npm publish

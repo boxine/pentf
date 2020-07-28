@@ -9,9 +9,57 @@ const {resultCountString} = require('./results');
 const output = require('./output');
 const utils = require('./utils');
 
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./runner').Task} task
+ * @returns {number}
+ */
+function getTaskOrder(config, task) {
+    const expectNothing = config.expect_nothing;
+
+    if (task.status === 'error' && (!task.expectedToFail || expectNothing)) {
+        return 1; // error
+    } else if (task.status === 'success' && (task.expectedToFail && !expectNothing)) {
+        return 2; // expectedToFailButPassed
+    } else if (task.status === 'error' && (task.expectedToFail && !expectNothing)) {
+        return 3; // expectedToFail
+    } else if (task.status ==='flaky') {
+        return 4; // flaky
+    } else if (task.status === 'skipped') {
+        return 5; // skipped
+    }
+
+    return 99;
+}
+
+
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./runner').RunnerResult} test_info
+ */
 function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
-    const {tasks} = state;
+
+    // Order tasks by severity
+    const tasks = state.tasks.slice().sort((taskA, taskB) => {
+        const a = getTaskOrder(config, taskA);
+        const b = getTaskOrder(config, taskB);
+
+        if (a < b) {
+            return -1;
+        } else if (a > b) {
+            return 1;
+        }
+
+        // Sort alphabetically by task name if order is the same
+        if (taskA.name < taskB.name) {
+            return -1;
+        } else if (taskA.name > taskB.name) {
+            return 1;
+        }
+
+        return 0;
+    });
 
     const tests = [];
     const testsById = new Map();

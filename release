@@ -1,5 +1,5 @@
 #!/bin/sh
-set -ex
+set -e
 
 CURRENT_VERSION=$(node -e 'console.log(require("./package.json").version)')
 echo "Enter new version number (current: $CURRENT_VERSION):"
@@ -8,6 +8,18 @@ read VERSION
 # "npm version <VERSION>" updates the version number in package.json
 # and package-lock.json, creates a git commit and the tag in one command
 npm version $VERSION -m "release v%s"
+
+./update-readme.js
+git diff
+
+echo -n Releasing in
+for i in $(seq 5); do
+	echo -n " $(expr 6 - $i)"
+	sleep 1
+done
+echo
+
+set -x
 git push
 git push --tags
 npm publish

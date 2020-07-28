@@ -411,8 +411,18 @@ async function testCases2tasks(config, testCases) {
  */
 
 /**
+ * @typedef {Object} RunnerResult
+ * @property {number} test_start
+ * @property {number} test_end
+ * @property {RunnerState} state
+ * @property {string} pentfVersion
+ * @property {string} testsVersion
+ */
+
+/**
  * @param {import('./config').Config} config
  * @param {TestCase[]} testCases
+ * @returns {RunnerResult}
  * @private
  */
 async function run(config, testCases) {

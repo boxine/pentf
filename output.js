@@ -58,9 +58,16 @@ function status(config, state) {
         }
     }
 
+    // Don't pollute logs with noise if nothing has changed in "no clear line"-mode.
+    const no_clear_line = !STATUS_STREAM.isTTY || config.no_clear_line;
+    if (no_clear_line && state.last_logged_status === status_str) {
+        return;
+    }
+    state.last_logged_status = status_str;
+
     clean(config);
     STATUS_STREAM.write(status_str);
-    if (!STATUS_STREAM.isTTY || config.no_clear_line) {
+    if (no_clear_line) {
         STATUS_STREAM.write('\n');
     }
 }

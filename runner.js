@@ -421,6 +421,8 @@ async function testCases2tasks(config, testCases) {
  * @property {Task[]} tasks
  * @property {Set<string>} [locks]
  * @property {NodeJS.Timeout} [external_locking_refresh_timeout]
+ * @property {string} last_logged_status The last status string that was logged
+ * to the console.
  */
 
 /**
@@ -438,6 +440,7 @@ async function run(config, testCases) {
     /** @type {RunnerState} */
     const state = {
         tasks,
+        last_logged_status: ''
     };
 
     if (config.sentry) {

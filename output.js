@@ -203,22 +203,26 @@ function finish(config, state) {
 
     clean(config);
 
+    const print = config.logFunc
+        ? config.logFunc.bind(null, config)
+        : STATUS_STREAM.write.bind(STATUS_STREAM);
+
     if (tasks.length === 0 && config.filter) {
-        STATUS_STREAM.write(`No test case found with filter: ${config.filter}\n`);
+        print(`No test case found with filter: ${config.filter}\n`);
     }
-    STATUS_STREAM.write(resultSummary(config, tasks) + '\n');
+    print(resultSummary(config, tasks) + '\n');
 
     const expectedToFail = tasks.filter(t => t.expectedToFail && t.status === 'error');
     if (!config.expect_nothing && (expectedToFail.length > 0)) {
         let msg = color(config, 'gray', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
         msg += '\n\n';
-        STATUS_STREAM.write(msg);
+        print(msg);
     }
 
     // Internal self-check
     const inconsistent = tasks.filter(t => !['success', 'error', 'skipped'].includes(t.status));
     if (inconsistent.length) {
-        STATUS_STREAM.write(
+        print(
             `INTERNAL ERROR: ${inconsistent.length} out of ${tasks.length} tasks` +
             ` are in an inconsistent state. First affected task is ${inconsistent[0].name}` +
             ` in state ${inconsistent[0].status}.`);
@@ -522,6 +526,48 @@ async function formatError(config, err) {
         + indentLines(stack, 2);
 }
 
+/**
+ * @param {import('./config').Config} config 
+ * @param {import('./runner').Task} task 
+ * @private
+ */
+function shouldShowError(config, task) {
+    return (
+        !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(task.error.stack)) &&
+        (config.expect_nothing || !task.expectedToFail));
+}
+
+/**
+ * @param {import('./config').Config} config 
+ * @param {import('./runner').Task} task 
+ * @private
+ */
+async function logTaskError(config, task) {
+    const show_error = shouldShowError(config, task);
+    const e = task.error;
+    if (config.verbose) {
+        log(
+            config,
+            '[task] Decided whether to show error for task ' +
+            `${task._runner_task_id} (${task.name}): ${JSON.stringify(show_error)}`
+        );
+    }
+    if (show_error) {
+        const name = color(config, 'lightCyan', task.name);
+        if (e.pentf_expectedToSucceed) {
+            const label = color(config, 'inverse-green', 'PASSED');
+            log(
+                config, `${label} test case ${name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
+        } else {
+            const label = color(config, 'inverse-red', 'FAILED');
+            log(
+                config,
+                `${label} test case ${name} at ${utils.localIso8601()}:\n` +
+                `${await formatError(config, e)}\n`);
+        }
+    }
+}
+
 
 /**
  * Generate a string representation for a random value.
@@ -555,8 +601,10 @@ module.exports = {
     formatError,
     valueRepr,
     log,
+    logTaskError,
     logVerbose,
     generateDiff,
+    shouldShowError,
     status,
     stringify,
 };

@@ -14,6 +14,7 @@ const output = require('./output');
 const utils = require('./utils');
 const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
+const { shouldShowError } = require('./output');
 
 /**
  * @param {import('./config').Config} config 
@@ -122,9 +123,8 @@ async function run_task(config, task) {
             }
         }
 
-        const show_error = (
-            !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(e.stack)) &&
-            (config.expect_nothing || !task.expectedToFail));
+        await output.logTaskError(config, task);
+        const show_error = output.shouldShowError(config, task);
         if (config.verbose) {
             output.log(
                 config,
@@ -132,44 +132,29 @@ async function run_task(config, task) {
                 `${task._runner_task_id} (${task.name}): ${JSON.stringify(show_error)}`
             );
         }
-        if (show_error) {
-            const name = output.color(config, 'lightCyan', task.name);
-            if (e.pentf_expectedToSucceed) {
-                const label = output.color(config, 'inverse-green', 'PASSED');
-                output.log(
-                    config, `${label} test case ${name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
-            } else {
-                const label = output.color(config, 'inverse-red', 'FAILED');
+        if (config.sentry && show_error && !e.pentf_expectedToSucceed) {
+            if (config.verbose) {
                 output.log(
                     config,
-                    `${label} test case ${name} at ${utils.localIso8601()}:\n` +
-                    `${await output.formatError(config, e)}\n`);
+                    '[task] Reporting error to sentry for ' +
+                    `${task._runner_task_id} (${task.name})`
+                );
+            }
 
-                if (config.sentry) {
-                    if (config.verbose) {
-                        output.log(
-                            config,
-                            '[task] Reporting error to sentry for ' +
-                            `${task._runner_task_id} (${task.name})`
-                        );
+            try {
+                const Sentry = require('@sentry/node');
+                Sentry.withScope(scope => {
+                    scope.setTag('task', task.name);
+                    scope.setTag('testcase', task.tc.name);
+                    if (process.env.CI_JOB_URL) {
+                        scope.setTag('jobUrl', process.env.CI_JOB_URL);
                     }
-
-                    try {
-                        const Sentry = require('@sentry/node');
-                        Sentry.withScope(scope => {
-                            scope.setTag('task', task.name);
-                            scope.setTag('testcase', task.tc.name);
-                            if (process.env.CI_JOB_URL) {
-                                scope.setTag('jobUrl', process.env.CI_JOB_URL);
-                            }
-                            Sentry.captureException(e);
-                        });
-                    } catch (sentryErr) {
-                        output.log(
-                            config,
-                            `INTERNAL ERROR: Sentry reporting failed for ${task.name}: ${sentryErr}`);
-                    }
-                }
+                    Sentry.captureException(e);
+                });
+            } catch (sentryErr) {
+                output.log(
+                    config,
+                    `INTERNAL ERROR: Sentry reporting failed for ${task.name}: ${sentryErr}`);
             }
         }
 
@@ -496,14 +481,25 @@ async function run(config, testCases) {
 
         await locking.init(config, state);
 
-        if (config.concurrency === 0) {
-            await sequential_run(config, state);
-        } else {
-            try {
+        try {
+            if (config.concurrency === 0) {
+                await sequential_run(config, state);
+            } else {
                 await parallel_run(config, state);
-            } finally {
-                output.finish(config, state);
             }
+        } finally {
+            // We may have printed a lot of things to stdout making it hard to see
+            // failed tests and their stack traces. Therefore we re-print all stack
+            // traces of all failed tests at the end.
+            if (config.verbose || config.ci) {
+                const errored = tasks.filter(t => t.status === 'error' && (!t.expectedToFail || config.expect_nothing));
+                for (const task of errored) {
+                    if (shouldShowError(config, task)) {
+                        await output.logTaskError(config, task);
+                    }
+                }
+            }
+            output.finish(config, state);
         }
 
         output.logVerbose(config, 'Test run complete, shutting down locks & email connections ...');
@@ -525,6 +521,7 @@ async function run(config, testCases) {
                 {message: 'afterAllTests function', warning: true});
         }
     }
+
     const now = new Date();
     const test_end = now.getTime();
 

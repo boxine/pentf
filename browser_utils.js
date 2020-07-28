@@ -543,9 +543,9 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
 
 /**
  * Click any element by its text content.
- * 
+ *
  * The text can span multiple nodes compared to `clickText` which matches direct descended text nodes only.
- * 
+ *
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string | RegExp} textOrRegExp Text or regex to match the text that the element must contain.
  * @param {{extraMessage?: string, timeout?: number, checkEvery?: number, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
@@ -559,7 +559,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
         checkText(textOrRegExp);
     }
 
-    const serializedMatcher = typeof textOrRegExp !== 'string' 
+    const serializedMatcher = typeof textOrRegExp !== 'string'
         ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
         : textOrRegExp;
 
@@ -602,7 +602,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
             while ((item = stack.pop())) {
                 for (let i = 0; i < item.childNodes.length; i++) {
                     const child = item.childNodes[i];
-                    
+
                     // Skip text nodes as they are not clickable
                     if (child.nodeType === Node.TEXT_NODE) {
                         continue;

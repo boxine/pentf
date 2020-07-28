@@ -168,15 +168,15 @@ function markdown(results) {
     return `# ${heading(results)}
 ${report_header_md}
 ### Options
-Tested Environment: **${results.config.env}**  
-Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}  
+Tested Environment: **${results.config.env}**
+Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}
 ${((results.config.repeat || 1) > 1) ?
         'Each test repeated **' + escape_html(results.config.repeat + '') + '** times  \n' : ''
-}Start: ${format_timestamp(results.start)}  
+}Start: ${format_timestamp(results.start)}
 
 ### Results
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})  
-Total test duration: ${format_duration(results.duration)}  
+Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})
+Total test duration: ${format_duration(results.duration)}
 
 | #     | Test              | Description       | Duration | Result  |
 |---    |-----------------  |-----------------  | -------- | ------  |

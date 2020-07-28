@@ -81,7 +81,7 @@ function formatDuration(config, duration) {
     let seconds = Math.floor((duration / 1000) % 60);
     let minutes = Math.floor((duration / (1000 * 60)) % 60);
     let hours = Math.floor(duration / (1000 * 60 * 60));
-  
+
     let str = '';
     if (hours > 0) {
         str += `${hours}h `;
@@ -95,13 +95,13 @@ function formatDuration(config, duration) {
     let timeColor = 'gray';
     if (duration > 60000) timeColor = 'red';
     else if (duration > 30000) timeColor = 'yellow';
-  
+
     return color(config, timeColor, str);
 }
 
 /**
- * @param {*} config 
- * @param {import('./runner').RunnerState} state 
+ * @param {*} config
+ * @param {import('./runner').RunnerState} state
  * @private
  */
 function detailedStatus(config, state) {
@@ -130,14 +130,14 @@ function detailedStatus(config, state) {
                         } else {
                             aquired.push(r);
                         }
-                        
+
                     }
-                    
+
                     const waiting_format = waiting.length ? `, waiting: ${color(config, 'red', waiting.join(', '))}` : '';
                     const aquired_format = aquired.length ? `, ${color(config, 'cyan', aquired.join(', '))}` : '';
                     out += aquired_format + waiting_format;
                 }
-                
+
                 return out;
             })
             .join('\n');
@@ -282,13 +282,13 @@ function stringify(value, level = 0) {
 
     const start = indent(level + 1);
     const end = indent(level);
-    
+
     if (Array.isArray(value)) {
         if (value.length === 0) return '[]';
         const items = value
             .map(item => `${start}${stringify(item, level + 1)}`)
             .join(',\n');
-        
+
         return `[\n${items},\n${end}]`;
     }
 
@@ -301,7 +301,7 @@ function stringify(value, level = 0) {
             return `${start}"${key}": ${stringify(value[key], level + 1)}`;
         })
         .join(',\n');
-    
+
     return `{\n${items},\n${end}}`;
 }
 
@@ -317,7 +317,7 @@ function shouldShowDiff(err) {
 
     // Chaijs adds a showDiff property
     if (err.showDiff) return true;
-    
+
     if (
         typeof err.actual === 'string' && typeof err.expected === 'string'
         && err.actual.includes('\n') && err.expected.includes('\n')
@@ -394,9 +394,9 @@ function color(config, colorName, str) {
 
 /**
  * Mark a string as a link for terminals that support this (GNOME Terminal)
- * @param {*} config 
- * @param {string} text 
- * @param {string} target 
+ * @param {*} config
+ * @param {string} text
+ * @param {string} target
  * @hidden
  */
 function link(config, text, target) {
@@ -409,7 +409,7 @@ function link(config, text, target) {
 
 /**
  * Convert tabs indentation to two spaces.
- * @param {string} str 
+ * @param {string} str
  */
 function tabs2Spaces(str) {
     return str.replace(/^\t+/, tabs => '  '.repeat(tabs.length));
@@ -427,8 +427,8 @@ function indentLines(str, n) {
 
 /**
  * Generate an excerpt of the location in the source around the
- * specified position. 
- * @param {*} config 
+ * specified position.
+ * @param {*} config
  * @param {string} content Text content to generate the code frame of
  * @param {number} lineNum zero-based line number
  * @param {number} columnNum zero-based column number
@@ -451,7 +451,7 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
             if (n === lineNum) {
                 const marker = color(config, 'bold-red', '>');
                 const formatted = `${marker} ${currentLine} | ${normalized}`;
-                
+
                 // Account for possible tab indention
                 const count = (line.length - normalized.length) + columnNum - 1;
 
@@ -464,7 +464,7 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
 }
 
 /**
- * Format the error 
+ * Format the error
  * @param {*} config Penf config object
  * @param {Error} err Error object to format
  * @returns {Promise<string>}
@@ -502,7 +502,7 @@ async function formatError(config, err) {
         })
         .join('\n');
 
-    
+
     let codeFrame = '';
     try {
         if (nearestFrame) {
@@ -527,8 +527,8 @@ async function formatError(config, err) {
 }
 
 /**
- * @param {import('./config').Config} config 
- * @param {import('./runner').Task} task 
+ * @param {import('./config').Config} config
+ * @param {import('./runner').Task} task
  * @private
  */
 function shouldShowError(config, task) {
@@ -538,8 +538,8 @@ function shouldShowError(config, task) {
 }
 
 /**
- * @param {import('./config').Config} config 
- * @param {import('./runner').Task} task 
+ * @param {import('./config').Config} config
+ * @param {import('./runner').Task} task
  * @private
  */
 async function logTaskError(config, task) {
@@ -590,7 +590,7 @@ function valueRepr(value) {
             // ignore
         }
     }
-    
+
     return '' + value;
 }
 

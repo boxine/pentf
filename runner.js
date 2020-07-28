@@ -17,8 +17,8 @@ const {timeoutPromise} = require('./promise_utils');
 const { shouldShowError } = require('./output');
 
 /**
- * @param {import('./config').Config} config 
- * @param {Task} task 
+ * @param {import('./config').Config} config
+ * @param {Task} task
  * @private
  */
 async function run_task(config, task) {
@@ -164,7 +164,7 @@ async function run_task(config, task) {
         }
 
         task.status = 'error';
-        
+
         if (config.fail_fast) {
             process.exit(3);
         }
@@ -172,8 +172,8 @@ async function run_task(config, task) {
 }
 
 /**
- * @param {import('./config').Config} config 
- * @param {RunnerState} state 
+ * @param {import('./config').Config} config
+ * @param {RunnerState} state
  * @private
  */
 async function sequential_run(config, state) {
@@ -199,15 +199,15 @@ async function sequential_run(config, state) {
 }
 
 /**
- * @param {import('./config').Config} config 
- * @param {RunnerState} state 
- * @param {Task} task 
+ * @param {import('./config').Config} config
+ * @param {RunnerState} state
+ * @param {Task} task
  * @private
  */
 async function run_one(config, state, task) {
     output.status(config, state);
 
-    if (task.status === 'skipped') return task;    
+    if (task.status === 'skipped') return task;
 
     task.status = 'running';
     task.start = performance.now();
@@ -220,8 +220,8 @@ async function run_one(config, state, task) {
 }
 
 /**
- * @param {import('./config').Config} config 
- * @param {RunnerState} state 
+ * @param {import('./config').Config} config
+ * @param {RunnerState} state
  * @private
  */
 async function parallel_run(config, state) {
@@ -327,10 +327,10 @@ async function parallel_run(config, state) {
 
 /**
  * @typedef {Object} TestCase
- * @param {string} name 
- * @param {(config: import('./config').Config) => Promise<void> | void} run 
+ * @param {string} name
+ * @param {(config: import('./config').Config) => Promise<void> | void} run
  * @param {(config: import('./config').Config) => Promise<boolean> | boolean} [skip]
- * @param {string} [expectedToFail] 
+ * @param {string} [expectedToFail]
  */
 
 /**
@@ -348,8 +348,8 @@ async function parallel_run(config, state) {
  */
 
 /**
- * @param {import('./config').Config} config 
- * @param {TestCase[]} testCases 
+ * @param {import('./config').Config} config
+ * @param {TestCase[]} testCases
  * @returns {Promise<Task[]>}
  * @private
  */
@@ -411,8 +411,8 @@ async function testCases2tasks(config, testCases) {
  */
 
 /**
- * @param {import('./config').Config} config 
- * @param {TestCase[]} testCases 
+ * @param {import('./config').Config} config
+ * @param {TestCase[]} testCases
  * @private
  */
 async function run(config, testCases) {

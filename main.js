@@ -24,7 +24,7 @@ const {loadTests} = require('./loader');
  */
 
 /**
- * @param {PentfOptions} options 
+ * @param {PentfOptions} options
  */
 async function real_main(options={}) {
     if (options.rootDir) {
@@ -66,7 +66,7 @@ async function real_main(options={}) {
     if (config.extensions.length) {
         config.extensions = config.extensions
             .reduce((acc, item) => acc.concat(item), []);
-    } 
+    }
 
     if (args.list) {
         for (const tc of test_cases) {

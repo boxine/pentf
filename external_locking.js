@@ -12,9 +12,9 @@ const REFRESH_INTERVAL = 30000;
 const REQUEST_EXPIRE_IN = 40000;
 
 /**
- * @param {import('./config').Config} config 
- * @param {string[]} resources 
- * @param {number} expireIn 
+ * @param {import('./config').Config} config
+ * @param {string[]} resources
+ * @param {number} expireIn
  * @returns {Promise<boolean | any>}
  */
 async function externalAcquire(config, resources, expireIn) {
@@ -49,9 +49,9 @@ async function externalAcquire(config, resources, expireIn) {
 }
 
 /**
- * @param {import('./config').Config} config 
- * @param {string[]} resources 
- * @param {string} [overrideClient] 
+ * @param {import('./config').Config} config
+ * @param {string[]} resources
+ * @param {string} [overrideClient]
  * @returns {Promise<true | any>}
  */
 async function externalRelease(config, resources, overrideClient) {
@@ -88,7 +88,7 @@ async function externalRelease(config, resources, overrideClient) {
 }
 
 /**
- * @param {import('./config').Config} config 
+ * @param {import('./config').Config} config
  * @returns {Promise<Array<import('./locking').Lock>>}
  */
 async function externalList(config) {
@@ -109,7 +109,7 @@ async function externalList(config) {
 }
 
 /**
- * @param {import('./config').Config} config 
+ * @param {import('./config').Config} config
  * @private
  */
 async function listLocks(config) {
@@ -118,7 +118,7 @@ async function listLocks(config) {
 }
 
 /**
- * @param {import('./config').Config} config 
+ * @param {import('./config').Config} config
  */
 async function clearAllLocks(config) {
     const locks = await externalList(config);
@@ -153,7 +153,7 @@ function generateClientName({env=process.env, nowStr=localIso8601(new Date())} =
 }
 
 /**
- * @param {import('./config').Config} config 
+ * @param {import('./config').Config} config
  * @private
  */
 function prepare(config) {
@@ -168,8 +168,8 @@ function prepare(config) {
 }
 
 /**
- * @param {import('./confg').Config} config 
- * @param {import('./runner').RunnerState} state 
+ * @param {import('./confg').Config} config
+ * @param {import('./runner').RunnerState} state
  * @private
  */
 async function refresh(config, state) {
@@ -199,8 +199,8 @@ async function refresh(config, state) {
 }
 
 /**
- * @param {import('./config').Config} state 
- * @param {import('./runner').RunnerState} state 
+ * @param {import('./config').Config} state
+ * @param {import('./runner').RunnerState} state
  * @private
  */
 async function init(config, state) {
@@ -209,8 +209,8 @@ async function init(config, state) {
 }
 
 /**
- * @param {import('./config').Config} config 
- * @param {import('./runner').RunnerState} state 
+ * @param {import('./config').Config} config
+ * @param {import('./runner').RunnerState} state
  * @private
  */
 async function shutdown(config, state) {

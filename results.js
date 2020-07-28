@@ -2,9 +2,9 @@ const assert = require('assert').strict;
 
 /**
  * Get tests result summary data
- * @param {import('./config').Config} config 
- * @param {import('./runner').Task[]} tasks 
- * @param {boolean} onTests 
+ * @param {import('./config').Config} config
+ * @param {import('./runner').Task[]} tasks
+ * @param {boolean} onTests
  * @private
  */
 function getResults(config, tasks, onTests=false) {

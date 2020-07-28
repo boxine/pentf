@@ -85,7 +85,7 @@ function* range(count) {
 
 /**
  * Range as array
- * @param {number} count 
+ * @param {number} count
  */
 function arange(count) {
     return Array.from(range(count));

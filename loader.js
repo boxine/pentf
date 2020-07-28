@@ -21,9 +21,9 @@ async function supportsImports() {
 }
 
 /**
- * @param {*} args 
- * @param {string} testsDir 
- * @param {string} [globPattern] 
+ * @param {*} args
+ * @param {string} testsDir
+ * @param {string} [globPattern]
  * @private
  */
 async function loadTests(args, testsDir, globPattern = '*.js') {

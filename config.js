@@ -422,8 +422,7 @@ async function readConfigFile(configDir, env) {
  */
 
 /**
- * 
- * @param {*} options 
+ * @param {*} options
  * @param {*} args
  * @returns {Config}
  */

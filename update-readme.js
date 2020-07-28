@@ -18,7 +18,7 @@ function main() {
     const readme_m = /^([^]+## Options)\n[^]*?\n(##[^#][^]*|\s*)$/.exec(readme_input);
     assert(readme_m);
 
-    const full_help = (child_process.execSync('./run --help', {
+    const full_help = (child_process.execSync('node run --help', {
         env: {
             COLUMNS: 110,
             PENTF_GENERIC_HELP: 'true',

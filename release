@@ -2,8 +2,12 @@
 set -e
 
 CURRENT_VERSION=$(node -e 'console.log(require("./package.json").version)')
-echo "Enter new version number (current: $CURRENT_VERSION):"
+NEXT_VERSION=$(./next_version.js)
+echo "Enter new version number (current: $CURRENT_VERSION, default $NEXT_VERSION):"
 read VERSION
+if test -z "${VERSION}"; then
+	VERSION="${NEXT_VERSION}"
+fi
 
 # "npm version <VERSION>" updates the version number in package.json
 # and package-lock.json, creates a git commit and the tag in one command

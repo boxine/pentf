@@ -158,6 +158,9 @@ async function newPage(config, chrome_args=[]) {
     }
 
     page._pentf_config = config;
+    // Not every frame is a page, but each frame of the current tab has
+    // a reference to the frame manager instance.
+    page._frameManager._pentf_config = config;
 
     return page;
 }
@@ -196,7 +199,7 @@ async function closePage(page) {
  * @param {number?} [timeout] How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
  */
-async function waitForVisible(page, selector, {message=undefined, timeout=30000}={}) {
+async function waitForVisible(page, selector, {message=undefined, timeout=page._frameManager._pentf_config.default_timeout}={}) {
     // Precompute errors for nice stack trace
     const notFoundErr = new Error(
         `Failed to find element matching  ${selector}  within ${timeout}ms` +
@@ -277,7 +280,7 @@ function checkText(text) {
  * @param {number?} timeout How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the text node.
  */
-async function waitForText(page, text, {timeout=30000, extraMessage=undefined}={}) {
+async function waitForText(page, text, {timeout=page._frameManager._pentf_config.default_timeout, extraMessage=undefined}={}) {
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
     const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
@@ -309,7 +312,7 @@ function _checkTestId(testId) {
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  * @returns {Promise<import('puppeteer').ElementHandle>} Handle to the element with the given test ID.
  */
-async function waitForTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
+async function waitForTestId(page, testId, {extraMessage=undefined, timeout=page._frameManager._pentf_config.default_timeout, visible=true} = {}) {
     _checkTestId(testId);
 
     const err = new Error(
@@ -433,7 +436,7 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  */
-async function clickSelector(page, selector, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
+async function clickSelector(page, selector, {timeout=page._frameManager._pentf_config.default_timeout, checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
@@ -481,7 +484,7 @@ async function clickSelector(page, selector, {timeout=30000, checkEvery=200, mes
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  */
-async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
+async function clickXPath(page, xpath, {timeout=page._frameManager._pentf_config.default_timeout, checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
@@ -528,7 +531,7 @@ const DEFAULT_CLICKABLE = (
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
  */
-async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
+async function clickText(page, text, {timeout=page._frameManager._pentf_config.default_timeout, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
     checkText(text);
     const xpath = (
         elementXPath +
@@ -554,7 +557,7 @@ async function clickText(page, text, {timeout=30000, checkEvery=200, elementXPat
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
  * @param {boolean?} visible Optional check if element is visible (default: true)
  */
-async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=200, extraMessage=undefined, visible=true}={}) {
+async function clickNestedText(page, textOrRegExp, {timeout=page._frameManager._pentf_config.default_timeout, checkEvery=200, extraMessage=undefined, visible=true}={}) {
     if (typeof textOrRegExp === 'string') {
         checkText(textOrRegExp);
     }
@@ -649,7 +652,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
  * @param {string?} extraMessage Optional error message shown if the element is not present in time.
  * @param {number?} timeout How long to wait, in milliseconds. (default: true)
  */
-async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000, visible=true} = {}) {
+async function clickTestId(page, testId, {extraMessage=undefined, timeout=page._frameManager._pentf_config.default_timeout, visible=true} = {}) {
     _checkTestId(testId);
 
     const xpath = `//*[@data-testid="${testId}"]`;
@@ -667,7 +670,7 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=30000,
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {string?} message Message shown if the element can not be found.
  */
-async function typeSelector(page, selector, text, {message=undefined, timeout=30000}={}) {
+async function typeSelector(page, selector, text, {message=undefined, timeout=page._frameManager._pentf_config.default_timeout}={}) {
     const el = await waitForVisible(page, selector, {timeout, message});
     await el.type(text);
 }

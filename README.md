@@ -347,6 +347,7 @@ The keys are up to you; for example you probably want to have a main entry point
                       Load unpacked browser extensions
 --forward-console     Forward browser console logs
 -d, --debug           Shorthand for "--keep-open --devtools-preserve --forward-console"
+--default-timeout MS  Default timeout value for various browser functions
 ```
 
 ###### Test runner

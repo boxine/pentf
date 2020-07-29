@@ -265,6 +265,12 @@ function parseArgs(options, raw_args) {
         help: 'Shorthand for "--keep-open --devtools-preserve --forward-console"',
         action: 'storeTrue',
     });
+    puppeteer_group.addArgument(['--default-timeout'], {
+        help: 'Default timeout value for various browser functions (default: 30s)',
+        metavar: 'MS',
+        type: 'int',
+        defaultValue: 30000
+    });
 
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
     runner_group.addArgument(['-C', '--concurrency'], {

@@ -282,7 +282,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 --<span class="hljs-keyword">print</span>-config        Output the effective configuration and <span class="hljs-keyword">exit</span>.
 -c, --<span class="hljs-keyword">print</span>-curl      <span class="hljs-keyword">Print</span> curl commands <span class="hljs-keyword">for</span> each HTTP request
 -I REGEXP, --ignore-errors REGEXP
-                      <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">error</span> messages matching the regular expression. Example: -I 
+                      <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">error</span> messages matching the regular expression. Example: -I
                       <span class="hljs-string">"\(TOC-[0-9]+\)"</span>
 -<span class="hljs-keyword">E</span>, --expect-nothing  Ignore expectedToFail attributes <span class="hljs-keyword">on</span> tests
 --<span class="hljs-keyword">no</span>-colors           Disable colors <span class="hljs-keyword">in</span> stdout</code></pre>
@@ -303,7 +303,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
                       Markdown <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.md .
 --load-json INPUT.json
                       Load test results from JSON (instead <span class="hljs-keyword">of</span> executing tests)
---sentry              Enable error reporting via Sentry. By <span class="hljs-keyword">default</span>, this will be activated <span class="hljs-keyword">if</span> the CI 
+--sentry              Enable error reporting via Sentry. By <span class="hljs-keyword">default</span>, this will be activated <span class="hljs-keyword">if</span> the CI
                       environment variable <span class="hljs-keyword">is</span> <span class="hljs-keyword">set</span> <span class="hljs-keyword">and</span> a SENTRY_DSN <span class="hljs-keyword">is</span> configured.
 --no-sentry           Disable error reporting via Sentry even <span class="hljs-keyword">if</span> it <span class="hljs-keyword">is</span> configured
 --sentry-dsn OVERRIDE_SENTRY_DSN
@@ -333,7 +333,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 -s MS, --slow-mo MS   Wait this many milliseconds after every call <span class="hljs-keyword">to</span> the virtual browser
 -k, --keep-open       Keep browser sessions open <span class="hljs-keyword">in</span> case of failures. Implies -V.
 --devtools            Start browser with devtools open. Implies -V
---devtools-preserve   Configure devtools <span class="hljs-keyword">to</span> preserve logs <span class="hljs-keyword">and</span><span class="hljs-built_in"> network </span>requests upon navigation. Implies 
+--devtools-preserve   Configure devtools <span class="hljs-keyword">to</span> preserve logs <span class="hljs-keyword">and</span><span class="hljs-built_in"> network </span>requests upon navigation. Implies
                       --devtools
 --extensions [EXTENSION_DIR [EXTENSION_DIR <span class="hljs-built_in">..</span>.]]
                       Load unpacked browser extensions
@@ -343,12 +343,12 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 					<h6>Test runner</h6>
 				</a>
 				<pre><code>-C COUNT, --concurrency COUNT
-                      Maximum number of tests to run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> to run without a pool, sequentially. 
+                      Maximum number of tests to run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> to run without a pool, sequentially.
                       Can include *, +, and cpus <span class="hljs-keyword">for</span> the number of CPUs. Defaults to <span class="hljs-number">4</span>+cpus.
 -S, --sequential      Do not run tests <span class="hljs-keyword">in</span> parallel (same as -C <span class="hljs-number">0</span>)
 --fail-fast           Abort once a test fails
 --print-tasks         Output all tasks that the runner would perform, and <span class="hljs-keyword">exit</span>
---<span class="hljs-keyword">exit</span>-zero           Terminate with <span class="hljs-keyword">exit</span> code <span class="hljs-number">0</span> (success) even <span class="hljs-keyword">if</span> tests fail. (Exit codes != <span class="hljs-number">0</span> are still 
+--<span class="hljs-keyword">exit</span>-zero           Terminate with <span class="hljs-keyword">exit</span> code <span class="hljs-number">0</span> (success) even <span class="hljs-keyword">if</span> tests fail. (Exit codes != <span class="hljs-number">0</span> are still
                       emitted <span class="hljs-keyword">in</span> cases of internal crashes)
 --repeat COUNT        Run the tests the specified number of times
 --timeout MS          Set a maximum duration <span class="hljs-keyword">for</span> a test case <span class="hljs-keyword">in</span> ms before timing out. (Default: <span class="hljs-number">1</span>h)
@@ -380,7 +380,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 				</a>
 				<p>Sometimes, we have to deprecate or move a legacy name or feature. The pentf deprecation policy is as following:</p>
 				<ol>
-					<li>For 6 months, a warning is only output if the <code>PENTF_FUTURE_DEPRECATIONS</code> environment variable is set. </li>
+					<li>For 6 months, a warning is only output if the <code>PENTF_FUTURE_DEPRECATIONS</code> environment variable is set.</li>
 					<li>Deprecation warnings are output all the time, but everything continues to work for 6 more months.</li>
 					<li>Afterwards, as long as we can find any usages of the legacy variant, we keep supporting it.</li>
 					<li>Finally, once there are no known usages of the legacy variant, we stop support alltogether.</li>

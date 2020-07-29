@@ -370,6 +370,42 @@ async function assertValue(input, expected) {
     }
 }
 
+
+/**
+ * @typedef {{changed: boolean}} NavigationState
+ * @private
+ */
+
+/**
+ * @param {import('puppeteer').Page} page
+ * @returns {NavigationState}
+ * @private
+ */
+function watchNavigtation(page) {
+    const state = {changed: false};
+    page.on('request', async resp => {
+        if (resp.isNavigationRequest()) {
+            state.changed = true;
+            await page.waitForNavigation();
+            state.changed = false;
+        }
+    });
+    return state;
+}
+
+/**
+ * @param {import('puppeteer').Page} page
+ * @param {NavigationState} navigationState
+ * @private
+ */
+async function waitForNavigationRequest(page, navigationState) {
+    // Wait for new execution context if the current frame was destroyed
+    if (navigationState.changed) {
+        await page.waitForNavigation();
+        navigationState.changed = false;
+    }
+}
+
 /**
  * Assert that there is currently no element matching the XPath on the page.
  *
@@ -397,9 +433,12 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
     }
     const {message, timeout, checkEvery} = options;
 
+    const navigation = watchNavigtation(page);
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
+        await waitForNavigationRequest(page, navigation);
+
         const found = await page.evaluate(xpath => {
             const element = document.evaluate(
                 xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
@@ -436,9 +475,12 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
 async function clickSelector(page, selector, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
 
+    const navigation = watchNavigtation(page);
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
+        await waitForNavigationRequest(page, navigation);
+
         const found = await page.evaluate((selector, visible) => {
             const element = document.querySelector(selector);
             if (!element) return false;
@@ -484,9 +526,12 @@ async function clickSelector(page, selector, {timeout=30000, checkEvery=200, mes
 async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
+    const navigation = watchNavigtation(page);
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
+        await waitForNavigationRequest(page, navigation);
+
         const found = await page.evaluate((xpath, visible) => {
             const element = document.evaluate(
                 xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
@@ -563,9 +608,12 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
         ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
         : textOrRegExp;
 
+    const navigation = watchNavigtation(page);
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
+        await waitForNavigationRequest(page, navigation);
+
         const found = await page.evaluate((matcher, visible) => {
             // eslint-disable-next-line no-undef
             /** @type {(text: string) => boolean} */

@@ -1,20 +1,37 @@
-const {clickXPath, closePage, newPage} = require('../browser_utils');
+const {clickXPath, closePage, newPage, assertNotXPath, clickSelector, clickNestedText} = require('../browser_utils');
 
 async function run(config) {
-    const page = await newPage(config);
+    const preparePage = async () => {
+        const page = await newPage(config);
+        await page.setContent(`<html><script>
+            setTimeout(() => location.href = 'https://example.com/', 1000);
+        </script>
+        <body>original</body></html>`);
 
-    await page.setContent(`<html><script>
-        setTimeout(() => location.href = 'https://google.com/', 1000);
-    </script>
-    <body>original</body></html>`);
-    await clickXPath(page, '//button');
+        return page;
+    };
+
+    // assertNotXPath()
+    let page = await preparePage();
+    await assertNotXPath(page, '//foobar');
+
+    // clickSelector()
+    page = await preparePage();
+    await clickSelector(page, 'h1');
+
+    // clickXPath()
+    page = await preparePage();
+    await clickXPath(page, '//h1');
+
+    // clickNestedText()
+    page = await preparePage();
+    await clickNestedText(page, /Example Domain/);
 
     await closePage(page);
 }
 
 module.exports = {
-    description: 'Test clickXPath while navigating',
+    description: 'Test clickXPath, clickSelector, clickXPath and clickNestedText while navigating',
     resources: [],
     run,
-    expectedToFail: 'https://github.com/boxine/pentf/issues/127',
 };

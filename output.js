@@ -487,7 +487,7 @@ async function formatError(config, err) {
 
     const stack = errorstacks.parseStackTrace(actualStack)
         .map(frame => {
-            if (!config.no_clear_line && frame.name) {
+            if (frame.name) {
                 // Only show frame for errors in the user's code
                 if (!nearestFrame && !/node_modules/.test(frame.fileName) && frame.fileName.startsWith(config._rootDir)) {
                     nearestFrame = frame;

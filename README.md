@@ -385,6 +385,13 @@ The keys are up to you; for example you probably want to have a main entry point
                       Display the locking client ID we would use if we would lock something now
 ```
 
+## Environment Variables
+
+Pentf supports settings that can be set via an environment variable.
+
+| Name | Values | Description |
+|---|---|---|
+| `PENTF_SHOW_CODE_FRAMES` | `true` / `false` | Enable or disable amending error stacks with a code frame depicting an excerpt of the code surrounding the error location. |
 
 ## License
 

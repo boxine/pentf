@@ -5,6 +5,7 @@ const path = require('path');
 const {performance} = require('perf_hooks');
 const {promisify} = require('util');
 const mkdirp = require('mkdirp');
+const kolorist = require('kolorist');
 
 const browser_utils = require('./browser_utils');
 const email = require('./email');
@@ -493,6 +494,13 @@ async function run(config, testCases) {
         Sentry.init({
             dsn: sentry_dsn,
             environment: config.env,
+            beforeBreadcrumb(breadcrumb) {
+                // Strip ansi color codes from sentry messages.
+                if (breadcrumb.message && typeof breadcrumb.message === 'string') {
+                    breadcrumb.message = kolorist.stripColors(breadcrumb.message);
+                }
+                return breadcrumb;
+            },
             integrations: [],
         });
     }

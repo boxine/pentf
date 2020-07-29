@@ -370,42 +370,6 @@ async function assertValue(input, expected) {
     }
 }
 
-
-/**
- * @typedef {{changed: boolean}} NavigationState
- * @private
- */
-
-/**
- * @param {import('puppeteer').Page} page
- * @returns {NavigationState}
- * @private
- */
-function watchNavigtation(page) {
-    const state = {changed: false};
-    page.on('request', async resp => {
-        if (resp.isNavigationRequest()) {
-            state.changed = true;
-            await page.waitForNavigation();
-            state.changed = false;
-        }
-    });
-    return state;
-}
-
-/**
- * @param {import('puppeteer').Page} page
- * @param {NavigationState} navigationState
- * @private
- */
-async function waitForNavigationRequest(page, navigationState) {
-    // Wait for new execution context if the current frame was destroyed
-    if (navigationState.changed) {
-        await page.waitForNavigation();
-        navigationState.changed = false;
-    }
-}
-
 /**
  * Assert that there is currently no element matching the XPath on the page.
  *
@@ -433,20 +397,27 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
     }
     const {message, timeout, checkEvery} = options;
 
-    const navigation = watchNavigtation(page);
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        await waitForNavigationRequest(page, navigation);
-
-        const found = await page.evaluate(xpath => {
-            const element = document.evaluate(
-                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-            return !!element;
-        }, xpath);
-        assert(!found,
-            'Element matching ' + xpath + ' is present, but should not be there.' +
-            (message ? ' ' + message : ''));
+        try {
+            const found = await page.evaluate(xpath => {
+                const element = document.evaluate(
+                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                return !!element;
+            }, xpath);
+            assert(!found,
+                'Element matching ' + xpath + ' is present, but should not be there.' +
+                (message ? ' ' + message : ''));
+        } catch(err) {
+            if (/Execution context was destroyed/.test(err.message)) {
+                // try {
+                //     await Promise.race(page.evaluate
+                // } c
+                await page.waitForNavigation();
+                continue;
+            }
+        }
 
         if (remainingTimeout <= 0) {
             break;
@@ -475,24 +446,27 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
 async function clickSelector(page, selector, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
 
-    const navigation = watchNavigtation(page);
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        await waitForNavigationRequest(page, navigation);
+        try {
+            const found = await page.evaluate((selector, visible) => {
+                const element = document.querySelector(selector);
+                if (!element) return false;
 
-        const found = await page.evaluate((selector, visible) => {
-            const element = document.querySelector(selector);
-            if (!element) return false;
+                if (visible && element.offsetParent === null) return null; // invisible
 
-            if (visible && element.offsetParent === null) return null; // invisible
-
-            element.click();
-            return true;
-        }, selector, visible);
-
-        if (found) {
-            return;
+                element.click();
+                return true;
+            }, selector, visible);
+            if (found) {
+                return;
+            }
+        } catch(err) {
+            if (/Execution context was destroyed/.test(err.message)) {
+                await page.waitForNavigation();
+                continue;
+            }
         }
 
         if (remainingTimeout <= 0) {
@@ -526,25 +500,30 @@ async function clickSelector(page, selector, {timeout=30000, checkEvery=200, mes
 async function clickXPath(page, xpath, {timeout=30000, checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
-    const navigation = watchNavigtation(page);
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        await waitForNavigationRequest(page, navigation);
 
-        const found = await page.evaluate((xpath, visible) => {
-            const element = document.evaluate(
-                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-            if (!element) return false;
+        try {
+            const found = await page.evaluate((xpath, visible) => {
+                const element = document.evaluate(
+                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                if (!element) return false;
 
-            if (visible && element.offsetParent === null) return null; // invisible
+                if (visible && element.offsetParent === null) return null; // invisible
 
-            element.click();
-            return true;
-        }, xpath, visible);
+                element.click();
+                return true;
+            }, xpath, visible);
 
-        if (found) {
-            return;
+            if (found) {
+                return;
+            }
+        } catch(err) {
+            if (/Execution context was destroyed/.test(err.message)) {
+                await page.waitForNavigation();
+                continue;
+            }
         }
 
         if (remainingTimeout <= 0) {
@@ -608,75 +587,80 @@ async function clickNestedText(page, textOrRegExp, {timeout=30000, checkEvery=20
         ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
         : textOrRegExp;
 
-    const navigation = watchNavigtation(page);
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        await waitForNavigationRequest(page, navigation);
+        try {
+            const found = await page.evaluate((matcher, visible) => {
+                // eslint-disable-next-line no-undef
+                /** @type {(text: string) => boolean} */
+                let matchFunc;
+                /** @type {null | (text: string) => boolean} */
+                let matchFuncExact = null;
 
-        const found = await page.evaluate((matcher, visible) => {
-            // eslint-disable-next-line no-undef
-            /** @type {(text: string) => boolean} */
-            let matchFunc;
-            /** @type {null | (text: string) => boolean} */
-            let matchFuncExact = null;
+                if (typeof matcher == 'string') {
+                    matchFunc = text => text.includes(matcher);
+                } else {
+                    const regexExact = new RegExp(matcher.source, matcher.flags);
+                    matchFuncExact = text => {
+                        // Reset regex state in case global flag was used
+                        regexExact.lastIndex = 0;
+                        return regexExact.test(text);
+                    };
 
-            if (typeof matcher == 'string') {
-                matchFunc = text => text.includes(matcher);
-            } else {
-                const regexExact = new RegExp(matcher.source, matcher.flags);
-                matchFuncExact = text => {
-                    // Reset regex state in case global flag was used
-                    regexExact.lastIndex = 0;
-                    return regexExact.test(text);
-                };
+                    // Remove leading ^ and ending $, otherwise the traversal
+                    // will fail at the first node.
+                    const source = matcher.source
+                        .replace(/^[^]/, '')
+                        .replace(/[$]$/, '');
+                    const regex = new RegExp(source, matcher.flags);
+                    matchFunc = text => {
+                        // Reset regex state in case global flag was used
+                        regex.lastIndex = 0;
+                        return regex.test(text);
+                    };
+                }
 
-                // Remove leading ^ and ending $, otherwise the traversal
-                // will fail at the first node.
-                const source = matcher.source
-                    .replace(/^[^]/, '')
-                    .replace(/[$]$/, '');
-                const regex = new RegExp(source, matcher.flags);
-                matchFunc = text => {
-                    // Reset regex state in case global flag was used
-                    regex.lastIndex = 0;
-                    return regex.test(text);
-                };
-            }
+                const stack = [document.body];
+                let item = null;
+                let lastFound = null;
+                while ((item = stack.pop())) {
+                    for (let i = 0; i < item.childNodes.length; i++) {
+                        const child = item.childNodes[i];
 
-            const stack = [document.body];
-            let item = null;
-            let lastFound = null;
-            while ((item = stack.pop())) {
-                for (let i = 0; i < item.childNodes.length; i++) {
-                    const child = item.childNodes[i];
-
-                    // Skip text nodes as they are not clickable
-                    if (child.nodeType === Node.TEXT_NODE) {
-                        continue;
-                    }
-
-                    const text = child.textContent || '';
-                    if (child.childNodes.length > 0 && matchFunc(text)) {
-                        if (matchFuncExact === null || matchFuncExact(text)) {
-                            lastFound = child;
+                        // Skip text nodes as they are not clickable
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            continue;
                         }
-                        stack.push(child);
+
+                        const text = child.textContent || '';
+                        if (child.childNodes.length > 0 && matchFunc(text)) {
+                            if (matchFuncExact === null || matchFuncExact(text)) {
+                                lastFound = child;
+                            }
+                            stack.push(child);
+                        }
                     }
                 }
+
+                if (!lastFound) return false;
+
+                if (visible && lastFound.offsetParent === null) return null; // invisible)
+
+                lastFound.click();
+                return true;
+            }, serializedMatcher, visible);
+
+            if (found) {
+                return;
             }
-
-            if (!lastFound) return false;
-
-            if (visible && lastFound.offsetParent === null) return null; // invisible)
-
-            lastFound.click();
-            return true;
-        }, serializedMatcher, visible);
-
-        if (found) {
-            return;
+        } catch(err) {
+            if (/Execution context was destroyed/.test(err.message)) {
+                await page.waitForNavigation();
+                continue;
+            }
         }
+
 
         if (remainingTimeout <= 0) {
             const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';

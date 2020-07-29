@@ -131,7 +131,7 @@ async function run_task(config, task) {
                 );
                 task.error_screenshots = await timeoutPromise(
                     config, screenshotPromise,
-                    {timeout: 30000, message: 'screenshots took too long'});
+                    {timeout: 10000, message: 'screenshots took too long'});
             } catch(e) {
                 output.log(
                     config,

@@ -489,7 +489,7 @@ async function formatError(config, err) {
         .map(frame => {
             if (frame.name) {
                 // Only show frame for errors in the user's code
-                if (!nearestFrame && !/node_modules/.test(frame.fileName) && frame.fileName.startsWith(config._rootDir)) {
+                if (process.env.PENTF_SHOW_CODE_FRAMES === 'false' && !nearestFrame && !/node_modules/.test(frame.fileName) && frame.fileName.startsWith(config._rootDir)) {
                     nearestFrame = frame;
                 }
 

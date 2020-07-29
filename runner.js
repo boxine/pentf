@@ -17,13 +17,42 @@ const {timeoutPromise} = require('./promise_utils');
 const { shouldShowError } = require('./output');
 
 /**
+ * @typedef {(config: import('./config') => Promise<void> | void)} TeardownHook
+ */
+
+/**
+ * Add a callback to execute during the teardown phase of the test case.
+ * @param {TaskConfig} config
+ * @param {TeardownHook} callback
+ */
+function onTeardown(config, callback) {
+    config._teardown_hooks.push(callback);
+}
+
+// Work around JSDoc limitation, which doesn't seem to support extending
+// interfaces on the fly.
+/**
+ * @typedef {Object} RawTaskConfig
+ * @property {TeardownHook[]} _teardown_hooks
+ * @property {import('puppeteer').Page[]} _browser_pages
+ * @property {string} _testName
+ * @property {string} _taskName
+ */
+
+/**
+ * @typedef {import('./config').Config & RawTaskConfig} TaskConfig
+ */
+
+/**
  * @param {import('./config').Config} config
  * @param {Task} task
  * @private
  */
 async function run_task(config, task) {
+    /** @type {TaskConfig} */
     const task_config = {
         ...config,
+        _teardown_hooks: [],
         _browser_pages: [],
         _testName: task.tc.name,
         _taskName: task.name,
@@ -167,6 +196,21 @@ async function run_task(config, task) {
 
         if (config.fail_fast) {
             process.exit(3);
+        }
+    } finally {
+        try {
+            // Run teardown functions if there are any
+            const teardownPromise = Promise.all(task_config._teardown_hooks.map(fn => fn(config)));
+            await timeoutPromise(
+                config,
+                teardownPromise,
+                {timeout: 30000, message: 'teardown took too long'}
+            );
+        } catch(e) {
+            output.log(
+                config,
+                `INTERNAL ERROR: failed to run teardown for #${task.id} (${task.name}): ${e}`
+            );
         }
     }
 }
@@ -550,5 +594,6 @@ async function run(config, testCases) {
 }
 
 module.exports = {
+    onTeardown,
     run,
 };

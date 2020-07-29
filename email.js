@@ -144,7 +144,7 @@ async function connect(config, user) {
  * assert.strictEqual(welcomeMail.text.includes('Hello'));
  * assert.strictEqual(welcomeMail.html.includes('<p>Hello'));
  * ```
- * @param {*} config The pentf configuration object.
+ * @param {import('./runner').TaskConfig} config The pentf configuration object.
  * @param {Date} since Earliest time the email can be sent. (To avoid finding the email of a prior test.)
  * @param {string} to receiveer email address (`config.email` if you have just one email address, often the result of `makeRandomEmail`)
  * @param {string} subjectContains Search string for the subject.
@@ -172,9 +172,9 @@ async function getMail(
     let client = email_cached_clients.get(user);
     let do_logout = false;
     if (client) {
-        output.logVerbose(config, `[email] Reusing existing client for ${user}`);
+        output.logVerbose(config, `[email] Reusing existing client for ${user} (${config._taskName})`);
     } else {
-        output.logVerbose(config, `[email] Connecting to account ${user}`);
+        output.logVerbose(config, `[email] Connecting to account ${user} (${config._taskName})`);
         client = await connect(config, user);
 
         if (!email_cached_clients.has(user) && config.email_new_client !== 'always') {
@@ -184,16 +184,16 @@ async function getMail(
         }
     }
 
-    output.logVerbose(config, '[email] Waiting for message to arrive...');
+    output.logVerbose(config, `[email] Waiting for message to arrive... (${config._taskName})`);
     const msg = await utils.retry(
         () => _find_message(config, client, since, to, subjectContains), wait_times);
     assert(msg, (
         'Could not find message to ' + to + ' matching ' + JSON.stringify(subjectContains) + ' since ' + since));
-    output.logVerbose(config, '[email] Message arrived');
+    output.logVerbose(config, `[email] Message arrived (${config._taskName})`);
 
     if (do_logout) {
         await client.close();
-        output.logVerbose(config, `[email] Closed client for ${user}`);
+        output.logVerbose(config, `[email] Closed client for ${user} (${config._taskName})`);
     }
 
     return msg;

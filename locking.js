@@ -68,10 +68,10 @@ async function acquire(config, state, task) {
     const {locks} = state;
     assert(locks);
     if (task.resources.some(r => locks.has(r))) {
-        if (config.locking_verbose) {
+        if (config.locking_verbose || config.log_file) {
             const failed = task.resources.filter(r => locks.has(r));
 
-            output.log(config, `[locking] ${task.id}: Failed to acquire ${failed.join(',')}`);
+            output.logVerbose(config, `[locking] ${task.id}: Failed to acquire ${failed.join(',')}`);
         }
         return false;
     }
@@ -80,16 +80,16 @@ async function acquire(config, state, task) {
         try {
             const acquireRes = await external_locking.externalAcquire(config, task.resources, 40000);
             if (acquireRes !== true) {
-                if (config.locking_verbose) {
-                    output.log(config,
+                if (config.locking_verbose || config.log_file) {
+                    output.logVerbose(config,
                         `[exlocking] ${task.id}: Failed to acquire ${acquireRes.resource}`  +
                         `, held by ${acquireRes.client}, expires in ${acquireRes.expireIn} ms`);
                 }
                 return false;
             }
         } catch(e) {
-            if (config.locking_verbose) {
-                output.log(config, `[exlocking] Failed to acquire locks for ${task.id}: ${e.stack}`);
+            if (config.locking_verbose || config.log_file) {
+                output.logVerbose(config, `[exlocking] Failed to acquire locks for ${task.id}: ${e.stack}`);
             }
             return false;
         }
@@ -98,8 +98,8 @@ async function acquire(config, state, task) {
     for (const r of task.resources) {
         locks.add(r);
     }
-    if (config.locking_verbose) {
-        output.log(config, `[locking] ${task.id}: Acquired ${task.resources.join(',')}`);
+    if (config.locking_verbose || config.log_file) {
+        output.logVerbose(config, `[locking] ${task.id}: Acquired ${task.resources.join(',')}`);
     }
     return true;
 }
@@ -111,8 +111,8 @@ async function acquire(config, state, task) {
  */
 async function acquireEventually(config, state, task) {
     if (config.no_locking) return true;
-    if (config.locking_verbose) {
-        output.log(config, `[locking] ${task.id}: Trying to eventually acquire ${task.resources.join(',')}`);
+    if (config.locking_verbose || config.log_file) {
+        output.logVerbose(config, `[locking] ${task.id}: Trying to eventually acquire ${task.resources.join(',')}`);
     }
     let waitTime = 50;
     while (! await acquire(config, state, task)) {
@@ -138,8 +138,8 @@ async function release(config, state, task) {
         try {
             const response = await external_locking.externalRelease(config, task.resources);
             if (response !== true) {
-                if (config.locking_verbose) {
-                    output.log(config,
+                if (config.locking_verbose || config.log_file) {
+                    output.logVerbose(config,
                         `[exlocking] ${task.id}: Failed to release ${response.resource}` +
                         `, held by ${response.client} expires in ${response.expireIn} ms`);
                 }
@@ -154,8 +154,8 @@ async function release(config, state, task) {
         assert(locks.has(r), `Trying to release ${r} for ${task.id}, but not in current locks ${Array.from(locks).sort().join(',')}`);
         locks.delete(r);
     }
-    if (config.locking_verbose) {
-        output.log(config, `[locking] ${task.id}: Released ${task.resources.join(',')}`);
+    if (config.locking_verbose || config.log_file) {
+        output.logVerbose(config, `[locking] ${task.id}: Released ${task.resources.join(',')}`);
     }
 }
 

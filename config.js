@@ -85,6 +85,12 @@ function parseArgs(options, raw_args) {
         action: 'storeTrue',
         help: 'Let tests output diagnostic details',
     });
+    output_group.addArgument(['--log-file'], {
+        help: 'Write verbose log information to disk. Doesn\'t affect tty logging.',
+        metavar: 'FILE',
+        type: 'string',
+        dest: 'log_file'
+    });
     output_group.addArgument(['-q', '--quiet'], {
         action: 'storeTrue',
         help: 'Do not output test status',
@@ -424,7 +430,7 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean}} Config
+ * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream}} Config
  */
 
 /**

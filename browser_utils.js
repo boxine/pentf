@@ -147,22 +147,42 @@ async function newPage(config, chrome_args=[]) {
         await Promise.all(targets.map(t => configureDevtools(t)));
     }
 
-    page._logs = [];
+    browser._logs = [];
     if (config.forward_console) {
         await forwardBrowserConsole(page);
     }
 
     if (config._browser_pages) {
-        page._pentf_browser_pages = config._browser_pages;
         config._browser_pages.push(page);
     }
 
-    page._pentf_config = config;
-    // Not every frame is a page, but each frame of the current tab has
-    // a reference to the frame manager instance.
-    page._frameManager._pentf_config = config;
+    // The Browser instance is the nearest shared ancestor across pages
+    // and frames.
+    browser._pentf_config = config;
 
     return page;
+}
+
+/**
+ * Get browser instance from a Page or Frame instance
+ * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
+ * @private
+ */
+function getBrowser(pageOrFrame) {
+    if (typeof pageOrFrame.browser === 'function') {
+        return pageOrFrame.browser();
+    } else {
+        return pageOrFrame._frameManager._page.browser();
+    }
+}
+
+/**
+ * Get the default timeout from a Page or Frame instance
+ * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
+ * @private
+ */
+function getDefaultTimeout(pageOrFrame) {
+    return getBrowser(pageOrFrame)._pentf_config.default_timeout;
 }
 
 /**
@@ -170,18 +190,17 @@ async function newPage(config, chrome_args=[]) {
  * @param {import('puppeteer').Page} page puppeteer page object returned by `newPage`.
  */
 async function closePage(page) {
-    const config = page._pentf_config;
+    const browser = getBrowser(page);
+    const config = browser._pentf_config;
 
     // Wait for all pending logging tasks to finish before closing browser
     await timeoutPromise(
-        config, Promise.all(page._logs), {message: 'Aborting waiting on page logs'});
+        config, Promise.all(browser._logs), {message: 'Aborting waiting on page logs'});
 
-    if (page._pentf_browser_pages) {
-        remove(page._pentf_browser_pages, p => p === page);
+    if (config._pentf_browser_pages) {
+        remove(config._pentf_browser_pages, p => p === page);
     }
 
-    const browser = await timeoutPromise(
-        config, page.browser(), {message: 'browser retrieval took too long'});
     await timeoutPromise(config, page.close(), {message: 'Closing the page took too long'});
     await timeoutPromise(config, browser.close(), {message: 'Closing the browser took too long'});
 }
@@ -199,7 +218,7 @@ async function closePage(page) {
  * @param {number?} [timeout] How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
  */
-async function waitForVisible(page, selector, {message=undefined, timeout=page._frameManager._pentf_config.default_timeout}={}) {
+async function waitForVisible(page, selector, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
     // Precompute errors for nice stack trace
     const notFoundErr = new Error(
         `Failed to find element matching  ${selector}  within ${timeout}ms` +
@@ -280,7 +299,7 @@ function checkText(text) {
  * @param {number?} timeout How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the text node.
  */
-async function waitForText(page, text, {timeout=page._frameManager._pentf_config.default_timeout, extraMessage=undefined}={}) {
+async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMessage=undefined}={}) {
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
     const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
@@ -312,7 +331,7 @@ function _checkTestId(testId) {
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  * @returns {Promise<import('puppeteer').ElementHandle>} Handle to the element with the given test ID.
  */
-async function waitForTestId(page, testId, {extraMessage=undefined, timeout=page._frameManager._pentf_config.default_timeout, visible=true} = {}) {
+async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true} = {}) {
     _checkTestId(testId);
 
     const err = new Error(
@@ -436,7 +455,7 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  */
-async function clickSelector(page, selector, {timeout=page._frameManager._pentf_config.default_timeout, checkEvery=200, message=undefined, visible=true} = {}) {
+async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
@@ -484,7 +503,7 @@ async function clickSelector(page, selector, {timeout=page._frameManager._pentf_
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  */
-async function clickXPath(page, xpath, {timeout=page._frameManager._pentf_config.default_timeout, checkEvery=200, message=undefined, visible=true} = {}) {
+async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true} = {}) {
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
@@ -531,7 +550,7 @@ const DEFAULT_CLICKABLE = (
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
  */
-async function clickText(page, text, {timeout=page._frameManager._pentf_config.default_timeout, checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
+async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
     checkText(text);
     const xpath = (
         elementXPath +
@@ -557,7 +576,7 @@ async function clickText(page, text, {timeout=page._frameManager._pentf_config.d
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
  * @param {boolean?} visible Optional check if element is visible (default: true)
  */
-async function clickNestedText(page, textOrRegExp, {timeout=page._frameManager._pentf_config.default_timeout, checkEvery=200, extraMessage=undefined, visible=true}={}) {
+async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage=undefined, visible=true}={}) {
     if (typeof textOrRegExp === 'string') {
         checkText(textOrRegExp);
     }
@@ -652,7 +671,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=page._frameManager._
  * @param {string?} extraMessage Optional error message shown if the element is not present in time.
  * @param {number?} timeout How long to wait, in milliseconds. (default: true)
  */
-async function clickTestId(page, testId, {extraMessage=undefined, timeout=page._frameManager._pentf_config.default_timeout, visible=true} = {}) {
+async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true} = {}) {
     _checkTestId(testId);
 
     const xpath = `//*[@data-testid="${testId}"]`;
@@ -670,7 +689,7 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=page._
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {string?} message Message shown if the element can not be found.
  */
-async function typeSelector(page, selector, text, {message=undefined, timeout=page._frameManager._pentf_config.default_timeout}={}) {
+async function typeSelector(page, selector, text, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
     const el = await waitForVisible(page, selector, {timeout, message});
     await el.type(text);
 }

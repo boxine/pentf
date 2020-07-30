@@ -149,7 +149,7 @@ async function newPage(config, chrome_args=[]) {
 
     browser._logs = [];
     if (config.forward_console) {
-        await forwardBrowserConsole(page);
+        await forwardBrowserConsole(config, page);
     }
 
     if (config._browser_pages) {

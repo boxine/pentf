@@ -1,3 +1,6 @@
+const output = require('./output');
+const kolorist = require('kolorist');
+
 /**
  * Reconstruct original types from serialized message
  * @param {*} value
@@ -103,6 +106,37 @@ function serialize(value, seen) {
 }
 
 /**
+ * @param {import('./config').Config} config
+ * @param {string} type
+ * @param {import('puppeteer').ConsoleMessage} message
+ * @private
+ */
+function printRawMessage(config, type, message) {
+    const loc = message.location();
+    let url = loc.url;
+    if (loc.lineNumber) {
+        url += `:${loc.lineNumber}`;
+        if (loc.columnNumber) {
+            url += `:${loc.columnNumber}`;
+        }
+    }
+    url = kolorist.link(url, url);
+
+    const colors = {
+        warn: 'yellow',
+        error: 'red',
+    };
+
+    const locStr = output.color(config, 'dim', `  at ${url}`);
+    let text = `${message.text()}\n${locStr}`;
+    if (colors[type]) {
+        text = output.color(config, colors[type], text);
+    }
+
+    output.log(config, text);
+}
+
+/**
  * Serialize console arguments and send them to puppeteer. Unfortunately for
  * us the native serialization methods for JSHandle objects from puppeteer
  * are lossy. They turn Error objects into `{}` and `null` to `undefined`.
@@ -112,9 +146,10 @@ function serialize(value, seen) {
  * The only way to keep the data intact is to use a custom serialization format
  * and pass it around as a string.
  *
+ * @param {import('./config').Config} config
  * @param {import('puppeteer').Page} page
  */
-async function forwardBrowserConsole(page) {
+async function forwardBrowserConsole(config, page) {
     // The stack is not present on the trace method, so we need to patch it in
     await page.evaluateOnNewDocument((fn) => {
         const serialize = new Function(`return ${fn}`)();
@@ -133,8 +168,18 @@ async function forwardBrowserConsole(page) {
         browser._logs.push(new Promise(r => resolve = r));
 
         let type = message.type();
-        // Correct log type for warning messages
-        type = type === 'warning' ? 'warn' : type;
+        // Correct log type
+        const typeMap = {
+            warning: 'warn',
+            verbose: 'log'
+        };
+        type = typeMap[type] || type;
+
+        if (!message.args().length) {
+            printRawMessage(config, type, message);
+            resolve();
+            return;
+        }
 
         try {
             const args = await Promise.all(
@@ -153,7 +198,15 @@ async function forwardBrowserConsole(page) {
                 console[type].apply(console, parsed);
             }
         } catch (err) {
-            console.log(err);
+            // While we're serializing data, the user or something else might
+            // trigger a navigation. In this case our context will be destroyed.
+            // When this happens we fall back to the raw string value that
+            // puppeteer sent us initially.
+            if (/Execution context was destroyed/.test(err.message)) {
+                printRawMessage(config, type, message);
+            } else {
+                console.log(err);
+            }
         } finally {
             resolve();
         }

@@ -88,7 +88,9 @@ async function acquire(config, state, task) {
                 return false;
             }
         } catch(e) {
-            output.log(config, `[exlocking] Failed to acquire locks for ${task.id}: ${e.stack}`);
+            if (config.locking_verbose) {
+                output.log(config, `[exlocking] Failed to acquire locks for ${task.id}: ${e.stack}`);
+            }
             return false;
         }
     }

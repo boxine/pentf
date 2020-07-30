@@ -400,7 +400,7 @@ function color(config, colorName, str) {
  * @hidden
  */
 function link(config, text, target) {
-    if (!config.colors) {
+    if (!config.colors || process.env.CI) {
         return text;
     }
 

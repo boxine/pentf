@@ -82,12 +82,10 @@ async function run_task(config, task) {
         clearTimeout(timeout);
 
         task.status = 'success';
-        if (config.verbose) {
-            output.log(
-                config,
-                `[task] Marked #${task._runner_task_id} (${task.name}) as success`
-            );
-        }
+        output.logVerbose(
+            config,
+            `[task] Marked #${task._runner_task_id} (${task.name}) as success`
+        );
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
             const etf = (typeof task.expectedToFail === 'string') ? ` (${task.expectedToFail})` : '';
@@ -110,12 +108,10 @@ async function run_task(config, task) {
         }
 
         if (config.take_screenshots) {
-            if (config.verbose) {
-                output.log(
-                    config,
-                    `[task] Taking ${task_config._browser_pages.length} screenshots for task` +
-                    ` #${task._runner_task_id} (${task.name})`);
-            }
+            output.logVerbose(
+                config,
+                `[task] Taking ${task_config._browser_pages.length} screenshots for task` +
+                ` #${task._runner_task_id} (${task.name})`);
             try {
                 const screenshotPromise = Promise.all(task_config._browser_pages.map(
                     async (page, i) => {
@@ -140,12 +136,10 @@ async function run_task(config, task) {
         }
         // Close all browser windows
         if (! config.keep_open && task_config._browser_pages.length > 0) {
-            if (config.verbose) {
-                output.log(
-                    config,
-                    `[task] Closing ${task_config._browser_pages.length} browser pages for task` +
-                    ` #${task._runner_task_id} (${task.name})`);
-            }
+            output.logVerbose(
+                config,
+                `[task] Closing ${task_config._browser_pages.length} browser pages for task` +
+                ` #${task._runner_task_id} (${task.name})`);
             try {
                 await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
             } catch(e) {
@@ -155,21 +149,17 @@ async function run_task(config, task) {
 
         await output.logTaskError(config, task);
         const show_error = output.shouldShowError(config, task);
-        if (config.verbose) {
-            output.log(
-                config,
-                '[task] Decided whether to show error for task ' +
-                `${task._runner_task_id} (${task.name}): ${JSON.stringify(show_error)}`
-            );
-        }
+        output.logVerbose(
+            config,
+            '[task] Decided whether to show error for task ' +
+            `${task._runner_task_id} (${task.name}): ${JSON.stringify(show_error)}`
+        );
         if (config.sentry && show_error && !e.pentf_expectedToSucceed) {
-            if (config.verbose) {
-                output.log(
-                    config,
-                    '[task] Reporting error to sentry for ' +
-                    `${task._runner_task_id} (${task.name})`
-                );
-            }
+            output.logVerbose(
+                config,
+                '[task] Reporting error to sentry for ' +
+                `${task._runner_task_id} (${task.name})`
+            );
 
             try {
                 const Sentry = require('@sentry/node');
@@ -188,10 +178,8 @@ async function run_task(config, task) {
             }
         }
 
-        if (config.verbose) {
-            output.log(
-                config, `[task] Error teardown done for ${task._runner_task_id} (${task.name})`);
-        }
+        output.logVerbose(
+            config, `[task] Error teardown done for ${task._runner_task_id} (${task.name})`);
 
         task.status = 'error';
 
@@ -328,7 +316,7 @@ async function parallel_run(config, state) {
 
             task._runner_task_id = runner_task_id;
             const promise = run_one(config, state, task);
-            if (config.verbose) output.log(config, `[runner] started task #${task._runner_task_id}: ${task.id}`);
+            output.logVerbose(config, `[runner] started task #${task._runner_task_id}: ${task.id}`);
             promise._runner_task_id = runner_task_id;
             runner_task_id++;
             state.running.push(promise);
@@ -364,7 +352,7 @@ async function parallel_run(config, state) {
             output.log(config, `[runner] waiting for one of the tasks ${tasksStr} to finish`);
         }
         const done_task = await Promise.race(state.running);
-        if (config.verbose) output.log(config, `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`);
+        output.logVerbose(config, `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`);
         await locking.release(config, state, done_task);
         utils.remove(state.running, promise => promise._runner_task_id === done_task._runner_task_id);
     }

@@ -418,7 +418,7 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean}} Config
+ * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, filter?: RegExp, forward_console?: boolean, keep_open?: boolean}} Config
  */
 
 /**

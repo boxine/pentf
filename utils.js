@@ -91,6 +91,11 @@ function arange(count) {
     return Array.from(range(count));
 }
 
+/**
+ * @template T
+ * @param {T[]} ar
+ * @param {(item: T) => boolean} filter
+ */
 function count(ar, filter) {
     let res = 0;
     for (var el of ar) {

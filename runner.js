@@ -67,7 +67,7 @@ async function run_task(config, task) {
         });
 
         let finished = false;
-        const testPromise = task.tc.run(task_config)
+        const testPromise = Promise.resolve(task.tc.run(task_config))
             .finally(() => (finished = true));
 
         await Promise.race([

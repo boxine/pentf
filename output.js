@@ -195,7 +195,10 @@ function resultSummary(config, tasks, onTests=false) {
     return res;
 }
 
-
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./runner').RunnerState} state
+ */
 function finish(config, state) {
     last_state = null;
     const {tasks} = state;
@@ -203,34 +206,64 @@ function finish(config, state) {
 
     clean(config);
 
-    const print = config.logFunc
-        ? config.logFunc.bind(null, config)
-        : STATUS_STREAM.write.bind(STATUS_STREAM);
-
+    let msg = '';
     if (tasks.length === 0 && config.filter) {
-        print(`No test case found with filter: ${config.filter}\n`);
+        msg += `No test case found with filter: ${config.filter}\n`;
     }
-    print(resultSummary(config, tasks) + '\n');
+    msg += resultSummary(config, tasks);
 
     const expectedToFail = tasks.filter(t => t.expectedToFail && t.status === 'error');
     if (!config.expect_nothing && (expectedToFail.length > 0)) {
-        let msg = color(config, 'gray', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
+        msg += color(config, 'gray', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
         msg += '\n\n';
-        print(msg);
     }
 
     // Internal self-check
     const inconsistent = tasks.filter(t => !['success', 'error', 'skipped'].includes(t.status));
     if (inconsistent.length) {
-        print(
+        msg +=
             `INTERNAL ERROR: ${inconsistent.length} out of ${tasks.length} tasks` +
             ` are in an inconsistent state. First affected task is ${inconsistent[0].name}` +
-            ` in state ${inconsistent[0].status}.`);
+            ` in state ${inconsistent[0].status}.`;
     }
+
+    if (config.logFunc) {
+        config.logFunc(config, msg);
+        return;
+    }
+
+    if (config.log_file) {
+        reportLogFile(config, msg);
+    }
+
+    STATUS_STREAM.write(msg);
 }
 
+/**
+ * @param {import("./config").Config} config
+ * @param {string} message
+ * @private
+ */
+function reportLogFile(config, message) {
+    const time = utils.localIso8601();
+    message = `${time} ${kolorist.stripColors(message)}`;
+    if (!message.endsWith('\n')) {
+        message += '\n';
+    }
+
+    config.log_file_stream.write(message);
+}
+
+/**
+ * @param {import('./config').Config} config
+ * @param {*} message
+ */
 function log(config, message) {
     if (config.logFunc) return config.logFunc(config, message);
+
+    if (config.log_file) {
+        reportLogFile(config, message);
+    }
 
     if (! config.concurrency) {
         console.log(message);  // eslint-disable-line no-console
@@ -246,8 +279,17 @@ function log(config, message) {
     }
 }
 
+/**
+ * @param {import("./config").Config} config
+ * @param {string} message
+ */
 function logVerbose(config, message) {
-    if (!config.verbose) return;
+    if (!config.verbose) {
+        if (config.log_file) {
+            reportLogFile(config, message);
+        }
+        return;
+    }
     log(config, message);
 }
 

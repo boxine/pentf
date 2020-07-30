@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const {readConfig, parseArgs} = require('./config');
-const {readFile} = require('./utils');
+const {readFile, localIso8601} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
 const {color, logVerbose} = require('./output');
@@ -94,6 +94,13 @@ async function real_main(options={}) {
         const json_input = await readFile(args.load_json, {encoding: 'utf-8'});
         results = JSON.parse(json_input);
     } else {
+        if (config.log_file && !config.log_file_stream) {
+            const stream = fs.createWriteStream(config.log_file, { flags: 'w' });
+            const time = localIso8601();
+            stream.write(`${time} Start runner\n`);
+            config.log_file_stream = stream;
+        }
+
         // Run tests
         const test_info = await runner.run(config, test_cases);
         if (!test_info) return;

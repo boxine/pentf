@@ -195,7 +195,11 @@ function resultSummary(config, tasks, onTests=false) {
     return res;
 }
 
-
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./runner').RunnerState} state
+ * @private
+ */
 function finish(config, state) {
     last_state = null;
     const {tasks} = state;
@@ -213,10 +217,31 @@ function finish(config, state) {
     print(resultSummary(config, tasks) + '\n');
 
     const expectedToFail = tasks.filter(t => t.expectedToFail && t.status === 'error');
+
+    let hasHint = false;
     if (!config.expect_nothing && (expectedToFail.length > 0)) {
-        let msg = color(config, 'gray', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
-        msg += '\n\n';
-        print(msg);
+        const msg = color(config, 'gray', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
+        print(msg + '\n');
+        hasHint = true;
+    }
+    const hasDebug = config.debug || config.forward_console || config.keep_open || config.devtools || config.devtools_preserve;
+    if ((!config.filter || !hasDebug) && utils.count(tasks, t => t.status === 'error' && (!t.expectedToFail || config.expect_nothing)) > 0) {
+        let msg = '';
+        if (!config.filter && !hasDebug) {
+            msg = '  Pass in -f/--filter REGEX and -d/--debug to inspect specific tests.';
+        } else if (!config.filter) {
+            msg = '  Pass in -f/--filter REGEX to inspect specific tests.';
+        } else if (!hasDebug) {
+            msg = '  Pass in -d/--debug to inspect tests.';
+        }
+
+        if (msg) {
+            print(color(config, 'gray', msg) + '\n');
+            hasHint = true;
+        }
+    }
+    if (hasHint) {
+        print('\n');
     }
 
     // Internal self-check

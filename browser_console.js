@@ -127,9 +127,10 @@ async function forwardBrowserConsole(page) {
         };
     }, serialize.toString());
 
+    const browser = page.browser();
     page.on('console', async message => {
         let resolve;
-        page._logs.push(new Promise(r => resolve = r));
+        browser._logs.push(new Promise(r => resolve = r));
 
         let type = message.type();
         // Correct log type for warning messages

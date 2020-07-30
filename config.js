@@ -422,17 +422,19 @@ async function readConfigFile(configDir, env) {
  */
 
 /**
- * @param {*} options
- * @param {*} args
+ * @param {import('./main').PentfOptions} options
+ * @param {object} args
  * @returns {Config}
  */
 async function readConfig(options, args) {
     const {configDir} = options;
-    assert(configDir);
-    const env = args.env;
-    assert(env);
 
-    const config = await readConfigFile(configDir, env);
+    let config = {};
+    if (configDir) {
+        const env = args.env;
+        assert(env);
+        config = await readConfigFile(configDir, env);
+    }
     config.beforeAllTests = options.beforeAllTests;
     config.afterAllTests = options.afterAllTests;
     if (args.override_external_locking_url) {

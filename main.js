@@ -74,7 +74,7 @@ async function real_main(options={}) {
             if (tc.description) {
                 description = (
                     ' ' + (config.colors ? '' : '(') +
-                    color(config, 'gray', tc.description) +
+                    color(config, 'dim', tc.description) +
                     (config.colors ? '' : ')')
                 );
             }

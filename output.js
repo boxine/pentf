@@ -92,7 +92,7 @@ function formatDuration(config, duration) {
 
     str += `${seconds}s`;
 
-    let timeColor = 'gray';
+    let timeColor = 'dim';
     if (duration > 60000) timeColor = 'red';
     else if (duration > 30000) timeColor = 'yellow';
 
@@ -214,7 +214,7 @@ function finish(config, state) {
 
     const expectedToFail = tasks.filter(t => t.expectedToFail && t.status === 'error');
     if (!config.expect_nothing && (expectedToFail.length > 0)) {
-        msg += color(config, 'gray', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
+        msg += color(config, 'dim', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
         msg += '\n\n';
     }
 
@@ -499,7 +499,7 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
 
                 return formatted + `\n  ${padding} ${color(config, 'dim', '|')} ${' '.repeat(count)}${color(config, 'bold-red', '^')}`;
             } else {
-                return color(config, 'gray', `  ${currentLine} | ${normalized}`);
+                return color(config, 'dim', `  ${currentLine} | ${normalized}`);
             }
         })
         .join('\n');

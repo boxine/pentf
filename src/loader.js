@@ -45,6 +45,74 @@ async function importFile(file) {
 }
 
 /**
+ * @typedef {Omit<import('./runner').TestCase, 'name' | 'run'>} TestOptions
+ */
+
+/**
+ * @typedef {{(name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void, only: (name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void} TestFn
+ */
+
+/**
+ * @typedef {{(name: string, callback: () => void): void, only: (name: string, callback: () => void): void} SuiteFn
+ */
+
+/**
+ * @param {string} suiteName
+ * @param {(test: TestFn, suite: SuiteFn) => void} builder
+ * @private
+ */
+function loadSuite(suiteName, builder) {
+    const tests = [];
+    const only = [];
+    let onlyInScope = false;
+    const groups = [suiteName];
+    let i = 0;
+
+    /**
+     * @param {string} description
+     * @param {(config: import('./config').Config) => Promise<void>} run
+     * @param {{ skip: () => Promise<boolean> | boolean}} options
+     */
+    function test(description, run, options = {}) {
+        const arr = onlyInScope ? only : tests;
+        arr.push({
+            description,
+            name: `${groups.join('>')}_${i++}`,
+            run,
+            ...options,
+        });
+    }
+
+    test.only = (description, run, options = {}) => {
+        only.push({
+            description,
+            name: `${groups.join('>')}_${i++}`,
+            run,
+            ...options,
+        });
+    };
+
+    function suite(description, callback) {
+        groups.push(description);
+        callback();
+        groups.pop();
+    }
+
+    suite.only = (description, callback) => {
+        onlyInScope = true;
+        groups.push(description);
+
+        callback();
+
+        onlyInScope = false;
+        groups.pop();
+    };
+
+    builder(test, suite);
+    return only.length > 0 ? only : tests;
+}
+
+/**
  * @param {*} args
  * @param {string} testsDir
  * @param {string} [globPattern]
@@ -69,17 +137,24 @@ async function loadTests(args, testsDir, globPattern = '*.{js,cjs,mjs}') {
         }))).filter(t => t);
     }
 
-    return await Promise.all(
+    const testCases = [];
+    await Promise.all(
         tests.map(async t => {
             const file = path.join(testsDir, t.path);
 
             let tc = await importFile(file);
 
-            // ESM modules are readonly, so we need to create our own writable
-            // object.
-            return {...tc, name: t.name};
+            if (typeof tc.runSuite === 'function') {
+                testCases.push(...loadSuite(t.name, tc.runSuite));
+            } else {
+                // ESM modules are readonly, so we need to create our own writable
+                // object.
+                testCases.push({...tc, name: t.name});
+            }
         })
     );
+
+    return testCases;
 }
 
 module.exports = {

@@ -99,6 +99,7 @@ async function real_main(options={}) {
         if (!test_info) return;
 
         results = render.craftResults(config, test_info);
+        console.log(test_info);
     }
 
     await render.doRender(config, results);

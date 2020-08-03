@@ -22,5 +22,6 @@ async function run() {
 module.exports = {
     description: 'Print fallback console when execution context is destroyed.',
     resources: [],
+    skip: () => 'Test is timing sensitive',
     run,
 };

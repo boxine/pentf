@@ -51,7 +51,7 @@ async function real_main(options={}) {
         process.env.NODE_DISABLE_COLORS = 'true';
     }
 
-    const test_cases = await loadTests(args, options.testsDir, options.testsGlob);
+    const test_cases = await loadTests(args, options.testsDir, config.testsGlob || options.testsGlob);
     config._testsDir = options.testsDir;
     if (options.rootDir) config._rootDir = options.rootDir;
     if (options.configDir) config._configDir = options.configDir;

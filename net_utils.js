@@ -56,6 +56,7 @@ async function fetch(config, url, init) {
     if (needAgent) {
         const agentinit = {
             keepAlive: true,
+            timeout: 60000, // 60s
         };
         if (url.startsWith('https://')) {
             agentinit.rejectUnauthorized = (

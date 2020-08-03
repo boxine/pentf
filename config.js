@@ -210,6 +210,11 @@ function parseArgs(options, raw_args) {
         dest: 'include_slow_tests',
         help: 'Run tests that take a very long time',
     });
+    selection_group.addArgument(['--tests-glob'], {
+        dest: 'testsGlob',
+        defaultValue: undefined,
+        help: 'Glob pattern to use when searching test files',
+    });
 
     const email_group = parser.addArgumentGroup({title: 'Email'});
     email_group.addArgument(['--keep-emails'], {

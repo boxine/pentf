@@ -36,6 +36,7 @@ function onTeardown(config, callback) {
  * @typedef {Object} RawTaskConfig
  * @property {TeardownHook[]} _teardown_hooks
  * @property {import('puppeteer').Page[]} _browser_pages
+ * @property {Error | null} _breadcrumb
  * @property {string} _testName
  * @property {string} _taskName
  */
@@ -55,6 +56,7 @@ async function run_task(config, task) {
         ...config,
         _teardown_hooks: [],
         _browser_pages: [],
+        _breadcrumb: null,
         _testName: task.tc.name,
         _taskName: task.name,
     };
@@ -103,6 +105,7 @@ async function run_task(config, task) {
 
         task.duration = performance.now() - task.start;
         task.error = e;
+        task.breadcrumb = task_config._breadcrumb;
         if (e.pentf_expectedToFail) {
             task.expectedToFail = e.pentf_expectedToFail;
         }
@@ -376,6 +379,7 @@ async function parallel_run(config, state) {
  * @property {string} name
  * @property {TestCase} tc
  * @property {TaskStatus} status
+ * @property {Error | null} breadcrumb
  * @property {boolean} [skipReason]
  * @property {boolean | ((config: import('./config').Config) => boolean)} [expectedToFail]
  */
@@ -426,6 +430,7 @@ async function testCases2tasks(config, testCases) {
         for (let runId = 0;runId < repeat;runId++) {
             tasks[runId * testCases.length + position] = {
                 ...task,
+                breadcrumb: null,
                 id: `${tc.name}_${runId}`,
                 name: `${tc.name}[${runId}]`,
             };

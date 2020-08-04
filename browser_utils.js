@@ -30,7 +30,7 @@ let tmp_home;
  * await waitForText(page, 'More information');
  * await closePage(page);
  * ```
- * @param {*} config The pentf configuration object.
+ * @param {import('./runner').TaskConfig} config The pentf configuration object.
  * @param {string[]} [chrome_args] Additional arguments for Chrome (optional).
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
@@ -159,6 +159,7 @@ async function newPage(config, chrome_args=[]) {
     // The Browser instance is the nearest shared ancestor across pages
     // and frames.
     browser._pentf_config = config;
+    addBreadcrumb(page, 'newPage()');
 
     return page;
 }
@@ -186,6 +187,20 @@ function getDefaultTimeout(pageOrFrame) {
 }
 
 /**
+ * Mark progress in test. Useful for when the test times out and there is no
+ * hint as to why.
+ * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
+ * @param {string} name
+ * @private
+ */
+function addBreadcrumb(pageOrFrame, name) {
+    const config =  getBrowser(pageOrFrame)._pentf_config;
+    if (config.breadcrumbs) {
+        config._breadcrumb = new Error(`Last successful browser operation was "${name}"`);
+    }
+}
+
+/**
  * Close a page (and its associated browser)
  * @param {import('puppeteer').Page} page puppeteer page object returned by `newPage`.
  */
@@ -203,6 +218,7 @@ async function closePage(page) {
 
     await timeoutPromise(config, page.close(), {message: 'Closing the page took too long'});
     await timeoutPromise(config, browser.close(), {message: 'Closing the browser took too long'});
+    addBreadcrumb(page, 'closePage()');
 }
 
 /**
@@ -247,6 +263,7 @@ async function waitForVisible(page, selector, {message=undefined, timeout=getDef
         }
     }
     assert(el !== null);
+    addBreadcrumb(page, `waitForVisible(${selector})`);
     return el;
 }
 
@@ -306,7 +323,9 @@ async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMe
 
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
-        return await page.waitForXPath(xpath, {timeout});
+        const res = await page.waitForXPath(xpath, {timeout});
+        addBreadcrumb(page, `waitForText(${text})`);
+        return res;
     } catch (e) {
         throw err;
     }
@@ -352,6 +371,7 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
         throw err; // Do not construct error here lest stack trace gets lost
     }
     assert(el !== null);
+    addBreadcrumb(page, `waitForTestId(${testId})`);
     return el;
 }
 
@@ -368,6 +388,7 @@ async function assertValue(input, expected) {
         await page.waitForFunction((inp, expected) => {
             return inp.value === expected;
         }, {timeout: 2000}, input, expected);
+        addBreadcrumb(page, `assertValue(${expected})`);
     } catch (e) {
         if (e.name !== 'TimeoutError') throw e;
 
@@ -438,6 +459,7 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
         await wait(Math.min(checkEvery, remainingTimeout));
         remainingTimeout -= checkEvery;
     }
+    addBreadcrumb(page, `assertNotXPath(${xpath})`);
 }
 
 /**
@@ -472,6 +494,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
         }, selector, visible);
 
         if (found) {
+            addBreadcrumb(page, `clickSelector(${selector})`);
             return;
         }
 
@@ -521,6 +544,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
         }, xpath, visible);
 
         if (found) {
+            addBreadcrumb(page, `clickXPath(${xpath})`);
             return;
         }
 
@@ -556,11 +580,13 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
         elementXPath +
         `[contains(text(), ${escapeXPathText(text)})]`);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-    return clickXPath(page, xpath, {
+    const res = await clickXPath(page, xpath, {
         timeout,
         checkEvery,
         message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`,
     });
+    addBreadcrumb(page, `clickText(${text})`);
+    return res;
 }
 
 /**
@@ -649,6 +675,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         }, serializedMatcher, visible);
 
         if (found) {
+            addBreadcrumb(page, `clickNestedText(${textOrRegExp})`);
             return;
         }
 
@@ -677,7 +704,9 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
     const xpath = `//*[@data-testid="${testId}"]`;
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
     const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
-    return await clickXPath(page, xpath, {timeout, message, visible});
+    const res = await clickXPath(page, xpath, {timeout, message, visible});
+    addBreadcrumb(page, `clickTestId(${testId})`);
+    return res;
 }
 
 /**
@@ -692,6 +721,7 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
 async function typeSelector(page, selector, text, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
     const el = await waitForVisible(page, selector, {timeout, message});
     await el.type(text);
+    addBreadcrumb(page, `typeSelector(${selector}, text: ${text})`);
 }
 
 /**
@@ -724,6 +754,7 @@ async function setLanguage(page, lang) {
             }
         });
     }, lang);
+    addBreadcrumb(page, `setLanguage(${lang.join(', ')})`);
 }
 
 /**
@@ -736,7 +767,7 @@ async function setLanguage(page, lang) {
  */
 async function getAttribute(page, selector, name) {
     await page.waitForSelector(selector);
-    return page.$eval(
+    const res = await page.$eval(
         selector,
         (el, propName) => {
             if (propName in el) {
@@ -747,6 +778,8 @@ async function getAttribute(page, selector, name) {
         },
         name,
     );
+    addBreadcrumb(page, `getAttribute(${selector}, attr: ${name})`);
+    return res;
 }
 
 /**
@@ -757,7 +790,9 @@ async function getAttribute(page, selector, name) {
  * @returns {Promise<string>} Text content of the selected element.
  */
 async function getText(page, selector) {
-    return getAttribute(page, selector, 'textContent');
+    const res = await getAttribute(page, selector, 'textContent');
+    addBreadcrumb(page, `getText(${selector})`);
+    return res;
 }
 
 /**
@@ -932,4 +967,5 @@ module.exports = {
     waitForTestId,
     waitForText,
     waitForVisible,
+    workaround_setContent
 };

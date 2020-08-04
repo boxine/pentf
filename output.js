@@ -606,6 +606,19 @@ async function logTaskError(config, task) {
                 config,
                 `${label} test case ${name} at ${utils.localIso8601()}:\n` +
                 `${await formatError(config, e)}\n`);
+
+            // There won't be a useful stack trace if the test timed out.
+            // Display collected breadcrumb additionally if there is one.
+            if (/Timeout:\sTest\scase/.test(e.message)) {
+                if (task.breadcrumb) {
+                    log(
+                        config,
+                        `${await formatError(config, task.breadcrumb)}\n`
+                    );
+                } else {
+                    log(config, '  No breadcrumbs were collected.\n');
+                }
+            }
         }
     }
 }

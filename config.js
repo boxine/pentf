@@ -331,6 +331,10 @@ function parseArgs(options, raw_args) {
         dest: 'status_interval',
         help: 'Interval in MS to print a detailed list of the current runner state.',
     });
+    runner_group.addArgument(['--breadcrumbs'], {
+        help: 'Keep track of the last successful browser operation (breadcrumbs). This helps with debugging test cases that timed out.',
+        action: 'storeTrue',
+    });
 
     const locking_group = parser.addArgumentGroup({title: 'Locking'});
     locking_group.addArgument(['-L', '--no-locking'], {
@@ -435,7 +439,7 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream}} Config
+ * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean}} Config
  */
 
 /**

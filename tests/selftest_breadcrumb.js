@@ -29,8 +29,10 @@ const {
 async function execRunner(config, expected, fn) {
     const name = `${config._taskName}[${expected}]`;
     const output = [];
+    /** @type {import('../config').Config} */
     const runnerConfig = {
         ...config,
+        breadcrumbs: true,
         logFunc(config, message) {
             output.push(kolorist.stripColors(message));
         },

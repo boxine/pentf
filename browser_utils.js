@@ -195,7 +195,9 @@ function getDefaultTimeout(pageOrFrame) {
  */
 function addBreadcrumb(pageOrFrame, name) {
     const config =  getBrowser(pageOrFrame)._pentf_config;
-    config._breadcrumb = new Error(`Last successful browser operation was "${name}"`);
+    if (config.breadcrumbs) {
+        config._breadcrumb = new Error(`Last successful browser operation was "${name}"`);
+    }
 }
 
 /**

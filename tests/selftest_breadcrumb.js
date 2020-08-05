@@ -27,7 +27,7 @@ const {
  * @param {(config: import('../config').Config => Promise<void>)} fn
  */
 async function execRunner(config, expected, fn) {
-    const name = `${config._taskName}[${expected}]`;
+    const name = `${config._taskName}[${expected}]`.replace(/[/:]/g, '_');
     const output = [];
     /** @type {import('../config').Config} */
     const runnerConfig = {
@@ -53,8 +53,8 @@ async function execRunner(config, expected, fn) {
 
 function assertOutput(output, str) {
     assert(
-        output.includes(`Last successful browser operation was "${str}"`),
-        `Expected output to include "${str}".\n\nOutput was: ${output}`
+        output.includes(`breadcrumb "exit ${str}"`),
+        `Expected output to include "exit ${str}".\n\nOutput was: ${output}`
     );
 }
 
@@ -150,6 +150,70 @@ async function run(config) {
         const page = await newPage(config);
         await workaround_setContent(page, '<div class="foo"></div>');
         await getText(page, 'div');
+    });
+
+    // Should add breadcrumbs to native page functions
+    await execRunner(config, 'page.goto(https://example.com)', async config => {
+        const page = await newPage(config);
+        await page.goto('https://example.com');
+    });
+
+    await execRunner(config, 'page.$(div)', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<div />');
+        await page.$('div');
+    });
+
+    await execRunner(config, 'page.$$(div)', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<div />');
+        await page.$$('div');
+    });
+
+    await execRunner(config, 'page.$eval()', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<div />');
+        await page.$eval('div', () => null);
+    });
+
+    await execRunner(config, 'page.$$eval()', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<div />');
+        await page.$$eval('div', () => null);
+    });
+
+    await execRunner(config, 'page.click(button)', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<button />');
+        await page.click('button');
+    });
+
+    await execRunner(config, 'page.evaluate()', async config => {
+        const page = await newPage(config);
+        await page.evaluate(() => null);
+    });
+
+    await execRunner(config, 'page.type(input, foo)', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<input />');
+        await page.type('input', 'foo');
+    });
+
+    await execRunner(config, 'page.waitForSelector(div)', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<div />');
+        await page.waitForSelector('div');
+    });
+
+    await execRunner(config, 'page.waitForFunction()', async config => {
+        const page = await newPage(config);
+        await page.waitForFunction(() => true);
+    });
+
+    await execRunner(config, 'page.waitForXPath(//div)', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<div />');
+        await page.waitForXPath('//div');
     });
 }
 

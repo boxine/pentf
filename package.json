@@ -19,7 +19,7 @@
     "form-data": "^2.3.3",
     "glob": "^7.1.6",
     "he": "^1.2.0",
-    "kolorist": "^1.2.0",
+    "kolorist": "^1.2.3",
     "libmime": "^4.0.1",
     "mkdirp": "^0.5.1",
     "node-fetch": "^2.3.0",

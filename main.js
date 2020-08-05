@@ -110,7 +110,11 @@ async function real_main(options={}) {
 
     await render.doRender(config, results);
     if (!config.keep_open) {
-        const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
+        const anyErrors = results.tests.some(
+            s =>
+                (s.status === 'error' && !s.expectedToFail) ||
+                (s.status === 'success' && s.expectedToFail)
+        );
         const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
         logVerbose(`Terminating with exit code ${retCode}`);
         process.exit(retCode);

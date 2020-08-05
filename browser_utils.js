@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const {promisify} = require('util');
 const tmp = require('tmp-promise');
+const {performance} = require('perf_hooks');
 
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
@@ -35,6 +36,7 @@ let tmp_home;
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
 async function newPage(config, chrome_args=[]) {
+    addBreadcrumb(config, 'enter newPage()');
     let puppeteer;
     try {
         if(config.puppeteer_firefox) {
@@ -156,10 +158,24 @@ async function newPage(config, chrome_args=[]) {
         config._browser_pages.push(page);
     }
 
+    if (config.breadcrumbs) {
+        withBreadcrumb(config, page, '$', (selector) => `page.$(${selector})`);
+        withBreadcrumb(config, page, '$$', (selector) => `page.$$(${selector})`);
+        withBreadcrumb(config, page, '$eval', () => 'page.$eval()');
+        withBreadcrumb(config, page, '$$eval', () => 'page.$$eval()');
+        withBreadcrumb(config, page, 'click', (selector) => `page.click(${selector})`);
+        withBreadcrumb(config, page, 'evaluate', () => 'page.evaluate()');
+        withBreadcrumb(config, page, 'goto', (url) => `page.goto(${url})`);
+        withBreadcrumb(config, page, 'type', (selector, text) => `page.type(${selector}, ${text})`);
+        withBreadcrumb(config, page, 'waitForSelector', (selector) => `page.waitForSelector(${selector})`);
+        withBreadcrumb(config, page, 'waitForFunction', () => 'page.waitForFunction()');
+        withBreadcrumb(config, page, 'waitForXPath', (xpath) => `page.waitForXPath(${xpath})`);
+    }
+
     // The Browser instance is the nearest shared ancestor across pages
     // and frames.
     browser._pentf_config = config;
-    addBreadcrumb(page, 'newPage()');
+    addBreadcrumb(config, 'exit newPage()');
 
     return page;
 }
@@ -189,15 +205,32 @@ function getDefaultTimeout(pageOrFrame) {
 /**
  * Mark progress in test. Useful for when the test times out and there is no
  * hint as to why.
- * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
+ * @param {import('./runner').TaskConfig} config
  * @param {string} name
  * @private
  */
-function addBreadcrumb(pageOrFrame, name) {
-    const config =  getBrowser(pageOrFrame)._pentf_config;
+function addBreadcrumb(config, name) {
     if (config.breadcrumbs) {
-        config._breadcrumb = new Error(`Last successful browser operation was "${name}"`);
+        const time = Math.round(performance.now() - config.start);
+        config._breadcrumb = new Error(`Last breadcrumb "${name}" at ${time}ms after test started.`);
     }
+}
+
+/**
+ * @template {K}
+ * @param {import('puppeteer').Page} page
+ * @param {K extends keyof import('puppeteer').Page} prop
+ * @param {(...any[]) => string} getName
+ */
+function withBreadcrumb(config, page, prop, getName) {
+    const original = page[prop];
+    page[prop] = (...args) => {
+        const name = getName.apply(null, args);
+        addBreadcrumb(config, `enter ${name}`);
+        const res = original.apply(page, args);
+        addBreadcrumb(config, `exit ${name}`);
+        return res;
+    };
 }
 
 /**
@@ -207,6 +240,7 @@ function addBreadcrumb(pageOrFrame, name) {
 async function closePage(page) {
     const browser = getBrowser(page);
     const config = browser._pentf_config;
+    addBreadcrumb(config, 'enter closePage()');
 
     // Wait for all pending logging tasks to finish before closing browser
     await timeoutPromise(
@@ -218,7 +252,7 @@ async function closePage(page) {
 
     await timeoutPromise(config, page.close(), {message: 'Closing the page took too long'});
     await timeoutPromise(config, browser.close(), {message: 'Closing the browser took too long'});
-    addBreadcrumb(page, 'closePage()');
+    addBreadcrumb(config, 'exit closePage()');
 }
 
 /**
@@ -235,6 +269,9 @@ async function closePage(page) {
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
  */
 async function waitForVisible(page, selector, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForVisible(${selector})`);
+
     // Precompute errors for nice stack trace
     const notFoundErr = new Error(
         `Failed to find element matching  ${selector}  within ${timeout}ms` +
@@ -263,7 +300,7 @@ async function waitForVisible(page, selector, {message=undefined, timeout=getDef
         }
     }
     assert(el !== null);
-    addBreadcrumb(page, `waitForVisible(${selector})`);
+    addBreadcrumb(config, `exit waitForVisible(${selector})`);
     return el;
 }
 
@@ -317,6 +354,8 @@ function checkText(text) {
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the text node.
  */
 async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMessage=undefined}={}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForText(${text})`);
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
     const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
@@ -324,7 +363,7 @@ async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMe
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
         const res = await page.waitForXPath(xpath, {timeout});
-        addBreadcrumb(page, `waitForText(${text})`);
+        addBreadcrumb(config, `exit waitForText(${text})`);
         return res;
     } catch (e) {
         throw err;
@@ -352,6 +391,8 @@ function _checkTestId(testId) {
  */
 async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true} = {}) {
     _checkTestId(testId);
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForTestId(${testId})`);
 
     const err = new Error(
         `Failed to find ${visible ? 'visible ' : ''}element with data-testid "${testId}" within ${timeout}ms` +
@@ -371,7 +412,7 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
         throw err; // Do not construct error here lest stack trace gets lost
     }
     assert(el !== null);
-    addBreadcrumb(page, `waitForTestId(${testId})`);
+    addBreadcrumb(config, `exit waitForTestId(${testId})`);
     return el;
 }
 
@@ -384,11 +425,13 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
 async function assertValue(input, expected) {
     const page = input._page;
     assert(page);
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter assertValue(${expected})`);
     try {
         await page.waitForFunction((inp, expected) => {
             return inp.value === expected;
         }, {timeout: 2000}, input, expected);
-        addBreadcrumb(page, `assertValue(${expected})`);
+        addBreadcrumb(config, `exit assertValue(${expected})`);
     } catch (e) {
         if (e.name !== 'TimeoutError') throw e;
 
@@ -424,6 +467,8 @@ async function assertValue(input, expected) {
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
 async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=200) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter assertNotXPath(${xpath})`);
     assert.equal(
         typeof xpath, 'string',
         `XPath ${xpath} should be a string, but is of type ${typeof xpath}`);
@@ -459,7 +504,7 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
         await wait(Math.min(checkEvery, remainingTimeout));
         remainingTimeout -= checkEvery;
     }
-    addBreadcrumb(page, `assertNotXPath(${xpath})`);
+    addBreadcrumb(config, `exit assertNotXPath(${xpath})`);
 }
 
 /**
@@ -478,6 +523,8 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  */
 async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter clickSelector(${selector})`);
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
@@ -494,7 +541,8 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
         }, selector, visible);
 
         if (found) {
-            addBreadcrumb(page, `clickSelector(${selector})`);
+            const config = getBrowser(page)._pentf_config;
+            addBreadcrumb(config, `exit clickSelector(${selector})`);
             return;
         }
 
@@ -527,6 +575,8 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  */
 async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter clickXPath(${xpath})`);
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
@@ -544,7 +594,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
         }, xpath, visible);
 
         if (found) {
-            addBreadcrumb(page, `clickXPath(${xpath})`);
+            addBreadcrumb(config, `exit clickXPath(${xpath})`);
             return;
         }
 
@@ -575,6 +625,8 @@ const DEFAULT_CLICKABLE = (
  * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
  */
 async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined}={}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter clickText(${text})`);
     checkText(text);
     const xpath = (
         elementXPath +
@@ -585,7 +637,7 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
         checkEvery,
         message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`,
     });
-    addBreadcrumb(page, `clickText(${text})`);
+    addBreadcrumb(config, `exit clickText(${text})`);
     return res;
 }
 
@@ -603,6 +655,8 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
  * @param {boolean?} visible Optional check if element is visible (default: true)
  */
 async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage=undefined, visible=true}={}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter clickNestedText(${textOrRegExp})`);
     if (typeof textOrRegExp === 'string') {
         checkText(textOrRegExp);
     }
@@ -675,7 +729,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         }, serializedMatcher, visible);
 
         if (found) {
-            addBreadcrumb(page, `clickNestedText(${textOrRegExp})`);
+            addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
             return;
         }
 
@@ -699,13 +753,15 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
  * @param {number?} timeout How long to wait, in milliseconds. (default: true)
  */
 async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter clickTestId(${testId})`);
     _checkTestId(testId);
 
     const xpath = `//*[@data-testid="${testId}"]`;
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
     const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
     const res = await clickXPath(page, xpath, {timeout, message, visible});
-    addBreadcrumb(page, `clickTestId(${testId})`);
+    addBreadcrumb(config, `exit clickTestId(${testId})`);
     return res;
 }
 
@@ -719,9 +775,11 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
  * @param {string?} message Message shown if the element can not be found.
  */
 async function typeSelector(page, selector, text, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter typeSelector(${selector}, text: ${text})`);
     const el = await waitForVisible(page, selector, {timeout, message});
     await el.type(text);
-    addBreadcrumb(page, `typeSelector(${selector}, text: ${text})`);
+    addBreadcrumb(config, `exit typeSelector(${selector}, text: ${text})`);
 }
 
 /**
@@ -735,6 +793,8 @@ async function setLanguage(page, lang) {
         lang = [lang];
     }
     assert(Array.isArray(lang));
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter setLanguage(${lang.join(', ')})`);
 
     // From https://stackoverflow.com/a/47292022/35070
     await page.setExtraHTTPHeaders({'Accept-Language': lang.join(',')}); // For HTTP requests
@@ -754,7 +814,7 @@ async function setLanguage(page, lang) {
             }
         });
     }, lang);
-    addBreadcrumb(page, `setLanguage(${lang.join(', ')})`);
+    addBreadcrumb(config, `exit setLanguage(${lang.join(', ')})`);
 }
 
 /**
@@ -766,6 +826,8 @@ async function setLanguage(page, lang) {
  * @returns {Promise<string>} The attribute value
  */
 async function getAttribute(page, selector, name) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter getAttribute(${selector}, attr: ${name})`);
     await page.waitForSelector(selector);
     const res = await page.$eval(
         selector,
@@ -778,7 +840,7 @@ async function getAttribute(page, selector, name) {
         },
         name,
     );
-    addBreadcrumb(page, `getAttribute(${selector}, attr: ${name})`);
+    addBreadcrumb(config, `exit getAttribute(${selector}, attr: ${name})`);
     return res;
 }
 
@@ -790,8 +852,10 @@ async function getAttribute(page, selector, name) {
  * @returns {Promise<string>} Text content of the selected element.
  */
 async function getText(page, selector) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter getText(${selector})`);
     const res = await getAttribute(page, selector, 'textContent');
-    addBreadcrumb(page, `getText(${selector})`);
+    addBreadcrumb(config, `exit getText(${selector})`);
     return res;
 }
 

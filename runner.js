@@ -59,6 +59,7 @@ async function run_task(config, task) {
         _breadcrumb: null,
         _testName: task.tc.name,
         _taskName: task.name,
+        start: task.start,
     };
     let timeout;
     try {
@@ -379,6 +380,7 @@ async function parallel_run(config, state) {
  * @property {string} name
  * @property {TestCase} tc
  * @property {TaskStatus} status
+ * @property {number} start
  * @property {Error | null} breadcrumb
  * @property {boolean} [skipReason]
  * @property {boolean | ((config: import('./config').Config) => boolean)} [expectedToFail]
@@ -402,6 +404,7 @@ async function testCases2tasks(config, testCases) {
             status: 'todo',
             name: tc.name,
             id: tc.name,
+            start: 0,
         };
 
         const skipReason = tc.skip && await tc.skip(config);

@@ -4,43 +4,42 @@
     "description": "parallel end-to-end test framework",
     "main": "src/index.js",
     "types": "dist/index.d.ts",
-    "type": "module",
     "exports": {
         ".": {
-            "import": "./src/index.js",
-            "require": "./dist/index.js"
+            "import": "./dist/index.mjs",
+            "require": "./src/index.js"
         },
         "./assert_utils": {
-            "import": "./src/assert_utils.js",
-            "require": "./dist/assert_utils.js"
+            "import": "./dist/assert_utils.mjs",
+            "require": "./src/assert_utils.js"
         },
         "./browser_utils": {
-            "import": "./src/browser_utils.js",
-            "require": "./dist/browser_utils.js"
+            "import": "./dist/browser_utils.mjs",
+            "require": "./src/browser_utils.js"
         },
         "./curl_command": {
-            "import": "./src/curl_command.js",
-            "require": "./dist/curl_command.js"
+            "import": "./dist/curl_command.mjs",
+            "require": "./src/curl_command.js"
         },
         "./email": {
-            "import": "./src/email.js",
-            "require": "./dist/email.js"
+            "import": "./dist/email.mjs",
+            "require": "./src/email.js"
         },
         "./net_utils": {
-            "import": "./src/net_utils.js",
-            "require": "./dist/net_utils.js"
+            "import": "./dist/net_utils.mjs",
+            "require": "./src/net_utils.js"
         },
         "./output": {
-            "import": "./src/output.js",
-            "require": "./dist/output.js"
+            "import": "./dist/output.mjs",
+            "require": "./src/output.js"
         },
         "./promise_utils": {
-            "import": "./src/promise_utils.js",
-            "require": "./dist/promise_utils.js"
+            "import": "./dist/promise_utils.mjs",
+            "require": "./src/promise_utils.js"
         },
         "./utils": {
-            "import": "./src/utils.js",
-            "require": "./dist/utils.js"
+            "import": "./dist/utils.mjs",
+            "require": "./src/utils.js"
         },
         "./package.json": "./package.json",
         "./": "./"
@@ -69,6 +68,8 @@
         "tough-cookie": "^4.0.0"
     },
     "devDependencies": {
+        "@babel/cli": "^7.10.5",
+        "@babel/core": "^7.11.1",
         "@types/diff": "^4.0.2",
         "deep-equal": "^1.0.1",
         "eslint": "^7.0.0",

@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+rm -rf dist/
+$(npm bin)/babel --out-dir dist/ src/*.js

@@ -1,5 +1,2 @@
-const {main} = require('./main');
-
-module.exports = {
-    main,
-};
+// Only needed for Node 10 interop
+module.exports = require('./src/index');

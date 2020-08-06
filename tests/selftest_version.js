@@ -3,7 +3,7 @@ const child_process = require('child_process');
 const path = require('path');
 const {promisify} = require('util');
 
-const {testsVersion} = require('../version');
+const {testsVersion} = require('../src/version');
 
 async function run() {
     const scratchDir = path.join(__dirname, 'version_tests');

@@ -1,61 +1,92 @@
 {
-  "name": "pentf",
-  "version": "1.0.94",
-  "description": "parallel end-to-end test framework",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "directories": {
-    "test": "tests"
-  },
-  "dependencies": {
-    "@sentry/node": "^5.15.5",
-    "@types/glob": "^7.1.1",
-    "@types/puppeteer": "^2.0.1",
-    "argparse": "^1.0.10",
-    "diff": "^4.0.2",
-    "emailjs-imap-client": "^3.0.7",
-    "emailjs-mime-parser": "^2.0.5",
-    "errorstacks": "^1.1.5",
-    "form-data": "^2.3.3",
-    "glob": "^7.1.6",
-    "he": "^1.2.0",
-    "kolorist": "^1.2.3",
-    "libmime": "^4.0.1",
-    "mkdirp": "^0.5.1",
-    "node-fetch": "^2.3.0",
-    "stream-buffers": "^3.0.2",
-    "tmp-promise": "^2.0.2",
-    "tough-cookie": "^4.0.0"
-  },
-  "devDependencies": {
-    "@types/diff": "^4.0.2",
-    "deep-equal": "^1.0.1",
-    "eslint": "^7.0.0",
-    "nodemon": "^1.18.11",
-    "prettier": "^2.0.5",
-    "puppeteer": "^5.2.1",
-    "rimraf": "^3.0.2",
-    "typedoc": "^0.17.4",
-    "typescript": "^3.8.3"
-  },
-  "peerDependencies": {
-    "puppeteer": "*"
-  },
-  "scripts": {
-    "test": "./run",
-    "lint": "eslint . run",
-    "types": "tsc",
-    "clean": "rimraf *.d.ts doc",
-    "prepublishOnly": "npm run clean && npm run types"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/boxine/pentf.git"
-  },
-  "author": "Philipp Hagemeister, Boxine GmbH",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/boxine/pentf/issues"
-  },
-  "homepage": "https://github.com/boxine/pentf#readme"
+    "name": "pentf",
+    "version": "1.0.94",
+    "description": "parallel end-to-end test framework",
+    "main": "src/index.js",
+    "types": "index.d.ts",
+    "exports": {
+        ".": {
+            "require": "./src/index.js"
+        },
+        "./assert_utils": {
+            "require": "./src/assert_utils.js"
+        },
+        "./browser_utils": {
+            "require": "./src/browser_utils.js"
+        },
+        "./curl_command": {
+            "require": "./src/curl_command.js"
+        },
+        "./email": {
+            "require": "./src/email.js"
+        },
+        "./net_utils": {
+            "require": "./src/net_utils.js"
+        },
+        "./output": {
+            "require": "./src/output.js"
+        },
+        "./promise_utils": {
+            "require": "./src/promise_utils.js"
+        },
+        "./utils": {
+            "require": "./src/utils.js"
+        },
+        "./package.json": "./package.json",
+        "./": "./"
+    },
+    "directories": {
+        "test": "tests"
+    },
+    "dependencies": {
+        "@sentry/node": "^5.15.5",
+        "@types/glob": "^7.1.1",
+        "@types/puppeteer": "^2.0.1",
+        "argparse": "^1.0.10",
+        "diff": "^4.0.2",
+        "emailjs-imap-client": "^3.0.7",
+        "emailjs-mime-parser": "^2.0.5",
+        "errorstacks": "^1.1.5",
+        "form-data": "^2.3.3",
+        "glob": "^7.1.6",
+        "he": "^1.2.0",
+        "kolorist": "^1.2.3",
+        "libmime": "^4.0.1",
+        "mkdirp": "^0.5.1",
+        "node-fetch": "^2.3.0",
+        "stream-buffers": "^3.0.2",
+        "tmp-promise": "^2.0.2",
+        "tough-cookie": "^4.0.0"
+    },
+    "devDependencies": {
+        "@types/diff": "^4.0.2",
+        "deep-equal": "^1.0.1",
+        "eslint": "^7.0.0",
+        "nodemon": "^1.18.11",
+        "prettier": "^2.0.5",
+        "puppeteer": "^5.2.1",
+        "rimraf": "^3.0.2",
+        "typedoc": "^0.17.4",
+        "typescript": "^3.8.3"
+    },
+    "peerDependencies": {
+        "puppeteer": "*"
+    },
+    "scripts": {
+        "test": "./run",
+        "lint": "eslint . run",
+        "types": "tsc",
+        "clean": "rimraf *.d.ts doc",
+        "prepublishOnly": "npm run clean && npm run types"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/boxine/pentf.git"
+    },
+    "author": "Philipp Hagemeister, Boxine GmbH",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/boxine/pentf/issues"
+    },
+    "homepage": "https://github.com/boxine/pentf#readme"
 }

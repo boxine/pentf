@@ -1,5 +1,5 @@
-const {newPage} = require('../../browser_utils');
-const {arange} = require('../../utils');
+const {newPage} = require('../../src/browser_utils');
+const {arange} = require('../../src/utils');
 
 async function run(config) {
     await Promise.all(arange(config.currency === 0 ? 6 : 15).map(async () => {

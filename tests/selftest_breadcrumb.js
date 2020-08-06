@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const runner = require('../runner');
+const runner = require('../src/runner');
 const kolorist = require('kolorist');
 const {
     newPage,
@@ -19,17 +19,17 @@ const {
     getAttribute,
     getText,
     workaround_setContent,
-} = require('../browser_utils');
+} = require('../src/browser_utils');
 
 /**
- * @param {import('../runner').TaskConfig} config
+ * @param {import('../src/runner').TaskConfig} config
  * @param {string} expected
- * @param {(config: import('../config').Config => Promise<void>)} fn
+ * @param {(config: import('../src/config').Config => Promise<void>)} fn
  */
 async function execRunner(config, expected, fn) {
     const name = `${config._taskName}[${expected}]`.replace(/[/:]/g, '_');
     const output = [];
-    /** @type {import('../config').Config} */
+    /** @type {import('../src/config').Config} */
     const runnerConfig = {
         ...config,
         breadcrumbs: true,

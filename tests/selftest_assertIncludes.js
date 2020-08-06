@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {assertIncludes} = require('../assert_utils');
+const {assertIncludes} = require('../src/assert_utils');
 
 async function run() {
     assertIncludes('& foobar', 'foo');

@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {closePage, newPage, getAttribute, getText} = require('../browser_utils');
+const {closePage, newPage, getAttribute, getText} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);

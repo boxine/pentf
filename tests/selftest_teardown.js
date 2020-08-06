@@ -1,8 +1,8 @@
 const assert = require('assert').strict;
-const runner = require('../runner');
+const runner = require('../src/runner');
 
 /**
- * @param {import('../runner').TaskConfig} config
+ * @param {import('../src/runner').TaskConfig} config
  * @param {string[]} output
  */
 function effect(config, output) {
@@ -13,7 +13,7 @@ function effect(config, output) {
 }
 
 /**
- * @param {import('../runner').TaskConfig} config
+ * @param {import('../src/runner').TaskConfig} config
  * @param {string[]} output
  */
 function failingEffect(config, output) {

@@ -39,7 +39,7 @@ async function testsVersion(config) {
 }
 
 function pentfVersion() {
-    return require('./package.json').version;
+    return require('../package.json').version;
 }
 
 module.exports = {

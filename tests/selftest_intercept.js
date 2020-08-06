@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 const http = require('http');
 
-const {closePage, interceptRequest, newPage, waitForTestId} = require('../browser_utils');
+const {closePage, interceptRequest, newPage, waitForTestId} = require('../src/browser_utils');
 
 async function get_result(page) {
     return await page.evaluate(

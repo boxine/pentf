@@ -1,5 +1,5 @@
-const {assertIncludes} = require('../assert_utils');
-const {makeRandomEmail} = require('../utils');
+const {assertIncludes} = require('../src/assert_utils');
+const {makeRandomEmail} = require('../src/utils');
 
 async function run(config) {
     const testConfig = {

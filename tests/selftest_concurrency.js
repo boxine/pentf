@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 
-const {assertGreaterEqual} = require('../assert_utils');
-const {_computeConcurrency: computeConcurrency} = require('../config');
+const {assertGreaterEqual} = require('../src/assert_utils');
+const {_computeConcurrency: computeConcurrency} = require('../src/config');
 
 async function run() {
     assertGreaterEqual(computeConcurrency('cpus'), 1);

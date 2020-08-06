@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {_linkify: linkify} = require('../render');
+const {_linkify: linkify} = require('../src/render');
 
 async function run() {
     assert.strictEqual(linkify('https://ix.de/'), '<a href="https://ix.de/">https://ix.de/</a>');

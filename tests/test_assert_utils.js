@@ -6,7 +6,7 @@ const {
     assertLess,
     assertLessEqual,
     assertNumeric,
-} = require('../assert_utils');
+} = require('../src/assert_utils');
 
 async function run() {
     assertNumeric(42n);

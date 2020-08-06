@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 
-const runner = require('../runner');
-const render = require('../render');
+const runner = require('../src/runner');
+const render = require('../src/render');
 
 async function run() {
     let output = [];

@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 const path = require('path');
-const {_readConfigFile: readConfigFile} = require('../config');
+const {_readConfigFile: readConfigFile} = require('../src/config');
 
 async function run() {
     const exampleDir = path.join(__dirname, 'config_examples');

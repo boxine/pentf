@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
+    "outDir": "dist/",
+    "target": "ES2018",
     "allowJs": true,
     "alwaysStrict": true,
     "declaration": true,
-    "emitDeclarationOnly": true,
   },
-  "files": ["./index.js"]
+  "files": ["./src/index.js"]
 }

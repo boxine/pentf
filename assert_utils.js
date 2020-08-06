@@ -1,2 +1,2 @@
 // Only needed for Node 10 interop
-module.exports = require('./src/assert_utils');
+module.exports = require('./dist/assert_utils');

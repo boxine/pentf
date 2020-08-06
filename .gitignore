@@ -11,3 +11,6 @@ doc/
 
 # Generated types
 *.d.ts
+
+# Generated build artifacts
+dist/

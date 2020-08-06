@@ -1,2 +1,2 @@
 // Only needed for Node 10 interop
-module.exports = require('./src/net_utils');
+module.exports = require('./dist/net_utils');

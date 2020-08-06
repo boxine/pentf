@@ -3,34 +3,44 @@
     "version": "1.0.94",
     "description": "parallel end-to-end test framework",
     "main": "src/index.js",
-    "types": "index.d.ts",
+    "types": "dist/index.d.ts",
+    "type": "module",
     "exports": {
         ".": {
-            "require": "./src/index.js"
+            "import": "./src/index.js",
+            "require": "./dist/index.js"
         },
         "./assert_utils": {
-            "require": "./src/assert_utils.js"
+            "import": "./src/assert_utils.js",
+            "require": "./dist/assert_utils.js"
         },
         "./browser_utils": {
-            "require": "./src/browser_utils.js"
+            "import": "./src/browser_utils.js",
+            "require": "./dist/browser_utils.js"
         },
         "./curl_command": {
-            "require": "./src/curl_command.js"
+            "import": "./src/curl_command.js",
+            "require": "./dist/curl_command.js"
         },
         "./email": {
-            "require": "./src/email.js"
+            "import": "./src/email.js",
+            "require": "./dist/email.js"
         },
         "./net_utils": {
-            "require": "./src/net_utils.js"
+            "import": "./src/net_utils.js",
+            "require": "./dist/net_utils.js"
         },
         "./output": {
-            "require": "./src/output.js"
+            "import": "./src/output.js",
+            "require": "./dist/output.js"
         },
         "./promise_utils": {
-            "require": "./src/promise_utils.js"
+            "import": "./src/promise_utils.js",
+            "require": "./dist/promise_utils.js"
         },
         "./utils": {
-            "require": "./src/utils.js"
+            "import": "./src/utils.js",
+            "require": "./dist/utils.js"
         },
         "./package.json": "./package.json",
         "./": "./"
@@ -75,9 +85,10 @@
     "scripts": {
         "test": "./run",
         "lint": "eslint . run",
-        "types": "tsc",
-        "clean": "rimraf *.d.ts doc",
-        "prepublishOnly": "npm run clean && npm run types"
+        "build": "npm run clean && tsc",
+        "types": "npm run build",
+        "clean": "rimraf *.d.ts doc dist",
+        "prepublishOnly": "npm run build"
     },
     "repository": {
         "type": "git",

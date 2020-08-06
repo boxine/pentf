@@ -17,9 +17,9 @@ prettier:
 test:
 	@npm run test --silent
 
-doc: *.js tsconfig.json
+doc: src/*.js tsconfig.json
 	./node_modules/.bin/typedoc --out doc --noEmit --excludeNotExported --excludeNotDocumented --excludeExternals \
-		*.js
+		src/*.js
 
 lockserver-dev:
 	node_modules/.bin/nodemon lockserver/lockserver.js

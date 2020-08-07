@@ -24,7 +24,7 @@ function failingEffect(config, output) {
 }
 
 async function run(config) {
-    const output = [];
+    let output = [];
     await runner.run(
         {...config, logFunc: () => null},
         [
@@ -47,6 +47,31 @@ async function run(config) {
     );
 
     assert(/INTERNAL ERROR.*teardown/.test(logs.join('')), 'should print internal error message');
+
+    // Call call if keep_open and successful test
+    output = [];
+    await runner.run(
+        {...config, keep_open: true, logFunc() {}},
+        [
+            { name: 'normal teardown', run: async (config) => {
+                effect(config, output);
+            }}
+        ]
+    );
+    assert.deepEqual(output, ['run effect', 'teardown effect']);
+
+    // Don't call if keep_open and failing test
+    output = [];
+    await runner.run(
+        {...config, keep_open: true, logFunc() {}},
+        [
+            { name: 'normal teardown', run: async (config) => {
+                effect(config, output);
+                throw new Error('fail');
+            }}
+        ]
+    );
+    assert.deepEqual(output, ['run effect']);
 }
 
 module.exports = {

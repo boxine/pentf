@@ -558,6 +558,32 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
 }
 
 /**
+ * Asserts that a selector is not present in the passed page or frame.
+ *
+ * @example
+ * ```javascript
+ * await assertNotSelector(page, 'div[data-id="foo"] a.view', {message: 'Expected foo to not be present'});
+ * ```
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
+ * @param {{timeout?: number, message?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ */
+async function assertNotSelector(page, selector, {timeout=getDefaultTimeout(page), message} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter assertNotSelector(${selector})`);
+    try {
+        await page.waitForSelector(selector, {timeout});
+    } catch(err) {
+        addBreadcrumb(config, `exit assertNotSelector(${selector})`);
+        return;
+    }
+
+    throw new Error(`Element matching ${selector} is present, but should not be there. ${message ? ' ' + message : ''}`);
+}
+
+/**
  * Clicks an element addressed by XPath atomically, e.g. within the same event loop run as finding it.
  *
  * ```javascript
@@ -1037,6 +1063,7 @@ async function html2pdf(config, path, html, modifyPage=null) {
 }
 
 module.exports = {
+    assertNotSelector,
     assertNotTestId,
     assertNotXPath,
     assertValue,

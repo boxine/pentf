@@ -1,6 +1,7 @@
 const child_process = require('child_process');
 const {promisify} = require('util');
 const {EOL} = require('os');
+const fs = require('fs');
 
 async function _cmd(cmd, args, options) {
     return (await (promisify(child_process.execFile)(cmd, args, options))).stdout.trim();
@@ -39,7 +40,11 @@ async function testsVersion(config) {
 }
 
 function pentfVersion() {
-    return require('./package.json').version;
+    // Don't use inline synchronous `require()` here, because
+    // that cannot be translated to ES Modules. For ES Modules
+    // any inline `import()` call is asynchronous.
+    // Work around that by invoking `fs.readFileSync()` instead.
+    return JSON.parse(fs.readFileSync('./package.json', 'utf-8')).version;
 }
 
 module.exports = {

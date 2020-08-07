@@ -766,6 +766,34 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
 }
 
 /**
+ * Asserts that an element identified by a test ID (`data-testid=` attribute) is not present in the passed page or frame.
+ *
+ * @example
+ * ```javascript
+ * await assertNotTestId(page, 'foo', {message: 'Expected Test ID "foo" to not be present'});
+ * ```
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} testId The test ID to look for.
+ * @param {{timeout?: number, message?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ */
+async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), message} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter assertNotTestId(${testId})`);
+    _checkTestId(testId);
+
+    const xpath = `//*[@data-testid="${testId}"]`;
+    try {
+        await assertNotXPath(page, xpath, {timeout});
+        addBreadcrumb(config, `exit assertNotTestId(${testId})`);
+    } catch (err) {
+        if (/Element\smatching/.test(err.message)) {
+            throw new Error(`Element matching test id "${testId}" is present, but should not be there. ${message ? ' ' + message : ''}`);
+        }
+    }
+}
+/**
  * Type text into an element identified by a query selector.
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
@@ -1009,6 +1037,7 @@ async function html2pdf(config, path, html, modifyPage=null) {
 }
 
 module.exports = {
+    assertNotTestId,
     assertNotXPath,
     assertValue,
     clickNestedText,

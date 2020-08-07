@@ -401,6 +401,7 @@ async function testCases2tasks(config, testCases) {
         /** @type {Task} */
         const task = {
             tc,
+            resources: tc.resources || [],
             status: 'todo',
             name: tc.name,
             id: tc.name,

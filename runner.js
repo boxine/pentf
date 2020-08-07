@@ -191,19 +191,22 @@ async function run_task(config, task) {
             process.exit(3);
         }
     } finally {
-        try {
-            // Run teardown functions if there are any
-            const teardownPromise = Promise.all(task_config._teardown_hooks.map(fn => fn(config)));
-            await timeoutPromise(
-                config,
-                teardownPromise,
-                {timeout: 30000, message: 'teardown took too long'}
-            );
-        } catch(e) {
-            output.log(
-                config,
-                `INTERNAL ERROR: failed to run teardown for #${task.id} (${task.name}): ${e}`
-            );
+        if (!config.keep_open || task.status === 'success') {
+            output.logVerbose(`[runner] Executing ${task_config._teardown_hooks.length} teardown hooks`);
+            try {
+                // Run teardown functions if there are any
+                const teardownPromise = Promise.all(task_config._teardown_hooks.map(fn => fn(config)));
+                await timeoutPromise(
+                    config,
+                    teardownPromise,
+                    {timeout: 30000, message: 'teardown took too long'}
+                );
+            } catch(e) {
+                output.log(
+                    config,
+                    `INTERNAL ERROR: failed to run teardown for #${task.id} (${task.name}): ${e}`
+                );
+            }
         }
     }
 }

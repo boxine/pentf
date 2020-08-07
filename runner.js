@@ -549,7 +549,7 @@ async function run(config, testCases) {
             // We may have printed a lot of things to stdout making it hard to see
             // failed tests and their stack traces. Therefore we re-print all stack
             // traces of all failed tests at the end.
-            if (config.verbose || config.ci) {
+            if (config.verbose || config.ci || config.status_interval) {
                 const errored = tasks.filter(t => t.status === 'error' && (!t.expectedToFail || config.expect_nothing));
                 for (const task of errored) {
                     if (shouldShowError(config, task)) {

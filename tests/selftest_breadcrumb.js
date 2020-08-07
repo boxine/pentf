@@ -19,6 +19,7 @@ const {
     getAttribute,
     getText,
     workaround_setContent,
+    assertNotTestId,
 } = require('../browser_utils');
 
 /**
@@ -91,6 +92,12 @@ async function run(config) {
         await workaround_setContent(page, '<input value="foo" />');
         const input = await page.$('input');
         await assertValue(input, 'foo');
+    });
+
+    await execRunner(config, 'assertNotTestId(foo)', async config => {
+        const page = await newPage(config);
+        await workaround_setContent(page, '<div></div>');
+        await assertNotTestId(page, 'foo', { timeout: 2000 });
     });
 
     await execRunner(config, 'assertNotXPath(//span)', async config => {

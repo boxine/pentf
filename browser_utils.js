@@ -403,7 +403,7 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
     try {
         el = await page.waitForFunction((qs, visible) => {
             const all = document.querySelectorAll(qs);
-            if (all.length !== 1) return null;
+            if (all.length < 1) return null;
             const [el] = all;
             if (visible && (el.offsetParent === null)) return null;
             return el;

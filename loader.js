@@ -26,7 +26,7 @@ async function supportsImports() {
  * @param {string} [globPattern]
  * @private
  */
-async function loadTests(args, testsDir, globPattern = '*.js') {
+async function loadTests(args, testsDir, globPattern = '*.{js,cjs,mjs}') {
     const testFiles = await promisify(glob.glob)(globPattern, {cwd: testsDir});
     let tests = testFiles.map(n => ({
         path: n,

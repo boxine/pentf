@@ -86,7 +86,7 @@
     "scripts": {
         "test": "./run",
         "lint": "eslint . run",
-        "build": "npm run clean && tsc",
+        "build": "npm run clean && babel --out-dir dist/ src/*.js --out-file-extension .mjs",
         "types": "npm run build",
         "clean": "rimraf *.d.ts doc dist",
         "prepublishOnly": "npm run build"

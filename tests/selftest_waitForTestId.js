@@ -20,6 +20,15 @@ async function run(config) {
     await assert.rejects(waitForTestId(page, 'invisible', {timeout: 201}));
     await waitForTestId(page, 'invisible', {visible: false, timeout: 1002});
 
+    // Return first element when multiple elements match
+    await page.setContent(`
+        <div data-testid="baz">baztext</div>
+        <div data-testid="baz">booftext</div>
+    `);
+
+    const baz = await waitForTestId(page, 'baz');
+    assert.strictEqual(await page.evaluate(baz => baz.textContent, baz), 'baztext');
+
     await closePage(page);
 }
 

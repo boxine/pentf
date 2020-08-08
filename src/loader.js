@@ -69,9 +69,10 @@ function loadSuite(suiteName, builder) {
     let i = 0;
 
     /**
+     * Create a test case
      * @param {string} description
      * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {{ skip: () => Promise<boolean> | boolean}} options
+     * @param {TestOptions} options
      */
     function test(description, run, options = {}) {
         const arr = onlyInScope ? only : tests;
@@ -83,6 +84,12 @@ function loadSuite(suiteName, builder) {
         });
     }
 
+    /**
+     * Only run this test case in the current file
+     * @param {string} description
+     * @param {(config: import('./config').Config) => Promise<void>} run
+     * @param {TestOptions} options
+     */
     test.only = (description, run, options = {}) => {
         only.push({
             description,
@@ -92,12 +99,22 @@ function loadSuite(suiteName, builder) {
         });
     };
 
+    /**
+     * Create a group for test cases
+     * @param {string} description
+     * @param {() => void} callback
+     */
     function suite(description, callback) {
         groups.push(description);
         callback();
         groups.pop();
     }
 
+    /**
+     * Only run the test cases inside this group
+     * @param {string} description
+     * @param {() => void} callback
+     */
     suite.only = (description, callback) => {
         onlyInScope = true;
         groups.push(description);

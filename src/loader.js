@@ -100,6 +100,14 @@ function loadSuite(suiteName, builder) {
     };
 
     /**
+     * Skip this test case
+     * @param {string} description
+     * @param {(config: import('./config').Config) => Promise<void>} run
+     * @param {TestOptions} options
+     */
+    test.skip = () => {};
+
+    /**
      * Create a group for test cases
      * @param {string} description
      * @param {() => void} callback
@@ -124,6 +132,13 @@ function loadSuite(suiteName, builder) {
         onlyInScope = false;
         groups.pop();
     };
+
+    /**
+     * Skip this group of test cases
+     * @param {string} description
+     * @param {() => void} callback
+     */
+    suite.skip = () => {};
 
     builder(test, suite);
     return only.length > 0 ? only : tests;

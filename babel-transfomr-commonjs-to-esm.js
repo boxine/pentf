@@ -52,6 +52,7 @@ module.exports = function cjs2esm({types: t}) {
                 // Collect a list of export name -> reference maps
                 const fns = new Map();
                 const requires = new Map();
+                const vars = [];
                 path.node.body.forEach((node, i) => {
                     if (t.isFunctionDeclaration(node)) {
                         fns.set(node.id.name, {i, node});
@@ -83,7 +84,31 @@ module.exports = function cjs2esm({types: t}) {
                                     }
                                 });
                             } else if (t.isIdentifier(left)) {
-                                specifiers.push(t.importNamespaceSpecifier(left));
+                                // Depending on whether node is run in ESM mode we may have to
+                                // account for default exports.
+                                //
+                                // ```js
+                                // import __foo from 'foo';
+                                // const foo = __foo.default || foo;
+                                // ```
+                                const leftImported = t.identifier(`__${left.name}`);
+                                specifiers.push(t.importNamespaceSpecifier(leftImported));
+
+                                vars.push(
+                                    t.variableDeclaration('const', [
+                                        t.variableDeclarator(
+                                            left,
+                                            t.logicalExpression(
+                                                '||',
+                                                t.memberExpression(
+                                                    leftImported,
+                                                    t.identifier('default')
+                                                ),
+                                                leftImported
+                                            )
+                                        ),
+                                    ])
+                                );
                                 requires.set(left.name, {i, node: varDecl});
                             } else {
                                 throw new Error('Unsupported node');
@@ -158,6 +183,12 @@ module.exports = function cjs2esm({types: t}) {
                 // Add any new imports (mainly because of re-exports)
                 newImports.forEach(importNode => {
                     path.node.body.unshift(importNode);
+                });
+
+                const varIdx = path.node.body.findIndex(node => !t.isImportDeclaration(node));
+
+                vars.forEach(decl => {
+                    path.node.body.splice(varIdx, 0, decl);
                 });
             },
 

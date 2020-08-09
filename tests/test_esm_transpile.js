@@ -49,7 +49,8 @@ export function bar() {
             bar,
         };
     `,
-        `import * as foo from 'foo';
+        `import * as __foo from 'foo';
+const foo = __foo.default || __foo;
 export function bar() {
   return foo();
 }`

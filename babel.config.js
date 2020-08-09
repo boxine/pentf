@@ -1,3 +1,3 @@
 module.exports = {
-    plugins: [[require('./babel-transfomr-commonjs-to-esm'), {extension: '.mjs'}]],
+    plugins: [[require('./babel-transform-commonjs-to-esm'), {extension: '.mjs'}]],
 };

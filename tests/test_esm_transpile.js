@@ -10,7 +10,7 @@ const assert = require('assert').strict;
 async function assertTranspile(input, expected, options = {}) {
     const result = await transformAsync(input, {
         babelrc: false,
-        plugins: [[path.join(__dirname, '../babel-transfomr-commonjs-to-esm.js'), options]],
+        plugins: [[path.join(__dirname, '../babel-transform-commonjs-to-esm.js'), options]],
     });
     assert.equal(result.code, expected);
 }

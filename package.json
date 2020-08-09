@@ -64,6 +64,10 @@
       "require": "./promise_utils.js",
       "import": "./dist/promise_utils.mjs"
     },
+    "./render": {
+      "require": "./render.js",
+      "import": "./dist/render.mjs"
+    },
     "./results": {
       "require": "./results.js",
       "import": "./dist/results.mjs"
@@ -123,7 +127,7 @@
     "test": "./run",
     "lint": "eslint . run",
     "types": "tsc",
-    "build": "babel --out-dir dist/ --out-file-extension .mjs assert_utils.js browser_console.js browser_utils.js config.js curl_command.js email.js external_locking.js index.js loader.js locking.js main.js net_utils.js output.js promise_utils.js results.js runner.js utils.js version.js",
+    "build": "babel --out-dir dist/ --out-file-extension .mjs assert_utils.js browser_console.js browser_utils.js config.js curl_command.js email.js external_locking.js index.js loader.js locking.js main.js net_utils.js output.js promise_utils.js render.js results.js runner.js utils.js version.js",
     "clean": "rimraf *.d.ts doc dist",
     "prepublishOnly": "npm run clean && npm run types && npm run build"
   },

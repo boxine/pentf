@@ -15,7 +15,8 @@ async function run() {
         );
     });
 
-    assert(/3 tests passed/.test(stderr), 'Only runs 3 tests');
+    assert(/3 tests passed/.test(stderr), 'Expected 3 tests to pass');
+    assert(/3 skipped/.test(stderr), 'Expected 3 tests to be marked as skipped');
 }
 
 module.exports = {

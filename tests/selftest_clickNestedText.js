@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {closePage, newPage, clickNestedText} = require('../browser_utils');
+const {closePage, newPage, clickNestedText} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -17,11 +17,11 @@ async function run(config) {
     await page.exposeFunction('pentfClick', clickId => {
         clicks.push(clickId);
     });
-    
+
     // String variant
     await clickNestedText(page, 'first');
     assert.deepStrictEqual(clicks, ['first']);
-    
+
     await clickNestedText(page, 'Some nested foo');
     assert.deepStrictEqual(clicks, ['first', 'nested']);
 
@@ -40,7 +40,7 @@ async function run(config) {
 
     await clickNestedText(page, /first/);
     assert.deepStrictEqual(clicks, ['first']);
-    
+
     await clickNestedText(page, /Some.*foo/);
     assert.deepStrictEqual(clicks, ['first', 'nested']);
 

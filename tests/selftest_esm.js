@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 const path = require('path');
 const child_process = require('child_process');
-const { supportsImports } = require('../loader');
+const { supportsImports } = require('../src/loader');
 
 async function run() {
     // Run in subprocess so that handle exhaustion does not affect this process

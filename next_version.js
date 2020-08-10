@@ -1,6 +1,2 @@
-#!/usr/bin/env node
-
-const currentVersion = require('./package.json').version;
-const parts = currentVersion.split('.');
-parts[parts.length - 1] = '' + (parseInt(parts[parts.length - 1]) + 1);
-console.log(parts.join('.'));
+// Only needed for Node 10 which doesn't support export maps
+module.exports = require('./src/next_version');

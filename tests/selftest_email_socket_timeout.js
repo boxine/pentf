@@ -2,8 +2,8 @@ const assert = require('assert').strict;
 const net = require('net');
 const {promisify} = require('util');
 
-const {connect} = require('../email');
-const {wait} = require('../utils');
+const {connect} = require('../src/email');
+const {wait} = require('../src/utils');
 
 
 async function run() {

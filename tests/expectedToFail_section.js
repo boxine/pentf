@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 
-const runner = require('../runner');
-const {expectedToFail} = require('../promise_utils');
+const runner = require('../src/runner');
+const {expectedToFail} = require('../src/promise_utils');
 
 async function run() {
     let output = [];

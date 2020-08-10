@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const { newPage, workaround_setContent, assertNotSelector } = require('../browser_utils');
+const { newPage, workaround_setContent, assertNotSelector } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);

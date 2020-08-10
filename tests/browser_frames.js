@@ -1,5 +1,5 @@
-const {assertEventually} = require('../assert_utils');
-const {closePage, newPage, waitForText} = require('../browser_utils');
+const {assertEventually} = require('../src/assert_utils');
+const {closePage, newPage, waitForText} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config, ['--disable-features=IsolateOrigins,site-per-process']);

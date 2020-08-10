@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 
-const {timeoutPromise} = require('../promise_utils');
-const {wait} = require('../utils');
+const {timeoutPromise} = require('../src/promise_utils');
+const {wait} = require('../src/utils');
 
 async function run(config) {
     await timeoutPromise(config, wait(10), {timeout: 1000});

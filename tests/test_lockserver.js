@@ -1,8 +1,8 @@
 const assert = require('assert').strict;
 
-const {fetch} = require('../net_utils');
-const {externalList, externalAcquire, externalRelease} = require('../external_locking');
-const {wait, cmpKey} = require('../utils');
+const {fetch} = require('../src/net_utils');
+const {externalList, externalAcquire, externalRelease} = require('../src/external_locking');
+const {wait, cmpKey} = require('../src/utils');
 
 
 async function run(config) {

@@ -1,4 +1,4 @@
-const {clickXPath, closePage, newPage} = require('../browser_utils');
+const {clickXPath, closePage, newPage} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);

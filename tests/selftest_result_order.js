@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
-const {craftResults} = require('../render');
-const runner = require('../runner');
+const {craftResults} = require('../src/render');
+const runner = require('../src/runner');
 
 async function run(config) {
     const noop = async () => null;
@@ -8,7 +8,7 @@ async function run(config) {
         throw new Error('fail');
     };
 
-    /** @type {import('../runner').TestCase[]} */
+    /** @type {import('../src/runner').TestCase[]} */
     const cases = [
         {name: 'success', run: noop},
         {name: 'skipped', run: noop, skip: () => true},

@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 const http = require('http');
-const {newPage, closePage, setLanguage} = require('../browser_utils');
+const {newPage, closePage, setLanguage} = require('../src/browser_utils');
 
 async function run(config) {
     const server = http.createServer((req, res) => {

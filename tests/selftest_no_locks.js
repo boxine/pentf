@@ -1,4 +1,4 @@
-const runner = require('../runner');
+const runner = require('../src/runner');
 
 async function run(config) {
     const tasks = [

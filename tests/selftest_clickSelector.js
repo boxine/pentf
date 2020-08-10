@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 
-const {clickSelector, closePage, newPage} = require('../browser_utils');
-const {assertEventually} = require('../assert_utils');
+const {clickSelector, closePage, newPage} = require('../src/browser_utils');
+const {assertEventually} = require('../src/assert_utils');
 
 async function run(config) {
     const page = await newPage(config);

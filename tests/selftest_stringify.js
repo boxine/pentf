@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const {stringify} = require('../output');
+const {stringify} = require('../src/output');
 
 async function run() {
     assert.equal(stringify(1), '1');
@@ -67,7 +67,7 @@ async function run() {
 
     // Mixed
     assert.equal(
-        stringify({ 
+        stringify({
             foo: [
                 1,
                 2,

@@ -70,6 +70,7 @@
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_loader_.html#importfile" class="tsd-kind-icon">import<wbr>File</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_loader_.html#loadsuite" class="tsd-kind-icon">load<wbr>Suite</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_loader_.html#loadtests" class="tsd-kind-icon">load<wbr>Tests</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_loader_.html#supportsimports" class="tsd-kind-icon">supports<wbr>Imports</a></li>
 							</ul>
@@ -89,7 +90,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b3b9885/src/loader.js#L29">loader.js:29</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/5f217d2/src/loader.js#L29">loader.js:29</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -110,16 +111,65 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
-					<a name="loadtests" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> load<wbr>Tests</h3>
+					<a name="loadsuite" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> load<wbr>Suite</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">load<wbr>Tests<span class="tsd-signature-symbol">(</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, testsDir<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, globPattern<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">load<wbr>Suite<span class="tsd-signature-symbol">(</span>suiteName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, builder<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>test<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TestFn</span>, suite<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DescribeFn</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b3b9885/src/loader.js#L53">loader.js:53</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/5f217d2/src/loader.js#L64">loader.js:64</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>suiteName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>builder: <span class="tsd-signature-symbol">(</span>test<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TestFn</span>, suite<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DescribeFn</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></h5>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-signature">
+											<ul class="tsd-signatures tsd-kind-type-literal">
+												<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>test<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TestFn</span>, suite<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DescribeFn</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+											</ul>
+											<ul class="tsd-descriptions">
+												<li class="tsd-description">
+													<h4 class="tsd-parameters-title">Parameters</h4>
+													<ul class="tsd-parameters">
+														<li>
+															<h5>test: <span class="tsd-signature-type">TestFn</span></h5>
+														</li>
+														<li>
+															<h5>suite: <span class="tsd-signature-type">DescribeFn</span></h5>
+														</li>
+													</ul>
+													<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
+					<a name="loadtests" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> load<wbr>Tests</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">load<wbr>Tests<span class="tsd-signature-symbol">(</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, testsDir<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, globPattern<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/5f217d2/src/loader.js#L153">loader.js:153</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -136,7 +186,7 @@
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> globPattern: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;*.{js,cjs,mjs}&quot;</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -150,7 +200,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/b3b9885/src/loader.js#L10">loader.js:10</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/5f217d2/src/loader.js#L10">loader.js:10</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -234,6 +284,9 @@
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_loader_.html#importfile" class="tsd-kind-icon">import<wbr>File</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
+						<a href="_loader_.html#loadsuite" class="tsd-kind-icon">load<wbr>Suite</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<a href="_loader_.html#loadtests" class="tsd-kind-icon">load<wbr>Tests</a>

@@ -150,6 +150,40 @@
 };</code></pre>
 				<p>Note that while the above example tests a webpage with <a href="https://github.com/GoogleChrome/puppeteer">puppeteer</a> and uses pentf&#39;s has native support for HTTP requests (in <code>net_utils</code>) and email sending (in <code>email</code>), tests can be anything – they just have to fail the promise if the test fails.</p>
 				<p>Have a look in the <a href="https://boxine.github.io/pentf/">API documentation</a> for various helper functions.</p>
+				<a href="#creating-a-test-suite" id="creating-a-test-suite" style="color: inherit; text-decoration: none;">
+					<h3>Creating a test suite</h3>
+				</a>
+				<p>Pentf supports creating multiple test cases in the same file, which is commonly referred to as a suite.</p>
+				<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">suite</span>(<span class="hljs-params">test, describe</span>) </span>{
+    test(<span class="hljs-string">'should do something'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+    test(<span class="hljs-string">'should do something else'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+
+    describe(<span class="hljs-string">'sub feature'</span>, () =&gt; {
+        test(<span class="hljs-string">'should work too'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+    });
+}
+
+<span class="hljs-built_in">module</span>.exports = {
+    suite
+}</code></pre>
+				<p>Specific tests or groups can be focused by appending <code>.only</code>. Only those defined with that property will run when the current suite is executed.</p>
+				<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">suite</span>(<span class="hljs-params">test, describe</span>) </span>{
+    test(<span class="hljs-string">'I won\'t run'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+    test.only(<span class="hljs-string">'I will run'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+
+    describe.only(<span class="hljs-string">'foo'</span>, () =&gt; {
+        test(<span class="hljs-string">'I will run too'</span>, <span class="hljs-keyword">async</span>() =&gt; {});
+    });
+}</code></pre>
+				<p>Test cases or groups can be skipped in a similar way by appending <code>.skip</code>. Those tests will not be executed during a test run.</p>
+				<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">suite</span>(<span class="hljs-params">test, describe</span>) </span>{
+    test(<span class="hljs-string">'I will run'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+    test.skip(<span class="hljs-string">'I won\'t run'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+
+    describe.skip(<span class="hljs-string">'foo'</span>, () =&gt; {
+        test(<span class="hljs-string">'I won\'t run'</span>, <span class="hljs-keyword">async</span>() =&gt; {});
+    });
+}</code></pre>
 				<a href="#tips-for-writing-good-tests" id="tips-for-writing-good-tests" style="color: inherit; text-decoration: none;">
 					<h2>Tips for writing good tests</h2>
 				</a>

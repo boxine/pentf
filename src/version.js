@@ -2,6 +2,7 @@ const child_process = require('child_process');
 const {promisify} = require('util');
 const {EOL} = require('os');
 const fs = require('fs');
+const path = require('path');
 
 async function _cmd(cmd, args, options) {
     return (await (promisify(child_process.execFile)(cmd, args, options))).stdout.trim();
@@ -44,7 +45,10 @@ function pentfVersion() {
     // that cannot be translated to ES Modules. For ES Modules
     // any inline `import()` call is asynchronous.
     // Work around that by invoking `fs.readFileSync()` instead.
-    return JSON.parse(fs.readFileSync('./package.json', 'utf-8')).version;
+    //
+    // The variable __dirname is not present in ESM environments.
+    // It will be replaced with a polyfill by our babel plugin.
+    return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8')).version;
 }
 
 module.exports = {

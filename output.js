@@ -495,7 +495,7 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
                 const formatted = `${marker} ${currentLine} | ${normalized}`;
 
                 // Account for possible tab indention
-                const count = (line.length - normalized.length) + columnNum - 1;
+                const count = (normalized.length - line.length) + columnNum - 1;
 
                 return formatted + `\n  ${padding} ${color(config, 'dim', '|')} ${' '.repeat(count)}${color(config, 'bold-red', '^')}`;
             } else {

@@ -13,7 +13,7 @@ async function run(config) {
     ];
     await runner.run(
         {
-            quite: true,
+            quiet: true,
             logFunc: () => null,
             ...config,
             external_locking_client: 'test_locking_server',

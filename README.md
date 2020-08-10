@@ -106,6 +106,51 @@ Note that while the above example tests a webpage with [puppeteer](https://githu
 
 Have a look in the [API documentation](https://boxine.github.io/pentf/) for various helper functions.
 
+### Creating a test suite
+
+Pentf supports creating multiple test cases in the same file, which is commonly referred to as a suite.
+
+```js
+function suite(test, describe) {
+    test('should do something', async () => {});
+    test('should do something else', async () => {});
+
+    describe('sub feature', () => {
+        test('should work too', async () => {});
+    });
+}
+
+module.exports = {
+    suite
+}
+```
+
+Specific tests or groups can be focused by appending `.only`. Only those defined with that property will run when the current suite is executed.
+
+```js
+function suite(test, describe) {
+    test('I won\'t run', async () => {});
+    test.only('I will run', async () => {});
+
+    describe.only('foo', () => {
+        test('I will run too', async() => {});
+    });
+}
+```
+
+Test cases or groups can be skipped in a similar way by appending `.skip`. Those tests will not be executed during a test run.
+
+```js
+function suite(test, describe) {
+    test('I will run', async () => {});
+    test.skip('I won\'t run', async () => {});
+
+    describe.skip('foo', () => {
+        test('I won\'t run', async() => {});
+    });
+}
+```
+
 ## Tips for writing good tests
 
 By their very nature, end-to-end tests can be flaky, i.e. sometimes succeed and sometimes fail when run multiple times. We want the tests to only relay the flakiness of the systems we test, and not introduce any additional flakiness ourselves. Here are a few tips for that:

@@ -3,7 +3,7 @@
   "version": "1.0.95",
   "description": "parallel end-to-end test framework",
   "main": "src/index.js",
-  "types": "index.d.ts",
+  "types": "dist/types/index.d.ts",
   "directories": {
     "test": "tests"
   },
@@ -128,7 +128,7 @@
     "lint": "eslint . run",
     "types": "tsc",
     "build": "babel --out-dir dist/ --out-file-extension .mjs src/*.js",
-    "clean": "rimraf *.d.ts doc dist",
+    "clean": "rimraf doc dist",
     "prepublishOnly": "npm run clean && npm run types && npm run build"
   },
   "repository": {

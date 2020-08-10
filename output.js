@@ -530,6 +530,13 @@ async function formatError(config, err) {
     const stack = errorstacks.parseStackTrace(actualStack)
         .map(frame => {
             if (frame.name) {
+                // Native node ES Modules prints URIs instead of pathnames,
+                // depending on whether the package the file is part of is
+                // marked as a module. The URI usually starts with
+                // `file://`, but some files lack the protocol and only
+                // start with a semicolon `://`.
+                frame.fileName = frame.fileName.replace(/^(file)?:\/\//, '');
+
                 // Only show frame for errors in the user's code
                 if (process.env.PENTF_SHOW_CODE_FRAMES !== 'false' && !nearestFrame && !/node_modules/.test(frame.fileName) && frame.fileName.startsWith(config._rootDir)) {
                     nearestFrame = frame;

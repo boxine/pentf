@@ -7,6 +7,86 @@
   "directories": {
     "test": "tests"
   },
+  "exports": {
+    ".": {
+      "require": "./index.js",
+      "import": "./dist/index.mjs"
+    },
+    "./assert_utils": {
+      "require": "./assert_utils.js",
+      "import": "./dist/assert_utils.mjs"
+    },
+    "./browser_console": {
+      "require": "./browser_console.js",
+      "import": "./dist/browser_console.mjs"
+    },
+    "./browser_utils": {
+      "require": "./browser_utils.js",
+      "import": "./dist/browser_utils.mjs"
+    },
+    "./config": {
+      "require": "./config.js",
+      "import": "./dist/config.mjs"
+    },
+    "./curl_command": {
+      "require": "./curl_command.js",
+      "import": "./dist/curl_command.mjs"
+    },
+    "./email": {
+      "require": "./email.js",
+      "import": "./dist/email.mjs"
+    },
+    "./external_locking": {
+      "require": "./external_locking.js",
+      "import": "./dist/external_locking.mjs"
+    },
+    "./loader": {
+      "require": "./loader.js",
+      "import": "./dist/loader.mjs"
+    },
+    "./locking": {
+      "require": "./locking.js",
+      "import": "./dist/locking.mjs"
+    },
+    "./main": {
+      "require": "./main.js",
+      "import": "./dist/main.mjs"
+    },
+    "./net_utils": {
+      "require": "./net_utils.js",
+      "import": "./dist/net_utils.mjs"
+    },
+    "./output": {
+      "require": "./output.js",
+      "import": "./dist/output.mjs"
+    },
+    "./promise_utils": {
+      "require": "./promise_utils.js",
+      "import": "./dist/promise_utils.mjs"
+    },
+    "./render": {
+      "require": "./render.js",
+      "import": "./dist/render.mjs"
+    },
+    "./results": {
+      "require": "./results.js",
+      "import": "./dist/results.mjs"
+    },
+    "./runner": {
+      "require": "./runner.js",
+      "import": "./dist/runner.mjs"
+    },
+    "./utils": {
+      "require": "./utils.js",
+      "import": "./dist/utils.mjs"
+    },
+    "./version": {
+      "require": "./version.js",
+      "import": "./dist/version.mjs"
+    },
+    "./package.json": "./package.json",
+    "./": "./"
+  },
   "dependencies": {
     "@sentry/node": "^5.15.5",
     "@types/glob": "^7.1.1",
@@ -28,6 +108,8 @@
     "tough-cookie": "^4.0.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.10.5",
+    "@babel/core": "^7.11.1",
     "@types/diff": "^4.0.2",
     "deep-equal": "^1.0.1",
     "eslint": "^7.0.0",
@@ -45,8 +127,9 @@
     "test": "./run",
     "lint": "eslint . run",
     "types": "tsc",
-    "clean": "rimraf *.d.ts doc",
-    "prepublishOnly": "npm run clean && npm run types"
+    "build": "babel --out-dir dist/ --out-file-extension .mjs assert_utils.js browser_console.js browser_utils.js config.js curl_command.js email.js external_locking.js index.js loader.js locking.js main.js net_utils.js output.js promise_utils.js render.js results.js runner.js utils.js version.js",
+    "clean": "rimraf *.d.ts doc dist",
+    "prepublishOnly": "npm run clean && npm run types && npm run build"
   },
   "repository": {
     "type": "git",

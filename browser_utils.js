@@ -16,6 +16,7 @@ const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
 const {timeoutPromise} = require('./promise_utils');
+const { importFile } = require('./loader');
 
 let tmp_home;
 
@@ -40,9 +41,9 @@ async function newPage(config, chrome_args=[]) {
     let puppeteer;
     try {
         if(config.puppeteer_firefox) {
-            puppeteer = require('puppeteer-firefox');
+            puppeteer = await importFile('puppeteer-firefox');
         } else {
-            puppeteer = require('puppeteer');
+            puppeteer = await importFile('puppeteer');
         }
     } catch(e) {
         // puppeteer/puppeteer-firefox is a peer dependency. Show a helpful error message when it's missing.

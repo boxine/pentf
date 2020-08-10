@@ -20,13 +20,37 @@ async function supportsImports() {
     return canUseImport;
 }
 
+let canUseImport;
+
+/**
+ * Load module via CommonJS or ES Modules depending on the environment
+ * @param {string} file
+ */
+async function importFile(file) {
+    if (canUseImport === undefined) {
+        canUseImport = await supportsImports();
+    }
+
+    if (canUseImport) {
+        // Use dynamic import statement to be able to load both native esm
+        // and commonjs modules.
+        const m = await import(file);
+
+        // If we're importing a commonjs file the exports will be defined
+        // as an esm default export
+        return m.default ? m.default : m;
+    } else {
+        return require(file);
+    }
+}
+
 /**
  * @param {*} args
  * @param {string} testsDir
  * @param {string} [globPattern]
  * @private
  */
-async function loadTests(args, testsDir, globPattern = '*.js') {
+async function loadTests(args, testsDir, globPattern = '*.{js,cjs,mjs}') {
     const testFiles = await promisify(glob.glob)(globPattern, {cwd: testsDir});
     let tests = testFiles.map(n => ({
         path: n,
@@ -45,25 +69,11 @@ async function loadTests(args, testsDir, globPattern = '*.js') {
         }))).filter(t => t);
     }
 
-    let canUseImport = await supportsImports();
     return await Promise.all(
         tests.map(async t => {
             const file = path.join(testsDir, t.path);
 
-            let tc;
-            if (canUseImport) {
-                // Use dynamic import statement to be able to load both native esm
-                // and commonjs modules.
-                tc = await import(file);
-
-                // If we're importing a commonjs file the exports will be defined
-                // as an esm default export
-                if (tc.default) {
-                    tc = tc.default;
-                }
-            } else {
-                tc = require(file);
-            }
+            let tc = await importFile(file);
 
             // ESM modules are readonly, so we need to create our own writable
             // object.
@@ -73,6 +83,7 @@ async function loadTests(args, testsDir, globPattern = '*.js') {
 }
 
 module.exports = {
+    importFile,
     loadTests,
     supportsImports,
 };

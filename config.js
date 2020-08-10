@@ -8,6 +8,7 @@ const path = require('path');
 const {promisify} = require('util');
 
 const utils = require('./utils');
+const { importFile } = require('./loader');
 
 class AutoWidthArgumentParser extends argparse.ArgumentParser {
     _getFormatter() {
@@ -420,7 +421,7 @@ async function readConfigFile(configDir, env) {
 
     const jsFilename = path.join(configDir, env + '.js');
     if (await promisify(fs.exists)(jsFilename)) {
-        config = require(jsFilename);
+        config = await importFile(jsFilename);
 
         if (typeof config == 'function') {
             config = await config(env);

@@ -5,6 +5,7 @@ results*.md
 results*.json
 screenshots
 doc/
+dist/
 
 # Editor
 .vscode/

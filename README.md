@@ -111,29 +111,29 @@ Have a look in the [API documentation](https://boxine.github.io/pentf/) for vari
 Pentf supports creating multiple test cases in the same file, which is commonly referred to as a suite.
 
 ```js
-function runSuite(it, describe) {
-    it('should do something', async () => {});
-    it('should do something else', async () => {});
+function suite(test, describe) {
+    test('should do something', async () => {});
+    test('should do something else', async () => {});
 
     describe('sub feature', () => {
-        it('should work too', async () => {});
+        test('should work too', async () => {});
     });
 }
 
 module.exports = {
-    runSuite
+    suite
 }
 ```
 
 Specific tests or groups can be focused by appending `.only`. Only those defined with that property will run when the current suite is executed.
 
 ```js
-function runSuite(it, describe) {
-    it('I won\'t run', async () => {});
-    it.only('I will run', async () => {});
+function suite(test, describe) {
+    test('I won\'t run', async () => {});
+    test.only('I will run', async () => {});
 
     describe.only('foo', () => {
-        it('I will run too', async() => {});
+        test('I will run too', async() => {});
     });
 }
 ```
@@ -141,12 +141,12 @@ function runSuite(it, describe) {
 Test cases or groups can be skipped in a similar way by appending `.skip`. Those tests will not be executed during a test run.
 
 ```js
-function runSuite(it, describe) {
-    it('I will run', async () => {});
-    it.skip('I won\'t run', async () => {});
+function suite(test, describe) {
+    test('I will run', async () => {});
+    test.skip('I won\'t run', async () => {});
 
     describe.skip('foo', () => {
-        it('I won\'t run', async() => {});
+        test('I won\'t run', async() => {});
     });
 }
 ```

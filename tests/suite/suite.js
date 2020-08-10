@@ -1,11 +1,11 @@
 /**
  * @param {import('../../src/loader').TestFn} test
  */
-function runSuite(test) {
+function suite(test) {
     test('Test A', () => {});
     test('Test B', () => {});
 }
 
 module.exports = {
-    runSuite,
+    suite,
 };

@@ -53,12 +53,12 @@ async function importFile(file) {
  */
 
 /**
- * @typedef {{(name: string, callback: () => void): void, only: (name: string, callback: () => void): void} SuiteFn
+ * @typedef {{(name: string, callback: () => void): void, only: (name: string, callback: () => void): void} DescribeFn
  */
 
 /**
  * @param {string} suiteName
- * @param {(test: TestFn, suite: SuiteFn) => void} builder
+ * @param {(test: TestFn, suite: DescribeFn) => void} builder
  * @private
  */
 function loadSuite(suiteName, builder) {
@@ -112,7 +112,7 @@ function loadSuite(suiteName, builder) {
      * @param {string} description
      * @param {() => void} callback
      */
-    function suite(description, callback) {
+    function describe(description, callback) {
         groups.push(description);
         callback();
         groups.pop();
@@ -123,7 +123,7 @@ function loadSuite(suiteName, builder) {
      * @param {string} description
      * @param {() => void} callback
      */
-    suite.only = (description, callback) => {
+    describe.only = (description, callback) => {
         onlyInScope = true;
         groups.push(description);
 
@@ -138,9 +138,9 @@ function loadSuite(suiteName, builder) {
      * @param {string} description
      * @param {() => void} callback
      */
-    suite.skip = () => {};
+    describe.skip = () => {};
 
-    builder(test, suite);
+    builder(test, describe);
     return only.length > 0 ? only : tests;
 }
 
@@ -176,8 +176,8 @@ async function loadTests(args, testsDir, globPattern = '*.{js,cjs,mjs}') {
 
             let tc = await importFile(file);
 
-            if (typeof tc.runSuite === 'function') {
-                testCases.push(...loadSuite(t.name, tc.runSuite));
+            if (typeof tc.suite === 'function') {
+                testCases.push(...loadSuite(t.name, tc.suite));
             } else {
                 // ESM modules are readonly, so we need to create our own writable
                 // object.

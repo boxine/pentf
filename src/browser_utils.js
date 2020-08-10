@@ -178,6 +178,18 @@ async function newPage(config, chrome_args=[]) {
     browser._pentf_config = config;
     addBreadcrumb(config, 'exit newPage()');
 
+    // PDF renderer invokes newPage with a raw config object which doesn't
+    // have runner sepcific properties
+    if (config._teardown_hooks) {
+        // Don't use onTeardown, because importing it would lead to a circular
+        // dependency.
+        config._teardown_hooks.push(async () => {
+            if (!page.isClosed()) {
+                await closePage(page);
+            }
+        });
+    }
+
     return page;
 }
 

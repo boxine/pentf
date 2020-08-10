@@ -65,8 +65,11 @@ function loadSuite(suiteName, builder) {
     const tests = [];
     const only = [];
     let onlyInScope = false;
+    let skipInScope = false;
     const groups = [suiteName];
     let i = 0;
+
+    const skipFn = () => true;
 
     /**
      * Create a test case
@@ -80,6 +83,7 @@ function loadSuite(suiteName, builder) {
             description,
             name: `${groups.join('>')}_${i++}`,
             run,
+            skip: skipInScope ? skipFn : options.skip,
             ...options,
         });
     }
@@ -95,6 +99,7 @@ function loadSuite(suiteName, builder) {
             description,
             name: `${groups.join('>')}_${i++}`,
             run,
+            skip: skipInScope ? skipFn : options.skip,
             ...options,
         });
     };
@@ -105,7 +110,16 @@ function loadSuite(suiteName, builder) {
      * @param {(config: import('./config').Config) => Promise<void>} run
      * @param {TestOptions} options
      */
-    test.skip = () => {};
+    test.skip = (description, run, options = {}) => {
+        const arr = onlyInScope ? only : tests;
+        arr.push({
+            description,
+            name: `${groups.join('>')}_${i++}`,
+            run,
+            skip: skipFn,
+            ...options,
+        });
+    };
 
     /**
      * Create a group for test cases
@@ -138,7 +152,15 @@ function loadSuite(suiteName, builder) {
      * @param {string} description
      * @param {() => void} callback
      */
-    describe.skip = () => {};
+    describe.skip = (description, callback) => {
+        skipInScope = true;
+        groups.push(description);
+
+        callback();
+
+        skipInScope = false;
+        groups.pop();
+    };
 
     builder(test, describe);
     return only.length > 0 ? only : tests;

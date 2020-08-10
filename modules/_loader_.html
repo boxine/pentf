@@ -69,6 +69,7 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_loader_.html#importfile" class="tsd-kind-icon">import<wbr>File</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_loader_.html#loadtests" class="tsd-kind-icon">load<wbr>Tests</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_loader_.html#supportsimports" class="tsd-kind-icon">supports<wbr>Imports</a></li>
 							</ul>
@@ -78,6 +79,36 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="importfile" class="tsd-anchor"></a>
+					<h3>import<wbr>File</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">import<wbr>File<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/9c027fd/loader.js#L29">loader.js:29</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Load module via CommonJS or ES Modules depending on the environment</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>file: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
 					<a name="loadtests" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> load<wbr>Tests</h3>
@@ -88,7 +119,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0a69e19/loader.js#L29">loader.js:29</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/9c027fd/loader.js#L53">loader.js:53</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -102,7 +133,7 @@
 									<h5>testsDir: <span class="tsd-signature-type">string</span></h5>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> globPattern: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;*.js&quot;</span></h5>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> globPattern: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;*.{js,cjs,mjs}&quot;</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -119,7 +150,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/0a69e19/loader.js#L10">loader.js:10</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/9c027fd/loader.js#L10">loader.js:10</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -142,6 +173,12 @@
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="_assert_utils_.html">&quot;assert_<wbr>utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="_babel_transform_commonjs_to_esm_.html">&quot;babel-<wbr>transform-<wbr>commonjs-<wbr>to-<wbr>esm&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="_babel_config_.html">&quot;babel.config&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="_browser_console_.html">&quot;browser_<wbr>console&quot;</a>
@@ -210,6 +247,9 @@
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_loader_.html#importfile" class="tsd-kind-icon">import<wbr>File</a>
+					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<a href="_loader_.html#loadtests" class="tsd-kind-icon">load<wbr>Tests</a>
 					</li>

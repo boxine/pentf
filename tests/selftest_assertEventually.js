@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {assertEventually} = require('../assert_utils');
+const {assertEventually} = require('../src/assert_utils');
 
 async function run() {
     await assert.rejects(assertEventually(() => false, {timeout: 10, checkEvery: 1, message: 'Never changed'}), {

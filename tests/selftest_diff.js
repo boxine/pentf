@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const {generateDiff} = require('../output');
+const {generateDiff} = require('../src/output');
 
 function assertDiff(a, b, expected) {
     assert.equal(
@@ -63,7 +63,7 @@ async function run() {
     );
 
     assertDiff(
-        { 
+        {
             foo: [
                 1,
                 2,
@@ -74,7 +74,7 @@ async function run() {
                     b: [1, 2, 'asd', 'asdasd']
                 }
             ]
-        }, 
+        },
         {
             foo: [
                 1,

@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 const path = require('path');
-const {closePage, newPage} = require('../browser_utils');
+const {closePage, newPage} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage({

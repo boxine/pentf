@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {loadTests} = require('../loader');
+const {loadTests} = require('../src/loader');
 
 async function run(config) {
     assert.deepStrictEqual(

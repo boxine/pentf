@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {parseHeader} = require('../email');
+const {parseHeader} = require('../src/email');
 
 async function run() {
     assert.equal(parseHeader('To', 'To: somebody\r\n'), 'somebody');

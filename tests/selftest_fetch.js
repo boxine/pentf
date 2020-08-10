@@ -2,7 +2,7 @@ const assert = require('assert').strict;
 const http = require('http');
 const querystring = require('querystring');
 
-const {fetch} = require('../net_utils');
+const {fetch} = require('../src/net_utils');
 
 function escapeHTML(s) {
     // from https://stackoverflow.com/a/20403618/35070

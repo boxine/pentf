@@ -2,86 +2,86 @@
   "name": "pentf",
   "version": "1.0.95",
   "description": "parallel end-to-end test framework",
-  "main": "index.js",
+  "main": "src/index.js",
   "types": "index.d.ts",
   "directories": {
     "test": "tests"
   },
   "exports": {
     ".": {
-      "require": "./index.js",
+      "require": "./src/index.js",
       "import": "./dist/index.mjs"
     },
     "./assert_utils": {
-      "require": "./assert_utils.js",
+      "require": "./src/assert_utils.js",
       "import": "./dist/assert_utils.mjs"
     },
     "./browser_console": {
-      "require": "./browser_console.js",
+      "require": "./src/browser_console.js",
       "import": "./dist/browser_console.mjs"
     },
     "./browser_utils": {
-      "require": "./browser_utils.js",
+      "require": "./src/browser_utils.js",
       "import": "./dist/browser_utils.mjs"
     },
     "./config": {
-      "require": "./config.js",
+      "require": "./src/config.js",
       "import": "./dist/config.mjs"
     },
     "./curl_command": {
-      "require": "./curl_command.js",
+      "require": "./src/curl_command.js",
       "import": "./dist/curl_command.mjs"
     },
     "./email": {
-      "require": "./email.js",
+      "require": "./src/email.js",
       "import": "./dist/email.mjs"
     },
     "./external_locking": {
-      "require": "./external_locking.js",
+      "require": "./src/external_locking.js",
       "import": "./dist/external_locking.mjs"
     },
     "./loader": {
-      "require": "./loader.js",
+      "require": "./src/loader.js",
       "import": "./dist/loader.mjs"
     },
     "./locking": {
-      "require": "./locking.js",
+      "require": "./src/locking.js",
       "import": "./dist/locking.mjs"
     },
     "./main": {
-      "require": "./main.js",
+      "require": "./src/main.js",
       "import": "./dist/main.mjs"
     },
     "./net_utils": {
-      "require": "./net_utils.js",
+      "require": "./src/net_utils.js",
       "import": "./dist/net_utils.mjs"
     },
     "./output": {
-      "require": "./output.js",
+      "require": "./src/output.js",
       "import": "./dist/output.mjs"
     },
     "./promise_utils": {
-      "require": "./promise_utils.js",
+      "require": "./src/promise_utils.js",
       "import": "./dist/promise_utils.mjs"
     },
     "./render": {
-      "require": "./render.js",
+      "require": "./src/render.js",
       "import": "./dist/render.mjs"
     },
     "./results": {
-      "require": "./results.js",
+      "require": "./src/results.js",
       "import": "./dist/results.mjs"
     },
     "./runner": {
-      "require": "./runner.js",
+      "require": "./src/runner.js",
       "import": "./dist/runner.mjs"
     },
     "./utils": {
-      "require": "./utils.js",
+      "require": "./src/utils.js",
       "import": "./dist/utils.mjs"
     },
     "./version": {
-      "require": "./version.js",
+      "require": "./src/version.js",
       "import": "./dist/version.mjs"
     },
     "./package.json": "./package.json",
@@ -127,7 +127,7 @@
     "test": "./run",
     "lint": "eslint . run",
     "types": "tsc",
-    "build": "babel --out-dir dist/ --out-file-extension .mjs assert_utils.js browser_console.js browser_utils.js config.js curl_command.js email.js external_locking.js index.js loader.js locking.js main.js net_utils.js output.js promise_utils.js render.js results.js runner.js utils.js version.js",
+    "build": "babel --out-dir dist/ --out-file-extension .mjs src/*.js",
     "clean": "rimraf *.d.ts doc dist",
     "prepublishOnly": "npm run clean && npm run types && npm run build"
   },

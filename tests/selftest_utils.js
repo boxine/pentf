@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {timezoneOffsetString} = require('../utils');
+const {timezoneOffsetString} = require('../src/utils');
 
 async function run() {
     assert.equal(timezoneOffsetString(0), 'Z');

@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {resultCountString} = require('../results');
+const {resultCountString} = require('../src/results');
 
 async function run() {
     const simple = [

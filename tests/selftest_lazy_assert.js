@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {lazyAssert} = require('../assert_utils');
+const {lazyAssert} = require('../src/assert_utils');
 
 async function run() {
     let executed = false;

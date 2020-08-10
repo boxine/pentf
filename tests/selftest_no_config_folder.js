@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const {readConfig} = require('../config');
+const {readConfig} = require('../src/config');
 
 async function run() {
     const config = await readConfig({}, {});

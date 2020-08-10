@@ -1,6 +1,6 @@
 const assert = require('assert');
-const { _generateClientName: generateClientName } = require('../external_locking');
-const { pentfVersion } = require('../version');
+const { _generateClientName: generateClientName } = require('../src/external_locking');
+const { pentfVersion } = require('../src/version');
 
 async function run() {
     assert.equal(generateClientName({

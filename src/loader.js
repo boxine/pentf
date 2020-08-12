@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const {promisify} = require('util');
+const {pathToFileURL} = require('url');
 
 /**
  * Check if the current running node version supports import statements.
@@ -34,7 +35,17 @@ async function importFile(file) {
     if (canUseImport) {
         // Use dynamic import statement to be able to load both native esm
         // and commonjs modules.
-        const m = await import(file);
+
+        // If we have a an absolute path we need to convert it to a URL.
+        // This is crucial for Windows support where paths are not valid
+        // URL pathnames. The latter is supported by `import()` out of
+        // the box.
+        let urlOrModuleName = file;
+        if (path.isAbsolute(file)) {
+            urlOrModuleName = pathToFileURL(file).href;
+        }
+
+        const m = await import(urlOrModuleName);
 
         // If we're importing a commonjs file the exports will be defined
         // as an esm default export

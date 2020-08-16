@@ -181,7 +181,7 @@ function resultSummary(config, tasks, onTests=false) {
         res += color(config, 'red', `  ${pad(errored.length)} failed (${errored.map(s => s.name).join(', ')})\n`);
     }
     if (flaky.length) {
-        res += `  ${pad(flaky.length)} flaky\n`;
+        res += color(config, 'lightMagenta', `  ${pad(flaky.length)} flaky (${flaky.map(s => s.name).join(', ')})\n`);
     }
     if (skipped.length) {
         res += color(config, 'cyan',`  ${pad(skipped.length)} skipped (${skipped.map(s => s.name).join(', ')})\n`);

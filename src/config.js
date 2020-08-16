@@ -320,6 +320,13 @@ function parseArgs(options, raw_args) {
         defaultValue: 1,
         help: 'Run the tests the specified number of times',
     });
+    runner_group.addArgument(['--repeat-flaky'], {
+        type: 'int',
+        metavar: 'COUNT',
+        defaultValue: 0,
+        help: 'Repeat a failing test until it passes or the specified run count limit is reached',
+        dest: 'repeatFlaky'
+    });
     runner_group.addArgument(['--timeout'], {
         type: 'int',
         metavar: 'MS',
@@ -440,7 +447,7 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean}} Config
+ * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number}} Config
  */
 
 /**

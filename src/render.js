@@ -11,27 +11,50 @@ const utils = require('./utils');
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').Task} task
+ * @param {TestResult} result
  * @returns {number}
  */
-function getTaskOrder(config, task) {
+function getTestOrder(config, result) {
     const expectNothing = config.expect_nothing;
 
-    if (task.status === 'error' && (!task.expectedToFail || expectNothing)) {
+    if (result.status === 'error' && (!result.expectedToFail || expectNothing)) {
         return 1; // error
-    } else if (task.status === 'success' && (task.expectedToFail && !expectNothing)) {
+    } else if (result.status === 'success' && (result.expectedToFail && !expectNothing)) {
         return 2; // expectedToFailButPassed
-    } else if (task.status === 'error' && (task.expectedToFail && !expectNothing)) {
+    } else if (result.status === 'error' && (result.expectedToFail && !expectNothing)) {
         return 3; // expectedToFail
-    } else if (task.status ==='flaky') {
+    } else if (result.status ==='flaky') {
         return 4; // flaky
-    } else if (task.status === 'skipped') {
+    } else if (result.status === 'skipped') {
         return 5; // skipped
     }
 
     return 99;
 }
 
+/**
+ * @typedef {Object} TaskResult
+ * @param {import('./runner').TaskStatus} status
+ * @param {number} duration
+ * @param {*} error_screenshots  // FIXME
+ * @param {string} error_stack
+ */
+
+/**
+ * @typedef {import('./runner').TaskStatus | "flaky"} TestStatus
+ */
+
+/**
+ * @typedef {Object} TestResult
+ * @property {string} name
+ * @property {string} id
+ * @property {string} description
+ * @property {boolean} skipped
+ * @property {boolean} taskResults
+ * @property {TestStatus} status
+ * @property {*} expectedToFail // FIXME
+ * @property {*} skipReason // FIXME
+ */
 
 /**
  * @param {import('./config').Config} config
@@ -39,29 +62,11 @@ function getTaskOrder(config, task) {
  */
 function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
+    const {tasks} = state;
 
-    // Order tasks by severity
-    const tasks = state.tasks.slice().sort((taskA, taskB) => {
-        const a = getTaskOrder(config, taskA);
-        const b = getTaskOrder(config, taskB);
-
-        if (a < b) {
-            return -1;
-        } else if (a > b) {
-            return 1;
-        }
-
-        // Sort alphabetically by task name if order is the same
-        if (taskA.name < taskB.name) {
-            return -1;
-        } else if (taskA.name > taskB.name) {
-            return 1;
-        }
-
-        return 0;
-    });
-
+    /** @type {TestResult[]} */
     const tests = [];
+    /** @type {Map<string, TestResult>} */
     const testsById = new Map();
 
     for (const task of tasks) {
@@ -101,6 +106,27 @@ function craftResults(config, test_info) {
             t.status = 'flaky';
         }
     }
+
+    // Order tests by severity
+    tests.sort((testA, testB) => {
+        const a = getTestOrder(config, testA);
+        const b = getTestOrder(config, testB);
+
+        if (a < b) {
+            return -1;
+        } else if (a > b) {
+            return 1;
+        }
+
+        // Sort alphabetically by task name if order is the same
+        if (testA.name < testB.name) {
+            return -1;
+        } else if (testA.name > testB.name) {
+            return 1;
+        }
+
+        return 0;
+    });
 
     return {
         start: test_start,

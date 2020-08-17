@@ -230,9 +230,7 @@ async function sequential_run(config, state) {
             console.log(task.name + ' ...');
         }
 
-        task.status = 'running';
-        task.start = performance.now();
-        await run_task(config, task);
+        await run_one(config, state, task);
 
         await locking.release(config, state, task);
     }
@@ -249,11 +247,27 @@ async function run_one(config, state, task) {
 
     if (task.status === 'skipped') return task;
 
+    const tcName = task.tc.name;
+    const count = state.flakyCounts.get(tcName) || 0;
+    state.flakyCounts.set(tcName, count + 1);
+
     task.status = 'running';
     task.start = performance.now();
     output.status(config, state);
 
     await run_task(config, task);
+
+    const repeat = config.repeat || 1;
+    if (count < config.repeatFlaky - 1 && task.status === 'error' && !task.expectedToFail) {
+        output.logVerbose(config, `Retrying task for flaky detection. Retry count: ${count + 1} (${task.id})`);
+        state.tasks.push({
+            ...task,
+            status: 'todo',
+            breadcrumb: null,
+            id: `${tcName}_${repeat + count}`,
+            name: `${tcName}[${repeat + count}]`,
+        });
+    }
 
     output.status(config, state);
     return task;
@@ -453,6 +467,7 @@ async function testCases2tasks(config, testCases) {
  * @property {NodeJS.Timeout} [external_locking_refresh_timeout]
  * @property {string} last_logged_status The last status string that was logged
  * to the console.
+ * @property {Map<string, number>} flakyCounts Track flakyness run count of a test
  */
 
 /**
@@ -479,6 +494,7 @@ async function run(config, testCases) {
     const tasks = await testCases2tasks(config, testCases);
     /** @type {RunnerState} */
     const state = {
+        flakyCounts: new Map(),
         tasks,
         last_logged_status: ''
     };

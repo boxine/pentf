@@ -32,11 +32,17 @@ function clean(config) {
 function status(config, state) {
     if (config.quiet) return;
     assert(state.tasks);
+    assert(state.resultById);
 
     last_state = state;
 
-    const {errored, done, expectedToFail, skipped, running} = getResults(config, state.tasks, false);
+    const testResults = Array.from(state.resultById.values());
+    const {errored, expectedToFail, skipped} = getResults(config, testResults);
     const {tasks} = state;
+
+    const done = tasks.filter(t => t.status === 'error' || t.status === 'success');
+    const running = tasks.filter(t => t.status === 'running');
+
     const failed_str = errored.length > 0 ? color(config, 'red', `${errored.length} failed, `) : '';
     const expected_fail_str = expectedToFail.length > 0 ? `${expectedToFail.length} failed as expected, ` : '';
 
@@ -106,7 +112,11 @@ function formatDuration(config, duration) {
  */
 function detailedStatus(config, state) {
     const {tasks} = state;
-    const {done, skipped, running} = getResults(config, state.tasks, false);
+    const testResults = Array.from(state.resultById.values());
+    const {skipped} = getResults(config, testResults);
+
+    const done = tasks.filter(t => t.status === 'success' || t.status === 'error');
+    const running = tasks.filter(t => t.status === 'running');
 
     const label = color(config, 'inverse-blue', 'STATUS');
     const progress = color(config, 'yellow', `${done.length}/${tasks.length - skipped.length} done`)+ `, ${running.length} running`;
@@ -152,11 +162,10 @@ function detailedStatus(config, state) {
 * Summarize test results.
 * @hidden
 * @param {*} config The pentf configuration object.
-* @param {Array<Object>} tasks All finished tasks.
-* @param {boolean} onTests Summarize tests instead of tasks.
+* @param {ReturnType<typeof import('./results').getResults>} results
 * @returns {string} A string with counts of the results.
 **/
-function resultSummary(config, tasks, onTests=false) {
+function resultSummary(config, results) {
     const {
         success,
         errored,
@@ -164,8 +173,7 @@ function resultSummary(config, tasks, onTests=false) {
         skipped,
         expectedToFail,
         expectedToFailButPassed,
-        itemName
-    } = getResults(config, tasks, onTests);
+    } = results;
 
     const maxChars = Math.max(
         ...[success.length, errored.length, flaky.length, skipped.length, expectedToFail.length, expectedToFailButPassed.length]
@@ -175,7 +183,7 @@ function resultSummary(config, tasks, onTests=false) {
 
     let res = '';
     if (success.length > 0) {
-        res += color(config, 'green', `  ${pad(success.length)} ${itemName} passed\n`);
+        res += color(config, 'green', `  ${pad(success.length)} tests passed\n`);
     }
     if (errored.length > 0) {
         res += color(config, 'red', `  ${pad(errored.length)} failed (${errored.map(s => s.name).join(', ')})\n`);
@@ -210,10 +218,11 @@ function finish(config, state) {
     if (tasks.length === 0 && config.filter) {
         msg += `No test case found with filter: ${config.filter}\n`;
     }
-    msg += resultSummary(config, tasks);
+    const testResults = Array.from(state.resultById.values());
+    const results = getResults(config, testResults);
+    msg += resultSummary(config, results);
 
-    const expectedToFail = tasks.filter(t => t.expectedToFail && t.status === 'error');
-    if (!config.expect_nothing && (expectedToFail.length > 0)) {
+    if (!config.expect_nothing && (results.expectedToFail.length > 0)) {
         msg += color(config, 'dim', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
         msg += '\n\n';
     }

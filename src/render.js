@@ -1,13 +1,10 @@
-const assert = require('assert');
 const fs = require('fs');
 const {promisify} = require('util');
-const {stripColors} = require('kolorist');
 const {html2pdf} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
 const {resultCountString} = require('./results');
 
 const output = require('./output');
-const utils = require('./utils');
 
 /**
  * @param {import('./config').Config} config
@@ -50,7 +47,7 @@ function getTestOrder(config, result) {
  * @property {string} id
  * @property {string} description
  * @property {boolean} skipped
- * @property {boolean} taskResults
+ * @property {TaskResult[]} taskResults
  * @property {TestStatus} status
  * @property {*} expectedToFail // FIXME
  * @property {*} skipReason // FIXME
@@ -62,50 +59,9 @@ function getTestOrder(config, result) {
  */
 function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
-    const {tasks} = state;
 
     /** @type {TestResult[]} */
-    const tests = [];
-    /** @type {Map<string, TestResult>} */
-    const testsById = new Map();
-
-    for (const task of tasks) {
-        const testId = task.tc.id || task.tc.name;
-        assert(testId);
-
-        let testResult = testsById.get(testId);
-        if (!testResult) {
-            testResult = {
-                ...utils.pluck(task, ['expectedToFail', 'skipReason']),
-                name: task.tc.name,
-                id: testId,
-                description: task.tc.description,
-                skipped: task.status === 'skipped',
-                taskResults: [],
-            };
-            tests.push(testResult);
-            testsById.set(testId, testResult);
-        }
-
-        const taskResult = utils.pluck(task, ['status', 'duration', 'error_screenshots']);
-        if (task.error) {
-            // Node's assert module modifies the Error's stack property and
-            // adds ansi color codes. These can only be disabled globally via
-            // an environment variable, but we want to keep colorized output
-            // for the cli. So we need to strip the ansi codes from the assert
-            // stack.
-            taskResult.error_stack = stripColors(task.error.stack);
-        }
-        testResult.taskResults.push(taskResult);
-    }
-
-    for (const t of tests) {
-        if (t.taskResults.every(tr => tr.status === t.taskResults[0].status)) {
-            t.status = t.taskResults[0].status;
-        } else {
-            t.status = 'flaky';
-        }
-    }
+    const tests = Array.from(state.resultById.values());
 
     // Order tests by severity
     tests.sort((testA, testB) => {
@@ -277,7 +233,7 @@ function _calcSingleStatusStr(status) {
 
 function _calcSummaryStatus(taskResults) {
     if (taskResults.every(tr => tr.status === taskResults[0].status)) {
-        return _calcSingleStatusStr(taskResults[0].status);
+        return _calcSingleStatusStr(taskResults.length ? taskResults[0].status : 'skipped');
     }
 
     // Flaky results, tabulate

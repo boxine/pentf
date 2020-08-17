@@ -6,12 +6,15 @@ const render = require('../src/render');
  * @param {import('../src/runner').TaskConfig} config
  */
 async function run(config) {
+    let output = [];
     const runnerConfig = {
         ...config,
-        logFunc: () => null,
+        colors: false,
+        logFunc: (_, message) => output.push(message),
         repeatFlaky: 3,
         quiet: true,
     };
+
 
     function createTests() {
         let i = 0;
@@ -69,13 +72,17 @@ async function run(config) {
 
     // Sequential run
     let tests = createTests();
+    output = [];
     let result = await runner.run({...runnerConfig, concurrency: 1}, tests);
     assertResult(result);
+    assert(output[output.length-1].includes('2 flaky (foo, bob)'), 'Summary did not include flaky tests');
 
     // Parallel run
     tests = createTests();
+    output = [];
     result = await runner.run({...runnerConfig, concurrency: 1}, tests);
     assertResult(result);
+    assert(output[output.length-1].includes('2 flaky (foo, bob)'), 'Summary did not include flaky tests');
 }
 
 module.exports = {

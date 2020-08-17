@@ -98,6 +98,7 @@ function parseArgs(options, raw_args) {
     });
     output_group.addArgument(['--no-clear-line', '--ci'], {
         action: 'storeTrue',
+        dest: 'ci',
         help: 'Never clear the current output line (as if output is not a tty)',
     });
     output_group.addArgument(['--print-config'], {

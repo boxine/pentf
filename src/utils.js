@@ -99,6 +99,11 @@ function count(ar, filter) {
     return res;
 }
 
+/**
+ * @template T
+ * @param {T} obj
+ * @param {Array<keyof T>} keys
+ */
 function pluck(obj, keys) {
     const res = {};
     for (const k of keys) {

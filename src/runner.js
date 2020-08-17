@@ -253,18 +253,26 @@ function update_results(config, state, task) {
     let status = task.status;
     if (config.repeatFlaky > 0 && status === 'success' || status === 'error') {
         const runs = flakyCounts.get(testId) || 1;
-        if (runs > 1) {
-            if (runs < config.repeatFlaky && task.status !== 'success') {
+        // Not flaky if the first run was successful
+        if (!(runs === 1 && task.status === 'success')) {
+            // If task is failing, but we haven't reached the limit, then
+            // we are still trying to determine if the test is flaky.
+            if (runs < config.repeatFlaky && task.status === 'error') {
                 status = 'todo';
             } else if (task.status === 'success') {
+                // At this point the test was run more than 1 time. This means
+                // that the test previously errored, but passes now. Therefore we
+                // must be dealing with a flaky one.
                 status = 'flaky';
             } else {
+                // All retries errored, so we have an actual error.
                 status = 'error';
             }
         }
     }
     result.status = status;
 
+    // Append the task result if the task finished
     if (task.status === 'error' || task.status === 'success' || task.status === 'skipped') {
         result.taskResults.push({
             status: task.status,

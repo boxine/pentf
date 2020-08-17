@@ -525,7 +525,9 @@ async function formatError(config, err) {
     let nearestFrame;
 
     // Assertion libraries often add multiline messages to the error stack.
-    const actualStack = err.stack.replace(`${err.name}: ${err.message}`, '');
+    const actualStack = err.stack
+        .replace(`${err.name}: ${err.message}`, '')
+        .replace(err.message, '');
 
     const stack = errorstacks.parseStackTrace(actualStack)
         .map(frame => {

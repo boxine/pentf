@@ -310,6 +310,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 					<h6>Output</h6>
 				</a>
 				<pre><code>-v, --verbose         Let tests output diagnostic details
+--<span class="hljs-keyword">log</span>-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>       Write verbose <span class="hljs-keyword">log</span> information to disk. Doesn't affect tty logging.
 -q, --quiet           <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">test</span> status
 --<span class="hljs-keyword">no</span>-<span class="hljs-keyword">clear</span>-<span class="hljs-keyword">line</span>, --<span class="hljs-keyword">ci</span>
                       Never <span class="hljs-keyword">clear</span> the current output <span class="hljs-keyword">line</span> (<span class="hljs-keyword">as</span> <span class="hljs-keyword">if</span> output is not a tty)
@@ -345,13 +346,15 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 				<a href="#test-selection" id="test-selection" style="color: inherit; text-decoration: none;">
 					<h6>Test selection</h6>
 				</a>
-				<pre><code>-f REGEXP, <span class="hljs-comment">--filter REGEXP</span>
-                      Regular expression <span class="hljs-keyword">to</span> match names <span class="hljs-keyword">of</span> tests <span class="hljs-keyword">to</span> <span class="hljs-built_in">run</span>
--b REGEXP, <span class="hljs-comment">--filter-body REGEXP</span>
-                      Run only tests <span class="hljs-keyword">whose</span> full code <span class="hljs-keyword">is</span> matched <span class="hljs-keyword">by</span> this regular expression
--l, <span class="hljs-comment">--list            List all tests that would be run and exit</span>
--a, <span class="hljs-comment">--all, --include-slow-tests</span>
-                      Run tests <span class="hljs-keyword">that</span> take a very long <span class="hljs-built_in">time</span></code></pre>
+				<pre><code>-<span class="hljs-keyword">f</span> REGEXP, --<span class="hljs-built_in">filter</span> REGEXP
+                      Regular expression <span class="hljs-keyword">to</span> <span class="hljs-keyword">match</span> names of tests <span class="hljs-keyword">to</span> run
+-<span class="hljs-keyword">b</span> REGEXP, --<span class="hljs-built_in">filter</span>-body REGEXP
+                      Run <span class="hljs-keyword">only</span> tests whose full code <span class="hljs-keyword">is</span> matched by this regular expression
+-<span class="hljs-keyword">l</span>, --<span class="hljs-keyword">list</span>            List <span class="hljs-keyword">all</span> tests that would <span class="hljs-keyword">be</span> run <span class="hljs-built_in">and</span> <span class="hljs-keyword">exit</span>
+-<span class="hljs-keyword">a</span>, --<span class="hljs-keyword">all</span>, --include-slow-tests
+                      Run tests that take <span class="hljs-keyword">a</span> very long time
+--tests-<span class="hljs-built_in">glob</span> TESTSGLOB
+                      Glob pattern <span class="hljs-keyword">to</span> use when searching test <span class="hljs-keyword">files</span></code></pre>
 				<a href="#email" id="email" style="color: inherit; text-decoration: none;">
 					<h6>Email</h6>
 				</a>
@@ -373,21 +376,24 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
                       Load unpacked browser extensions
 --forward-console     Forward browser<span class="hljs-built_in"> console </span>logs
 -d, --<span class="hljs-builtin-name">debug</span>           Shorthand <span class="hljs-keyword">for</span> <span class="hljs-string">"--keep-open --devtools-preserve --forward-console"</span>
---default-timeout MS <span class="hljs-built_in"> Default </span>timeout value <span class="hljs-keyword">for</span> various browser functions</code></pre>
+--default-timeout MS <span class="hljs-built_in"> Default </span>timeout value <span class="hljs-keyword">for</span> various browser functions (default: 30s)</code></pre>
 				<a href="#test-runner" id="test-runner" style="color: inherit; text-decoration: none;">
 					<h6>Test runner</h6>
 				</a>
-				<pre><code>-C COUNT, --concurrency COUNT
-                      Maximum number of tests to run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> to run without a pool, sequentially.
-                      Can include *, +, and cpus <span class="hljs-keyword">for</span> the number of CPUs. Defaults to <span class="hljs-number">4</span>+cpus.
--S, --sequential      Do not run tests <span class="hljs-keyword">in</span> parallel (same as -C <span class="hljs-number">0</span>)
---fail-fast           Abort once a test fails
---print-tasks         Output all tasks that the runner would perform, and <span class="hljs-keyword">exit</span>
---<span class="hljs-keyword">exit</span>-zero           Terminate with <span class="hljs-keyword">exit</span> code <span class="hljs-number">0</span> (success) even <span class="hljs-keyword">if</span> tests fail. (Exit codes != <span class="hljs-number">0</span> are still
-                      emitted <span class="hljs-keyword">in</span> cases of internal crashes)
---repeat COUNT        Run the tests the specified number of times
---timeout MS          Set a maximum duration <span class="hljs-keyword">for</span> a test case <span class="hljs-keyword">in</span> ms before timing out. (Default: <span class="hljs-number">1</span>h)
---status-interval MS  Interval <span class="hljs-keyword">in</span> MS to print a detailed list of the current runner state.</code></pre>
+				<pre><code>-C COUNT, <span class="hljs-comment">--concurrency COUNT</span>
+                      Maximum <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> tests <span class="hljs-keyword">to</span> <span class="hljs-built_in">run</span> <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> <span class="hljs-keyword">to</span> <span class="hljs-built_in">run</span> <span class="hljs-keyword">without</span> a pool, sequentially.
+                      Can include *, +, <span class="hljs-keyword">and</span> cpus <span class="hljs-keyword">for</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> CPUs. Defaults <span class="hljs-keyword">to</span> <span class="hljs-number">4</span>+cpus.
+-S, <span class="hljs-comment">--sequential      Do not run tests in parallel (same as -C 0)</span>
+<span class="hljs-comment">--fail-fast           Abort once a test fails</span>
+<span class="hljs-comment">--print-tasks         Output all tasks that the runner would perform, and exit</span>
+<span class="hljs-comment">--exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still</span>
+                      emitted <span class="hljs-keyword">in</span> cases <span class="hljs-keyword">of</span> internal crashes)
+<span class="hljs-comment">--repeat COUNT        Run the tests the specified number of times</span>
+<span class="hljs-comment">--repeat-flaky COUNT  Repeat a failing test until it passes or the specified run count limit is reached</span>
+<span class="hljs-comment">--timeout MS          Set a maximum duration for a test case in ms before timing out. (Default: 1h)</span>
+<span class="hljs-comment">--status-interval MS  Interval in MS to print a detailed list of the current runner state.</span>
+<span class="hljs-comment">--breadcrumbs         Keep track of the last successful browser operation (breadcrumbs). This helps with</span>
+                      debugging test cases <span class="hljs-keyword">that</span> timed out.</code></pre>
 				<a href="#locking" id="locking" style="color: inherit; text-decoration: none;">
 					<h6>Locking</h6>
 				</a>

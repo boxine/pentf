@@ -32,11 +32,11 @@ function clean(config) {
 function status(config, state) {
     if (config.quiet) return;
     assert(state.tasks);
-    assert(state.resultByTaskId);
+    assert(state.resultByTaskName);
 
     last_state = state;
 
-    const testResults = Array.from(state.resultByTaskId.values());
+    const testResults = Array.from(state.resultByTaskName.values());
     const {errored, expectedToFail, skipped} = getResults(config, testResults);
     const {tasks} = state;
 
@@ -112,7 +112,7 @@ function formatDuration(config, duration) {
  */
 function detailedStatus(config, state) {
     const {tasks} = state;
-    const testResults = Array.from(state.resultByTaskId.values());
+    const testResults = Array.from(state.resultByTaskName.values());
     const {skipped} = getResults(config, testResults);
 
     const done = tasks.filter(t => t.status === 'success' || t.status === 'error');
@@ -218,7 +218,7 @@ function finish(config, state) {
     if (tasks.length === 0 && config.filter) {
         msg += `No test case found with filter: ${config.filter}\n`;
     }
-    const testResults = Array.from(state.resultByTaskId.values());
+    const testResults = Array.from(state.resultByTaskName.values());
     const results = getResults(config, testResults);
     msg += resultSummary(config, results);
 

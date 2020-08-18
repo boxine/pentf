@@ -245,11 +245,11 @@ async function sequential_run(config, state) {
  * @param {Task} task
  */
 function update_results(config, state, task) {
-    const { resultByTaskName, flakyCounts } = state;
+    const { resultByTaskGroup, flakyCounts } = state;
     const {group} = task;
     assert(group);
 
-    const result = resultByTaskName.get(group);
+    const result = resultByTaskGroup.get(group);
     assert(result);
 
     let status = task.status;
@@ -463,11 +463,11 @@ async function parallel_run(config, state) {
  */
 
 /**
- * @param {RunnerState["resultByTaskName"]} resultByTaskName
+ * @param {RunnerState["resultByTaskGroup"]} resultByTaskGroup
  * @param {Task} task
  */
-function initTaskResult(resultByTaskName, task) {
-    resultByTaskName.set(task.group, {
+function initTaskResult(resultByTaskGroup, task) {
+    resultByTaskGroup.set(task.group, {
         expectedToFail: task.expectedToFail,
         skipReason: task.skipReason,
         id: task.id,
@@ -483,11 +483,11 @@ function initTaskResult(resultByTaskName, task) {
 /**
  * @param {import('./config').Config} config
  * @param {TestCase[]} testCases
- * @param {RunnerState["resultByTaskName"]} resultByTaskName
+ * @param {RunnerState["resultByTaskGroup"]} resultByTaskGroup
  * @returns {Promise<Task[]>}
  * @private
  */
-async function testCases2tasks(config, testCases, resultByTaskName) {
+async function testCases2tasks(config, testCases, resultByTaskGroup) {
     const repeat = config.repeat || 1;
     assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
 
@@ -524,7 +524,7 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
 
         if (skipReason || (repeat === 1)) {
             tasks[position] = task;
-            initTaskResult(resultByTaskName, task);
+            initTaskResult(resultByTaskGroup, task);
             return;
         }
 
@@ -537,7 +537,7 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
                 name: `${tc.name}[${runId}]`,
             };
             tasks[runId * testCases.length + position] = repeatTask;
-            initTaskResult(resultByTaskName, repeatTask);
+            initTaskResult(resultByTaskGroup, repeatTask);
         }
     }));
     return tasks.filter(t => t);
@@ -551,7 +551,7 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
  * @property {string} last_logged_status The last status string that was logged
  * to the console.
  * @property {Map<string, number>} flakyCounts Track flakyness run count of a test
- * @property {Map<string, import('./render').TestResult>} resultByTaskName
+ * @property {Map<string, import('./render').TestResult>} resultByTaskGroup
  */
 
 /**
@@ -575,13 +575,13 @@ async function run(config, testCases) {
     external_locking.prepare(config);
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
-    const resultByTaskName = new Map();
-    const tasks = await testCases2tasks(config, testCases, resultByTaskName);
+    const resultByTaskGroup = new Map();
+    const tasks = await testCases2tasks(config, testCases, resultByTaskGroup);
     /** @type {RunnerState} */
     const state = {
         flakyCounts: new Map(),
         tasks,
-        resultByTaskName,
+        resultByTaskGroup,
         last_logged_status: ''
     };
 

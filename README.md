@@ -321,6 +321,7 @@ The keys are up to you; for example you probably want to have a main entry point
 
 ```
 -v, --verbose         Let tests output diagnostic details
+--log-file FILE       Write verbose log information to disk. Doesn't affect tty logging.
 -q, --quiet           Do not output test status
 --no-clear-line, --ci
                       Never clear the current output line (as if output is not a tty)
@@ -367,6 +368,8 @@ The keys are up to you; for example you probably want to have a main entry point
 -l, --list            List all tests that would be run and exit
 -a, --all, --include-slow-tests
                       Run tests that take a very long time
+--tests-glob TESTSGLOB
+                      Glob pattern to use when searching test files
 ```
 
 ###### Email
@@ -392,7 +395,7 @@ The keys are up to you; for example you probably want to have a main entry point
                       Load unpacked browser extensions
 --forward-console     Forward browser console logs
 -d, --debug           Shorthand for "--keep-open --devtools-preserve --forward-console"
---default-timeout MS  Default timeout value for various browser functions
+--default-timeout MS  Default timeout value for various browser functions (default: 30s)
 ```
 
 ###### Test runner
@@ -407,8 +410,11 @@ The keys are up to you; for example you probably want to have a main entry point
 --exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still
                       emitted in cases of internal crashes)
 --repeat COUNT        Run the tests the specified number of times
+--repeat-flaky COUNT  Repeat a failing test until it passes or the specified run count limit is reached
 --timeout MS          Set a maximum duration for a test case in ms before timing out. (Default: 1h)
 --status-interval MS  Interval in MS to print a detailed list of the current runner state.
+--breadcrumbs         Keep track of the last successful browser operation (breadcrumbs). This helps with
+                      debugging test cases that timed out.
 ```
 
 ###### Locking

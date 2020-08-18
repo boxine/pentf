@@ -237,6 +237,59 @@ async function sequential_run(config, state) {
 }
 
 /**
+ * Update test results
+ * @param {import('./config').Config} config
+ * @param {RunnerState} state
+ * @param {Task} task
+ */
+function update_results(config, state, task) {
+    const { resultByTaskId, flakyCounts } = state;
+    const testId = task.tc.id || task.tc.name;
+    assert(testId);
+
+    const result = resultByTaskId.get(testId);
+    assert(result);
+
+    let status = task.status;
+    if (config.repeatFlaky > 0 && status === 'success' || status === 'error') {
+        const runs = flakyCounts.get(testId) || 1;
+        // Not flaky if the first run was successful
+        if (!(runs === 1 && task.status === 'success')) {
+            // If task is failing, but we haven't reached the limit, then
+            // we are still trying to determine if the test is flaky.
+            if (runs < config.repeatFlaky && task.status === 'error') {
+                status = 'todo';
+            } else if (task.status === 'success') {
+                // At this point the test was run more than 1 time. This means
+                // that the test previously errored, but passes now. Therefore we
+                // must be dealing with a flaky one.
+                status = 'flaky';
+            } else {
+                // All retries errored, so we have an actual error.
+                status = 'error';
+            }
+        }
+    }
+    result.status = status;
+
+    // Append the task result if the task finished
+    if (task.status === 'error' || task.status === 'success' || task.status === 'skipped') {
+        result.taskResults.push({
+            status: task.status,
+            duration: task.duration, // TODO,
+            error_stack: task.error ?
+                // Node's assert module modifies the Error's stack property and
+                // adds ansi color codes. These can only be disabled globally via
+                // an environment variable, but we want to keep colorized output
+                // for the cli. So we need to strip the ansi codes from the assert
+                // stack.
+                kolorist.stripColors(task.error.stack)
+                : null,
+        });
+    }
+}
+
+/**
  * @param {import('./config').Config} config
  * @param {RunnerState} state
  * @param {Task} task
@@ -269,6 +322,7 @@ async function run_one(config, state, task) {
         });
     }
 
+    update_results(config, state, task);
     output.status(config, state);
     return task;
 }
@@ -388,7 +442,7 @@ async function parallel_run(config, state) {
  */
 
 /**
- * @typedef {"success" | "running" | "error" | "todo"} TaskStatus
+ * @typedef {"success" | "running" | "error" | "todo" | "skipped"} TaskStatus
  */
 
 /**
@@ -406,10 +460,11 @@ async function parallel_run(config, state) {
 /**
  * @param {import('./config').Config} config
  * @param {TestCase[]} testCases
+ * @param {RunnerState["resultByTaskId"]} resultByTaskId
  * @returns {Promise<Task[]>}
  * @private
  */
-async function testCases2tasks(config, testCases) {
+async function testCases2tasks(config, testCases, resultByTaskId) {
     const repeat = config.repeat || 1;
     assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
 
@@ -441,6 +496,17 @@ async function testCases2tasks(config, testCases) {
             }
         }
 
+        resultByTaskId.set(task.id, {
+            expectedToFail: task.expectedToFail,
+            skipReason: task.skipReason,
+            id: task.id,
+            status: task.status,
+            name: task.tc.name,
+            description: task.tc.description,
+            skipped: task.status === 'skipped',
+            taskResults: []
+        });
+
         locking.annotateTaskResources(config, task);
 
         if (skipReason || (repeat === 1)) {
@@ -468,6 +534,7 @@ async function testCases2tasks(config, testCases) {
  * @property {string} last_logged_status The last status string that was logged
  * to the console.
  * @property {Map<string, number>} flakyCounts Track flakyness run count of a test
+ * @property {Map<string, import('./render').TestResult>} resultByTaskId
  */
 
 /**
@@ -491,11 +558,13 @@ async function run(config, testCases) {
     external_locking.prepare(config);
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
-    const tasks = await testCases2tasks(config, testCases);
+    const resultByTaskId = new Map();
+    const tasks = await testCases2tasks(config, testCases, resultByTaskId);
     /** @type {RunnerState} */
     const state = {
         flakyCounts: new Map(),
         tasks,
+        resultByTaskId,
         last_logged_status: ''
     };
 

@@ -39,6 +39,7 @@ function onTeardown(config, callback) {
  * @property {Error | null} _breadcrumb
  * @property {string} _testName
  * @property {string} _taskName
+ * @property {string} _taskGroup
  */
 
 /**
@@ -59,6 +60,7 @@ async function run_task(config, task) {
         _breadcrumb: null,
         _testName: task.tc.name,
         _taskName: task.name,
+        _taskGroup: task.group,
         start: task.start,
     };
     let timeout;
@@ -243,16 +245,16 @@ async function sequential_run(config, state) {
  * @param {Task} task
  */
 function update_results(config, state, task) {
-    const { resultByTaskName, flakyCounts } = state;
-    const {name} = task;
-    assert(name);
+    const { resultByTaskGroup, flakyCounts } = state;
+    const {group} = task;
+    assert(group);
 
-    const result = resultByTaskName.get(name);
+    const result = resultByTaskGroup.get(group);
     assert(result);
 
     let status = task.status;
     if (config.repeatFlaky > 0 && status === 'success' || status === 'error') {
-        const runs = flakyCounts.get(name) || 1;
+        const runs = flakyCounts.get(group) || 1;
         // Not flaky if the first run was successful
         if (!(runs === 1 && task.status === 'success')) {
             // If task is failing, but we haven't reached the limit, then
@@ -300,8 +302,8 @@ async function run_one(config, state, task) {
 
     if (task.status === 'skipped') return task;
 
-    const count = state.flakyCounts.get(task.name) || 0;
-    state.flakyCounts.set(task.name, count + 1);
+    const count = state.flakyCounts.get(task.group) || 0;
+    state.flakyCounts.set(task.group, count + 1);
 
     task.status = 'running';
     task.start = performance.now();
@@ -318,8 +320,9 @@ async function run_one(config, state, task) {
             status: 'todo',
             breadcrumb: null,
             id: `${tcName}_${repeat + count}`,
-            // Keep task.name the same, so that we can group results together
-            name: task.name
+            name: `${tcName}[${repeat + count}]`,
+            // Keep group the same, so that we can group results together
+            group: task.group
         });
     }
 
@@ -449,7 +452,8 @@ async function parallel_run(config, state) {
 /**
  * @typedef {Object} Task
  * @property {string} id
- * @property {string} name Name of the task. Note that this is used to group results of flaky detection.
+ * @property {string} name Name of the task.
+ * @property {string} group The name of the group this task belongs to. This is used for repeatFlaky
  * @property {TestCase} tc
  * @property {TaskStatus} status
  * @property {number} start
@@ -459,16 +463,17 @@ async function parallel_run(config, state) {
  */
 
 /**
- * @param {RunnerState["resultByTaskName"]} resultByTaskName
+ * @param {RunnerState["resultByTaskGroup"]} resultByTaskGroup
  * @param {Task} task
  */
-function initTaskResult(resultByTaskName, task) {
-    resultByTaskName.set(task.name, {
+function initTaskResult(resultByTaskGroup, task) {
+    resultByTaskGroup.set(task.group, {
         expectedToFail: task.expectedToFail,
         skipReason: task.skipReason,
         id: task.id,
         status: task.status,
         name: task.name,
+        group: task.group,
         description: task.tc.description,
         skipped: task.status === 'skipped',
         taskResults: []
@@ -478,11 +483,11 @@ function initTaskResult(resultByTaskName, task) {
 /**
  * @param {import('./config').Config} config
  * @param {TestCase[]} testCases
- * @param {RunnerState["resultByTaskName"]} resultByTaskName
+ * @param {RunnerState["resultByTaskGroup"]} resultByTaskGroup
  * @returns {Promise<Task[]>}
  * @private
  */
-async function testCases2tasks(config, testCases, resultByTaskName) {
+async function testCases2tasks(config, testCases, resultByTaskGroup) {
     const repeat = config.repeat || 1;
     assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
 
@@ -494,6 +499,7 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
             resources: tc.resources || [],
             status: 'todo',
             name: tc.name,
+            group: tc.name,
             id: tc.name,
             start: 0,
         };
@@ -518,7 +524,7 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
 
         if (skipReason || (repeat === 1)) {
             tasks[position] = task;
-            initTaskResult(resultByTaskName, task);
+            initTaskResult(resultByTaskGroup, task);
             return;
         }
 
@@ -527,10 +533,11 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
                 ...task,
                 breadcrumb: null,
                 id: `${tc.name}_${runId}`,
+                group: `${tc.name}_${runId}`,
                 name: `${tc.name}[${runId}]`,
             };
             tasks[runId * testCases.length + position] = repeatTask;
-            initTaskResult(resultByTaskName, repeatTask);
+            initTaskResult(resultByTaskGroup, repeatTask);
         }
     }));
     return tasks.filter(t => t);
@@ -544,7 +551,7 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
  * @property {string} last_logged_status The last status string that was logged
  * to the console.
  * @property {Map<string, number>} flakyCounts Track flakyness run count of a test
- * @property {Map<string, import('./render').TestResult>} resultByTaskName
+ * @property {Map<string, import('./render').TestResult>} resultByTaskGroup
  */
 
 /**
@@ -568,13 +575,13 @@ async function run(config, testCases) {
     external_locking.prepare(config);
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
-    const resultByTaskName = new Map();
-    const tasks = await testCases2tasks(config, testCases, resultByTaskName);
+    const resultByTaskGroup = new Map();
+    const tasks = await testCases2tasks(config, testCases, resultByTaskGroup);
     /** @type {RunnerState} */
     const state = {
         flakyCounts: new Map(),
         tasks,
-        resultByTaskName,
+        resultByTaskGroup,
         last_logged_status: ''
     };
 

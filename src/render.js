@@ -44,6 +44,7 @@ function getTestOrder(config, result) {
 /**
  * @typedef {Object} TestResult
  * @property {string} name
+ * @property {string} group
  * @property {string} id
  * @property {string} description
  * @property {boolean} skipped
@@ -61,7 +62,7 @@ function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
 
     /** @type {TestResult[]} */
-    const tests = Array.from(state.resultByTaskName.values());
+    const tests = Array.from(state.resultByTaskGroup.values());
 
     // Order tests by severity
     tests.sort((testA, testB) => {

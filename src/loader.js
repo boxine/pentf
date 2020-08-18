@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const {promisify} = require('util');
-const {pathToFileURL} = require('url');
+const {pathToFileURL, fileURLToPath} = require('url');
 
 /**
  * Check if the current running node version supports import statements.
@@ -22,6 +22,7 @@ async function supportsImports() {
 }
 
 let canUseImport;
+let tsService;
 
 /**
  * Load module via CommonJS or ES Modules depending on the environment
@@ -43,6 +44,22 @@ async function importFile(file) {
         let urlOrModuleName = file;
         if (path.isAbsolute(file)) {
             urlOrModuleName = pathToFileURL(file).href;
+        }
+
+        if (/\.tsx?$/.test(urlOrModuleName)) {
+            if (tsService === undefined) {
+                // FIXME: cache service
+                /** @type {import('./loader-typescript')} */
+                const tsLoader = (await import('./loader-typescript.js')).default;
+                const options = tsLoader.getOptions();
+                tsService = tsLoader.createService(options);
+                tsLoader.registerCjsRequire(tsService);
+
+                // TypeScript needs paths instead of URLs
+                const filePath = fileURLToPath(urlOrModuleName);
+                const m = require(filePath);
+                return m.default ? m.default : m;
+            }
         }
 
         const m = await import(urlOrModuleName);

@@ -122,7 +122,13 @@ function main(options) {
         try {
             await real_main(options);
         } catch (e) {
-            console.error(e.stack);
+            // No need to print internal stack for userland errors.
+            if (e.name === 'TSError') {
+                console.error(e.message);
+            } else {
+                console.error(e.stack);
+            }
+
             process.exit(2);
         }
     })();

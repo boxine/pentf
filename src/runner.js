@@ -575,6 +575,7 @@ async function run(config, testCases) {
     external_locking.prepare(config);
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
+    /** @type {RunnerState["resultByTaskGroup"]} */
     const resultByTaskGroup = new Map();
     const tasks = await testCases2tasks(config, testCases, resultByTaskGroup);
     /** @type {RunnerState} */
@@ -658,7 +659,11 @@ async function run(config, testCases) {
             if (config.verbose || config.ci || config.status_interval) {
                 const errored = tasks.filter(t => t.status === 'error' && (!t.expectedToFail || config.expect_nothing));
                 for (const task of errored) {
-                    if (shouldShowError(config, task)) {
+                    const group = resultByTaskGroup.get(task.group);
+                    assert(group);
+
+                    // Don't re-print errors if the test is marked as flaky
+                    if (group.status !== 'flaky' && shouldShowError(config, task)) {
                         await output.logTaskError(config, task);
                     }
                 }

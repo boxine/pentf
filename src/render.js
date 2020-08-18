@@ -44,6 +44,7 @@ function getTestOrder(config, result) {
 /**
  * @typedef {Object} TestResult
  * @property {string} name
+ * @property {string} group
  * @property {string} id
  * @property {string} description
  * @property {boolean} skipped

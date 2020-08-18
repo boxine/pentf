@@ -39,6 +39,7 @@ function onTeardown(config, callback) {
  * @property {Error | null} _breadcrumb
  * @property {string} _testName
  * @property {string} _taskName
+ * @property {string} _taskGroup
  */
 
 /**
@@ -59,6 +60,7 @@ async function run_task(config, task) {
         _breadcrumb: null,
         _testName: task.tc.name,
         _taskName: task.name,
+        _taskGroup: task.group,
         start: task.start,
     };
     let timeout;
@@ -244,15 +246,15 @@ async function sequential_run(config, state) {
  */
 function update_results(config, state, task) {
     const { resultByTaskName, flakyCounts } = state;
-    const {name} = task;
-    assert(name);
+    const {group} = task;
+    assert(group);
 
-    const result = resultByTaskName.get(name);
+    const result = resultByTaskName.get(group);
     assert(result);
 
     let status = task.status;
     if (config.repeatFlaky > 0 && status === 'success' || status === 'error') {
-        const runs = flakyCounts.get(name) || 1;
+        const runs = flakyCounts.get(group) || 1;
         // Not flaky if the first run was successful
         if (!(runs === 1 && task.status === 'success')) {
             // If task is failing, but we haven't reached the limit, then
@@ -300,8 +302,8 @@ async function run_one(config, state, task) {
 
     if (task.status === 'skipped') return task;
 
-    const count = state.flakyCounts.get(task.name) || 0;
-    state.flakyCounts.set(task.name, count + 1);
+    const count = state.flakyCounts.get(task.group) || 0;
+    state.flakyCounts.set(task.group, count + 1);
 
     task.status = 'running';
     task.start = performance.now();
@@ -318,8 +320,9 @@ async function run_one(config, state, task) {
             status: 'todo',
             breadcrumb: null,
             id: `${tcName}_${repeat + count}`,
-            // Keep task.name the same, so that we can group results together
-            name: task.name
+            name: `${tcName}[${repeat + count}]`,
+            // Keep group the same, so that we can group results together
+            group: task.group
         });
     }
 
@@ -449,7 +452,8 @@ async function parallel_run(config, state) {
 /**
  * @typedef {Object} Task
  * @property {string} id
- * @property {string} name Name of the task. Note that this is used to group results of flaky detection.
+ * @property {string} name Name of the task.
+ * @property {string} group The name of the group this task belongs to. This is used for repeatFlaky
  * @property {TestCase} tc
  * @property {TaskStatus} status
  * @property {number} start
@@ -463,12 +467,13 @@ async function parallel_run(config, state) {
  * @param {Task} task
  */
 function initTaskResult(resultByTaskName, task) {
-    resultByTaskName.set(task.name, {
+    resultByTaskName.set(task.group, {
         expectedToFail: task.expectedToFail,
         skipReason: task.skipReason,
         id: task.id,
         status: task.status,
         name: task.name,
+        group: task.group,
         description: task.tc.description,
         skipped: task.status === 'skipped',
         taskResults: []
@@ -494,6 +499,7 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
             resources: tc.resources || [],
             status: 'todo',
             name: tc.name,
+            group: tc.name,
             id: tc.name,
             start: 0,
         };
@@ -527,6 +533,7 @@ async function testCases2tasks(config, testCases, resultByTaskName) {
                 ...task,
                 breadcrumb: null,
                 id: `${tc.name}_${runId}`,
+                group: `${tc.name}_${runId}`,
                 name: `${tc.name}[${runId}]`,
             };
             tasks[runId * testCases.length + position] = repeatTask;

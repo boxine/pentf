@@ -1,12 +1,13 @@
 const state = new Map();
 async function run(config) {
-    let i = state.has(config._taskName) ? state.get(config._taskName) : -1;
+    const group = config._taskGroup;
+    let i = state.has(group) ? state.get(group) : -1;
     i++;
     if (i === 0 || (i + 1) % 3 !== 0) {
-        state.set(config._taskName, i);
+        state.set(group, i);
         throw new Error('fail');
     } else {
-        state.set(config._taskName, i);
+        state.set(group, i);
     }
 }
 

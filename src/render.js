@@ -61,7 +61,7 @@ function craftResults(config, test_info) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
 
     /** @type {TestResult[]} */
-    const tests = Array.from(state.resultById.values());
+    const tests = Array.from(state.resultByTaskId.values());
 
     // Order tests by severity
     tests.sort((testA, testB) => {

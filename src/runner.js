@@ -243,11 +243,11 @@ async function sequential_run(config, state) {
  * @param {Task} task
  */
 function update_results(config, state, task) {
-    const { resultById, flakyCounts } = state;
+    const { resultByTaskId, flakyCounts } = state;
     const testId = task.tc.id || task.tc.name;
     assert(testId);
 
-    const result = resultById.get(testId);
+    const result = resultByTaskId.get(testId);
     assert(result);
 
     let status = task.status;
@@ -460,11 +460,11 @@ async function parallel_run(config, state) {
 /**
  * @param {import('./config').Config} config
  * @param {TestCase[]} testCases
- * @param {RunnerState["resultById"]} resultById
+ * @param {RunnerState["resultByTaskId"]} resultByTaskId
  * @returns {Promise<Task[]>}
  * @private
  */
-async function testCases2tasks(config, testCases, resultById) {
+async function testCases2tasks(config, testCases, resultByTaskId) {
     const repeat = config.repeat || 1;
     assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
 
@@ -496,7 +496,7 @@ async function testCases2tasks(config, testCases, resultById) {
             }
         }
 
-        resultById.set(task.id, {
+        resultByTaskId.set(task.id, {
             expectedToFail: task.expectedToFail,
             skipReason: task.skipReason,
             id: task.id,
@@ -534,7 +534,7 @@ async function testCases2tasks(config, testCases, resultById) {
  * @property {string} last_logged_status The last status string that was logged
  * to the console.
  * @property {Map<string, number>} flakyCounts Track flakyness run count of a test
- * @property {Map<string, import('./render').TestResult>} resultById
+ * @property {Map<string, import('./render').TestResult>} resultByTaskId
  */
 
 /**
@@ -558,13 +558,13 @@ async function run(config, testCases) {
     external_locking.prepare(config);
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
-    const resultById = new Map();
-    const tasks = await testCases2tasks(config, testCases, resultById);
+    const resultByTaskId = new Map();
+    const tasks = await testCases2tasks(config, testCases, resultByTaskId);
     /** @type {RunnerState} */
     const state = {
         flakyCounts: new Map(),
         tasks,
-        resultById,
+        resultByTaskId,
         last_logged_status: ''
     };
 

@@ -8,7 +8,7 @@
     "test": "tests"
   },
   "bin": {
-    "pentf": "./cli.js"
+    "pentf": "./bin/cli.js"
   },
   "exports": {
     ".": {

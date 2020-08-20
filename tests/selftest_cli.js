@@ -3,7 +3,7 @@ const path = require('path');
 const child_process = require('child_process');
 
 async function run() {
-    const sub_run = path.join(__dirname, '..', 'cli.js');
+    const sub_run = path.join(__dirname, '..', 'bin', 'cli.js');
     const {stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
             sub_run,

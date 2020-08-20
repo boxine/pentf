@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const pentf = require('./index.js');
+const pentf = require('../src/index.js');
 
 const cwd = process.cwd();
 pentf.main({

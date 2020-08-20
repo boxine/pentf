@@ -287,6 +287,7 @@ function update_results(config, state, task) {
                 // stack.
                 kolorist.stripColors(task.error.stack)
                 : null,
+            error_screenshots: task.error_screenshots,
         });
     }
 }
@@ -459,6 +460,7 @@ async function parallel_run(config, state) {
  * @property {number} start
  * @property {Error | null} breadcrumb
  * @property {boolean} [skipReason]
+ * @property {Buffer[]} error_screenshots
  * @property {boolean | ((config: import('./config').Config) => boolean)} [expectedToFail]
  */
 

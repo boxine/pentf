@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const {promisify} = require('util');
 const {html2pdf} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
@@ -98,24 +99,28 @@ async function doRender(config, results) {
     if (config.json) {
         output.logVerbose('Rendering to JSON ...');
         const json = JSON.stringify(results, undefined, 2) + '\n';
-        await promisify(fs.writeFile)(config.json_file, json, {encoding: 'utf-8'});
+        const fileName = path.join(config._rootDir, config.json_file);
+        await promisify(fs.writeFile)(fileName, json, {encoding: 'utf-8'});
     }
 
     if (config.markdown) {
         output.logVerbose('Rendering to Markdown ...');
         const md = markdown(results);
-        await promisify(fs.writeFile)(config.markdown_file, md, {encoding: 'utf-8'});
+        const fileName = path.join(config._rootDir, config.markdown_file);
+        await promisify(fs.writeFile)(fileName, md, {encoding: 'utf-8'});
     }
 
     if (config.html) {
         output.logVerbose('Rendering to HTML ...');
         const html_code = html(results);
-        await promisify(fs.writeFile)(config.html_file, html_code, {encoding: 'utf-8'});
+        const fileName = path.join(config._rootDir, config.html_file);
+        await promisify(fs.writeFile)(fileName, html_code, {encoding: 'utf-8'});
     }
 
     if (config.pdf) {
         output.logVerbose('Rendering to PDF ...');
-        await pdf(config, config.pdf_file, results);
+        const fileName = path.join(config._rootDir, config.pdf_file);
+        await pdf(config, fileName, results);
     }
 }
 

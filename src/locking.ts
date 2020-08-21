@@ -1,11 +1,11 @@
-const assert = require('assert').strict;
+import {strict as assert} from 'assert';
 
-const output = require('./output');
-const {wait} = require('./utils');
-const external_locking = require('./external_locking');
+import * as output from './output';
+import {wait} from './utils';
+import * as external_locking from './external_locking';
 
 /**
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {import('./runner').Task} task
  * @private
  */
@@ -20,7 +20,7 @@ function annotateTaskResources(config, task) {
 }
 
 /**
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {import('./runner').RunnerState} state
  * @private
  */
@@ -32,7 +32,7 @@ async function init(config, state) {
 }
 
 /**
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {import('./runner').RunnerState} state
  * @private
  */
@@ -46,7 +46,7 @@ async function shutdown(config, state) {
 
 /**
  * Aquire locks on resources
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {import('./runner').RunnerState} state
  * @param {import('./runner').Task} task
  */
@@ -98,7 +98,7 @@ async function acquire(config, state, task) {
 }
 
 /**
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {import('./runner').RunnerState} state
  * @param {import('./runner').Task} task
  */
@@ -117,7 +117,7 @@ async function acquireEventually(config, state, task) {
 
 /**
  * Release locks on resources
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {import('./runner').RunnerState} state
  * @param {import('./runner').Task} task
  */
@@ -153,7 +153,7 @@ async function release(config, state, task) {
 }
 
 /**
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {import('./runner').Task[]} tasks
  * @private
  */

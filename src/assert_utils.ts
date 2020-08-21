@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Extensions to node's [assert module](https://nodejs.org/api/assert.html).
  * Feel free to use any other assert library, as long as it throws an exception if assertions
@@ -6,15 +5,15 @@
  * @packageDocumentation
  */
 
-const assert = require('assert').strict;
+import {strict as assert} from 'assert';
 
-const {wait} = require('./utils');
+import {wait} from './utils';
 
 /**
 * Assert that a value is a Number or BigInt.
 * @param x {number|BigInt} The value to check.
 */
-function assertNumeric(x, message = undefined) {
+export function assertNumeric(x: number | bigint, message?: string) {
     assert(
         ['number', 'bigint'].includes(typeof x),
         `${x} is not a number, but ${typeof x}.` + (message ? ' ' + message : ''));
@@ -26,7 +25,7 @@ function assertNumeric(x, message = undefined) {
 * @param {number|BigInt} y The ostensibly larger value.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-function assertLess(x, y, message = undefined) {
+export function assertLess(x: number | bigint, y: number | bigint, message?: string) {
     assertNumeric(x);
     assertNumeric(y);
     assert(!Number.isNaN(x));
@@ -40,7 +39,7 @@ function assertLess(x, y, message = undefined) {
 * @param {number|BigInt} y The ostensibly larger or equal value.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-function assertLessEqual(x, y, message = undefined) {
+export function assertLessEqual(x: number | bigint, y: number | bigint, message?: string) {
     assertNumeric(x);
     assertNumeric(y);
     assert(!Number.isNaN(x));
@@ -54,7 +53,7 @@ function assertLessEqual(x, y, message = undefined) {
 * @param {number|BigInt} y The ostensibly smaller value.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-function assertGreater(x, y, message = undefined) {
+export function assertGreater(x: number | bigint, y: number | bigint, message?: string) {
     assertNumeric(x);
     assertNumeric(y);
     assert(!Number.isNaN(x));
@@ -68,7 +67,7 @@ function assertGreater(x, y, message = undefined) {
 * @param {number|BigInt} y The ostensibly larger or equal value.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-function assertGreaterEqual(x, y, message = undefined) {
+export function assertGreaterEqual(x: number | bigint, y: number | bigint, message?: string) {
     assertNumeric(x);
     assertNumeric(y);
     assert(!Number.isNaN(x));
@@ -88,7 +87,7 @@ function assertGreaterEqual(x, y, message = undefined) {
 * @param {string|array} needle The thing to search for.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-function assertIncludes(haystack, needle, message = undefined) {
+export function assertIncludes(haystack: any, needle: any, message?: string) {
     lazyAssert(
         haystack.includes, () => `Haystack object ${haystack} does not have an includes method`);
 
@@ -100,6 +99,8 @@ function assertIncludes(haystack, needle, message = undefined) {
         )
     );
 }
+
+export type TestFn = () => Promise<boolean> | boolean
 
 /**
  * Assert that a condition is eventually true.
@@ -118,7 +119,7 @@ function assertIncludes(haystack, needle, message = undefined) {
  * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
  *                                `false`: A thrown error/exception is treated as if the test function returned false.
  */
-async function assertEventually(testfunc,
+export async function assertEventually(testfunc: TestFn,
     {message='assertEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
@@ -152,7 +153,7 @@ async function assertEventually(testfunc,
  * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
  *                                `false`: A thrown error/exception is treated as if the test function returned false.
  */
-async function assertAsyncEventually(testfunc,
+export async function assertAsyncEventually(testfunc: TestFn,
     {message='assertAsyncEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
@@ -184,7 +185,7 @@ async function assertAsyncEventually(testfunc,
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
 */
-async function assertAlways(testfunc, {message='assertAlways failed', timeout=10000, checkEvery=200} = {}) {
+async function assertAlways(testfunc: TestFn, {message='assertAlways failed', timeout=10000, checkEvery=200} = {}) {
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         const res = testfunc();
         if (!res) {
@@ -204,7 +205,7 @@ async function assertAlways(testfunc, {message='assertAlways failed', timeout=10
  * @param {boolean} value The value to be asserted to be true.
  * @param {() => string} makeMessage Function to generate the error message, should the value be false.
 */
-function lazyAssert(value, makeMessage) {
+function lazyAssert(value: boolean, makeMessage: () => string) {
     if (! value) {
         assert(value, makeMessage());
     }

@@ -1,14 +1,12 @@
-'use strict';
-
 const argparse = require('argparse');
-const assert = require('assert').strict;
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const {promisify} = require('util');
+import {strict as assert} from 'assert';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import {promisify} from 'util';
 
-const utils = require('./utils');
-const { importFile } = require('./loader');
+import * as utils from './utils';
+import { importFile } from './loader';
 
 class AutoWidthArgumentParser extends argparse.ArgumentParser {
     _getFormatter() {
@@ -22,7 +20,7 @@ class AutoWidthArgumentParser extends argparse.ArgumentParser {
     }
 }
 
-function listEnvs(configDir) {
+export function listEnvs(configDir) {
     const allFiles = fs.readdirSync(configDir);
     const res = utils.filterMap(allFiles, fn => {
         const m = /^(?![_.])([-_A-Za-z0-9.]+)\.(?:json|js)$/.exec(fn);
@@ -54,8 +52,10 @@ function computeConcurrency(spec, {cpuCount=undefined}={}) {
         ).reduce((x, y) => x * y, 1)
     ).reduce((x, y) => x + y, 0);
 }
+// tests only
+export const _computeConcurrency = computeConcurrency;
 
-function parseArgs(options, raw_args) {
+export function parseArgs(options, raw_args) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
@@ -424,7 +424,7 @@ function parseArgs(options, raw_args) {
     return args;
 }
 
-async function readConfigFile(configDir, env) {
+async function readConfigFile(configDir: string, env: string) {
     let config;
 
     const jsFilename = path.join(configDir, env + '.js');
@@ -446,20 +446,50 @@ async function readConfigFile(configDir, env) {
     }
     return config;
 }
+// tests only
+export const _readConfigFile = readConfigFile;
 
-/**
- * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number}} Config
- */
+export interface Config {
+    no_external_locking?: boolean;
+    no_locking?: boolean;
+    locking_verbose?: boolean;
+    external_locking_client?: string;
+    external_locking_url?: string;
+    expect_nothing?: boolean;
+    log_file?: string;
+    log_file_stream?: fs.WriteStream;
+    breadcrumbs?: boolean;
+    repeatFlaky: number;
+    concurrency: number;
+    sentry?: boolean;
+    verbose?: boolean;
+    keep_open?: boolean;
+    status_interval?: number;
+    repeat?: number;
+    manually_lock?: string;
+    print_tasks?: boolean;
+    list_conflicts?: boolean;
+    clear_external_locks?: boolean;
+    list_locks?: boolean;
+    quiet?: boolean;
+    email?: string;
+    colors?: boolean;
+    ignore_errors?: string;
+    no_clear_line?: boolean;
+    logFunc?: (config: Config, message: string) => void;
+    display_locking_client?: boolean;
+    beforeAllTests?: (config: Config) => Promise<void> | void
+    afterAllTests?: (config: Config, initData: any) => Promise<void> | void
+}
 
 /**
  * @param {import('./main').PentfOptions} options
  * @param {object} args
- * @returns {Config}
  */
-async function readConfig(options, args) {
+export async function readConfig(options, args): Promise<Config> {
     const {configDir} = options;
 
-    let config = {};
+    let config: Partial<Config> = {};
     if (configDir) {
         const env = args.env;
         assert(env);
@@ -479,14 +509,5 @@ async function readConfig(options, args) {
         config.sentry = true;
     }
 
-    return {...config, ...args};
+    return {...config, ...args} as Config;
 }
-
-module.exports = {
-    listEnvs,
-    parseArgs,
-    readConfig,
-    // tests only
-    _readConfigFile: readConfigFile,
-    _computeConcurrency: computeConcurrency,
-};

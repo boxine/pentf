@@ -16,42 +16,34 @@ const utils = require('./utils');
 const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
 const { shouldShowError } = require('./output');
+import { Page } from 'puppeteer';
+import { Config } from './config';
+import { TestResult, TestStatus } from './render';
 
-/**
- * @typedef {(config: import('./config') => Promise<void> | void)} TeardownHook
- */
+export type TeardownHook = (config: TaskConfig) => Promise<void> | void;
 
 /**
  * Add a callback to execute during the teardown phase of the test case.
- * @param {TaskConfig} config
- * @param {TeardownHook} callback
  */
-function onTeardown(config, callback) {
+export function onTeardown(config: TaskConfig, callback: TeardownHook) {
     config._teardown_hooks.push(callback);
 }
 
-// Work around JSDoc limitation, which doesn't seem to support extending
-// interfaces on the fly.
-/**
- * @typedef {Object} RawTaskConfig
- * @property {TeardownHook[]} _teardown_hooks
- * @property {import('puppeteer').Page[]} _browser_pages
- * @property {Error | null} _breadcrumb
- * @property {string} _testName
- * @property {string} _taskName
- * @property {string} _taskGroup
- */
+export interface TaskConfig extends Config {
+    _teardown_hooks: TeardownHook[]
+    _browser_pages: Page[]
+    _breadcrumb: Error | null
+    _testName: string
+    _taskName: string
+    _taskGroup: string
+}
 
 /**
- * @typedef {import('./config').Config & RawTaskConfig} TaskConfig
- */
-
-/**
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {Task} task
  * @private
  */
-async function run_task(config, task) {
+async function run_task(config, task: T) {
     /** @type {TaskConfig} */
     const task_config = {
         ...config,
@@ -218,11 +210,9 @@ async function run_task(config, task) {
 }
 
 /**
- * @param {import('./config').Config} config
- * @param {RunnerState} state
  * @private
  */
-async function sequential_run(config, state) {
+async function sequential_run(config: Config, state: RunnerState) {
     const skipped = state.tasks.filter(s => s.status === 'skipped');
     if (!config.quiet && skipped.length > 0) {
         console.log(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})`);
@@ -244,11 +234,8 @@ async function sequential_run(config, state) {
 
 /**
  * Update test results
- * @param {import('./config').Config} config
- * @param {RunnerState} state
- * @param {Task} task
  */
-function update_results(config, state, task) {
+function update_results(config: Config, state: RunnerState, task: Task) {
     const { resultByTaskGroup, flakyCounts } = state;
     const {group} = task;
     assert(group);
@@ -256,7 +243,7 @@ function update_results(config, state, task) {
     const result = resultByTaskGroup.get(group);
     assert(result);
 
-    let status = task.status;
+    let status: TestStatus = task.status;
     if (config.repeatFlaky > 0 && status === 'success' || status === 'error') {
         const runs = flakyCounts.get(group) || 1;
         // Not flaky if the first run was successful
@@ -302,12 +289,9 @@ function update_results(config, state, task) {
 }
 
 /**
- * @param {import('./config').Config} config
- * @param {RunnerState} state
- * @param {Task} task
  * @private
  */
-async function run_one(config, state, task) {
+async function run_one(config: Config, state: RunnerState, task: Task) {
     output.status(config, state);
 
     if (task.status === 'skipped') return task;
@@ -342,11 +326,10 @@ async function run_one(config, state, task) {
 }
 
 /**
- * @param {import('./config').Config} config
  * @param {RunnerState} state
  * @private
  */
-async function parallel_run(config, state) {
+async function parallel_run(config: Config, state) {
     output.status(config, state);
 
     if (config.keep_open) {
@@ -447,37 +430,33 @@ async function parallel_run(config, state) {
     }
 }
 
-/**
- * @typedef {Object} TestCase
- * @param {string} name
- * @param {(config: import('./config').Config) => Promise<void> | void} run
- * @param {(config: import('./config').Config) => Promise<boolean> | boolean} [skip]
- * @param {string} [expectedToFail]
- */
+export interface TestCase {
+  name: string;
+  run: (config: TaskConfig) => Promise<void> | void;
+  skip?: (config: Config) => Promise<boolean> | boolean;
+  expectedToFail?: string;
+  description?: string;
+  resources?: string[];
+}
 
-/**
- * @typedef {"success" | "running" | "error" | "todo" | "skipped"} TaskStatus
- */
+export type TaskStatus = "success" | "running" | "error" | "todo" | "skipped";
 
-/**
- * @typedef {Object} Task
- * @property {string} id
- * @property {string} name Name of the task.
- * @property {string} group The name of the group this task belongs to. This is used for repeatFlaky
- * @property {TestCase} tc
- * @property {TaskStatus} status
- * @property {number} start
- * @property {Error | null} breadcrumb
- * @property {boolean} [skipReason]
- * @property {Buffer[]} error_screenshots
- * @property {boolean | ((config: import('./config').Config) => boolean)} [expectedToFail]
- */
+export interface Task {
+  id: string;
+  name: string;
+  /** The name of the group this task belongs to. This is used for repeatFlaky */
+  group: string;
+  tc: TestCase;
+  status: TaskStatus;
+  start: number;
+  breadcrumb: Error | null;
+  skipReason?: boolean;
+  error_screenshots: Buffer[];
+  resources: string[];
+  expectedToFail?: boolean | string | ((config: Config) => boolean | string)
+}
 
-/**
- * @param {RunnerState["resultByTaskGroup"]} resultByTaskGroup
- * @param {Task} task
- */
-function initTaskResult(resultByTaskGroup, task) {
+function initTaskResult(resultByTaskGroup: RunnerState["resultByTaskGroup"], task: Task) {
     resultByTaskGroup.set(task.group, {
         expectedToFail: task.expectedToFail,
         skipReason: task.skipReason,
@@ -492,20 +471,15 @@ function initTaskResult(resultByTaskGroup, task) {
 }
 
 /**
- * @param {import('./config').Config} config
- * @param {TestCase[]} testCases
- * @param {RunnerState["resultByTaskGroup"]} resultByTaskGroup
- * @returns {Promise<Task[]>}
  * @private
  */
-async function testCases2tasks(config, testCases, resultByTaskGroup) {
+async function testCases2tasks(config: Config, testCases: TestCase[], resultByTaskGroup: RunnerState["resultByTaskGroup"]): Promise<Task[]> {
     const repeat = config.repeat || 1;
     assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
 
     const tasks = new Array(testCases.length * repeat);
     await Promise.all(testCases.map(async (tc, position) => {
-        /** @type {Task} */
-        const task = {
+        const task: Task = {
             tc,
             resources: tc.resources || [],
             status: 'todo',
@@ -554,33 +528,29 @@ async function testCases2tasks(config, testCases, resultByTaskGroup) {
     return tasks.filter(t => t);
 }
 
-/**
- * @typedef {Object} RunnerState
- * @property {Task[]} tasks
- * @property {Set<string>} [locks]
- * @property {NodeJS.Timeout} [external_locking_refresh_timeout]
- * @property {string} last_logged_status The last status string that was logged
- * to the console.
- * @property {Map<string, number>} flakyCounts Track flakyness run count of a test
- * @property {Map<string, import('./render').TestResult>} resultByTaskGroup
- */
+export interface RunnerState {
+  tasks: Task[];
+  locks?: Set<string>;
+  external_locking_refresh_timeout?: NodeJS.Timeout;
+  /** The last status string that was logged to the console */
+  last_logged_status: string;
+  /** Track flakyness run count of a test */
+  flakyCounts: Map<string, number>;
+  resultByTaskGroup: Map<string, TestResult>;
+}
+
+export interface RunnerResult {
+  test_start: number;
+  test_end: number;
+  state: RunnerState;
+  pentfVersion: string;
+  testsVersion: string;
+}
 
 /**
- * @typedef {Object} RunnerResult
- * @property {number} test_start
- * @property {number} test_end
- * @property {RunnerState} state
- * @property {string} pentfVersion
- * @property {string} testsVersion
- */
-
-/**
- * @param {import('./config').Config} config
- * @param {TestCase[]} testCases
- * @returns {RunnerResult}
  * @private
  */
-async function run(config, testCases) {
+export async function run(config: Config, testCases: TestCase[]): Promise<RunnerResult | undefined> {
     const test_start = Date.now();
 
     external_locking.prepare(config);
@@ -608,7 +578,7 @@ async function run(config, testCases) {
         Sentry.init({
             dsn: sentry_dsn,
             environment: config.env,
-            beforeBreadcrumb(breadcrumb) {
+            beforeBreadcrumb(breadcrumb: any) {
                 // Strip ansi color codes from sentry messages.
                 if (breadcrumb.message && typeof breadcrumb.message === 'string') {
                     breadcrumb.message = kolorist.stripColors(breadcrumb.message);
@@ -718,8 +688,3 @@ async function run(config, testCases) {
         state,
     };
 }
-
-module.exports = {
-    onTeardown,
-    run,
-};

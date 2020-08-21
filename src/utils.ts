@@ -1,7 +1,10 @@
+import { Config } from "./config";
+import { TaskConfig } from "./runner";
+
 const assert = require('assert').strict;
 const fs = require('fs');
 
-function makeEmailAddress(config, suffix) {
+function makeEmailAddress(config: Config, suffix: string) {
     assert(config.email, 'Missing `email` key in pentf configuration');
     const [account, domain] = config.email.split('@');
     return account + '+' + suffix + '@' + domain;
@@ -15,16 +18,16 @@ function makeEmailAddress(config, suffix) {
                            If no prefix is specified, the test name is used if available.
  * @returns {string} If `config.email` is `'foo@bar.com'`, something like `foo+prefix129ad12@bar.com`
  */
-function makeRandomEmail(config, prefix=undefined) {
+export function makeRandomEmail(config: TaskConfig, prefix?: string) {
     if (prefix === undefined) {
         prefix = config._testName || '';
     }
     return makeEmailAddress(config, prefix + Math.random().toString(36).slice(2));
 }
 
-async function readFile(fileName, type) {
+export async function readFile(fileName: string, type: string) {
     return new Promise((resolve, reject) => {
-        fs.readFile(fileName, type, (err, data) => {
+        fs.readFile(fileName, type, (err: Error, data: any) => {
             err ? reject(err) : resolve(data);
         });
     });
@@ -39,11 +42,11 @@ async function readFile(fileName, type) {
  * ```
  * @param {number} ms Number of milliseconds to wait.
  */
-async function wait(ms) {
+export async function wait(ms: number) {
     await new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function retry(func, waitTimes) {
+export async function retry(func, waitTimes) {
     for (const w of waitTimes) {
         const res = await func();
         if (res) return res;
@@ -52,7 +55,7 @@ async function retry(func, waitTimes) {
     return await func();
 }
 
-function randomHex() {
+export function randomHex() {
     return [
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 16)];
@@ -64,7 +67,7 @@ function randomHex() {
  * @param {number} len Length of the hex string.
  * @return string A random hex string, e.g. `A812F0D91`
  */
-function randomHexstring(len) {
+export function randomHexstring(len: number) {
     let res = '';
     while (len-- > 0) {
         res += randomHex();
@@ -72,12 +75,12 @@ function randomHexstring(len) {
     return res;
 }
 
-function regexEscape(s) {
+export function regexEscape(s: string) {
     // From https://stackoverflow.com/a/3561711/35070
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
-function* range(count) {
+export function* range(count: number) {
     for (let i = 0;i < count;i++) {
         yield i;
     }
@@ -85,13 +88,12 @@ function* range(count) {
 
 /**
  * Range as array
- * @param {number} count
  */
-function arange(count) {
+export function arange(count: number) {
     return Array.from(range(count));
 }
 
-function count(ar, filter) {
+export function count<T>(ar: T[], filter: (item: T) => boolean) {
     let res = 0;
     for (var el of ar) {
         if (filter(el)) res++;
@@ -99,13 +101,8 @@ function count(ar, filter) {
     return res;
 }
 
-/**
- * @template T
- * @param {T} obj
- * @param {Array<keyof T>} keys
- */
-function pluck(obj, keys) {
-    const res = {};
+export function pluck<T>(obj: T, keys: Array<keyof T>) {
+    const res: Partial<T> = {};
     for (const k of keys) {
         if (Object.prototype.hasOwnProperty.call(obj, k)) {
             res[k] = obj[k];
@@ -115,7 +112,7 @@ function pluck(obj, keys) {
 }
 
 // Remove the element for which callback returns true from the array.
-function remove(array, callback) {
+export function remove<T>(array: T[], callback: (item: T) => boolean) {
     for (let i = 0;i < array.length;i++) {
         if (callback(array[i])) {
             array.splice(i, 1);
@@ -125,7 +122,7 @@ function remove(array, callback) {
     throw new Error('Did not remove anything');
 }
 
-function filterMap(ar, cb) {
+export function filterMap<T>(ar: T[], cb: (item: T, index: number) => boolean) {
     const res = [];
     for (let i = 0;i < ar.length;i++) {
         const mapped = cb(ar[i], i);
@@ -136,9 +133,9 @@ function filterMap(ar, cb) {
     return res;
 }
 
-const _pad = num => ('' + num).padStart(2, '0');
+const _pad = (num: number) => ('' + num).padStart(2, '0');
 
-function timezoneOffsetString(offset) {
+export function timezoneOffsetString(offset: number) {
     if (!offset) return 'Z';
 
     const sign = (offset < 0) ? '+' : '-';
@@ -148,7 +145,7 @@ function timezoneOffsetString(offset) {
     return sign + _pad(hours) + ':' + _pad(minutes);
 }
 
-function localIso8601(date) {
+export function localIso8601(date?: Date) {
     if (!date) date = new Date();
 
     // Adapted from: https://stackoverflow.com/a/8563517/35070
@@ -164,7 +161,7 @@ function localIso8601(date) {
     );
 }
 
-function assertEventually(...args) {
+export function assertEventually(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');
     if (process.env.PENTF_FUTURE_DEPRECATIONS) {
@@ -176,7 +173,7 @@ function assertEventually(...args) {
     return assert_utils.assertEventually(...args);
 }
 
-function assertAsyncEventually(...args) {
+export function assertAsyncEventually(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');
     if (process.env.PENTF_FUTURE_DEPRECATIONS) {
@@ -188,7 +185,7 @@ function assertAsyncEventually(...args) {
     return assert_utils.assertAsyncEventually(...args);
 }
 
-function assertAlways(...args) {
+export function assertAlways(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');
     if (process.env.PENTF_FUTURE_DEPRECATIONS) {
@@ -200,7 +197,7 @@ function assertAlways(...args) {
     return assert_utils.assertAlways(...args);
 }
 
-function cmp(a, b) {
+export function cmp(a: any, b: any) {
     if (a < b) {
         return -1;
     } else if (a > b) {
@@ -210,31 +207,8 @@ function cmp(a, b) {
     }
 }
 
-function cmpKey(key) {
-    return function(x, y) {
+export function cmpKey(key: string) {
+    return function(x: Record<string, any>, y: Record<string, any>) {
         return cmp(x[key], y[key]);
     };
 }
-
-module.exports = {
-    arange,
-    assertAlways,
-    assertAsyncEventually,
-    assertEventually,
-    cmp,
-    cmpKey,
-    count,
-    filterMap,
-    localIso8601,
-    makeRandomEmail,
-    pluck,
-    randomHex,
-    randomHexstring,
-    range,
-    readFile,
-    regexEscape,
-    remove,
-    retry,
-    timezoneOffsetString,
-    wait,
-};

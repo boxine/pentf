@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2018",
     "allowJs": true,
+    "strict": true,
     "alwaysStrict": true,
     "declaration": true,
     "declarationDir": "dist/types/",

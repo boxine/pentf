@@ -1,22 +1,27 @@
+import { StackFrame } from "errorstacks";
 // Functions to output the current state.
-// For functions to render the state _after_ the tests have finished, look in render.js .
-const assert = require('assert').strict;
-const readline = require('readline');
-const diff = require('diff');
-const kolorist = require('kolorist');
-const errorstacks = require('errorstacks');
-const fs = require('fs');
-const {isAbsolute} = require('path');
-const {performance} = require('perf_hooks');
 
-const utils = require('./utils');
-const {getResults} = require('./results');
+import { Config } from "./config";
+import { RunnerState } from "./runner";
+
+// For functions to render the state _after_ the tests have finished, look in render.js .
+import { strict as assert } from 'assert';
+import * as readline from 'readline';
+import * as diff from 'diff';
+import * as kolorist from 'kolorist';
+import * as errorstacks from 'errorstacks';
+import * as fs from 'fs';
+import {isAbsolute} from 'path';
+import {performance} from 'perf_hooks';
+
+import * as utils from './utils';
+import {getResults} from './results';
 
 const STATUS_STREAM = process.stderr;
 
 var last_state;
 
-function clean(config) {
+function clean(config: Config) {
     assert(config);
     if (!STATUS_STREAM.isTTY) return;
     if (config.no_clear_line) return;
@@ -25,11 +30,9 @@ function clean(config) {
 }
 
 /**
- * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
  * @private
  */
-function status(config, state) {
+function status(config: Config, state: RunnerState) {
     if (config.quiet) return;
     assert(state.tasks);
     assert(state.resultByTaskGroup);
@@ -80,10 +83,8 @@ function status(config, state) {
 
 /**
  * Convert a time to a human readable string
- * @param {*} config
- * @param {number} duration Time in ms
  */
-function formatDuration(config, duration) {
+function formatDuration(config: Config, duration: number) {
     let seconds = Math.floor((duration / 1000) % 60);
     let minutes = Math.floor((duration / (1000 * 60)) % 60);
     let hours = Math.floor(duration / (1000 * 60 * 60));
@@ -106,11 +107,9 @@ function formatDuration(config, duration) {
 }
 
 /**
- * @param {*} config
- * @param {import('./runner').RunnerState} state
  * @private
  */
-function detailedStatus(config, state) {
+function detailedStatus(config: Config, state: RunnerState) {
     const {tasks} = state;
     const testResults = Array.from(state.resultByTaskGroup.values());
     const {skipped} = getResults(config, testResults);
@@ -161,11 +160,10 @@ function detailedStatus(config, state) {
 /**
 * Summarize test results.
 * @hidden
-* @param {*} config The pentf configuration object.
 * @param {ReturnType<typeof import('./results').getResults>} results
 * @returns {string} A string with counts of the results.
 **/
-function resultSummary(config, results) {
+function resultSummary(config: Config, results) {
     const {
         success,
         errored,
@@ -203,11 +201,7 @@ function resultSummary(config, results) {
     return res;
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
- */
-function finish(config, state) {
+export function finish(config: Config, state: RunnerState) {
     last_state = null;
     const {tasks} = state;
     assert(tasks);
@@ -249,11 +243,9 @@ function finish(config, state) {
 }
 
 /**
- * @param {import("./config").Config} config
- * @param {string} message
  * @private
  */
-function reportLogFile(config, message) {
+function reportLogFile(config: Config, message: string) {
     const time = utils.localIso8601();
     message = `${time} ${kolorist.stripColors(message)}`;
     if (!message.endsWith('\n')) {
@@ -263,11 +255,7 @@ function reportLogFile(config, message) {
     config.log_file_stream.write(message);
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {*} message
- */
-function log(config, message) {
+function log(config: Config, message: string) {
     if (config.logFunc) return config.logFunc(config, message);
 
     if (config.log_file) {
@@ -288,11 +276,7 @@ function log(config, message) {
     }
 }
 
-/**
- * @param {import("./config").Config} config
- * @param {string} message
- */
-function logVerbose(config, message) {
+function logVerbose(config: Config, message: string) {
     if (!config.verbose) {
         if (config.log_file) {
             reportLogFile(config, message);
@@ -307,7 +291,7 @@ function logVerbose(config, message) {
  * @param {number} n Levels of indentation
  * @hidden
  */
-function indent(n) {
+function indent(n: number) {
     return '  '.repeat(n);
 }
 
@@ -316,11 +300,9 @@ function indent(n) {
  * comparisons. Contrary to `JSON.stringify(value, null, 2)` this
  * will sort object properties which is necessary to get a meaningful
  * diff.
- * @param {*} value Value to stringify
- * @returns {string}
  * @hidden
  */
-function stringify(value, level = 0) {
+function stringify(value: any, level = 0): string {
     if (typeof value === 'string') return `"${value}"`;
     if (
         typeof value === 'number'
@@ -386,7 +368,7 @@ function shouldShowDiff(err) {
  * @returns {string}
  * @hidden
  */
-function generateDiff(config, err) {
+function generateDiff(config: Config, err) {
     assert(err);
 
     // The "diff" package works on strings only
@@ -415,7 +397,7 @@ function generateDiff(config, err) {
     return `\n${formatted}\n`;
 }
 
-function color(config, colorName, str) {
+function color(config: Config, colorName: string, str: string) {
     if (!config.colors) {
         return str;
     }
@@ -445,12 +427,9 @@ function color(config, colorName, str) {
 
 /**
  * Mark a string as a link for terminals that support this (GNOME Terminal)
- * @param {*} config
- * @param {string} text
- * @param {string} target
  * @hidden
  */
-function link(config, text, target) {
+function link(config: Config, text: string, target: string) {
     if (!config.colors || process.env.CI) {
         return text;
     }
@@ -460,9 +439,8 @@ function link(config, text, target) {
 
 /**
  * Convert tabs indentation to two spaces.
- * @param {string} str
  */
-function tabs2Spaces(str) {
+function tabs2Spaces(str: string) {
     return str.replace(/^\t+/, tabs => '  '.repeat(tabs.length));
 }
 
@@ -470,7 +448,7 @@ function tabs2Spaces(str) {
  * @param {string} str String to indent
  * @param {number} n Indentation level
  */
-function indentLines(str, n) {
+function indentLines(str: string, n: number) {
     return str.split(/\n/g)
         .map(line => line && line !== '\n' ? '  '.repeat(n) + line : line)
         .join('\n');
@@ -486,7 +464,7 @@ function indentLines(str, n) {
  * @param {number} before Number of lines to show before the marker
  * @param {number} columnNum Number of lines to show after the marker
  */
-function genCodeFrame(config, content, lineNum, columnNum, before, after) {
+function genCodeFrame(config: Config, content: string, lineNum: number, columnNum: number, before: number, after: number) {
     const lines = content.split('\n');
     const startLine = Math.max(0, lineNum - before);
     const endLine = Math.min(lines.length - 1, lineNum + after);
@@ -516,12 +494,9 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
 
 /**
  * Format the error
- * @param {*} config Penf config object
- * @param {Error} err Error object to format
- * @returns {Promise<string>}
  * @hidden
  */
-async function formatError(config, err) {
+export async function formatError(config: Config, err: Error) {
     let diff = '';
     if (shouldShowDiff(err)) {
         diff += generateDiff(config, err);
@@ -529,12 +504,11 @@ async function formatError(config, err) {
 
     /**
      * The nearest location where the user's code triggered the error.
-     * @type {import('errorstacks').StackFrame}
      */
-    let nearestFrame;
+    let nearestFrame: StackFrame;
 
     // Assertion libraries often add multiline messages to the error stack.
-    const actualStack = err.stack
+    const actualStack = err.stack!
         .replace(`${err.name}: ${err.message}`, '')
         .replace(err.message, '');
 
@@ -587,22 +561,18 @@ async function formatError(config, err) {
 }
 
 /**
- * @param {import('./config').Config} config
- * @param {import('./runner').Task} task
  * @private
  */
-function shouldShowError(config, task) {
+function shouldShowError(config: Config, task: Task) {
     return (
         !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(task.error.stack)) &&
         (config.expect_nothing || !task.expectedToFail || task.expectedToFail && task.status === 'success'));
 }
 
 /**
- * @param {import('./config').Config} config
- * @param {import('./runner').Task} task
  * @private
  */
-async function logTaskError(config, task) {
+async function logTaskError(config: Config, task: Task) {
     const show_error = shouldShowError(config, task);
     const e = task.error;
     if (config.verbose) {
@@ -648,7 +618,7 @@ async function logTaskError(config, task) {
  * @param {*} value A random value.
  * @hidden
  */
-function valueRepr(value) {
+function valueRepr(value: any) {
     if (typeof value === 'symbol') {
         return value.toString();
     }

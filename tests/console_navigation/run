@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 const pentf = require('../../src/index.js');
 
 pentf.main({

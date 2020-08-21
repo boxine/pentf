@@ -1,8 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
-const {promisify} = require('util');
-const {pathToFileURL} = require('url');
+import { TaskConfig, TestCase } from './runner';
+
+import * as fs from 'fs';
+import * as path from 'path';
+import * as glob from 'glob';
+import {promisify} from 'util';
+import {pathToFileURL} from 'url';
 
 /**
  * Check if the current running node version supports import statements.
@@ -11,6 +13,7 @@ const {pathToFileURL} = require('url');
 async function supportsImports() {
     let canUseImport = true;
     try {
+        // @ts-ignore
         await import('./file-that-does-not-exist');
     } catch (err) {
         if (/Not\ssupported/.test(err.message)) {
@@ -21,13 +24,12 @@ async function supportsImports() {
     return canUseImport;
 }
 
-let canUseImport;
+let canUseImport: boolean | undefined;
 
 /**
  * Load module via CommonJS or ES Modules depending on the environment
- * @param {string} file
  */
-async function importFile(file) {
+export async function importFile(file: string) {
     if (canUseImport === undefined) {
         canUseImport = await supportsImports();
     }
@@ -55,24 +57,24 @@ async function importFile(file) {
     }
 }
 
-/**
- * @typedef {Omit<import('./runner').TestCase, 'name' | 'run'>} TestOptions
- */
+export type TestOptions = Omit<TestCase, 'name' | 'run'>;
+
+export interface TestFn {
+  (name: string, test: () => any, options?: TestOptions): void;
+  only: (name: string, test: (config: TaskConfig) => Promise<void | void>, options?: TestOptions) => void;
+}
+
+export interface DescribeFn {
+    (name: string, callback: () => void): void;
+    only: (name: string, callback: () => void) => void;
+}
+
+export type SuiteBuilder = (test: TestFn, suite: DescribeFn) => void;
 
 /**
- * @typedef {{(name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void, only: (name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void} TestFn
- */
-
-/**
- * @typedef {{(name: string, callback: () => void): void, only: (name: string, callback: () => void): void} DescribeFn
- */
-
-/**
- * @param {string} suiteName
- * @param {(test: TestFn, suite: DescribeFn) => void} builder
  * @private
  */
-function loadSuite(suiteName, builder) {
+export function loadSuite(suiteName: string, builder: SuiteBuilder) {
     const tests = [];
     const only = [];
     let onlyInScope = false;
@@ -85,10 +87,10 @@ function loadSuite(suiteName, builder) {
     /**
      * Create a test case
      * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
+     * @param {(config: import('./config.ts').Config) => Promise<void>} run
      * @param {TestOptions} options
      */
-    function test(description, run, options = {}) {
+    const test: TestFn = (description, run, options = {}) => {
         const arr = onlyInScope ? only : tests;
         arr.push({
             description,
@@ -101,9 +103,6 @@ function loadSuite(suiteName, builder) {
 
     /**
      * Only run this test case in the current file
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
      */
     test.only = (description, run, options = {}) => {
         only.push({
@@ -118,7 +117,7 @@ function loadSuite(suiteName, builder) {
     /**
      * Skip this test case
      * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
+     * @param {(config: import('./config.ts').Config) => Promise<void>} run
      * @param {TestOptions} options
      */
     test.skip = (description, run, options = {}) => {
@@ -134,10 +133,8 @@ function loadSuite(suiteName, builder) {
 
     /**
      * Create a group for test cases
-     * @param {string} description
-     * @param {() => void} callback
      */
-    function describe(description, callback) {
+    const describe: DescribeFn = (description, callback) => {
         groups.push(description);
         callback();
         groups.pop();
@@ -145,8 +142,6 @@ function loadSuite(suiteName, builder) {
 
     /**
      * Only run the test cases inside this group
-     * @param {string} description
-     * @param {() => void} callback
      */
     describe.only = (description, callback) => {
         onlyInScope = true;
@@ -183,7 +178,7 @@ function loadSuite(suiteName, builder) {
  * @param {string} [globPattern]
  * @private
  */
-async function loadTests(args, testsDir, globPattern = '*.{js,cjs,mjs}') {
+export async function loadTests(args, testsDir: string, globPattern = '*.{js,cjs,mjs}') {
     const testFiles = await promisify(glob.glob)(globPattern, {cwd: testsDir});
     let tests = testFiles.map(n => ({
         path: n,
@@ -221,9 +216,3 @@ async function loadTests(args, testsDir, globPattern = '*.{js,cjs,mjs}') {
 
     return testCases;
 }
-
-module.exports = {
-    importFile,
-    loadTests,
-    supportsImports,
-};

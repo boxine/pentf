@@ -1,11 +1,11 @@
-const output = require('./output');
-const kolorist = require('kolorist');
+import { ConsoleMessage, Page } from "puppeteer";
+import * as output from './output';
+import * as kolorist from 'kolorist';
 
 /**
  * Reconstruct original types from serialized message
- * @param {*} value
  */
-function parseConsoleArg(value) {
+export function parseConsoleArg(value: any): any {
     if (Array.isArray(value)) {
         return value.map(item => parseConsoleArg(item));
     } else if (typeof value === 'object' && value !== null) {
@@ -30,7 +30,7 @@ function parseConsoleArg(value) {
             }
         }
 
-        let out = {};
+        let out: Record<string, any> = {};
         for (const key in value) {
             out[key] = parseConsoleArg(value[key]);
         }
@@ -43,10 +43,8 @@ function parseConsoleArg(value) {
 /**
  * Serialize any JS value to JSON. Used to send data from the browser
  * to the node process.
- * @param {*} value
- * @param {Set<any>} seen
  */
-function serialize(value, seen) {
+export function serialize(value: any, seen: Set<any>): any {
     if (seen.has(value)) {
         return '[[Circular]]';
     }
@@ -88,7 +86,7 @@ function serialize(value, seen) {
             };
         }
 
-        let out = {};
+        let out: Record<string, any> = {};
         Object.keys(value).forEach(key => {
             out[key] = serialize(value[key], seen);
         });
@@ -106,14 +104,11 @@ function serialize(value, seen) {
 }
 
 /**
- * @param {import('./config').Config} config
- * @param {string} type
- * @param {import('puppeteer').ConsoleMessage} message
  * @private
  */
-function printRawMessage(config, type, message) {
+export function printRawMessage(config, type: string, message: ConsoleMessage) {
     const loc = message.location();
-    let url = loc.url;
+    let url = loc.url!;
     if (loc.lineNumber) {
         url += `:${loc.lineNumber}`;
         if (loc.columnNumber) {
@@ -122,7 +117,7 @@ function printRawMessage(config, type, message) {
     }
     url = kolorist.link(url, url);
 
-    const colors = {
+    const colors: Record<string, string> = {
         warn: 'yellow',
         error: 'red',
     };
@@ -147,9 +142,8 @@ function printRawMessage(config, type, message) {
  * and pass it around as a string.
  *
  * @param {import('./config').Config} config
- * @param {import('puppeteer').Page} page
  */
-async function forwardBrowserConsole(config, page) {
+export async function forwardBrowserConsole(config, page: Page) {
     // The stack is not present on the trace method, so we need to patch it in
     await page.evaluateOnNewDocument((fn) => {
         const serialize = new Function(`return ${fn}`)();

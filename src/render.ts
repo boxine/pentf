@@ -1,3 +1,6 @@
+import { Config } from "./config";
+import { RunnerResult, TaskStatus } from "./runner";
+
 const fs = require('fs');
 const path = require('path');
 const {promisify} = require('util');
@@ -6,9 +9,10 @@ const {timezoneOffsetString} = require('./utils');
 const {resultCountString} = require('./results');
 
 const output = require('./output');
+const { type } = require('os');
 
 /**
- * @param {import('./config').Config} config
+ * @param {import('./config.ts').Config} config
  * @param {TestResult} result
  * @returns {number}
  */
@@ -30,39 +34,30 @@ function getTestOrder(config, result) {
     return 99;
 }
 
-/**
- * @typedef {Object} TaskResult
- * @param {import('./runner').TaskStatus} status
- * @param {number} duration
- * @param {*} error_screenshots  // FIXME
- * @param {string} error_stack
- */
+ export interface TaskResult {
+    status: TaskStatus;
+    duration: number;
+    error_screenshots: Buffer[];
+    error_stack: string;
+ }
 
-/**
- * @typedef {import('./runner').TaskStatus | "flaky"} TestStatus
- */
+export type TestStatus = TaskStatus | "flaky";
 
-/**
- * @typedef {Object} TestResult
- * @property {string} name
- * @property {string} group
- * @property {string} id
- * @property {string} description
- * @property {boolean} skipped
- * @property {TaskResult[]} taskResults
- * @property {TestStatus} status
- * @property {*} expectedToFail // FIXME
- * @property {*} skipReason // FIXME
- */
+export interface TestResult {
+    name: string;
+    group: string;
+    id: string;
+    description?: string;
+    skipped: boolean;
+    taskResults: TaskResult[];
+    status: TestStatus;
+    expectedToFail?: string;
+    skipReason?: string;
+}
 
-/**
- * @param {import('./config').Config} config
- * @param {import('./runner').RunnerResult} test_info
- */
-function craftResults(config, test_info) {
+function craftResults(config: Config, test_info: RunnerResult) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
 
-    /** @type {TestResult[]} */
     const tests = Array.from(state.resultByTaskGroup.values());
 
     // Order tests by severity
@@ -95,7 +90,7 @@ function craftResults(config, test_info) {
     };
 }
 
-async function doRender(config, results) {
+async function doRender(config: Config, results) {
     if (config.json) {
         output.logVerbose('Rendering to JSON ...');
         const json = JSON.stringify(results, undefined, 2) + '\n';
@@ -124,7 +119,7 @@ async function doRender(config, results) {
     }
 }
 
-function format_duration(ms) {
+function format_duration(ms: number) {
     if (ms === undefined) {
         return '';
     }
@@ -141,8 +136,8 @@ function format_duration(ms) {
     return rounded_str + 's';
 }
 
-function format_timestamp(ts) {
-    const _pad = num => ('' + num).padStart(2, '0');
+function format_timestamp(ts: string | Date) {
+    const _pad = (num: number) => ('' + num).padStart(2, '0');
     const date = new Date(ts);
 
     return (
@@ -156,7 +151,7 @@ function format_timestamp(ts) {
     );
 }
 
-function linkify(str) {
+function linkify(str: string) {
     let res = '';
     let pos = 0;
 
@@ -172,7 +167,7 @@ function linkify(str) {
     return res;
 }
 
-function escape_html(str) {
+function escape_html(str: string) {
     // From https://stackoverflow.com/a/6234804/35070
     return (str
         .replace(/&/g, '&amp;')
@@ -230,7 +225,7 @@ function screenshots_html(result) {
     }).join('\n');
 }
 
-function _calcSingleStatusStr(status) {
+function _calcSingleStatusStr(status:) {
     return ({
         'success': '✔️',
         'error': '✘',
@@ -472,7 +467,7 @@ ${table}
 
 }
 
-async function pdf(config, path, results) {
+async function pdf(config: Config, path: string, results) {
     return html2pdf(config, path, html(results));
 }
 

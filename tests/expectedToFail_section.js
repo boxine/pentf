@@ -47,12 +47,16 @@ async function run() {
         },
     }];
 
-    await runner.run(runnerConfig, testCases);
+    const result = await runner.run(runnerConfig, testCases);
     assert(! output.some(o => o.includes('test case normal_ok')));
     assert(! output.some(o => o.includes('FAILED test case section_fail')));
     assert(output.some(o => o.includes('PASSED test case section_ok')));
     assert(output.some(o => o.includes('FAILED test case section_expectNothing_fail')));
     assert(! output.some(o => o.includes('test case section_expectNothing_ok')));
+
+    const groups = result.state.resultByTaskGroup;
+    assert(groups.get('section_fail').expectedToFail, 'expectedToFail not present on result for "section_fail"');
+    assert(groups.get('section_ok').expectedToFail, 'expectedToFail not present on result for "section_ok"');
 
     output = [];
     runnerConfig.expect_nothing = true;

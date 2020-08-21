@@ -594,7 +594,7 @@ async function formatError(config, err) {
 function shouldShowError(config, task) {
     return (
         !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(task.error.stack)) &&
-        (config.expect_nothing || !task.expectedToFail));
+        (config.expect_nothing || !task.expectedToFail || task.expectedToFail && task.status === 'success'));
 }
 
 /**

@@ -109,8 +109,14 @@ async function run_task(config, task) {
         task.duration = performance.now() - task.start;
         task.error = e;
         task.breadcrumb = task_config._breadcrumb;
+        task.status = 'error';
+
+        // Inline expectedToFail() calls
         if (e.pentf_expectedToFail) {
             task.expectedToFail = e.pentf_expectedToFail;
+        } else if (e.pentf_expectedToSucceed) {
+            task.expectedToFail = e.pentf_expectedToSucceed;
+            task.status = 'success';
         }
 
         if (config.take_screenshots) {
@@ -186,8 +192,6 @@ async function run_task(config, task) {
 
         output.logVerbose(
             config, `[task] Error teardown done for ${task._runner_task_id} (${task.name})`);
-
-        task.status = 'error';
 
         if (config.fail_fast) {
             process.exit(3);
@@ -289,6 +293,11 @@ function update_results(config, state, task) {
                 : null,
             error_screenshots: task.error_screenshots,
         });
+    }
+
+    // Update in case inline expectedToFail was used
+    if (!result.expectedToFail && task.expectedToFail) {
+        result.expectedToFail = task.expectedToFail;
     }
 }
 

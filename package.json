@@ -7,6 +7,9 @@
   "directories": {
     "test": "tests"
   },
+  "bin": {
+    "pentf": "./bin/cli.js"
+  },
   "exports": {
     ".": {
       "require": "./src/index.js",

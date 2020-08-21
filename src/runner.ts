@@ -434,7 +434,7 @@ export interface TestCase {
   name: string;
   run: (config: TaskConfig) => Promise<void> | void;
   skip?: (config: Config) => Promise<boolean> | boolean;
-  expectedToFail?: string;
+  expectedToFail?: string | ((config: Config) => string);
   description?: string;
   resources?: string[];
 }
@@ -487,6 +487,8 @@ async function testCases2tasks(config: Config, testCases: TestCase[], resultByTa
             group: tc.name,
             id: tc.name,
             start: 0,
+            breadcrumb: null,
+            error_screenshots: []
         };
 
         const skipReason = tc.skip && await tc.skip(config);
@@ -537,6 +539,7 @@ export interface RunnerState {
   /** Track flakyness run count of a test */
   flakyCounts: Map<string, number>;
   resultByTaskGroup: Map<string, TestResult>;
+  external_locking_failed?: boolean;
 }
 
 export interface RunnerResult {

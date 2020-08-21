@@ -1,26 +1,29 @@
-const argparse = require('argparse');
+import * as argparse from 'argparse';
 import {strict as assert} from 'assert';
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import {promisify} from 'util';
 
 import * as utils from './utils';
 import { importFile } from './loader';
+import { PentfPage } from './browser_utils';
+import { TeardownHook } from './runner';
+import { PentfOptions } from './main';
 
 class AutoWidthArgumentParser extends argparse.ArgumentParser {
     _getFormatter() {
-        const options = {prog: this.prog};
+        const options = {prog: (this as any).prog} as any;
         if (process.env.COLUMNS) {
             options.width = parseInt(process.env.COLUMNS);
         } else if (process.stdout.getWindowSize) {
             options.width = process.stdout.getWindowSize()[0];
         }
-        return new this.formatterClass(options);
+        return new (this as any).formatterClass(options);
     }
 }
 
-export function listEnvs(configDir) {
+export function listEnvs(configDir: string) {
     const allFiles = fs.readdirSync(configDir);
     const res = utils.filterMap(allFiles, fn => {
         const m = /^(?![_.])([-_A-Za-z0-9.]+)\.(?:json|js)$/.exec(fn);
@@ -30,7 +33,11 @@ export function listEnvs(configDir) {
     return res;
 }
 
-function computeConcurrency(spec, {cpuCount=undefined}={}) {
+export interface ConcurrencyOptions {
+  cpuCount?: number
+}
+
+function computeConcurrency(spec: number | string, {cpuCount}: ConcurrencyOptions={}) {
     if (typeof spec === 'number') { // Somebody passed in result value directly
         return spec;
     }
@@ -43,7 +50,7 @@ function computeConcurrency(spec, {cpuCount=undefined}={}) {
             numeric => {
                 numeric = numeric.trim();
                 if (numeric === 'cpus') {
-                    return cpuCount;
+                    return cpuCount!;
                 }
                 assert(
                     /^[0-9]+$/.test(numeric), `Invalid concurrency spec ${JSON.stringify(spec)}`);
@@ -55,7 +62,9 @@ function computeConcurrency(spec, {cpuCount=undefined}={}) {
 // tests only
 export const _computeConcurrency = computeConcurrency;
 
-export function parseArgs(options, raw_args) {
+
+
+export function parseArgs(options: PentfOptions, raw_args) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
@@ -424,7 +433,7 @@ export function parseArgs(options, raw_args) {
     return args;
 }
 
-async function readConfigFile(configDir: string, env: string) {
+async function readConfigFile(configDir: string, env: string): Promise<Partial<Config>> {
     let config;
 
     const jsFilename = path.join(configDir, env + '.js');
@@ -476,24 +485,41 @@ export interface Config {
     colors?: boolean;
     ignore_errors?: string;
     no_clear_line?: boolean;
+    testsGlob?: string;
     logFunc?: (config: Config, message: string) => void;
     display_locking_client?: boolean;
     beforeAllTests?: (config: Config) => Promise<void> | void
     afterAllTests?: (config: Config, initData: any) => Promise<void> | void
+    extensions: string[];
+    puppeteer_firefox?: boolean;
+    env: string;
+    slow_mo?: number;
+    devtools?: boolean;
+    headless?: boolean;
+    devtools_preserve?: boolean;
+    forward_console?: boolean;
+    _browser_pages?: PentfPage[];
+    _teardown_hooks?: TeardownHook[];
+
+    sentry_dsn: string;
+    _rootDir?: string;
+    _configDir?: string;
+
+    // TODO: Remove those
+    _testsDir?: string;
 }
 
 /**
- * @param {import('./main').PentfOptions} options
  * @param {object} args
  */
-export async function readConfig(options, args): Promise<Config> {
+export async function readConfig(options: PentfOptions, args: Config): Promise<Config> {
     const {configDir} = options;
 
     let config: Partial<Config> = {};
     if (configDir) {
         const env = args.env;
         assert(env);
-        config = await readConfigFile(configDir, env);
+        config = await readConfigFile(configDir, env!);
     }
     config.beforeAllTests = options.beforeAllTests;
     config.afterAllTests = options.afterAllTests;

@@ -1,22 +1,17 @@
 import { Config } from "./config";
 import { RunnerResult, TaskStatus } from "./runner";
 
-const fs = require('fs');
-const path = require('path');
-const {promisify} = require('util');
-const {html2pdf} = require('./browser_utils');
-const {timezoneOffsetString} = require('./utils');
-const {resultCountString} = require('./results');
+import * as fs from 'fs';
+import * as path from 'path';
+import {promisify} from 'util';
+import {html2pdf} from './browser_utils';
+import {timezoneOffsetString} from './utils';
+import {resultCountString} from './results';
 
-const output = require('./output');
-const { type } = require('os');
+import * as output from './output';
+import { link } from "kolorist";
 
-/**
- * @param {import('./config.ts').Config} config
- * @param {TestResult} result
- * @returns {number}
- */
-function getTestOrder(config, result) {
+function getTestOrder(config: Config, result: TestResult) {
     const expectNothing = config.expect_nothing;
 
     if (result.status === 'error' && (!result.expectedToFail || expectNothing)) {
@@ -55,7 +50,7 @@ export interface TestResult {
     skipReason?: string;
 }
 
-function craftResults(config: Config, test_info: RunnerResult) {
+export function craftResults(config: Config, test_info: RunnerResult) {
     const {test_start, test_end, state, ...moreInfo} = test_info;
 
     const tests = Array.from(state.resultByTaskGroup.values());
@@ -90,7 +85,7 @@ function craftResults(config: Config, test_info: RunnerResult) {
     };
 }
 
-async function doRender(config: Config, results) {
+export async function doRender(config: Config, results) {
     if (config.json) {
         output.logVerbose('Rendering to JSON ...');
         const json = JSON.stringify(results, undefined, 2) + '\n';
@@ -166,6 +161,8 @@ function linkify(str: string) {
 
     return res;
 }
+// tests only
+export const _linkify = linkify;
 
 function escape_html(str: string) {
     // From https://stackoverflow.com/a/6234804/35070
@@ -225,14 +222,14 @@ function screenshots_html(result) {
     }).join('\n');
 }
 
-function _calcSingleStatusStr(status:) {
+function _calcSingleStatusStr(status) {
     return ({
         'success': '✔️',
         'error': '✘',
     }[status] || status);
 }
 
-function _calcSummaryStatus(taskResults) {
+function _calcSummaryStatus(taskResults: TaskResult[]) {
     if (taskResults.every(tr => tr.status === taskResults[0].status)) {
         return _calcSingleStatusStr(taskResults.length ? taskResults[0].status : 'skipped');
     }
@@ -249,7 +246,7 @@ function _calcSummaryStatus(taskResults) {
         .join(' '));
 }
 
-function _calcDuration(taskResults) {
+function _calcDuration(taskResults: TaskResult[]) {
     if (taskResults.length === 1) {
         return format_duration(taskResults[0].duration);
     }
@@ -260,7 +257,7 @@ function _calcDuration(taskResults) {
     return format_duration(min) + ' - ' + format_duration(max);
 }
 
-function html(results) {
+function html(results: ) {
     const table = results.tests.map((testResult, idx) => {
         const {skipped, taskResults} = testResult;
 
@@ -466,15 +463,9 @@ ${table}
 `;
 
 }
+// tests only
+export const _html = html;
 
 async function pdf(config: Config, path: string, results) {
     return html2pdf(config, path, html(results));
 }
-
-module.exports = {
-    craftResults,
-    doRender,
-    // test only
-    _linkify: linkify,
-    _html: html,
-};

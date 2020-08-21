@@ -1,12 +1,12 @@
-const assert = require('assert').strict;
+import { strict as assert } from 'assert';
+import { Config } from './config';
+import { TestResult } from './render';
 
 /**
  * Get tests result summary data
- * @param {import('./config').Config} config
- * @param {import('./render').TestResult[]} results
  * @private
  */
-function getResults(config, results) {
+export function getResults(config: Config, results: TestResult[]) {
     const expectNothing = config.expect_nothing;
     assert(Array.isArray(results));
 
@@ -16,9 +16,9 @@ function getResults(config, results) {
     const flaky = results.filter(t => t.status === 'flaky');
     const skipped = results.filter(t => t.status === 'skipped');
     const expectedToFail = !expectNothing && results.filter(
-        t => t.expectedToFail && t.status === 'error');
+        t => t.expectedToFail && t.status === 'error') || [];
     const expectedToFailButPassed = !expectNothing && results.filter(
-        t => t.expectedToFail && t.status === 'success');
+        t => t.expectedToFail && t.status === 'success') || [];
     const todo = results.filter(t => t.status === 'todo');
 
     return {
@@ -32,6 +32,8 @@ function getResults(config, results) {
     };
 }
 
+export type Results = ReturnType<typeof getResults>;
+
 /**
 * Summarize test results for PDF.
 * @hidden
@@ -39,7 +41,7 @@ function getResults(config, results) {
 * @param {import('./render').TestResult[]} tests All finished tests.
 * @returns {string} A string with counts of the results.
 **/
-function resultCountString(config, tests) {
+export function resultCountString(config: Config, tests: TestResult[]) {
     const {
         success,
         errored,
@@ -64,8 +66,3 @@ function resultCountString(config, tests) {
     }
     return res;
 }
-
-module.exports = {
-    getResults,
-    resultCountString
-};

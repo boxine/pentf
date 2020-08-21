@@ -113,6 +113,7 @@
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.1",
+    "@types/argparse": "^1.0.38",
     "@types/diff": "^4.0.2",
     "deep-equal": "^1.0.1",
     "eslint": "^7.0.0",

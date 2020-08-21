@@ -2,7 +2,7 @@ import { StackFrame } from "errorstacks";
 // Functions to output the current state.
 
 import { Config } from "./config";
-import { RunnerState } from "./runner";
+import { RunnerState, Task } from "./runner";
 
 // For functions to render the state _after_ the tests have finished, look in render.js .
 import { strict as assert } from 'assert';
@@ -32,7 +32,7 @@ function clean(config: Config) {
 /**
  * @private
  */
-function status(config: Config, state: RunnerState) {
+export function status(config: Config, state: RunnerState) {
     if (config.quiet) return;
     assert(state.tasks);
     assert(state.resultByTaskGroup);
@@ -109,7 +109,7 @@ function formatDuration(config: Config, duration: number) {
 /**
  * @private
  */
-function detailedStatus(config: Config, state: RunnerState) {
+export function detailedStatus(config: Config, state: RunnerState) {
     const {tasks} = state;
     const testResults = Array.from(state.resultByTaskGroup.values());
     const {skipped} = getResults(config, testResults);
@@ -255,7 +255,7 @@ function reportLogFile(config: Config, message: string) {
     config.log_file_stream.write(message);
 }
 
-function log(config: Config, message: string) {
+export function log(config: Config, message: string) {
     if (config.logFunc) return config.logFunc(config, message);
 
     if (config.log_file) {
@@ -276,7 +276,7 @@ function log(config: Config, message: string) {
     }
 }
 
-function logVerbose(config: Config, message: string) {
+export function logVerbose(config: Config, message: string) {
     if (!config.verbose) {
         if (config.log_file) {
             reportLogFile(config, message);
@@ -302,7 +302,7 @@ function indent(n: number) {
  * diff.
  * @hidden
  */
-function stringify(value: any, level = 0): string {
+export function stringify(value: any, level = 0): string {
     if (typeof value === 'string') return `"${value}"`;
     if (
         typeof value === 'number'
@@ -368,7 +368,7 @@ function shouldShowDiff(err) {
  * @returns {string}
  * @hidden
  */
-function generateDiff(config: Config, err) {
+export function generateDiff(config: Config, err) {
     assert(err);
 
     // The "diff" package works on strings only
@@ -397,7 +397,7 @@ function generateDiff(config: Config, err) {
     return `\n${formatted}\n`;
 }
 
-function color(config: Config, colorName: string, str: string) {
+export function color(config: Config, colorName: string, str: string) {
     if (!config.colors) {
         return str;
     }
@@ -563,7 +563,7 @@ export async function formatError(config: Config, err: Error) {
 /**
  * @private
  */
-function shouldShowError(config: Config, task: Task) {
+export function shouldShowError(config: Config, task: Task) {
     return (
         !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(task.error.stack)) &&
         (config.expect_nothing || !task.expectedToFail || task.expectedToFail && task.status === 'success'));
@@ -572,7 +572,7 @@ function shouldShowError(config: Config, task: Task) {
 /**
  * @private
  */
-async function logTaskError(config: Config, task: Task) {
+export async function logTaskError(config: Config, task: Task) {
     const show_error = shouldShowError(config, task);
     const e = task.error;
     if (config.verbose) {
@@ -618,7 +618,7 @@ async function logTaskError(config: Config, task: Task) {
  * @param {*} value A random value.
  * @hidden
  */
-function valueRepr(value: any) {
+export function valueRepr(value: any) {
     if (typeof value === 'symbol') {
         return value.toString();
     }
@@ -636,18 +636,3 @@ function valueRepr(value: any) {
 
     return '' + value;
 }
-
-module.exports = {
-    color,
-    detailedStatus,
-    finish,
-    formatError,
-    valueRepr,
-    log,
-    logTaskError,
-    logVerbose,
-    generateDiff,
-    shouldShowError,
-    status,
-    stringify,
-};

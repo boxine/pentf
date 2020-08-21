@@ -3,13 +3,13 @@ import {strict as assert} from 'assert';
 import * as output from './output';
 import {wait} from './utils';
 import * as external_locking from './external_locking';
+import { Config } from './config';
+import { RunnerState, Task } from './runner';
 
 /**
- * @param {import('./config.ts').Config} config
- * @param {import('./runner').Task} task
  * @private
  */
-function annotateTaskResources(config, task) {
+export function annotateTaskResources(config: Config, task: Task) {
     if (config.no_locking) {
         return;
     }
@@ -20,11 +20,9 @@ function annotateTaskResources(config, task) {
 }
 
 /**
- * @param {import('./config.ts').Config} config
- * @param {import('./runner').RunnerState} state
  * @private
  */
-async function init(config, state) {
+export async function init(config: Config, state: RunnerState) {
     assert(config);
     assert(state);
     state.locks = new Set();
@@ -32,11 +30,9 @@ async function init(config, state) {
 }
 
 /**
- * @param {import('./config.ts').Config} config
- * @param {import('./runner').RunnerState} state
  * @private
  */
-async function shutdown(config, state) {
+export async function shutdown(config: Config, state: RunnerState) {
     external_locking.shutdown(config, state);
     state.locks.length = 0;
     assert.equal(
@@ -46,11 +42,8 @@ async function shutdown(config, state) {
 
 /**
  * Aquire locks on resources
- * @param {import('./config.ts').Config} config
- * @param {import('./runner').RunnerState} state
- * @param {import('./runner').Task} task
  */
-async function acquire(config, state, task) {
+export async function acquire(config: Config, state: RunnerState, task: Task) {
     if (config.no_locking) return true;
 
     assert(task);
@@ -97,12 +90,7 @@ async function acquire(config, state, task) {
     return true;
 }
 
-/**
- * @param {import('./config.ts').Config} config
- * @param {import('./runner').RunnerState} state
- * @param {import('./runner').Task} task
- */
-async function acquireEventually(config, state, task) {
+export async function acquireEventually(config: Config, state: RunnerState, task: Task) {
     if (config.no_locking) return true;
     if (config.locking_verbose || config.log_file) {
         output.logVerbose(config, `[locking] ${task.id}: Trying to eventually acquire ${task.resources.join(',')}`);
@@ -117,11 +105,8 @@ async function acquireEventually(config, state, task) {
 
 /**
  * Release locks on resources
- * @param {import('./config.ts').Config} config
- * @param {import('./runner').RunnerState} state
- * @param {import('./runner').Task} task
  */
-async function release(config, state, task) {
+export async function release(config: Config, state: RunnerState, task: Task) {
     if (config.no_locking) return true;
     if (! task.resources.length) {
         return;
@@ -153,11 +138,9 @@ async function release(config, state, task) {
 }
 
 /**
- * @param {import('./config.ts').Config} config
- * @param {import('./runner').Task[]} tasks
  * @private
  */
-function listConflicts(config, tasks) {
+export function listConflicts(config: Config, tasks: Task[]) {
     const tasksByResource = new Map();
     for (const t of tasks) {
         for (const r of t.resources) {
@@ -181,13 +164,3 @@ function listConflicts(config, tasks) {
         output.log(config, 'No resource conflicts found');
     }
 }
-
-module.exports = {
-    acquire,
-    acquireEventually,
-    annotateTaskResources,
-    init,
-    listConflicts,
-    release,
-    shutdown,
-};

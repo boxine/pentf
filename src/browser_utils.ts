@@ -1,24 +1,35 @@
-'use strict';
 /**
  * Browser functions, based upon puppeteer.
  * These functions extend [the puppeteer API](https://github.com/puppeteer/puppeteer/blob/master/docs/api.md).
  * @packageDocumentation
  */
 
-const assert = require('assert').strict;
-const fs = require('fs');
-const path = require('path');
-const {promisify} = require('util');
-const tmp = require('tmp-promise');
-const {performance} = require('perf_hooks');
+import { Browser, LaunchOptions, Page } from "puppeteer";
 
-const {assertAsyncEventually} = require('./assert_utils');
-const {forwardBrowserConsole} = require('./browser_console');
-const {wait, remove} = require('./utils');
-const {timeoutPromise} = require('./promise_utils');
-const { importFile } = require('./loader');
+import { strict as assert } from 'assert';
+import * as fs from 'fs';
+import * as path from 'path';
+import {promisify} from 'util';
+import * as tmp from 'tmp-promise';
+import {performance} from 'perf_hooks';
 
-let tmp_home;
+import {assertAsyncEventually} from './assert_utils';
+import {forwardBrowserConsole} from './browser_console';
+import {wait, remove} from './utils';
+import {timeoutPromise} from './promise_utils';
+import { importFile } from './loader';
+import { Config } from "./config";
+
+export interface PentfBrowser extends Browser {
+    _logs: Promise<any>[];
+}
+
+export interface PentfPage extends Page {
+    browser: () => PentfBrowser;
+}
+
+
+let tmp_home: string;
 
 /**
  * Launch a new browser with puppeteer, with a new page (=Tab). The browser is completely isolated from any other calls.
@@ -36,7 +47,7 @@ let tmp_home;
  * @param {string[]} [chrome_args] Additional arguments for Chrome (optional).
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
-async function newPage(config, chrome_args=[]) {
+async function newPage(config: Config, chrome_args: string[]=[]) {
     addBreadcrumb(config, 'enter newPage()');
     let puppeteer;
     try {
@@ -57,7 +68,7 @@ async function newPage(config, chrome_args=[]) {
     const args = ['--no-sandbox'];
     args.push(...chrome_args);
 
-    const params = {
+    const params: LaunchOptions = {
         args,
         ignoreHTTPSErrors: (config.env === 'local'),
     };
@@ -94,8 +105,8 @@ async function newPage(config, chrome_args=[]) {
             const mkdir = promisify(fs.mkdir);
             await mkdir(path.join(future_tmp_home, '.pki'));
             await mkdir(path.join(future_tmp_home, '.pki', 'nssdb'));
-            const copyNssFile = async basename => {
-                const source_file = path.join(process.env.HOME, '.pki', 'nssdb', basename);
+            const copyNssFile = async (basename: string) => {
+                const source_file = path.join(process.env.HOME!, '.pki', 'nssdb', basename);
                 const exists = await new Promise(resolve =>
                     fs.access(source_file, fs.constants.F_OK, err => resolve(!err))
                 );

@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const {parseArgs} = require('../src/config');
+const {parseArgs} = require('../src/config.ts');
 
 async function run() {
     assert.equal(parseArgs({}, [ '--ci']).ci, true);

@@ -185,7 +185,7 @@ export async function assertAsyncEventually(testfunc: TestFn,
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
 */
-async function assertAlways(testfunc: TestFn, {message='assertAlways failed', timeout=10000, checkEvery=200} = {}) {
+export async function assertAlways(testfunc: TestFn, {message='assertAlways failed', timeout=10000, checkEvery=200} = {}) {
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         const res = testfunc();
         if (!res) {
@@ -205,21 +205,8 @@ async function assertAlways(testfunc: TestFn, {message='assertAlways failed', ti
  * @param {boolean} value The value to be asserted to be true.
  * @param {() => string} makeMessage Function to generate the error message, should the value be false.
 */
-function lazyAssert(value: boolean, makeMessage: () => string) {
+export function lazyAssert(value: boolean, makeMessage: () => string) {
     if (! value) {
         assert(value, makeMessage());
     }
 }
-
-module.exports = {
-    assertAlways,
-    assertAsyncEventually,
-    assertEventually,
-    assertGreater,
-    assertGreaterEqual,
-    assertIncludes,
-    assertLess,
-    assertLessEqual,
-    assertNumeric,
-    lazyAssert,
-};

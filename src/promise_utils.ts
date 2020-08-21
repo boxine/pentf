@@ -50,6 +50,11 @@ export async function customErrorMessage(promise: Promise<any>, message: string)
     }
 }
 
+export interface PentfError extends Error {
+    pentf_expectedToFail?: string;
+    pentf_expectedToSucceed?: string;
+}
+
 /**
  * Mark a code section as expected to fail.
  * If the async function throws an error, the error will be included in reports, but not counted as a test failure.
@@ -88,7 +93,7 @@ export async function expectedToFail(config: TaskConfig, message: string, asyncF
     if (!config.expect_nothing) {
         const err = new Error(
             `Section marked as expectedToFail (${message}), but succeeded.` +
-            ' Pass in --expect-nothing/-E to ignore this message');
+            ' Pass in --expect-nothing/-E to ignore this message') as PentfError;
         err.pentf_expectedToSucceed = message;
         throw err;
     }
@@ -107,7 +112,7 @@ export async function expectedToFail(config: TaskConfig, message: string, asyncF
  * @returns {*} Whatever the promise returned, if it is successful
  */
 export async function timeoutPromise<T>(config: Config, promise: Promise<T>, {timeout=10000, message=undefined, warning=false} = {}): Promise<T> {
-    const stacktraceAr = (new Error()).stack.split('\n', 3);
+    const stacktraceAr = (new Error()).stack!.split('\n', 3);
     const stacktrace = stacktraceAr[stacktraceAr.length - 1];
 
     let resolved = false;

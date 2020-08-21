@@ -1,32 +1,30 @@
 /*eslint no-console: "off"*/
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-const {readConfig, parseArgs} = require('./config');
-const {readFile, localIso8601} = require('./utils');
-const runner = require('./runner');
-const render = require('./render');
-const {color, logVerbose} = require('./output');
-const {testsVersion, pentfVersion} = require('./version');
-const {loadTests} = require('./loader');
+import {readConfig, parseArgs, Config} from './config';
+import {readFile, localIso8601} from './utils';
+import * as runner from './runner';
+import * as render from './render';
+import {color, logVerbose} from './output';
+import {testsVersion, pentfVersion} from './version';
+import {loadTests} from './loader';
 
-/**
- * @typedef {Object} PentfOptions
- * @property {(config: import('./config').Config) => import('./config').Config} [defaultConfig]
- * Function to call on the loaded configuration, to set/compute default values.
- * @property {string} [description] program description in the --help output
- * @property {string} [rootDir] Root directory (assume tests/ contains tests,
- * config/ if exists contains config)
- * @property {string} [testsDir] Test directory
- * @property {string} [configDir] Configuration directory. false disables
- * configuration.
- */
+export interface PentfOptions extends Pick<Config, 'beforeAllTests' | 'afterAllTests'>{
+    /** Function to call on the loaded configuration, to set/compute default values. */
+    defaultConfig?: (config: Config) => Config;
+    /** program description in the --help output */
+    description?: string;
+    /** Root directory (assume tests/ contains tests, config/ if exists contains config) */
+    rootDir?: string;
+    /** Test directory */
+    testsDir?: string;
+    /** Configuration directory. false disables configuration. */
+    configDir?: string | false;
+}
 
-/**
- * @param {PentfOptions} options
- */
-async function real_main(options={}) {
+async function real_main(options: PentfOptions={}) {
     if (options.rootDir) {
         if (! options.testsDir) {
             options.testsDir = path.join(options.rootDir, 'tests');
@@ -51,7 +49,7 @@ async function real_main(options={}) {
         process.env.NODE_DISABLE_COLORS = 'true';
     }
 
-    const test_cases = await loadTests(args, options.testsDir, config.testsGlob || options.testsGlob);
+    const test_cases = await loadTests(args, options.testsDir!, config.testsGlob || options.testsGlob);
     config._testsDir = options.testsDir;
     if (options.rootDir) config._rootDir = options.rootDir;
     if (options.configDir) config._configDir = options.configDir;
@@ -65,7 +63,7 @@ async function real_main(options={}) {
     // Argparse wraps argument lists with another array
     if (config.extensions.length) {
         config.extensions = config.extensions
-            .reduce((acc, item) => acc.concat(item), []);
+            .reduce((acc, item) => acc.concat(item), [] as any);
     }
 
     if (args.list) {
@@ -91,8 +89,8 @@ async function real_main(options={}) {
 
     let results;
     if (args.load_json) {
-        const json_input = await readFile(args.load_json, {encoding: 'utf-8'});
-        results = JSON.parse(json_input);
+        const json_input = await readFile(args.load_json, {encoding: 'utf-8'} as any);
+        results = JSON.parse(json_input as any);
     } else {
         if (config.log_file && !config.log_file_stream) {
             const stream = fs.createWriteStream(config.log_file, { flags: 'w' });

@@ -1,6 +1,8 @@
-import { ConsoleMessage, Page } from "puppeteer";
+import { ConsoleMessage } from "puppeteer";
 import * as output from './output';
 import * as kolorist from 'kolorist';
+import { Config } from "./config";
+import { PentfPage } from "./browser_utils";
 
 /**
  * Reconstruct original types from serialized message
@@ -17,10 +19,10 @@ export function parseConsoleArg(value: any): any {
                 err.stack = value.stack;
                 return err;
             } else if (value.type === 'Set') {
-                return new Set(value.items.map(item => parseConsoleArg(item)));
+                return new Set(value.items.map((item: any) => parseConsoleArg(item)));
             } else if (value.type === 'Map') {
                 return new Map(
-                    value.items.map(item => {
+                    value.items.map((item: any) => {
                         return [parseConsoleArg(item[0]), parseConsoleArg(item[1])];
                     })
                 );
@@ -106,7 +108,7 @@ export function serialize(value: any, seen: Set<any>): any {
 /**
  * @private
  */
-export function printRawMessage(config, type: string, message: ConsoleMessage) {
+export function printRawMessage(config: Config, type: string, message: ConsoleMessage) {
     const loc = message.location();
     let url = loc.url!;
     if (loc.lineNumber) {
@@ -140,17 +142,15 @@ export function printRawMessage(config, type: string, message: ConsoleMessage) {
  *
  * The only way to keep the data intact is to use a custom serialization format
  * and pass it around as a string.
- *
- * @param {import('./config').Config} config
  */
-export async function forwardBrowserConsole(config, page: Page) {
+export async function forwardBrowserConsole(config: Config, page: PentfPage) {
     // The stack is not present on the trace method, so we need to patch it in
     await page.evaluateOnNewDocument((fn) => {
         const serialize = new Function(`return ${fn}`)();
-        const native = {};
+        const native: Record<string, any> = {};
         native.trace = console.trace;
-        console.trace = (...args) => {
-            const stack = new Error().stack.split('\n').slice(2).join('\n');
+        console.trace = (...args: any[]) => {
+            const stack = new Error().stack!.split('\n').slice(2).join('\n');
             args = ['\n' + stack, ...args];
             native.trace.apply(null, args.map(arg => serialize(arg, new Set())));
         };
@@ -158,12 +158,12 @@ export async function forwardBrowserConsole(config, page: Page) {
 
     const browser = page.browser();
     page.on('console', async message => {
-        let resolve;
+        let resolve = () => {};
         browser._logs.push(new Promise(r => resolve = r));
 
-        let type = message.type();
+        let type = message.type() as string;
         // Correct log type
-        const typeMap = {
+        const typeMap: Record<string, string> = {
             warning: 'warn',
             verbose: 'log'
         };
@@ -189,7 +189,7 @@ export async function forwardBrowserConsole(config, page: Page) {
             if (type === 'trace') {
                 console.log(`Trace: ${parsed[1] || ''}${parsed[0]}`);
             } else {
-                console[type].apply(console, parsed);
+                (console as any)[type].apply(console, parsed);
             }
         } catch (err) {
             // While we're serializing data, the user or something else might

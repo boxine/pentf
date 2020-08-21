@@ -62,11 +62,13 @@ export type TestOptions = Omit<TestCase, 'name' | 'run'>;
 export interface TestFn {
   (name: string, test: () => any, options?: TestOptions): void;
   only: (name: string, test: (config: TaskConfig) => Promise<void | void>, options?: TestOptions) => void;
+  skip: (name: string, test: (config: TaskConfig) => Promise<void | void>, options?: TestOptions) => void;
 }
 
 export interface DescribeFn {
     (name: string, callback: () => void): void;
     only: (name: string, callback: () => void) => void;
+    skip: (name: string, callback: () => void) => void;
 }
 
 export type SuiteBuilder = (test: TestFn, suite: DescribeFn) => void;
@@ -86,9 +88,6 @@ export function loadSuite(suiteName: string, builder: SuiteBuilder) {
 
     /**
      * Create a test case
-     * @param {string} description
-     * @param {(config: import('./config.ts').Config) => Promise<void>} run
-     * @param {TestOptions} options
      */
     const test: TestFn = (description, run, options = {}) => {
         const arr = onlyInScope ? only : tests;
@@ -116,9 +115,6 @@ export function loadSuite(suiteName: string, builder: SuiteBuilder) {
 
     /**
      * Skip this test case
-     * @param {string} description
-     * @param {(config: import('./config.ts').Config) => Promise<void>} run
-     * @param {TestOptions} options
      */
     test.skip = (description, run, options = {}) => {
         const arr = onlyInScope ? only : tests;
@@ -155,8 +151,6 @@ export function loadSuite(suiteName: string, builder: SuiteBuilder) {
 
     /**
      * Skip this group of test cases
-     * @param {string} description
-     * @param {() => void} callback
      */
     describe.skip = (description, callback) => {
         skipInScope = true;
@@ -197,7 +191,7 @@ export async function loadTests(args, testsDir: string, globPattern = '*.{js,cjs
         }))).filter(t => t);
     }
 
-    const testCases = [];
+    const testCases: TestCase[] = [];
     await Promise.all(
         tests.map(async t => {
             const file = path.join(testsDir, t.path);

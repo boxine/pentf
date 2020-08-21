@@ -122,7 +122,7 @@ export function remove<T>(array: T[], callback: (item: T) => boolean) {
     throw new Error('Did not remove anything');
 }
 
-export function filterMap<T>(ar: T[], cb: (item: T, index: number) => boolean) {
+export function filterMap<T>(ar: T[], cb: (item: T, index: number) => any) {
     const res = [];
     for (let i = 0;i < ar.length;i++) {
         const mapped = cb(ar[i], i);

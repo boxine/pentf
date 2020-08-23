@@ -71,8 +71,12 @@ async function importFile(file) {
  */
 
 /**
+ * @typedef {(test: TestFn, suite: DescribeFn) => void} SuiteBuilder
+ */
+
+/**
  * @param {string} suiteName
- * @param {(test: TestFn, suite: DescribeFn) => void} builder
+ * @param {SuiteBuilder} builder
  * @private
  */
 function loadSuite(suiteName, builder) {

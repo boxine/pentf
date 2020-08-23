@@ -223,7 +223,7 @@ function finish(config, state) {
     msg += resultSummary(config, results);
 
     if (!config.expect_nothing && (results.expectedToFail.length > 0)) {
-        msg += color(config, 'dim', '  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
+        msg += color(config, 'dim', '\n  Pass in -E/--expect-nothing to ignore expectedToFail declarations.');
         msg += '\n\n';
     }
 

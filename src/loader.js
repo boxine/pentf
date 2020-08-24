@@ -213,11 +213,14 @@ async function loadTests(args, testsDir, globPattern = '*.{js,cjs,mjs}') {
             let tc = await importFile(file);
 
             if (typeof tc.suite === 'function') {
-                testCases.push(...loadSuite(t.name, tc.suite));
+                testCases.push(...loadSuite(t.name, tc.suite).map(m => {
+                    m.fileName = file;
+                    return m;
+                }));
             } else {
                 // ESM modules are readonly, so we need to create our own writable
                 // object.
-                testCases.push({...tc, name: t.name});
+                testCases.push({...tc, name: t.name, fileName: file });
             }
         })
     );

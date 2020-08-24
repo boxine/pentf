@@ -16,6 +16,7 @@ const utils = require('./utils');
 const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
 const { shouldShowError } = require('./output');
+const { run_in_worker } = require('./run_worker_task');
 
 /**
  * @typedef {(config: import('./config') => Promise<void> | void)} TeardownHook
@@ -72,7 +73,7 @@ async function run_task(config, task) {
         });
 
         let finished = false;
-        const testPromise = Promise.resolve(task.tc.run(task_config))
+        const testPromise = new Promise(r => run_in_worker(task_config, task, r))
             .finally(() => (finished = true));
 
         await Promise.race([

@@ -1,4 +1,4 @@
-const {Worker, isMainThread, parentPort, workerData} = require('worker_threads');
+const {Worker, parentPort, workerData} = require('worker_threads');
 const {importFile} = require('./loader');
 
 async function start() {
@@ -12,7 +12,7 @@ async function start() {
     } catch(err) {
         status = 'error';
     } finally {
-        parentPort.postMessage({ event: 'done', status });
+        parentPort.postMessage({ type: 'done', status });
     }
 }
 

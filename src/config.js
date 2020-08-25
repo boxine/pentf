@@ -214,7 +214,7 @@ function parseArgs(options, raw_args) {
     });
     selection_group.addArgument(['--tests-glob'], {
         dest: 'testsGlob',
-        defaultValue: undefined,
+        defaultValue: '*.{js,cjs,mjs}',
         help: 'Glob pattern to use when searching test files',
     });
 
@@ -386,7 +386,19 @@ function parseArgs(options, raw_args) {
         help: 'Display the locking client ID we would use if we would lock something now',
     });
 
+    // Overwrite config object passed to `pentf.main()` with command line
+    // arguments. But only overwrite any existing config properties passed
+    // to `pentf.main()` if they were actually set via the cli. If the
+    // property doesn't exist in the existing config and we didn't specify
+    // it as a cli argument, we'll use the default value.
     const args = parser.parseArgs(raw_args);
+    for (const k in parser._actions) {
+        const flag = parser._actions[k];
+        if (flag.dest in options && args[flag.dest] === flag.defaultValue) {
+            args[flag.dest] = options[flag.dest];
+        }
+    }
+
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {
         console.log('Warning: --json-file given, but not -j/--json. Will NOT write JSON.'); // eslint-disable-line no-console
     }

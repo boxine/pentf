@@ -187,10 +187,10 @@ function loadSuite(suiteName, builder) {
 /**
  * @param {*} args
  * @param {string} testsDir
- * @param {string} [globPattern]
+ * @param {string} globPattern
  * @private
  */
-async function loadTests(args, testsDir, globPattern = '*.{js,cjs,mjs}') {
+async function loadTests(args, testsDir, globPattern) {
     const testFiles = await promisify(glob.glob)(globPattern, {cwd: testsDir});
     let tests = testFiles.map(n => ({
         path: n,

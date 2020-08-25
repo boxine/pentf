@@ -21,6 +21,14 @@ const { importFile } = require('./loader');
 let tmp_home;
 
 /**
+ * Ignore these errors
+ * @param {Error} err
+ */
+function ignorerError(err) {
+    return /Execution context was destroyed/.test(err.message);
+}
+
+/**
  * Launch a new browser with puppeteer, with a new page (=Tab). The browser is completely isolated from any other calls.
  * Most interactions will be with the page, but you can get the browser using `await page.browser();`.
  * For more information about the page object, see the [puppeteer API documentation](https://github.com/puppeteer/puppeteer/blob/master/docs/api.md).
@@ -501,11 +509,18 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        const found = await page.evaluate(xpath => {
-            const element = document.evaluate(
-                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-            return !!element;
-        }, xpath);
+        let found = false;
+        try {
+            found = await page.evaluate(xpath => {
+                const element = document.evaluate(
+                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                return !!element;
+            }, xpath);
+        } catch(err) {
+            if (!ignorerError(err)) {
+                throw err;
+            }
+        }
         assert(!found,
             'Element matching ' + xpath + ' is present, but should not be there.' +
             (message ? ' ' + message : ''));
@@ -543,15 +558,22 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        const found = await page.evaluate((selector, visible) => {
-            const element = document.querySelector(selector);
-            if (!element) return false;
+        let found = false;
+        try {
+            found = await page.evaluate((selector, visible) => {
+                const element = document.querySelector(selector);
+                if (!element) return false;
 
-            if (visible && element.offsetParent === null) return null; // invisible
+                if (visible && element.offsetParent === null) return null; // invisible
 
-            element.click();
-            return true;
-        }, selector, visible);
+                element.click();
+                return true;
+            }, selector, visible);
+        } catch(err) {
+            if (!ignorerError(err)) {
+                throw err;
+            }
+        }
 
         if (found) {
             const config = getBrowser(page)._pentf_config;
@@ -621,16 +643,23 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        const found = await page.evaluate((xpath, visible) => {
-            const element = document.evaluate(
-                xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-            if (!element) return false;
+        let found = false;
+        try {
+            found = await page.evaluate((xpath, visible) => {
+                const element = document.evaluate(
+                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                if (!element) return false;
 
-            if (visible && element.offsetParent === null) return null; // invisible
+                if (visible && element.offsetParent === null) return null; // invisible
 
-            element.click();
-            return true;
-        }, xpath, visible);
+                element.click();
+                return true;
+            }, xpath, visible);
+        } catch (err) {
+            if (!ignorerError(err)) {
+                throw err;
+            }
+        }
 
         if (found) {
             addBreadcrumb(config, `exit clickXPath(${xpath})`);
@@ -707,65 +736,73 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        const found = await page.evaluate((matcher, visible) => {
-            // eslint-disable-next-line no-undef
-            /** @type {(text: string) => boolean} */
-            let matchFunc;
-            /** @type {null | (text: string) => boolean} */
-            let matchFuncExact = null;
+        let found = false;
 
-            if (typeof matcher == 'string') {
-                matchFunc = text => text.includes(matcher);
-            } else {
-                const regexExact = new RegExp(matcher.source, matcher.flags);
-                matchFuncExact = text => {
-                    // Reset regex state in case global flag was used
-                    regexExact.lastIndex = 0;
-                    return regexExact.test(text);
-                };
+        try {
+            found = await page.evaluate((matcher, visible) => {
+                // eslint-disable-next-line no-undef
+                /** @type {(text: string) => boolean} */
+                let matchFunc;
+                /** @type {null | (text: string) => boolean} */
+                let matchFuncExact = null;
 
-                // Remove leading ^ and ending $, otherwise the traversal
-                // will fail at the first node.
-                const source = matcher.source
-                    .replace(/^[^]/, '')
-                    .replace(/[$]$/, '');
-                const regex = new RegExp(source, matcher.flags);
-                matchFunc = text => {
-                    // Reset regex state in case global flag was used
-                    regex.lastIndex = 0;
-                    return regex.test(text);
-                };
-            }
+                if (typeof matcher == 'string') {
+                    matchFunc = text => text.includes(matcher);
+                } else {
+                    const regexExact = new RegExp(matcher.source, matcher.flags);
+                    matchFuncExact = text => {
+                        // Reset regex state in case global flag was used
+                        regexExact.lastIndex = 0;
+                        return regexExact.test(text);
+                    };
 
-            const stack = [document.body];
-            let item = null;
-            let lastFound = null;
-            while ((item = stack.pop())) {
-                for (let i = 0; i < item.childNodes.length; i++) {
-                    const child = item.childNodes[i];
+                    // Remove leading ^ and ending $, otherwise the traversal
+                    // will fail at the first node.
+                    const source = matcher.source
+                        .replace(/^[^]/, '')
+                        .replace(/[$]$/, '');
+                    const regex = new RegExp(source, matcher.flags);
+                    matchFunc = text => {
+                        // Reset regex state in case global flag was used
+                        regex.lastIndex = 0;
+                        return regex.test(text);
+                    };
+                }
 
-                    // Skip text nodes as they are not clickable
-                    if (child.nodeType === Node.TEXT_NODE) {
-                        continue;
-                    }
+                const stack = [document.body];
+                let item = null;
+                let lastFound = null;
+                while ((item = stack.pop())) {
+                    for (let i = 0; i < item.childNodes.length; i++) {
+                        const child = item.childNodes[i];
 
-                    const text = child.textContent || '';
-                    if (child.childNodes.length > 0 && matchFunc(text)) {
-                        if (matchFuncExact === null || matchFuncExact(text)) {
-                            lastFound = child;
+                        // Skip text nodes as they are not clickable
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            continue;
                         }
-                        stack.push(child);
+
+                        const text = child.textContent || '';
+                        if (child.childNodes.length > 0 && matchFunc(text)) {
+                            if (matchFuncExact === null || matchFuncExact(text)) {
+                                lastFound = child;
+                            }
+                            stack.push(child);
+                        }
                     }
                 }
+
+                if (!lastFound) return false;
+
+                if (visible && lastFound.offsetParent === null) return null; // invisible)
+
+                lastFound.click();
+                return true;
+            }, serializedMatcher, visible);
+        } catch (err) {
+            if (!ignorerError(err)) {
+                throw err;
             }
-
-            if (!lastFound) return false;
-
-            if (visible && lastFound.offsetParent === null) return null; // invisible)
-
-            lastFound.click();
-            return true;
-        }, serializedMatcher, visible);
+        }
 
         if (found) {
             addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);

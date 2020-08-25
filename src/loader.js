@@ -35,7 +35,9 @@ async function importFile(file) {
     // Only use import() for JavaScript files. Patching module
     // resolution of import() calls is still very experimental, so
     // tools like `ts-node´ need to keep using `require` calls.
-    if (/\.[cm]?js$/.test(file) && canUseImport) {
+    // Note that we still need to forward loading from `node_modules`
+    // to `import()` regardless.
+    if ((/\.[cm]?js$/.test(file) || !file.includes('.')) && canUseImport) {
         // Use dynamic import statement to be able to load both native esm
         // and commonjs modules.
 

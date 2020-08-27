@@ -1,0 +1,34 @@
+const child_process = require('child_process');
+const path = require('path');
+const fs = require('fs');
+const { assertEventually } = require('../src/assert_utils');
+
+async function run() {
+    const sub_run = path.join(__dirname, 'watch_tests', 'run');
+    const child = child_process.spawn(sub_run, ['--watch', '-f', 'slow', '--ci', '--no-colors', '--no-pdf']);
+
+    const out = [];
+
+    child.stdout.on('data', data => out.push(data.toString()));
+    child.stderr.on('data', data => out.push(data.toString()));
+
+    await assertEventually(() => {
+        return out.find(msg => /Waiting for file changes/.test(msg));
+    });
+
+    const test = path.join(path.dirname(sub_run), 'slow.js');
+    const content = await fs.promises.readFile(test, 'utf-8');
+    await fs.promises.writeFile(test, content);
+
+    // Trigger a file change when the first run is not finished
+    await assertEventually(() => out.find(msg => /Updated/.test(msg)));
+    await fs.promises.writeFile(test, content);
+
+    await assertEventually(() => /1 tests passed/.test(out[out.length - 1]));
+}
+
+module.exports = {
+    run,
+    // Note: In the long term we should find a way to cancel pending tests
+    description: 'Wait until previous run is complete in watch mode',
+};

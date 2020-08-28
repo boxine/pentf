@@ -179,7 +179,7 @@ async function assertAsyncEventually(testfunc,
  * Assert that a condition remains true for the whole timeout.
  *
  * @param {() => any} testfunc The test function. Must return `true` to signal success.
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}}  [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{message?: string, timeout?: number, checkEvery?: number}}  [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the testfunc fails.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.

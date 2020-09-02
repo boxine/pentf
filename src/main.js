@@ -103,7 +103,10 @@ async function real_main(options={}) {
 
         // Run tests
         const test_info = await runner.run(config, test_cases);
-        if (!test_info) return;
+        if (!test_info) {
+            logVerbose(config, '[runner] No run information returned by runner');
+            return;
+        }
 
         results = render.craftResults(config, test_info);
     }

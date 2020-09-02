@@ -705,7 +705,7 @@ async function run(config, testCases) {
     const now = new Date();
     const test_end = now.getTime();
 
-    output.logVerbose(config, `Test ended at ${utils.localIso8601(now)}, crafting results`);
+    output.logVerbose(config, `Test run ended at ${utils.localIso8601(now)}`);
     const testsVersion = await timeoutPromise(
         config, version.testsVersion(config), {message: 'version determination', warning: true});
     const pentfVersion = version.pentfVersion();

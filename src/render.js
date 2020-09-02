@@ -60,6 +60,7 @@ function getTestOrder(config, result) {
  * @param {import('./runner').RunnerResult} test_info
  */
 function craftResults(config, test_info) {
+    output.logVerbose(config, '[results] crafting results...');
     const {test_start, test_end, state, ...moreInfo} = test_info;
 
     /** @type {TestResult[]} */
@@ -96,6 +97,8 @@ function craftResults(config, test_info) {
 }
 
 async function doRender(config, results) {
+    output.logVerbose(config, '[results] Render results');
+
     if (config.json) {
         output.logVerbose('Rendering to JSON ...');
         const json = JSON.stringify(results, undefined, 2) + '\n';

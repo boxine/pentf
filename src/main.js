@@ -95,7 +95,8 @@ async function real_main(options={}) {
         results = JSON.parse(json_input);
     } else {
         if (config.log_file && !config.log_file_stream) {
-            const stream = fs.createWriteStream(config.log_file, { flags: 'w' });
+            const fileName = path.join(config._rootDir, config.log_file);
+            const stream = fs.createWriteStream(fileName, { flags: 'w' });
             const time = localIso8601();
             stream.write(`${time} Start runner\n`);
             config.log_file_stream = stream;

@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const {html2pdf} = require('./browser_utils');
 const {timezoneOffsetString} = require('./utils');
 const {resultCountString} = require('./results');
@@ -103,30 +102,26 @@ async function doRender(config, results) {
     output.logVerbose(config, `[results] Render results JSON: ${config.json}, Markdown: ${config.markdown}, HTML: ${config.html}, PDF: ${config.pdf}`);
 
     if (config.json) {
-        const fileName = path.join(config._rootDir, config.json_file);
-        output.logVerbose(config, `Rendering to JSON to ${fileName}...`);
+        output.logVerbose(config, `Rendering to JSON to ${config.json_file}...`);
         const json = JSON.stringify(results, undefined, 2) + '\n';
-        await fs.promises.writeFile(fileName, json, {encoding: 'utf-8'});
+        await fs.promises.writeFile(config.json_file, json, {encoding: 'utf-8'});
     }
 
     if (config.markdown) {
-        const fileName = path.join(config._rootDir, config.markdown_file);
-        output.logVerbose(config, `Rendering to Markdown to ${fileName} ...`);
+        output.logVerbose(config, `Rendering to Markdown to ${config.markdown_file} ...`);
         const md = markdown(results);
-        await fs.promises.writeFile(fileName, md, {encoding: 'utf-8'});
+        await fs.promises.writeFile(config.markdown_file, md, {encoding: 'utf-8'});
     }
 
     if (config.html) {
-        const fileName = path.join(config._rootDir, config.html_file);
-        output.logVerbose(config, `Rendering to HTML ${fileName}...`);
+        output.logVerbose(config, `Rendering to HTML ${config.html_file}...`);
         const html_code = html(results);
-        await fs.promises.writeFile(fileName, html_code, {encoding: 'utf-8'});
+        await fs.promises.writeFile(config.html_file, html_code, {encoding: 'utf-8'});
     }
 
     if (config.pdf) {
-        const fileName = path.join(config._rootDir, config.pdf_file);
-        output.logVerbose(config, `Rendering to PDF ${fileName}...`);
-        await pdf(config, fileName, results);
+        output.logVerbose(config, `Rendering to PDF ${config.pdf_file}...`);
+        await pdf(config, config.pdf_file, results);
     }
 }
 

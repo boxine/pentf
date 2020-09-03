@@ -21,7 +21,8 @@ async function run() {
     await new Promise((resolve, reject) => {
         child_process.execFile(
             sub_run,
-            ['--exit-zero', '--no-screenshots', '--log-file', 'output.log'],
+            ['--exit-zero', '--no-screenshots', '--log-file', logFile],
+            { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {
                 if (err) reject(err);
                 else resolve({stdout, stderr});

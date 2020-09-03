@@ -10,6 +10,7 @@ async function run() {
             child_process.execFile(
                 sub_run,
                 ['--exit-zero', '--no-screenshots', '--no-color'],
+                { cwd: path.dirname(sub_run) },
                 (err, stdout, stderr) => {
                     if (err) reject(err);
                     else resolve({stdout, stderr});
@@ -27,6 +28,7 @@ async function run() {
             child_process.execFile(
                 sub_run,
                 ['--exit-zero', '--no-screenshots', '--no-color', '-v'],
+                { cwd: path.dirname(sub_run) },
                 (err, stdout, stderr) => {
                     if (err) reject(err);
                     else resolve({stdout, stderr});

@@ -24,6 +24,7 @@ async function run() {
         child_process.execFile(
             path.join(fixture, 'run'),
             ['--exit-zero', '--html', '--json', '--markdown', '--pdf'],
+            { cwd: fixture },
             (err, stdout, stderr) => {
                 if (err) reject(err);
                 else resolve({stdout, stderr});

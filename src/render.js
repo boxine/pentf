@@ -104,28 +104,28 @@ async function doRender(config, results) {
 
     if (config.json) {
         const fileName = path.join(config._rootDir, config.json_file);
-        output.logVerbose(`Rendering to JSON to ${fileName}...`);
+        output.logVerbose(config, `Rendering to JSON to ${fileName}...`);
         const json = JSON.stringify(results, undefined, 2) + '\n';
         await fs.promises.writeFile(fileName, json, {encoding: 'utf-8'});
     }
 
     if (config.markdown) {
         const fileName = path.join(config._rootDir, config.markdown_file);
-        output.logVerbose(`Rendering to Markdown to ${fileName} ...`);
+        output.logVerbose(config, `Rendering to Markdown to ${fileName} ...`);
         const md = markdown(results);
         await fs.promises.writeFile(fileName, md, {encoding: 'utf-8'});
     }
 
     if (config.html) {
         const fileName = path.join(config._rootDir, config.html_file);
-        output.logVerbose(`Rendering to HTML ${fileName}...`);
+        output.logVerbose(config, `Rendering to HTML ${fileName}...`);
         const html_code = html(results);
         await fs.promises.writeFile(fileName, html_code, {encoding: 'utf-8'});
     }
 
     if (config.pdf) {
         const fileName = path.join(config._rootDir, config.pdf_file);
-        output.logVerbose(`Rendering to PDF ${fileName}...`);
+        output.logVerbose(config, `Rendering to PDF ${fileName}...`);
         await pdf(config, fileName, results);
     }
 }

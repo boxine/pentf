@@ -18,20 +18,38 @@ npm i --save-dev pentf puppeteer
 
 ## Usage
 
-pentf can be used as a library (A standalone binary is also planned). Create a script named `run` in the directory of your tests, and fill it like this:
+pentf can be used both as a binary and as a library. If you're unsure what to pick, go with the binary route.
+
+## Binary (npm scripts)
+
+Add the following script to your `package.json` with the `--tests-glob` parameter matching to your test files:
+
+```json
+{
+    "name": "my-package",
+    "scripts": {
+        "test": "pentf --tests-glob test/**/*.test.js",
+    }
+}
+```
+
+Run `npm run test` or `yarn test` to launch pentf.
+
+## Node API
+
+Create a script named `run.js` in the directory of your tests, and fill it like this:
 
 ```javascript
-#!/usr/bin/env node
 require('pentf').main({
     rootDir: __dirname,
     description: 'Test my cool application',
 });
 ```
 
-Make the file executable with `chmod a+x run`, and from then on type
+Then type the following command
 
 ```shell
-./run
+node run.js
 ```
 
 to execute all tests. You may also want to have a look at the [options](#options).
@@ -43,7 +61,7 @@ Plop a new `.js` file into `tests/`. Its name will be the test''s name, and it s
 ```javascript
 const assert = require('assert').strict;
 const {getMail} = require('pentf/email');
-const {newPage, closePage} = require('pentf/browser_utils');
+const {newPage} = require('pentf/browser_utils');
 const {fetch} = require('pentf/net_utils');
 const {makeRandomEmail} = require('pentf/utils');
 
@@ -74,12 +92,10 @@ async function run(config) {
     await page.goto('https://meine.tonies.de/');
 
     // During development, you can make the test fail.
-    // Run with -k to see the browser's state at this time!
+    // Run with --debug to see the browser's state at this time!
     // Any test failure is fine, but in a pinch, try uncommenting:
 
     // assert(false);
-
-    await closePage(page);
 }
 
 module.exports = {

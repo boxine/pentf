@@ -77,11 +77,12 @@ async function importFile(file) {
  */
 
 /**
+ * @param {string} fileName
  * @param {string} suiteName
  * @param {SuiteBuilder} builder
  * @private
  */
-function loadSuite(suiteName, builder) {
+function loadSuite(fileName, suiteName, builder) {
     const tests = [];
     const only = [];
     let onlyInScope = false;
@@ -104,6 +105,7 @@ function loadSuite(suiteName, builder) {
             name: `${groups.join('>')}_${i++}`,
             run,
             skip: skipInScope ? skipFn : options.skip,
+            path: fileName,
             ...options,
         });
     }
@@ -120,6 +122,7 @@ function loadSuite(suiteName, builder) {
             name: `${groups.join('>')}_${i++}`,
             run,
             skip: skipInScope ? skipFn : options.skip,
+            path: fileName,
             ...options,
         });
     };
@@ -137,6 +140,7 @@ function loadSuite(suiteName, builder) {
             name: `${groups.join('>')}_${i++}`,
             run,
             skip: skipFn,
+            path: fileName,
             ...options,
         });
     };
@@ -190,12 +194,13 @@ function loadSuite(suiteName, builder) {
  * @param {*} args
  * @param {string} testsDir
  * @param {string} globPattern
+ * @returns {Promise<import('./runner').TestCase[]>}
  * @private
  */
 async function loadTests(args, testsDir, globPattern) {
-    const testFiles = await promisify(glob.glob)(globPattern, {cwd: testsDir});
+    const testFiles = await promisify(glob.glob)(globPattern, {cwd: testsDir, absolute: true});
     let tests = testFiles.map(n => ({
-        path: n,
+        fileName: n,
         name: path.basename(n, path.extname(n)),
     }));
 
@@ -205,8 +210,7 @@ async function loadTests(args, testsDir, globPattern) {
     if (args.filter_body) {
         const bodyFilterRe = new RegExp(args.filter_body);
         tests = (await Promise.all(tests.map(async test => {
-            const filePath = path.join(testsDir, test.path);
-            const contents = await promisify(fs.readFile)(filePath, {encoding: 'utf-8'});
+            const contents = await promisify(fs.readFile)(test.fileName, {encoding: 'utf-8'});
             return bodyFilterRe.test(contents) ? test : null;
         }))).filter(t => t);
     }
@@ -214,16 +218,14 @@ async function loadTests(args, testsDir, globPattern) {
     const testCases = [];
     await Promise.all(
         tests.map(async t => {
-            const file = path.join(testsDir, t.path);
-
-            let tc = await importFile(file);
+            let tc = await importFile(t.fileName);
 
             if (typeof tc.suite === 'function') {
-                testCases.push(...loadSuite(t.name, tc.suite));
+                testCases.push(...loadSuite(t.fileName, t.name, tc.suite));
             } else {
                 // ESM modules are readonly, so we need to create our own writable
                 // object.
-                testCases.push({...tc, name: t.name});
+                testCases.push({...tc, name: t.name, fileName: t.fileName});
             }
         })
     );

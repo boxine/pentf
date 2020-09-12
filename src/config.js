@@ -464,6 +464,26 @@ async function readConfigFile(configDir, env) {
  */
 
 /**
+ * Find nearest `package.json` file
+ * @param {string} dir
+ * @returns {string | null} Path to package.json or null if not found
+ */
+async function findPackageJson(dir) {
+    let fileName = path.join(dir, 'package.json');
+    try {
+        await fs.promises.readFile(fileName);
+        return fileName;
+    } catch(e) {
+        // File doesn't exist, traverse upwards
+        if (e.code === 'ENOENT' && dir !== path.dirname(dir)) {
+            return await findPackageJson(path.dirname(dir));
+        }
+    }
+
+    return null;
+}
+
+/**
  * @param {import('./main').PentfOptions} options
  * @param {object} args
  * @returns {Config}
@@ -472,6 +492,14 @@ async function readConfig(options, args) {
     const {configDir} = options;
 
     let config = {};
+
+    // Add support for `pentf` configuration key in `package.json`.
+    const pkgJsonPath = await findPackageJson(options.rootDir || process.cwd());
+    if (pkgJsonPath !== null) {
+        const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath));
+        config = pkgJson.pentf || config;
+    }
+
     if (configDir) {
         const env = args.env;
         assert(env);

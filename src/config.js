@@ -80,6 +80,13 @@ function parseArgs(options, raw_args) {
         dest: 'print_version',
         help: 'Print version of tests and test framework and exit.',
     });
+    parser.addArgument(['--config'], {
+        type: 'string',
+        metavar: 'FILE',
+        dest: 'config_file',
+        defaultValue: 'pentf.config.js',
+        help: 'Path to config file. (Default: pentf.config.js)',
+    });
 
     const output_group = parser.addArgumentGroup({title: 'Output'});
     output_group.addArgument(['-v', '--verbose'], {
@@ -460,7 +467,7 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {{no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number}} Config
  */
 
 /**
@@ -492,12 +499,23 @@ async function readConfig(options, args) {
     const {configDir} = options;
 
     let config = {};
+    const rootDir = options.rootDir || process.cwd();
 
     // Add support for `pentf` configuration key in `package.json`.
-    const pkgJsonPath = await findPackageJson(options.rootDir || process.cwd());
+    const pkgJsonPath = await findPackageJson(rootDir);
     if (pkgJsonPath !== null) {
         const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath));
         config = pkgJson.pentf || config;
+    }
+
+    // "pentf.config.js" configuration file
+    if (args.config_file) {
+        const configPath = path.join(rootDir, args.config_file);
+        if (await promisify(fs.exists)(configPath)) {
+            const res = await importFile(configPath);
+            const data = typeof res === 'function' ? res(args.env) : res;
+            config = {...config, ...data };
+        }
     }
 
     if (configDir) {

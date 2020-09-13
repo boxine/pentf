@@ -351,6 +351,15 @@ function parseArgs(options, raw_args) {
         help: 'Keep track of the last successful browser operation (breadcrumbs). This helps with debugging test cases that timed out.',
         action: 'storeTrue',
     });
+    runner_group.addArgument(['-w', '--watch'], {
+        help: 'Re-run tests if a test file changes.',
+        action: 'storeTrue',
+    });
+    runner_group.addArgument(['--watch-files'], {
+        help: 'Listen for these additional files in watch mode.',
+        action: 'append',
+        nargs: '*',
+    });
 
     const locking_group = parser.addArgumentGroup({title: 'Locking'});
     locking_group.addArgument(['-L', '--no-locking'], {
@@ -440,6 +449,9 @@ function parseArgs(options, raw_args) {
 
     args.concurrency = computeConcurrency(args.concurrency);
 
+    // argpase returns a nested array
+    args.watch_files = args.watch_files ? args.watch_files[0] : [];
+
     return args;
 }
 
@@ -467,7 +479,7 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string}} Config
  */
 
 /**

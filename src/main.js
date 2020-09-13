@@ -10,6 +10,38 @@ const render = require('./render');
 const {color, logVerbose} = require('./output');
 const {testsVersion, pentfVersion} = require('./version');
 const {loadTests} = require('./loader');
+const watcher = require('./watcher');
+
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./runner').TestCase[]} test_cases
+ */
+async function runTests(config, test_cases) {
+    let results;
+    if (config.load_json) {
+        const json_input = await readFile(config.load_json, {encoding: 'utf-8'});
+        results = JSON.parse(json_input);
+    } else {
+        if (config.log_file && !config.log_file_stream) {
+            const stream = fs.createWriteStream(config.log_file, { flags: 'w' });
+            const time = localIso8601();
+            stream.write(`${time} Start runner\n`);
+            config.log_file_stream = stream;
+        }
+
+        // Run tests
+        const test_info = await runner.run(config, test_cases);
+        if (!test_info) {
+            logVerbose(config, '[runner] No run information returned by runner');
+            return;
+        }
+
+        results = render.craftResults(config, test_info);
+    }
+
+    await render.doRender(config, results);
+    return results;
+}
 
 /**
  * @typedef {Object} PentfOptions
@@ -51,7 +83,8 @@ async function real_main(options={}) {
         process.env.NODE_DISABLE_COLORS = 'true';
     }
 
-    const test_cases = await loadTests(args, options.testsDir, config.testsGlob || options.testsGlob);
+    const globPath = config.testsGlob || options.testsGlob;
+    const test_cases = await loadTests(args, options.testsDir, globPath);
     config._testsDir = options.testsDir;
     if (options.rootDir) config._rootDir = options.rootDir;
     if (options.configDir) config._configDir = options.configDir;
@@ -89,34 +122,19 @@ async function real_main(options={}) {
         return;
     }
 
-    let results;
-    if (args.load_json) {
-        const json_input = await readFile(args.load_json, {encoding: 'utf-8'});
-        results = JSON.parse(json_input);
+    if (config.watch) {
+        await watcher.createWatcher(config, async test_cases => {
+            await runTests(config, test_cases);
+        });
     } else {
-        if (config.log_file && !config.log_file_stream) {
-            const stream = fs.createWriteStream(config.log_file, { flags: 'w' });
-            const time = localIso8601();
-            stream.write(`${time} Start runner\n`);
-            config.log_file_stream = stream;
+        const results = await runTests(config, test_cases);
+
+        if (!config.keep_open) {
+            const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
+            const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
+            logVerbose(`Terminating with exit code ${retCode}`);
+            process.exit(retCode);
         }
-
-        // Run tests
-        const test_info = await runner.run(config, test_cases);
-        if (!test_info) {
-            logVerbose(config, '[runner] No run information returned by runner');
-            return;
-        }
-
-        results = render.craftResults(config, test_info);
-    }
-
-    await render.doRender(config, results);
-    if (!config.keep_open) {
-        const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
-        const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
-        logVerbose(`Terminating with exit code ${retCode}`);
-        process.exit(retCode);
     }
 }
 

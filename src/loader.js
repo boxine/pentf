@@ -191,6 +191,25 @@ function loadSuite(fileName, suiteName, builder) {
 }
 
 /**
+ * @param {import('./config').Config} config
+ * @param {Array<{name: string, fileName: string}>} tests
+ */
+async function applyTestFilters(config, tests) {
+    if (config.filter) {
+        tests = tests.filter(n => new RegExp(config.filter).test(n.name));
+    }
+    if (config.filter_body) {
+        const bodyFilterRe = new RegExp(config.filter_body);
+        tests = (await Promise.all(tests.map(async test => {
+            const contents = await fs.promises.readFile(test.fileName, {encoding: 'utf-8'});
+            return bodyFilterRe.test(contents) ? test : null;
+        }))).filter(t => t);
+    }
+
+    return tests;
+}
+
+/**
  * @param {*} args
  * @param {string} testsDir
  * @param {string} globPattern
@@ -204,16 +223,7 @@ async function loadTests(args, testsDir, globPattern) {
         name: path.basename(n, path.extname(n)),
     }));
 
-    if (args.filter) {
-        tests = tests.filter(n => new RegExp(args.filter).test(n.name));
-    }
-    if (args.filter_body) {
-        const bodyFilterRe = new RegExp(args.filter_body);
-        tests = (await Promise.all(tests.map(async test => {
-            const contents = await promisify(fs.readFile)(test.fileName, {encoding: 'utf-8'});
-            return bodyFilterRe.test(contents) ? test : null;
-        }))).filter(t => t);
-    }
+    tests = await applyTestFilters(args, tests);
 
     const testCases = [];
     await Promise.all(
@@ -234,6 +244,7 @@ async function loadTests(args, testsDir, globPattern) {
 }
 
 module.exports = {
+    applyTestFilters,
     importFile,
     loadTests,
     supportsImports,

@@ -619,6 +619,8 @@ async function run(config, testCases) {
         });
     }
 
+    await Promise.all(config.launchers.map(l => l.onStartRun && l.onStartRun(config)));
+
     try {
         if (config.manually_lock) {
             const resources = config.manually_lock.split(',');
@@ -701,6 +703,8 @@ async function run(config, testCases) {
                 {message: 'afterAllTests function', warning: true});
         }
     }
+
+    await Promise.all(config.launchers.map(l => l && l.onCompleteRun && l.onCompleteRun()));
 
     const now = new Date();
     const test_end = now.getTime();

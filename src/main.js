@@ -29,6 +29,9 @@ async function runTests(config, test_cases) {
             config.log_file_stream = stream;
         }
 
+        // Initialize any launchers
+        await Promise.all(config.launchers.map(l => l.init && l.init(config)));
+
         // Run tests
         const test_info = await runner.run(config, test_cases);
         if (!test_info) {
@@ -122,6 +125,9 @@ async function real_main(options={}) {
         const results = await runTests(config, test_cases);
 
         if (!config.keep_open) {
+            // Terminate all active launchers
+            await Promise.all(config.launchers.map(l => l.shutdown && l.shutdown(config)));
+
             const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
             const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
             logVerbose(`Terminating with exit code ${retCode}`);

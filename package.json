@@ -122,9 +122,11 @@
     "prettier": "^2.0.5",
     "puppeteer": "^5.2.1",
     "rimraf": "^3.0.2",
+    "saucelabs": "^4.4.5",
     "ts-node": "^9.0.0",
     "typedoc": "^0.17.4",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "webdriverio": "^6.4.7"
   },
   "peerDependencies": {
     "puppeteer": "*"

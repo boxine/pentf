@@ -479,7 +479,15 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string}} Config
+ * @typedef {(config: import("../config").Config) => Promise<void>} LauncherListener
+ */
+
+/**
+ * @typedef {{init?: LauncherListener, onStartRun?: LauncherListener, onCompleteRun?: LauncherListener, shutdown?: LauncherListener}} Launcher
+ */
+
+/**
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string,  launchers: Launcher[], serverUrl?: string}} Config
  */
 
 /**
@@ -548,6 +556,8 @@ async function readConfig(options, args) {
     } else if (process.env.CI && config.sentry_dsn) {
         config.sentry = true;
     }
+
+    if (!config.launchers) config.launchers = [];
 
     return {...config, ...args};
 }

@@ -76,14 +76,28 @@
 				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
 					<h2>Usage</h2>
 				</a>
-				<p>pentf can be used as a library (A standalone binary is also planned). Create a script named <code>run</code> in the directory of your tests, and fill it like this:</p>
-				<pre><code class="language-javascript"><span class="hljs-meta">#!/usr/bin/env node</span>
-<span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf'</span>).main({
+				<p>pentf can be used both as a binary and as a library. If you&#39;re unsure what to pick, go with the binary route.</p>
+				<a href="#binary-npm-scripts" id="binary-npm-scripts" style="color: inherit; text-decoration: none;">
+					<h2>Binary (npm scripts)</h2>
+				</a>
+				<p>Add the following script to your <code>package.json</code> with the <code>--tests-glob</code> parameter matching to your test files:</p>
+				<pre><code class="language-json">{
+    <span class="hljs-attr">"name"</span>: <span class="hljs-string">"my-package"</span>,
+    <span class="hljs-attr">"scripts"</span>: {
+        <span class="hljs-attr">"test"</span>: <span class="hljs-string">"pentf --tests-glob test/**/*.test.js"</span>,
+    }
+}</code></pre>
+				<p>Run <code>npm run test</code> or <code>yarn test</code> to launch pentf.</p>
+				<a href="#node-api" id="node-api" style="color: inherit; text-decoration: none;">
+					<h2>Node API</h2>
+				</a>
+				<p>Create a script named <code>run.js</code> in the directory of your tests, and fill it like this:</p>
+				<pre><code class="language-javascript"><span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf'</span>).main({
     <span class="hljs-attr">rootDir</span>: __dirname,
     <span class="hljs-attr">description</span>: <span class="hljs-string">'Test my cool application'</span>,
 });</code></pre>
-				<p>Make the file executable with <code>chmod a+x run</code>, and from then on type</p>
-				<pre><code class="language-shell">./run</code></pre>
+				<p>Then type the following command</p>
+				<pre><code class="language-shell">node run.js</code></pre>
 				<p>to execute all tests. You may also want to have a look at the <a href="#options">options</a>.</p>
 				<a href="#writing-tests" id="writing-tests" style="color: inherit; text-decoration: none;">
 					<h2>Writing tests</h2>
@@ -91,7 +105,7 @@
 				<p>Plop a new <code>.js</code> file into <code>tests/</code>. Its name will be the test&#39;&#39;s name, and it should have an async <code>run</code> function, like this:</p>
 				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>).strict;
 <span class="hljs-keyword">const</span> {getMail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/email'</span>);
-<span class="hljs-keyword">const</span> {newPage, closePage} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/browser_utils'</span>);
+<span class="hljs-keyword">const</span> {newPage} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/browser_utils'</span>);
 <span class="hljs-keyword">const</span> {fetch} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/net_utils'</span>);
 <span class="hljs-keyword">const</span> {makeRandomEmail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/utils'</span>);
 
@@ -122,12 +136,10 @@
     <span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">'https://meine.tonies.de/'</span>);
 
     <span class="hljs-comment">// During development, you can make the test fail.</span>
-    <span class="hljs-comment">// Run with -k to see the browser's state at this time!</span>
+    <span class="hljs-comment">// Run with --debug to see the browser's state at this time!</span>
     <span class="hljs-comment">// Any test failure is fine, but in a pinch, try uncommenting:</span>
 
     <span class="hljs-comment">// assert(false);</span>
-
-    <span class="hljs-keyword">await</span> closePage(page);
 }
 
 <span class="hljs-built_in">module</span>.exports = {

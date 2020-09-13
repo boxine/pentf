@@ -35,6 +35,7 @@ async function execRunner(config, expected, fn) {
     const runnerConfig = {
         ...config,
         breadcrumbs: true,
+        quiet: true,
         logFunc(config, message) {
             output.push(kolorist.stripColors(message));
         },

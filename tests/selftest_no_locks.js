@@ -13,9 +13,9 @@ async function run(config) {
     ];
     await runner.run(
         {
+            ...config,
             quiet: true,
             logFunc: () => null,
-            ...config,
             external_locking_client: 'test_locking_server',
             // We should not do any request to the lockserver at all,
             // so we simply pick an invalid URL and let the agent throw.

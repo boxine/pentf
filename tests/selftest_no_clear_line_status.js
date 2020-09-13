@@ -8,7 +8,7 @@ async function run() {
     const {stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
             sub_run,
-            ['--exit-zero', '--no-screenshots', '--ci', '-C', '5'],
+            ['--exit-zero', '--no-screenshots', '--ci', '-C', '5', '--quiet'],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {
                 if (err) reject(err);

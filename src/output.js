@@ -19,7 +19,7 @@ var last_state;
 function clean(config) {
     assert(config);
     if (!STATUS_STREAM.isTTY) return;
-    if (config.no_clear_line) return;
+    if (config.ci) return;
     readline.cursorTo(STATUS_STREAM, 0);
     readline.clearLine(STATUS_STREAM, 0);
 }
@@ -65,7 +65,7 @@ function status(config, state) {
     }
 
     // Don't pollute logs with noise if nothing has changed in "no clear line"-mode.
-    const no_clear_line = !STATUS_STREAM.isTTY || config.no_clear_line;
+    const no_clear_line = !STATUS_STREAM.isTTY || config.ci;
     if (no_clear_line && state.last_logged_status === status_str) {
         return;
     }

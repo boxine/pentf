@@ -15,9 +15,9 @@ async function run(config) {
 
     await runner.run(
         {
+            ...config,
             quiet: true,
             logFunc: () => null,
-            ...config,
         },
         tasks
     );

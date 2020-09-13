@@ -331,6 +331,7 @@ The keys are up to you; for example you probably want to have a main entry point
 -e YOUR_ENVIRONMENTS, --env YOUR_ENVIRONMENTS
                       The environment to test against. Default is local.
 --version             Print version of tests and test framework and exit.
+--config FILE         Path to config file. (Default: pentf.config.js)
 ```
 
 ###### Output
@@ -431,6 +432,9 @@ The keys are up to you; for example you probably want to have a main entry point
 --status-interval MS  Interval in MS to print a detailed list of the current runner state.
 --breadcrumbs         Keep track of the last successful browser operation (breadcrumbs). This helps with
                       debugging test cases that timed out.
+-w, --watch           Re-run tests if a test file changes.
+--watch-files [WATCH_FILES [WATCH_FILES ...]]
+                      Listen for these additional files in watch mode.
 ```
 
 ###### Locking

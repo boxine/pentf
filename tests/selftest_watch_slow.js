@@ -31,4 +31,5 @@ module.exports = {
     run,
     // Note: In the long term we should find a way to cancel pending tests
     description: 'Wait until previous run is complete in watch mode',
+    skip: () => process.env.CI && 'Watch mode is flaky inside a container',
 };

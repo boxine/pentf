@@ -32,4 +32,5 @@ async function run(config) {
 module.exports = {
     run,
     description: 'Only re-run changed files',
+    skip: () => process.env.CI && 'Watch mode is flaky inside a container'
 };

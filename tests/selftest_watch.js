@@ -29,4 +29,5 @@ async function run(config) {
 module.exports = {
     run,
     description: 'Re-run test files if they change',
+    skip: () => process.env.CI && 'Watch mode is flaky inside a container'
 };

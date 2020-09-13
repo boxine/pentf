@@ -314,10 +314,11 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 				<a href="#options" id="options" style="color: inherit; text-decoration: none;">
 					<h2>Options</h2>
 				</a>
-				<pre><code>-h, --help            Show this help message and <span class="hljs-keyword">exit</span>.
+				<pre><code>-h, --help            Show this help message <span class="hljs-keyword">and</span> exit.
 -e YOUR_ENVIRONMENTS, --env YOUR_ENVIRONMENTS
-                      The environment to test against. Default is local.
---version             Print version of tests and test framework and <span class="hljs-keyword">exit</span>.</code></pre>
+                      The environment <span class="hljs-keyword">to</span> test against.<span class="hljs-built_in"> Default </span>is local.
+--version             <span class="hljs-builtin-name">Print</span> version of tests <span class="hljs-keyword">and</span> test framework <span class="hljs-keyword">and</span> exit.
+--config FILE         Path <span class="hljs-keyword">to</span><span class="hljs-built_in"> config </span>file. (Default: pentf.config.js)</code></pre>
 				<a href="#output" id="output" style="color: inherit; text-decoration: none;">
 					<h6>Output</h6>
 				</a>
@@ -393,8 +394,8 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 					<h6>Test runner</h6>
 				</a>
 				<pre><code>-C COUNT, <span class="hljs-comment">--concurrency COUNT</span>
-                      Maximum <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> tests <span class="hljs-keyword">to</span> <span class="hljs-built_in">run</span> <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> <span class="hljs-keyword">to</span> <span class="hljs-built_in">run</span> <span class="hljs-keyword">without</span> a pool, sequentially.
-                      Can include *, +, <span class="hljs-keyword">and</span> cpus <span class="hljs-keyword">for</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> CPUs. Defaults <span class="hljs-keyword">to</span> <span class="hljs-number">4</span>+cpus.
+                      Maximum <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> tests <span class="hljs-built_in">to</span> run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> <span class="hljs-built_in">to</span> run <span class="hljs-keyword">without</span> <span class="hljs-keyword">a</span> pool, sequentially.
+                      Can <span class="hljs-built_in">include</span> *, +, <span class="hljs-keyword">and</span> cpus <span class="hljs-keyword">for</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> CPUs. Defaults <span class="hljs-built_in">to</span> <span class="hljs-number">4</span>+cpus.
 -S, <span class="hljs-comment">--sequential      Do not run tests in parallel (same as -C 0)</span>
 <span class="hljs-comment">--fail-fast           Abort once a test fails</span>
 <span class="hljs-comment">--print-tasks         Output all tasks that the runner would perform, and exit</span>
@@ -405,7 +406,10 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 <span class="hljs-comment">--timeout MS          Set a maximum duration for a test case in ms before timing out. (Default: 1h)</span>
 <span class="hljs-comment">--status-interval MS  Interval in MS to print a detailed list of the current runner state.</span>
 <span class="hljs-comment">--breadcrumbs         Keep track of the last successful browser operation (breadcrumbs). This helps with</span>
-                      debugging test cases <span class="hljs-keyword">that</span> timed out.</code></pre>
+                      debugging test cases that timed out.
+-w, <span class="hljs-comment">--watch           Re-run tests if a test file changes.</span>
+<span class="hljs-comment">--watch-files [WATCH_FILES [WATCH_FILES ...]]</span>
+                      Listen <span class="hljs-keyword">for</span> these additional <span class="hljs-built_in">files</span> <span class="hljs-keyword">in</span> watch mode.</code></pre>
 				<a href="#locking" id="locking" style="color: inherit; text-decoration: none;">
 					<h6>Locking</h6>
 				</a>

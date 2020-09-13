@@ -26,7 +26,7 @@ function failingEffect(config, output) {
 async function run(config) {
     let output = [];
     await runner.run(
-        {...config, logFunc: () => null},
+        {...config, logFunc: () => null, quiet: true},
         [
             { name: 'normal teardown', run: async (config) => {
                 effect(config, output);
@@ -38,7 +38,7 @@ async function run(config) {
     // Fail on teardown
     const logs = [];
     await runner.run(
-        {...config, logFunc: (_, msg) => logs.push(msg)},
+        {...config, logFunc: (_, msg) => logs.push(msg), quiet: true},
         [
             { name: 'normal teardown', run: async (config) => {
                 failingEffect(config, output);
@@ -51,7 +51,7 @@ async function run(config) {
     // Call call if keep_open and successful test
     output = [];
     await runner.run(
-        {...config, keep_open: true, logFunc() {}},
+        {...config, keep_open: true, logFunc() {}, quiet: true},
         [
             { name: 'normal teardown', run: async (config) => {
                 effect(config, output);
@@ -63,7 +63,7 @@ async function run(config) {
     // Don't call if keep_open and failing test
     output = [];
     await runner.run(
-        {...config, keep_open: true, logFunc() {}},
+        {...config, keep_open: true, logFunc() {}, quiet: true},
         [
             { name: 'normal teardown', run: async (config) => {
                 effect(config, output);

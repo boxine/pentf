@@ -18,7 +18,7 @@ async function run(config) {
         {name: 'error #1', run: fail},
     ];
 
-    const testConfig = {...config, logFunc: () => null};
+    const testConfig = {...config, logFunc: () => null, quiet: true};
     const info = await runner.run(testConfig, cases);
     const results = craftResults(config, info).tests.map(t => t.name);
     assert.deepEqual(results, [

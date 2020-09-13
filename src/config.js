@@ -487,7 +487,7 @@ async function readConfigFile(configDir, env) {
  */
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string,  launchers: Launcher[], serverUrl?: string}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string,  launchers: Launcher[], pentfServerUrl?: string}} Config
  */
 
 /**

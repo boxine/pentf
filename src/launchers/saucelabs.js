@@ -21,23 +21,22 @@ async function createSaucelabsLauncher(options) {
     let api;
 
     async function init() {
-        if (!tunnelPromise && options.startConnect) {
-            api = new SaucelabsApi();
-            tunnelPromise = api.startSauceConnect({
-                logger: msg => console.log('Saucelabs', msg),
-            });
-        }
+        if (!options.startConnect) return;
 
+        api = new SaucelabsApi();
+        tunnelPromise = api.startSauceConnect({
+            logger: msg => console.log('Saucelabs', msg),
+        });
         await tunnelPromise;
     }
 
     async function onStartRun(config) {
-        if (!driver) {
-            driver = await remote(seleniumCapabilities);
+        if (config.pentfServerUrl) {
+            if (!driver) {
+                driver = await remote(seleniumCapabilities);
+            }
+            await driver.url(config.serverUrl);
         }
-
-        assert(config.serverUrl, 'Missing "config.serverUrl" option.');
-        await driver.url(config.serverUrl);
     }
 
     async function onCompleteRun() {

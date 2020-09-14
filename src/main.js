@@ -29,8 +29,8 @@ async function runTests(config, test_cases) {
             config.log_file_stream = stream;
         }
 
-        // Initialize any launchers
-        await Promise.all(config.launchers.map(l => l.init && l.init(config)));
+        // Initialize all plugins
+        await Promise.all(config.plugins.map(fn => fn(config)));
 
         // Run tests
         const test_info = await runner.run(config, test_cases);
@@ -126,7 +126,7 @@ async function real_main(options={}) {
 
         if (!config.keep_open) {
             // Terminate all active launchers
-            await Promise.all(config.launchers.map(l => l.shutdown && l.shutdown(config)));
+            await Promise.all(config.events.onShutdown.map(fn => fn(config)));
 
             const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
             const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;

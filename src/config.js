@@ -479,15 +479,15 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {(config: import("../config").Config) => Promise<void>} LauncherListener
+ * @typedef {(config: import("../config").Config) => Promise<void> | void} EventHandler
  */
 
 /**
- * @typedef {{init?: LauncherListener, onStartRun?: LauncherListener, onCompleteRun?: LauncherListener, shutdown?: LauncherListener}} Launcher
+ * @typedef {{onStartRun: EventHandler[], onFinishRun: EventHandler[], onShutdown: EventHandler[]}} Events
  */
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string,  launchers: Launcher[], pentfServerUrl?: string}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, plugins: Array<(config: Config) => Promise<void> | void>, events: Events, pentfServerUrl?: string}} Config
  */
 
 /**
@@ -518,14 +518,22 @@ async function findPackageJson(dir) {
 async function readConfig(options, args) {
     const {configDir} = options;
 
-    let config = args;
-    config.rootDir = options.rootDir || process.cwd();
+    let config = {
+        ...args,
+        plugins: [],
+        events: {
+            onStartRun: [],
+            onFinishRun: [],
+            onShutdown: [],
+        },
+        rootDir: options.rootDir || process.cwd()
+    };
 
     // Add support for `pentf` configuration key in `package.json`.
     const pkgJsonPath = await findPackageJson(config.rootDir);
     if (pkgJsonPath !== null) {
         const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath));
-        config = pkgJson.pentf || config;
+        config = pkgJson.pentf ? { ...config, ...pkgJson.pentf } : config;
     }
 
     // "pentf.config.js" configuration file
@@ -541,7 +549,7 @@ async function readConfig(options, args) {
     if (configDir) {
         const env = args.env;
         assert(env);
-        config = await readConfigFile(configDir, env);
+        config = {...config, ...await readConfigFile(configDir, env)};
     }
     config.beforeAllTests = options.beforeAllTests;
     config.afterAllTests = options.afterAllTests;
@@ -557,8 +565,7 @@ async function readConfig(options, args) {
         config.sentry = true;
     }
 
-    if (!config.launchers) config.launchers = [];
-
+    console.log(config)
     return {...config, ...args};
 }
 

@@ -619,7 +619,7 @@ async function run(config, testCases) {
         });
     }
 
-    await Promise.all(config.launchers.map(l => l.onStartRun && l.onStartRun(config)));
+    await Promise.all(config.events.onStartRun.map(fn => fn(config)));
 
     try {
         if (config.manually_lock) {
@@ -704,7 +704,7 @@ async function run(config, testCases) {
         }
     }
 
-    await Promise.all(config.launchers.map(l => l && l.onCompleteRun && l.onCompleteRun()));
+    await Promise.all(config.events.onFinishRun.map(fn => fn(config)));
 
     const now = new Date();
     const test_end = now.getTime();

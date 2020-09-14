@@ -4,10 +4,10 @@ const https = require('https');
 const node_fetch = require('node-fetch');
 const tough = require('tough-cookie');
 const {URL} = require('url');
+const fs = require('fs');
 
 const {makeCurlCommand} = require('./curl_command');
 const output = require('./output');
-const {readFile} = require('./utils');
 
 /**
  * fetch a URL.
@@ -159,8 +159,8 @@ async function setupTLSClientAuth(fetchOptions, keyFilename, certFilename, rejec
         rejectUnauthorized,
         keepAlive: true,
     };
-    agentOptions.key = await readFile(keyFilename, 'binary');
-    agentOptions.cert = await readFile(certFilename, 'binary');
+    agentOptions.key = await fs.promises.readFile(keyFilename, 'binary');
+    agentOptions.cert = await fs.promises.readFile(certFilename, 'binary');
     fetchOptions.agent = new https.Agent(agentOptions);
     if (!fetchOptions.curl_extra_options) {
         fetchOptions.curl_extra_options = [];

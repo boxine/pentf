@@ -1,5 +1,4 @@
 const assert = require('assert').strict;
-const fs = require('fs');
 
 function makeEmailAddress(config, suffix) {
     assert(config.email, 'Missing `email` key in pentf configuration');
@@ -20,14 +19,6 @@ function makeRandomEmail(config, prefix=undefined) {
         prefix = config._testName || '';
     }
     return makeEmailAddress(config, prefix + Math.random().toString(36).slice(2));
-}
-
-async function readFile(fileName, type) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(fileName, type, (err, data) => {
-            err ? reject(err) : resolve(data);
-        });
-    });
 }
 
 /**
@@ -231,7 +222,6 @@ module.exports = {
     randomHex,
     randomHexstring,
     range,
-    readFile,
     regexEscape,
     remove,
     retry,

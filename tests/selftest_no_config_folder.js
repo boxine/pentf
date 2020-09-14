@@ -6,6 +6,7 @@ async function run() {
     assert.deepEqual(config, {
         afterAllTests: undefined,
         beforeAllTests: undefined,
+        rootDir: process.cwd(),
         sentry: undefined,
         sentry_dsn: undefined
     });

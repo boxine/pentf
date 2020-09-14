@@ -12,8 +12,7 @@ async function run() {
     await (promisify(child_process.execFile)('tar', ['xf', 'example_repo.tar.gz'], {cwd: scratchDir}));
 
     const pseudoConfig = {
-        rootDir: exampleRepo,
-        _testsDir: path.join(exampleRepo, 'tests'), // This is normally auto-computed by the runner start
+        rootDir: path.join(exampleRepo, 'tests'),
     };
     const v = await testsVersion(pseudoConfig);
     const expectedRegex = /^6f053c5 \((.*?)\)\+changes\(tests\/firsttest.js\)$/;

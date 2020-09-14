@@ -50,7 +50,6 @@ async function runTests(config, test_cases) {
  * @property {string} [description] program description in the --help output
  * @property {string} [rootDir] Root directory (assume tests/ contains tests,
  * config/ if exists contains config)
- * @property {string} [testsDir] Test directory
  * @property {string} [configDir] Configuration directory. false disables
  * configuration.
  */
@@ -60,9 +59,6 @@ async function runTests(config, test_cases) {
  */
 async function real_main(options={}) {
     if (options.rootDir) {
-        if (! options.testsDir) {
-            options.testsDir = path.join(options.rootDir, 'tests');
-        }
         if (! options.configDir) {
             const autoConfigDir = path.join(options.rootDir, 'config');
             if (fs.existsSync(autoConfigDir)) {
@@ -74,8 +70,8 @@ async function real_main(options={}) {
 
     const args = parseArgs(options, process.argv.slice(2));
     const config = await readConfig(options, args);
-    if (options.defaultConfig) {
-        options.defaultConfig(config);
+    if (config.defaultConfig) {
+        config.defaultConfig(config);
     }
 
     if (!config.colors) {
@@ -83,11 +79,7 @@ async function real_main(options={}) {
         process.env.NODE_DISABLE_COLORS = 'true';
     }
 
-    const globPath = config.testsGlob || options.testsGlob;
-    const test_cases = await loadTests(args, options.testsDir, globPath);
-    config._testsDir = options.testsDir;
-    if (options.rootDir) config._rootDir = options.rootDir;
-    if (options.configDir) config._configDir = options.configDir;
+    const test_cases = await loadTests(config, config.testsGlob);
 
     if (args.print_version) {
         console.log(await testsVersion(config));

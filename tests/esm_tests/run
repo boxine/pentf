@@ -4,6 +4,5 @@ const pentf = require('../../src/index.js');
 
 pentf.main({
     rootDir: __dirname,
-    testsDir: __dirname,
     testsGlob: '*.mjs'
 });

@@ -11,14 +11,14 @@ async function _cmd(cmd, args, options) {
 async function testsVersion(config) {
     try {
         const tagsOutput = await _cmd(
-            'git', ['tag', '--points-at', 'HEAD'], {cwd: config._testsDir});
+            'git', ['tag', '--points-at', 'HEAD'], {cwd: config.rootDir});
         const tags = tagsOutput.split(EOL).filter(line => line);
         const tagsRepr = (tags.length > 0) ? tags.join('/') + '/' : '';
 
         const gitVersion = await _cmd(
             'git', ['show', '--pretty=format:%h (%ai)', '--no-patch', 'HEAD'],
-            {cwd: config._testsDir});
-        const changesOutput = await _cmd('git', ['status', '--porcelain'], {cwd: config._testsDir});
+            {cwd: config.rootDir});
+        const changesOutput = await _cmd('git', ['status', '--porcelain'], {cwd: config.rootDir});
         const changedFiles = (
             changesOutput.split(EOL)
                 .filter(line => line)

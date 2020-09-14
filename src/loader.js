@@ -210,20 +210,19 @@ async function applyTestFilters(config, tests) {
 }
 
 /**
- * @param {*} args
- * @param {string} testsDir
+ * @param {import('./config').Config} config
  * @param {string} globPattern
  * @returns {Promise<import('./runner').TestCase[]>}
  * @private
  */
-async function loadTests(args, testsDir, globPattern) {
-    const testFiles = await promisify(glob.glob)(globPattern, {cwd: testsDir, absolute: true});
+async function loadTests(config, globPattern) {
+    const testFiles = await promisify(glob.glob)(globPattern, {cwd: config.rootDir, absolute: true});
     let tests = testFiles.map(n => ({
         fileName: n,
         name: path.basename(n, path.extname(n)),
     }));
 
-    tests = await applyTestFilters(args, tests);
+    tests = await applyTestFilters(config, tests);
 
     const testCases = [];
     await Promise.all(

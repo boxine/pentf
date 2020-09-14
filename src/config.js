@@ -479,15 +479,11 @@ async function readConfigFile(configDir, env) {
 }
 
 /**
- * @typedef {(config: import("../config").Config) => Promise<void> | void} EventHandler
+ * @typedef {{name: string, onStart?: (config: Config) => Promise<void> | void, onLoad?: (config: import("../config").Config, files: string[]) => Promise<import("../runner").TestCase[]>, onShutDown?: () => Promise<void> | void}} Plugin
  */
 
 /**
- * @typedef {{onStartRun: EventHandler[], onFinishRun: EventHandler[], onShutdown: EventHandler[]}} Events
- */
-
-/**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, plugins: Array<(config: Config) => Promise<void> | void>, events: Events, pentfServerUrl?: string}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, plugins: Plugin[], pentfServerUrl?: string}} Config
  */
 
 /**
@@ -521,12 +517,7 @@ async function readConfig(options, args) {
     let config = {
         ...args,
         plugins: [],
-        events: {
-            onStartRun: [],
-            onFinishRun: [],
-            onShutdown: [],
-        },
-        rootDir: options.rootDir || process.cwd()
+        rootDir: options.rootDir || process.cwd(),
     };
 
     // Add support for `pentf` configuration key in `package.json`.
@@ -565,7 +556,6 @@ async function readConfig(options, args) {
         config.sentry = true;
     }
 
-    console.log(config)
     return {...config, ...args};
 }
 

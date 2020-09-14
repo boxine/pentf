@@ -110,7 +110,8 @@
     "node-fetch": "^2.3.0",
     "stream-buffers": "^3.0.2",
     "tmp-promise": "^2.0.2",
-    "tough-cookie": "^4.0.0"
+    "tough-cookie": "^4.0.0",
+    "wmr": "0.0.8"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.5",

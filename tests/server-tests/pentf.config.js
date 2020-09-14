@@ -1,14 +1,7 @@
-#!/usr/bin/env node
-
-const pentf = require('../../src/index.js');
 const { createSaucelabsLauncher } = require('../../src/plugins/saucelabs');
-const { createServer } = require('../../src/plugins/server');
 
-pentf.main({
-    rootDir: __dirname,
-    testsDir: __dirname,
+module.exports = {
     plugins: [
-        createServer(),
         createSaucelabsLauncher({
             username: process.env.SAUCE_USERNAME,
             accessKey: process.env.SAUCE_ACCESS_KEY,
@@ -17,4 +10,4 @@ pentf.main({
             ]
         })
     ]
-});
+};

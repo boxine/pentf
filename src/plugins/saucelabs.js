@@ -1,7 +1,5 @@
 const SaucelabsApi = require('saucelabs').default;
 const {remote} = require('webdriverio');
-const { onStartRun, onFinishRun, onShutdown } = require('./lifecycle');
-const config = require('../config');
 
 /**
  * @typedef {{name: string, version?: string, platform?: string}} SaucelabsBrowser
@@ -62,60 +60,61 @@ function createCapabilities(options, browser, tunnelIdentifier) {
 
 /**
  * @param {SaucelabsOptions} options
- * @returns {(config: import('../config').Config) => Promise<void>}
  */
-async function createSaucelabsLauncher(options) {
-    const tunnelIdentifier = 'pentf-saucelabs-' + Math.round(new Date().getTime() / 1000);
-
-    return async config => {
-        if (!options.startConnect) return;
-
+function createSaucelabsLauncher(options) {
+    const tunnel = {
+        id: 'pentf-saucelabs-' + Math.round(new Date().getTime() / 1000),
         /** @type {Promise<import('saucelabs').SauceConnectInstance>} */
-        let tunnelPromise;
-        /** @type {WebdriverIO.BrowserObject} */
-        let driver;
+        promise: undefined
+    };
 
-        if (config.pentfServerUrl) {
-            options.browsers.forEach(browser => {
-                const seleniumOptions = createCapabilities(options, browser, tunnelIdentifier);
+    return browser => createSauceBrowser(options, browser, tunnel);
+}
 
-                onStartRun(config, async () => {
-                    if (!tunnelPromise) {
-                        const api = new SaucelabsApi({
-                            user: options.username,
-                            key: options.accessKey,
-                        });
-                        tunnelPromise = api.startSauceConnect({
-                            tunnelIdentifier,
-                            logger: msg => console.log('Saucelabs', msg),
-                        });
-                    }
-                    await tunnelPromise;
+/**
+ * @param {SaucelabsOptions} options
+ * @param {{id: string, promise: Promise<import('saucelabs').SauceConnectInstance>}} tunnel
+ */
+function createSauceBrowser(options, browser, tunnel) {
+    /** @type {WebdriverIO.BrowserObject} */
+    let driver;
 
-                    if (!driver) {
-                        driver = await remote(seleniumOptions);
-                    }
-
-                    const browserName = getBrowserName(browser);
-                    console.log(`[saucelabs] ${browserName} session at https://saucelabs.com/tests/${driver.sessionId}`);
-                    console.log(`[saucelabs] Opening "${config.pentfServerUrl}" on the selenium client`);
-                    await driver.url(config.pentfServerUrl);
+    return {
+        name: 'saucelabs-launcher',
+        async onRunStart(config) {
+            if (!tunnel.promise) {
+                const api = new SaucelabsApi({
+                    user: options.username,
+                    key: options.accessKey,
                 });
-
-                onFinishRun(config, async () => {
-                    if (driver) {
-                        await driver.deleteSession();
-                    }
+                tunnel.promise = api.startSauceConnect({
+                    tunnelIdentifier: tunnel.id,
+                    logger: msg => console.log('Saucelabs', msg),
                 });
-            });
-        }
-
-        onShutdown(config, async () => {
-            if (tunnelPromise) {
-                const tunnel = await tunnelPromise;
-                await tunnel.close();
             }
-        });
+            await tunnel.promise;
+
+            if (!driver) {
+                const seleniumOptions = createCapabilities(options, browser, tunnel.id);
+                driver = await remote(seleniumOptions);
+
+                const browserName = getBrowserName(browser);
+                console.log(`[saucelabs] ${browserName} session at https://saucelabs.com/tests/${driver.sessionId}`);
+                console.log(`[saucelabs] Opening "${config.pentfServerUrl}" on the selenium client`);
+                await driver.url(config.pentfServerUrl);
+            }
+        },
+        async onRunEnd() {
+            if (driver) {
+                await driver.deleteSession();
+            }
+        },
+        async onShutdown() {
+            if (tunnel.promise) {
+                const instance = await instance.promise;
+                await instance.close();
+            }
+        }
     };
 }
 

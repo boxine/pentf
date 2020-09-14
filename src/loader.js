@@ -61,136 +61,6 @@ async function importFile(file) {
 }
 
 /**
- * @typedef {Omit<import('./runner').TestCase, 'name' | 'run'>} TestOptions
- */
-
-/**
- * @typedef {{(name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void, only: (name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void} TestFn
- */
-
-/**
- * @typedef {{(name: string, callback: () => void): void, only: (name: string, callback: () => void): void} DescribeFn
- */
-
-/**
- * @typedef {(test: TestFn, suite: DescribeFn) => void} SuiteBuilder
- */
-
-/**
- * @param {string} fileName
- * @param {string} suiteName
- * @param {SuiteBuilder} builder
- * @private
- */
-function loadSuite(fileName, suiteName, builder) {
-    const tests = [];
-    const only = [];
-    let onlyInScope = false;
-    let skipInScope = false;
-    const groups = [suiteName];
-    let i = 0;
-
-    const skipFn = () => true;
-
-    /**
-     * Create a test case
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
-    function test(description, run, options = {}) {
-        const arr = onlyInScope ? only : tests;
-        arr.push({
-            description,
-            name: `${groups.join('>')}_${i++}`,
-            run,
-            skip: skipInScope ? skipFn : options.skip,
-            path: fileName,
-            ...options,
-        });
-    }
-
-    /**
-     * Only run this test case in the current file
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
-    test.only = (description, run, options = {}) => {
-        only.push({
-            description,
-            name: `${groups.join('>')}_${i++}`,
-            run,
-            skip: skipInScope ? skipFn : options.skip,
-            path: fileName,
-            ...options,
-        });
-    };
-
-    /**
-     * Skip this test case
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
-    test.skip = (description, run, options = {}) => {
-        const arr = onlyInScope ? only : tests;
-        arr.push({
-            description,
-            name: `${groups.join('>')}_${i++}`,
-            run,
-            skip: skipFn,
-            path: fileName,
-            ...options,
-        });
-    };
-
-    /**
-     * Create a group for test cases
-     * @param {string} description
-     * @param {() => void} callback
-     */
-    function describe(description, callback) {
-        groups.push(description);
-        callback();
-        groups.pop();
-    }
-
-    /**
-     * Only run the test cases inside this group
-     * @param {string} description
-     * @param {() => void} callback
-     */
-    describe.only = (description, callback) => {
-        onlyInScope = true;
-        groups.push(description);
-
-        callback();
-
-        onlyInScope = false;
-        groups.pop();
-    };
-
-    /**
-     * Skip this group of test cases
-     * @param {string} description
-     * @param {() => void} callback
-     */
-    describe.skip = (description, callback) => {
-        skipInScope = true;
-        groups.push(description);
-
-        callback();
-
-        skipInScope = false;
-        groups.pop();
-    };
-
-    builder(test, describe);
-    return only.length > 0 ? only : tests;
-}
-
-/**
  * @param {import('./config').Config} config
  * @param {Array<{name: string, fileName: string}>} tests
  */
@@ -217,27 +87,18 @@ async function applyTestFilters(config, tests) {
  */
 async function loadTests(config, globPattern) {
     const testFiles = await promisify(glob.glob)(globPattern, {cwd: config.rootDir, absolute: true});
-    let tests = testFiles.map(n => ({
-        fileName: n,
-        name: path.basename(n, path.extname(n)),
-    }));
-
-    tests = await applyTestFilters(config, tests);
 
     const testCases = [];
-    await Promise.all(
-        tests.map(async t => {
-            let tc = await importFile(t.fileName);
-
-            if (typeof tc.suite === 'function') {
-                testCases.push(...loadSuite(t.fileName, t.name, tc.suite));
-            } else {
-                // ESM modules are readonly, so we need to create our own writable
-                // object.
-                testCases.push({...tc, name: t.name, fileName: t.fileName});
+    for (const plugin of config.plugins) {
+        if (plugin.onLoad) {
+            const res = await plugin.onLoad(config, testFiles);
+            if (Array.isArray(res)) {
+                testCases.push(...res);
+            } else if (res) {
+                testCases.push(res);
             }
-        })
-    );
+        }
+    }
 
     return testCases;
 }

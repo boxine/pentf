@@ -46,7 +46,7 @@ function createCapabilities(options, browser, tunnelIdentifier) {
                 customData: options.customData || {},
                 idleTimeout: options.idleTimeout || 90,
                 maxDuration: options.maxDuration || 1000,
-                name: config.name || 'Saucelabs Launcher',
+                name: options.name || 'Saucelabs Launcher',
                 parentTunnel: options.parentTunnel,
                 public: options.public || 'public',
                 recordScreenshots: options.recordScreenshots,

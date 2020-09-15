@@ -17,7 +17,7 @@ prettier:
 test:
 	@npm run test --silent
 
-doc: *.js tsconfig.json
+doc: src/* *.js tsconfig.json
 	./node_modules/.bin/typedoc --out doc --noEmit --excludeNotExported --excludeNotDocumented --excludeExternals \
 		src/*.js
 

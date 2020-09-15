@@ -105,6 +105,7 @@
     "he": "^1.2.0",
     "kolorist": "^1.2.3",
     "libmime": "^4.0.1",
+    "mime-types": "^2.1.27",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
     "node-fetch": "^2.3.0",

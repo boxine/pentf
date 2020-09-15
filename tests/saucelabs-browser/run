@@ -2,13 +2,13 @@
 
 const pentf = require('../../src/index.js');
 const { createSaucelabsLauncher } = require('../../src/plugins/saucelabs');
-const { createServer } = require('../../src/plugins/server');
+const { createServerPlugin } = require('../../src/plugins/server');
 
 pentf.main({
     rootDir: __dirname,
     testsDir: __dirname,
     plugins: [
-        createServer(),
+        createServerPlugin(),
         createSaucelabsLauncher({
             username: process.env.SAUCE_USERNAME,
             accessKey: process.env.SAUCE_ACCESS_KEY,

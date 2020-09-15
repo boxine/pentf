@@ -2,12 +2,12 @@
 
 const pentf = require('../../src/index.js');
 const { createPuppeteerLauncher } = require('../../src/plugins/puppeteer.js');
-const { createServer } = require('../../src/plugins/server');
+const { createServerPlugin } = require('../../src/plugins/server');
 
 pentf.main({
     rootDir: __dirname,
     plugins: [
-        createServer(),
+        createServerPlugin(),
         createPuppeteerLauncher()
     ]
 });

@@ -12,3 +12,6 @@ dist/
 
 # Generated types
 *.d.ts
+
+# WMR
+.cache/

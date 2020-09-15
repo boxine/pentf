@@ -128,6 +128,7 @@ async function real_main(options={}) {
     const results = await runTests(config, test_cases);
 
     if (!config.keep_open) {
+        await lifecycle.onShutdown(config);
         const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
         const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
         logVerbose(`Terminating with exit code ${retCode}`);

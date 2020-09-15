@@ -120,11 +120,14 @@ async function run_task(config, task) {
 
         output.logVerbose(
             config, `[task] Error teardown done for ${task._runner_task_id} (${task.name})`);
-
-        if (config.fail_fast) {
-            process.exit(3);
-        }
     } finally {
+        if (task.status === 'error' && config.fail_fast) {
+            // eslint-disable-next-line no-unsafe-finally
+            throw new Error('FailFast');
+        }
+
+        await lifecycle.onTestDone(config, task);
+
         if (!config.keep_open || task.status === 'success') {
             output.logVerbose(`[runner] Executing ${task_config._teardown_hooks.length} teardown hooks`);
             try {
@@ -143,7 +146,6 @@ async function run_task(config, task) {
             }
         }
 
-        await lifecycle.onTestDone(config, task);
     }
 }
 
@@ -528,16 +530,6 @@ async function run(config, testCases) {
     };
 
     try {
-        if (config.manually_lock) {
-            const resources = config.manually_lock.split(',');
-            const acquireRes = await external_locking.externalAcquire(config, resources, 60000);
-            if (acquireRes !== true) {
-                throw new Error(
-                    `Failed to lock ${acquireRes.resource}: ` +
-                    `Locked by ${acquireRes.client}, expires in ${acquireRes.expireIn}ms`);
-            }
-        }
-
         if (config.print_tasks) {
             console.log(tasks);
             return;
@@ -561,6 +553,16 @@ async function run(config, testCases) {
         if (config.display_locking_client) {
             console.log(config.external_locking_client);
             return;
+        }
+
+        if (config.manually_lock) {
+            const resources = config.manually_lock.split(',');
+            const acquireRes = await external_locking.externalAcquire(config, resources, 60000);
+            if (acquireRes !== true) {
+                throw new Error(
+                    `Failed to lock ${acquireRes.resource}: ` +
+                    `Locked by ${acquireRes.client}, expires in ${acquireRes.expireIn}ms`);
+            }
         }
 
         await locking.init(config, state);

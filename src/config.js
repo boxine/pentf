@@ -10,6 +10,7 @@ const {promisify} = require('util');
 const utils = require('./utils');
 const { importFile } = require('./loader');
 const { createNodeLauncher } = require('./plugins/node');
+const { createSentry } = require('./plugins/sentry');
 
 class AutoWidthArgumentParser extends argparse.ArgumentParser {
     _getFormatter() {
@@ -566,6 +567,10 @@ async function readConfig(options, args) {
 
     if (config.plugins.length === 0) {
         config.plugins.push(createNodeLauncher());
+    }
+
+    if (config.sentry) {
+        config.plugins.push(createSentry());
     }
 
     return config;

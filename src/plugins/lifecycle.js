@@ -44,6 +44,17 @@ async function onRunStart(config) {
 }
 
 /**
+ * @param {import("../config").Config, task: import('../runner').Task} config
+ */
+async function onTestDone(config, task) {
+    for (const plugin of config.plugins) {
+        if (plugin.onTaskDone) {
+            await plugin.onTaskDone(config, task);
+        }
+    }
+}
+
+/**
  * @param {import("../config").Config} config
  */
 async function onRunFinish(config) {
@@ -71,4 +82,5 @@ module.exports = {
     onRunStart,
     onRunFinish,
     onShutdown,
+    onTestDone,
 };

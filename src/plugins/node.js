@@ -1,5 +1,9 @@
 const path = require('path');
+const output = require('output');
 const {importFile} = require('../loader');
+const {promisify} = require('util');
+const mkdirp = require('mkdirp');
+const {timeoutPromise} = require('./promise_utils');
 
 /**
  * @typedef {Omit<import('./runner').TestCase, 'name' | 'run'>} TestOptions
@@ -152,6 +156,37 @@ function createNodeLauncher() {
             }
 
             return test_cases;
+        },
+        async onTestDone(config, task) {
+            if (task.status === 'error') {
+                if (config.take_screenshots) {
+                    output.logVerbose(
+                        config,
+                        `[task] Taking ${config._browser_pages.length} screenshots for task` +
+                        ` #${task._runner_task_id} (${task.name})`);
+                    try {
+                        const screenshotPromise = Promise.all(config._browser_pages.map(
+                            async (page, i) => {
+                                await promisify(mkdirp)(config.screenshot_directory);
+                                const fn = path.join(
+                                    config.screenshot_directory, `${task.id || task.name}-${i}.png`);
+                                return await page.screenshot({
+                                    path: fn,
+                                    type: 'png',
+                                    fullPage: true,
+                                });
+                            })
+                        );
+                        task.error_screenshots = await timeoutPromise(
+                            config, screenshotPromise,
+                            {timeout: 10000, message: 'screenshots took too long'});
+                    } catch(e) {
+                        output.log(
+                            config,
+                            `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}`);
+                    }
+                }
+            }
         }
     };
 }

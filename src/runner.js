@@ -1,10 +1,7 @@
 /* eslint no-console: 0 */
 
 const assert = require('assert').strict;
-const path = require('path');
 const {performance} = require('perf_hooks');
-const {promisify} = require('util');
-const mkdirp = require('mkdirp');
 const kolorist = require('kolorist');
 
 const email = require('./email');
@@ -117,34 +114,6 @@ async function run_task(config, task) {
         } else if (e.pentf_expectedToSucceed) {
             task.expectedToFail = e.pentf_expectedToSucceed;
             task.status = 'success';
-        }
-
-        if (config.take_screenshots) {
-            output.logVerbose(
-                config,
-                `[task] Taking ${task_config._browser_pages.length} screenshots for task` +
-                ` #${task._runner_task_id} (${task.name})`);
-            try {
-                const screenshotPromise = Promise.all(task_config._browser_pages.map(
-                    async (page, i) => {
-                        await promisify(mkdirp)(config.screenshot_directory);
-                        const fn = path.join(
-                            config.screenshot_directory, `${task.id || task.name}-${i}.png`);
-                        return await page.screenshot({
-                            path: fn,
-                            type: 'png',
-                            fullPage: true,
-                        });
-                    })
-                );
-                task.error_screenshots = await timeoutPromise(
-                    config, screenshotPromise,
-                    {timeout: 10000, message: 'screenshots took too long'});
-            } catch(e) {
-                output.log(
-                    config,
-                    `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}`);
-            }
         }
 
         await output.logTaskError(config, task);

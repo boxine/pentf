@@ -3,6 +3,7 @@ const path = require('path');
 const glob = require('glob');
 const {promisify} = require('util');
 const {pathToFileURL} = require('url');
+const lifecycle = require('./plugins/lifecycle');
 
 /**
  * Check if the current running node version supports import statements.
@@ -88,17 +89,7 @@ async function applyTestFilters(config, tests) {
 async function loadTests(config, globPattern) {
     const testFiles = await promisify(glob.glob)(globPattern, {cwd: config.rootDir, absolute: true});
 
-    const testCases = [];
-    for (const plugin of config.plugins) {
-        if (plugin.onLoad) {
-            const res = await plugin.onLoad(config, testFiles);
-            if (Array.isArray(res)) {
-                testCases.push(...res);
-            } else if (res) {
-                testCases.push(res);
-            }
-        }
-    }
+    const testCases = await lifecycle.onLoad(config, testFiles);
 
     return testCases;
 }

@@ -1,4 +1,6 @@
+const assert = require('assert').strict;
 const { newPage } = require('../browser_utils');
+const output = require('../output');
 
 /**
  * @returns {import('./lifecycle').Plugin}
@@ -16,7 +18,9 @@ function createPuppeteerLauncher() {
                 page = await newPage(config);
             }
 
-            console.log(`[puppeteer] Opening "${config.pentfServerUrl}"`);
+            assert(config.pentfServerUrl, 'Missing "config.pentfServerUrl". Did you forget to add the server plugin?')
+
+            output.log(config, `[puppeteer] Opening "${config.pentfServerUrl}"`);
             await page.goto(`${config.pentfServerUrl}?client=${name}`);
         },
     };

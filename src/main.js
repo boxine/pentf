@@ -9,8 +9,9 @@ const runner = require('./runner');
 const render = require('./render');
 const {color, logVerbose} = require('./output');
 const {testsVersion, pentfVersion} = require('./version');
-const {loadTests} = require('./loader');
+const {loadTests, applyTestFilters} = require('./loader');
 const watcher = require('./watcher');
+const lifecycle = require('./plugins/lifecycle');
 
 /**
  * @param {import('./config').Config} config
@@ -28,9 +29,6 @@ async function runTests(config, test_cases) {
             stream.write(`${time} Start runner\n`);
             config.log_file_stream = stream;
         }
-
-        // Initialize all plugins
-        await Promise.all(config.plugins.map(fn => fn(config)));
 
         // Run tests
         const test_info = await runner.run(config, test_cases);
@@ -82,7 +80,17 @@ async function real_main(options={}) {
         process.env.NODE_DISABLE_COLORS = 'true';
     }
 
-    const test_cases = await loadTests(config, config.testsGlob);
+    await lifecycle.onStart(config);
+
+    if (config.watch) {
+        await watcher.createWatcher(config, async test_cases => {
+            await runTests(config, test_cases);
+        });
+        return;
+    }
+
+    let test_cases = await loadTests(config, config.testsGlob);
+    test_cases = await applyTestFilters(config, test_cases);
 
     if (args.print_version) {
         console.log(await testsVersion(config));
@@ -117,22 +125,13 @@ async function real_main(options={}) {
         return;
     }
 
-    if (config.watch) {
-        await watcher.createWatcher(config, async test_cases => {
-            await runTests(config, test_cases);
-        });
-    } else {
-        const results = await runTests(config, test_cases);
+    const results = await runTests(config, test_cases);
 
-        if (!config.keep_open) {
-            // Terminate all active launchers
-            await Promise.all(config.events.onShutdown.map(fn => fn(config)));
-
-            const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
-            const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
-            logVerbose(`Terminating with exit code ${retCode}`);
-            process.exit(retCode);
-        }
+    if (!config.keep_open) {
+        const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
+        const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
+        logVerbose(`Terminating with exit code ${retCode}`);
+        process.exit(retCode);
     }
 }
 

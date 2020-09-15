@@ -11,6 +11,7 @@ const browser_utils = require('./browser_utils');
 const email = require('./email');
 const external_locking = require('./external_locking');
 const locking = require('./locking');
+const lifecycle = require('./plugins/lifecycle');
 const output = require('./output');
 const utils = require('./utils');
 const version = require('./version');
@@ -619,8 +620,6 @@ async function run(config, testCases) {
         });
     }
 
-    await Promise.all(config.events.onStartRun.map(fn => fn(config)));
-
     try {
         if (config.manually_lock) {
             const resources = config.manually_lock.split(',');
@@ -658,6 +657,7 @@ async function run(config, testCases) {
         }
 
         await locking.init(config, state);
+        await lifecycle.onRunStart(config);
 
         try {
             if (config.concurrency === 0) {
@@ -701,10 +701,13 @@ async function run(config, testCases) {
             await timeoutPromise(
                 config, config.afterAllTests(config, initData),
                 {message: 'afterAllTests function', warning: true});
+
+            await timeoutPromise(
+                config, lifecycle.onRunFinish(config),
+                {message: 'plugins finish', warning: true}
+            );
         }
     }
-
-    await Promise.all(config.events.onFinishRun.map(fn => fn(config)));
 
     const now = new Date();
     const test_end = now.getTime();

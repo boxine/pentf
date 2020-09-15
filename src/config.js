@@ -9,6 +9,7 @@ const {promisify} = require('util');
 
 const utils = require('./utils');
 const { importFile } = require('./loader');
+const { createNodeLauncher } = require('./plugins/node');
 
 class AutoWidthArgumentParser extends argparse.ArgumentParser {
     _getFormatter() {
@@ -415,6 +416,13 @@ function parseArgs(options, raw_args) {
         }
     }
 
+    // Copy over all other options into config
+    for (const k in options) {
+        if (!(k in args)) {
+            args[k] = options[k];
+        }
+    }
+
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {
         console.log('Warning: --json-file given, but not -j/--json. Will NOT write JSON.'); // eslint-disable-line no-console
     }
@@ -516,7 +524,7 @@ async function readConfig(options, args) {
 
     let config = {
         ...args,
-        plugins: [],
+        plugins: args.plugins || [],
         rootDir: options.rootDir || process.cwd(),
     };
 
@@ -556,7 +564,11 @@ async function readConfig(options, args) {
         config.sentry = true;
     }
 
-    return {...config, ...args};
+    if (config.plugins.length === 0) {
+        config.plugins.push(createNodeLauncher());
+    }
+
+    return config;
 }
 
 module.exports = {

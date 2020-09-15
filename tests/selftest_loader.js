@@ -4,7 +4,13 @@ const {loadTests} = require('../src/loader');
 
 async function run(config) {
     assert.deepStrictEqual(
-        (await loadTests({filter: 'selftest_lo[ao]der'}, config._testsDir, '*.js')).map(
+        (await loadTests(
+            {
+                filter: 'selftest_lo[ao]der',
+                rootDir: config.rootDir
+            },
+            'tests/*.js'
+        )).map(
             t => t.name
         ),
         ['selftest_loader']
@@ -15,9 +21,9 @@ async function run(config) {
         {
             filter: 'selftest_[a-l]',
             filter_body: 'he5Eih1oh+ai8sho',
+            rootDir: config.rootDir,
         },
-        config._testsDir,
-        '*.js'
+        'tests/*.js'
     );
     assert.deepStrictEqual(
         byBody.map(t => t.name),

@@ -20,10 +20,10 @@ function removeFromModuleCache(fileName) {
  */
 async function createWatcher(config, onChange) {
     const patterns = [...config.watch_files, config.testsGlob]
-        .map(pattern => path.join(config._testsDir, pattern));
+        .map(pattern => path.join(config.rootDir, pattern));
 
     const watcher = chokidar.watch(patterns, {
-        cwd: config._rootDir,
+        cwd: config.rootDir,
         ignoreInitial: true,
         absolute: true,
     });
@@ -34,7 +34,7 @@ async function createWatcher(config, onChange) {
     });
 
     watcher.on('unlink', fileOrDir => {
-        const absolute = path.join(config._rootDir, fileOrDir);
+        const absolute = path.join(config.rootDir, fileOrDir);
         removeFromModuleCache(absolute);
     });
 
@@ -46,13 +46,13 @@ async function createWatcher(config, onChange) {
             return;
         }
 
-        const absolute = path.join(config._rootDir, fileOrDir);
+        const absolute = path.join(config.rootDir, fileOrDir);
         removeFromModuleCache(absolute);
 
         // Check if we have a test file and if yes, if that file
         // matches the current filter set.
-        let test_cases = await loadTests(config, config._testsDir, config.testsGlob);
-        if (minimatch(absolute, path.join(config._testsDir, config.testsGlob))) {
+        let test_cases = await loadTests(config, config.testsGlob);
+        if (minimatch(absolute, path.join(config.rootDir, config.testsGlob))) {
             test_cases = await applyTestFilters(config, test_cases);
             test_cases = test_cases.filter(tc => tc.fileName === absolute);
         }

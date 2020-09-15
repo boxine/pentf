@@ -510,11 +510,11 @@ async function findPackageJson(dir) {
 async function readConfig(options, args) {
     const {configDir} = options;
 
-    let config = {};
-    const rootDir = options.rootDir || process.cwd();
+    let config = args;
+    config.rootDir = options.rootDir || process.cwd();
 
     // Add support for `pentf` configuration key in `package.json`.
-    const pkgJsonPath = await findPackageJson(rootDir);
+    const pkgJsonPath = await findPackageJson(config.rootDir);
     if (pkgJsonPath !== null) {
         const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath));
         config = pkgJson.pentf || config;
@@ -522,7 +522,7 @@ async function readConfig(options, args) {
 
     // "pentf.config.js" configuration file
     if (args.config_file) {
-        const configPath = path.join(rootDir, args.config_file);
+        const configPath = path.join(config.rootDir, args.config_file);
         if (await promisify(fs.exists)(configPath)) {
             const res = await importFile(configPath);
             const data = typeof res === 'function' ? res(args.env) : res;

@@ -17,6 +17,7 @@ const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
 const {timeoutPromise} = require('./promise_utils');
 const { importFile } = require('./loader');
+const output = require('./output');
 
 let tmp_home;
 
@@ -193,7 +194,11 @@ async function newPage(config, chrome_args=[]) {
         // dependency.
         config._teardown_hooks.push(async () => {
             if (!page.isClosed()) {
-                await closePage(page);
+                try {
+                    await closePage(page);
+                } catch (e) {
+                    output.log(config, `INTERNAL ERROR: Unable to close browser pages of ${config._taskName}: ${e}`);
+                }
             }
         });
     }

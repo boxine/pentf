@@ -7,7 +7,6 @@ const {promisify} = require('util');
 const mkdirp = require('mkdirp');
 const kolorist = require('kolorist');
 
-const browser_utils = require('./browser_utils');
 const email = require('./email');
 const external_locking = require('./external_locking');
 const locking = require('./locking');
@@ -145,18 +144,6 @@ async function run_task(config, task) {
                 output.log(
                     config,
                     `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}`);
-            }
-        }
-        // Close all browser windows
-        if (! config.keep_open && task_config._browser_pages.length > 0) {
-            output.logVerbose(
-                config,
-                `[task] Closing ${task_config._browser_pages.length} browser pages for task` +
-                ` #${task._runner_task_id} (${task.name})`);
-            try {
-                await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
-            } catch(e) {
-                output.log(config, `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}`);
             }
         }
 

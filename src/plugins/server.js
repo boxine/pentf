@@ -6,29 +6,20 @@ const { createServer } = require('../server/test-server');
 function createServerPlugin() {
     const serverCwd = path.join(__dirname, '..', 'server', 'public');
 
-    /** @type {{port: number, url: string, server: import('http').Server}} */
+    /** @type {{port: number, url: string, server: import('http').Server, wsServer: import("ws").Server, wsUrl: string}} */
     let instance;
 
     return {
         name: 'pentf-server',
         async onStart(config) {
-            instance = await createServer();
+            instance = await createServer(config);
             config.pentfServerUrl = instance.url;
         },
         async onLoad(config, files) {
             const scripts = files.map(file => {
-                const relative = path.relative(config.rootDir, file);
-                return `<script src="/base/${relative}"></script>`;
-            }).join('\n');
-
-            const template = path.join(serverCwd, 'run.template.html');
-            let html = await fs.promises.readFile(template, 'utf-8');
-            html = html.replace(/<!--\sSCRIPTS\s-->/, scripts);
-            await fs.promises.writeFile(
-                path.join(serverCwd, 'run.html'),
-                html
-            );
-
+                return '/base/'+ path.relative(config.rootDir, file);
+            });
+            instance.setFiles(scripts);
         },
         async onShutdown() {
             await wait(30000);

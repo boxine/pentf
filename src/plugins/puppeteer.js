@@ -20,7 +20,7 @@ function createPuppeteerLauncher() {
 
             assert(config.pentfServerUrl, 'Missing "config.pentfServerUrl". Did you forget to add the server plugin?')
 
-            output.log(config, `[puppeteer] Opening "${config.pentfServerUrl}"`);
+            output.log(config, `[puppeteer] Opening "${config.pentfServerUrl}/run"`);
             await page.goto(`${config.pentfServerUrl}/run?client=${name}`);
         },
     };

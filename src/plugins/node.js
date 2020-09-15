@@ -157,6 +157,18 @@ function createNodeLauncher() {
 
             return test_cases;
         },
+        async onRunStart(config) {
+            if (config.concurrency > 1) {
+                if (config.keep_open) {
+                    // We will have many, many  Chrome windows. Disable the maxListener limit
+                    process.setMaxListeners(0);
+                } else {
+                    // Many tests run 1 or 2 Chrome windows, so make sure we have enough handles.
+                    // 2 windows per test on average should be sufficient
+                    process.setMaxListeners(10 + 2 * config.concurrency);
+                }
+            }
+        },
         async onTestDone(config, task) {
             if (task.status === 'error') {
                 if (config.take_screenshots) {

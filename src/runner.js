@@ -281,15 +281,6 @@ async function run_one(config, state, task) {
 async function parallel_run(config, state) {
     output.status(config, state);
 
-    if (config.keep_open) {
-        // We will have many, many  Chrome windows. Disable the maxListener limit
-        process.setMaxListeners(0);
-    } else {
-        // Many tests run 1 or 2 Chrome windows, so make sure we have enough handles.
-        // 2 windows per test on average should be sufficient
-        process.setMaxListeners(10 + 2 * config.concurrency);
-    }
-
     let statusInterval;
     if (config.status_interval) {
         statusInterval = setInterval(

@@ -67,11 +67,11 @@ async function real_main(options={}) {
         }
     }
 
-
     const args = parseArgs(options, process.argv.slice(2));
     const config = await readConfig(options, args);
-    if (config.defaultConfig) {
-        config.defaultConfig(config);
+
+    if (options.defaultConfig) {
+        options.defaultConfig(config);
     }
 
     if (!config.colors) {

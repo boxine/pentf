@@ -16,6 +16,38 @@ const STATUS_STREAM = process.stderr;
 
 var last_state;
 
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./runner').RunnerState} state
+ */
+function proxyConsole(config, state) {
+    let org = {};
+    Object.keys(console).forEach(key => {
+        if (typeof console[key] === 'function') {
+            org[key] = console[key];
+            console[key] = new Proxy(console[key], {
+                apply(target, thisArg, args) {
+                    if (last_state) {
+                        clean(config);
+                    }
+                    org[key].apply(console, args);
+
+                    if (last_state) {
+                        status(config, state);
+                    }
+                }
+            });
+        }
+    });
+
+    return () => {
+        // Reset
+        Object.keys(org).forEach(key => {
+            console[key] = org[key];
+        });
+    };
+}
+
 function clean(config) {
     assert(config);
     if (!STATUS_STREAM.isTTY) return;
@@ -155,7 +187,7 @@ function detailedStatus(config, state) {
 
     // detailedStatus replaces the normal status string, so circumvent printing the status again
     if (config.logFunc) return config.logFunc(config, str);
-    console.log(str); // eslint-disable-line no-console
+    process.stdout.write(str + '\n');
 }
 
 /**
@@ -275,14 +307,14 @@ function log(config, message) {
     }
 
     if (! config.concurrency) {
-        console.log(message);  // eslint-disable-line no-console
+        process.stdout.write(message + '\n');
         return;
     }
 
     if (last_state) {
         clean(config);
     }
-    console.log(message); // eslint-disable-line no-console
+    process.stdout.write(message + '\n');
     if (last_state) {
         status(config, last_state);
     }
@@ -677,6 +709,7 @@ module.exports = {
     logTaskError,
     logVerbose,
     generateDiff,
+    proxyConsole,
     shouldShowError,
     status,
     stringify,

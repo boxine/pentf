@@ -597,6 +597,8 @@ async function run(config, testCases) {
         last_logged_status: ''
     };
 
+    const restoreConsole = output.proxyConsole(config, state);
+
     if (config.sentry) {
         const sentry_dsn = config.sentry_dsn;
         assert(
@@ -694,6 +696,8 @@ async function run(config, testCases) {
 
         output.logVerbose(config, 'lock & email shutdown complete');
     } finally {
+        restoreConsole();
+
         if (config.afterAllTests) {
             output.logVerbose(config, 'running custom per-project teardown ...');
             await timeoutPromise(

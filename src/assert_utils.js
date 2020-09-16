@@ -196,6 +196,44 @@ async function assertAlways(testfunc, {message='assertAlways failed', timeout=10
 }
 
 /**
+ * Assert that an HTTP response finished with the given status code.
+ *
+ * @example
+ * ```javascript
+ * const response = await fetch(config, 'https://foo.example/');
+ * await assertHttpStatus(response, 200);
+ * // Or, the shorter form:
+ * const shortResponse = await assertHttpStatus(fetch(config, 'https://foo.example/'));
+ * ```
+ * @param {*|Promise<*>} response HTTP fetch response object, as gotten from `await `[["net_utils".fetch|`netutils.fetch`]]`(...)`, or the promise resolving to that (e.g. just `[["net_utils".fetch|`netutils.fetch`]]`(...)`).
+ * @param {number?} expectedStatus The expected HTTP status (e.g. 201 for Created)
+ * @param {{message?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the assertion fails.
+ * @returns {*} The fetch response object.
+ */
+async function assertHttpStatus(response, expectedStatus=200, {message=undefined}={}) {
+    const err = new Error(); // Capture correct stack trace
+
+    if (response.then) { // It's a promise, resolve it
+        response = await response;
+    }
+    if (response.status === expectedStatus) {
+        return response;
+    }
+
+    let body = await response.text();
+    if (body.length > 400) {
+        body = body.slice(0, 399) + '…';
+    }
+    err.message = (
+        (message ? message + ': ' : '') +
+        `Expected request to ${response.url} to return HTTP ${expectedStatus}, but it returned` +
+        ` HTTP ${response.status}. HTTP body: ${body}`
+    );
+    throw err;
+}
+
+/**
  * Assert function with a message that is generated on demand.
  * @example
  * ```javascript
@@ -216,6 +254,7 @@ module.exports = {
     assertEventually,
     assertGreater,
     assertGreaterEqual,
+    assertHttpStatus,
     assertIncludes,
     assertLess,
     assertLessEqual,

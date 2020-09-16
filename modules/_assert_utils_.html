@@ -74,6 +74,7 @@
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_assert_utils_.html#asserteventually" class="tsd-kind-icon">assert<wbr>Eventually</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_assert_utils_.html#assertgreater" class="tsd-kind-icon">assert<wbr>Greater</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_assert_utils_.html#assertgreaterequal" class="tsd-kind-icon">assert<wbr>Greater<wbr>Equal</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_assert_utils_.html#asserthttpstatus" class="tsd-kind-icon">assert<wbr>Http<wbr>Status</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_assert_utils_.html#assertincludes" class="tsd-kind-icon">assert<wbr>Includes</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_assert_utils_.html#assertless" class="tsd-kind-icon">assert<wbr>Less</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_assert_utils_.html#assertlessequal" class="tsd-kind-icon">assert<wbr>Less<wbr>Equal</a></li>
@@ -96,7 +97,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L187">assert_utils.js:187</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L187">assert_utils.js:187</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -144,7 +145,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L155">assert_utils.js:155</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L155">assert_utils.js:155</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -192,7 +193,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L121">assert_utils.js:121</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L121">assert_utils.js:121</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -247,7 +248,7 @@ setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L57">assert_utils.js:57</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L57">assert_utils.js:57</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -290,7 +291,7 @@ setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L71">assert_utils.js:71</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L71">assert_utils.js:71</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -324,6 +325,57 @@ setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="asserthttpstatus" class="tsd-anchor"></a>
+					<h3>assert<wbr>Http<wbr>Status</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">assert<wbr>Http<wbr>Status<span class="tsd-signature-symbol">(</span>response<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, expectedStatus<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span>, __namedParameters<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L214">assert_utils.js:214</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Assert that an HTTP response finished with the given status code.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-javascript"><span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(config, <span class="hljs-string">'https://foo.example/'</span>);
+<span class="hljs-keyword">await</span> assertHttpStatus(response, <span class="hljs-number">200</span>);
+<span class="hljs-comment">// Or, the shorter form:</span>
+<span class="hljs-keyword">const</span> shortResponse = <span class="hljs-keyword">await</span> assertHttpStatus(fetch(config, <span class="hljs-string">'https://foo.example/'</span>));</code></pre>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>response: <span class="tsd-signature-type">any</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>HTTP fetch response object, as gotten from <code>await</code><a href="_net_utils_.html#fetch"><code>netutils.fetch</code></a><code>(...)</code>, or the promise resolving to that (e.g. just <code>&lt;a href=&quot;_net_utils_.html#fetch&quot;&gt;</code>netutils.fetch<code>&lt;/a&gt;</code>(...)`).</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> expectedStatus: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 200</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The expected HTTP status (e.g. 201 for Created)</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> __namedParameters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+							<p>The fetch response object.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
 					<a name="assertincludes" class="tsd-anchor"></a>
 					<h3>assert<wbr>Includes</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
@@ -333,7 +385,7 @@ setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L91">assert_utils.js:91</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L91">assert_utils.js:91</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -382,7 +434,7 @@ assertIncludes([<span class="hljs-number">9</span>, <span class="hljs-number">5<
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L29">assert_utils.js:29</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L29">assert_utils.js:29</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -425,7 +477,7 @@ assertIncludes([<span class="hljs-number">9</span>, <span class="hljs-number">5<
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L43">assert_utils.js:43</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L43">assert_utils.js:43</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -468,7 +520,7 @@ assertIncludes([<span class="hljs-number">9</span>, <span class="hljs-number">5<
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L17">assert_utils.js:17</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L17">assert_utils.js:17</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -502,7 +554,7 @@ assertIncludes([<span class="hljs-number">9</span>, <span class="hljs-number">5<
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/99e2ae1/src/assert_utils.js#L207">assert_utils.js:207</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/assert_utils.js#L245">assert_utils.js:245</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -632,6 +684,9 @@ assertIncludes([<span class="hljs-number">9</span>, <span class="hljs-number">5<
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_assert_utils_.html#assertgreaterequal" class="tsd-kind-icon">assert<wbr>Greater<wbr>Equal</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_assert_utils_.html#asserthttpstatus" class="tsd-kind-icon">assert<wbr>Http<wbr>Status</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_assert_utils_.html#assertincludes" class="tsd-kind-icon">assert<wbr>Includes</a>

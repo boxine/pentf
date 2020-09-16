@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const {readConfig, parseArgs} = require('./config');
-const {readFile, localIso8601} = require('./utils');
+const {localIso8601} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
 const {color, logVerbose} = require('./output');
@@ -19,7 +19,7 @@ const watcher = require('./watcher');
 async function runTests(config, test_cases) {
     let results;
     if (config.load_json) {
-        const json_input = await readFile(config.load_json, {encoding: 'utf-8'});
+        const json_input = await fs.promises.readFile(config.load_json, {encoding: 'utf-8'});
         results = JSON.parse(json_input);
     } else {
         if (config.log_file && !config.log_file_stream) {

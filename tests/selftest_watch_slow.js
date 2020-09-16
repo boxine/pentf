@@ -2,11 +2,12 @@ const child_process = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const { assertEventually } = require('../src/assert_utils');
+const { onTeardown } = require('../src/runner');
 
-async function run() {
+async function run(config) {
     const sub_run = path.join(__dirname, 'watch_tests', 'run');
     const child = child_process.spawn(sub_run, ['--watch', '-f', 'slow', '--ci', '--no-colors', '--no-pdf']);
-
+    onTeardown(config, () => child.kill());
     const out = [];
 
     child.stdout.on('data', data => out.push(data.toString()));

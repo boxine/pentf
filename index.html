@@ -330,7 +330,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 --<span class="hljs-keyword">print</span>-config        Output the effective configuration and <span class="hljs-keyword">exit</span>.
 -c, --<span class="hljs-keyword">print</span>-curl      <span class="hljs-keyword">Print</span> curl commands <span class="hljs-keyword">for</span> each HTTP request
 -I REGEXP, --ignore-errors REGEXP
-                      <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">error</span> messages matching the regular expression. Example: -I
+                      <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">error</span> messages matching the regular expression. Example: -I 
                       <span class="hljs-string">"\(TOC-[0-9]+\)"</span>
 -<span class="hljs-keyword">E</span>, --expect-nothing  Ignore expectedToFail attributes <span class="hljs-keyword">on</span> tests
 --<span class="hljs-keyword">no</span>-colors           Disable colors <span class="hljs-keyword">in</span> stdout</code></pre>
@@ -351,7 +351,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
                       Markdown <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.md .
 --load-json INPUT.json
                       Load test results from JSON (instead <span class="hljs-keyword">of</span> executing tests)
---sentry              Enable error reporting via Sentry. By <span class="hljs-keyword">default</span>, this will be activated <span class="hljs-keyword">if</span> the CI
+--sentry              Enable error reporting via Sentry. By <span class="hljs-keyword">default</span>, this will be activated <span class="hljs-keyword">if</span> the CI 
                       environment variable <span class="hljs-keyword">is</span> <span class="hljs-keyword">set</span> <span class="hljs-keyword">and</span> a SENTRY_DSN <span class="hljs-keyword">is</span> configured.
 --no-sentry           Disable error reporting via Sentry even <span class="hljs-keyword">if</span> it <span class="hljs-keyword">is</span> configured
 --sentry-dsn OVERRIDE_SENTRY_DSN
@@ -383,7 +383,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 -s MS, --slow-mo MS   Wait this many milliseconds after every call <span class="hljs-keyword">to</span> the virtual browser
 -k, --keep-open       Keep browser sessions open <span class="hljs-keyword">in</span> case of failures. Implies -V.
 --devtools            Start browser with devtools open. Implies -V
---devtools-preserve   Configure devtools <span class="hljs-keyword">to</span> preserve logs <span class="hljs-keyword">and</span><span class="hljs-built_in"> network </span>requests upon navigation. Implies
+--devtools-preserve   Configure devtools <span class="hljs-keyword">to</span> preserve logs <span class="hljs-keyword">and</span><span class="hljs-built_in"> network </span>requests upon navigation. Implies 
                       --devtools
 --extensions [EXTENSION_DIR [EXTENSION_DIR <span class="hljs-built_in">..</span>.]]
                       Load unpacked browser extensions
@@ -394,18 +394,18 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 					<h6>Test runner</h6>
 				</a>
 				<pre><code>-C COUNT, <span class="hljs-comment">--concurrency COUNT</span>
-                      Maximum <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> tests <span class="hljs-built_in">to</span> run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> <span class="hljs-built_in">to</span> run <span class="hljs-keyword">without</span> <span class="hljs-keyword">a</span> pool, sequentially.
+                      Maximum <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> tests <span class="hljs-built_in">to</span> run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> <span class="hljs-built_in">to</span> run <span class="hljs-keyword">without</span> <span class="hljs-keyword">a</span> pool, sequentially. 
                       Can <span class="hljs-built_in">include</span> *, +, <span class="hljs-keyword">and</span> cpus <span class="hljs-keyword">for</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> CPUs. Defaults <span class="hljs-built_in">to</span> <span class="hljs-number">4</span>+cpus.
 -S, <span class="hljs-comment">--sequential      Do not run tests in parallel (same as -C 0)</span>
 <span class="hljs-comment">--fail-fast           Abort once a test fails</span>
 <span class="hljs-comment">--print-tasks         Output all tasks that the runner would perform, and exit</span>
-<span class="hljs-comment">--exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still</span>
+<span class="hljs-comment">--exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still </span>
                       emitted <span class="hljs-keyword">in</span> cases <span class="hljs-keyword">of</span> internal crashes)
 <span class="hljs-comment">--repeat COUNT        Run the tests the specified number of times</span>
 <span class="hljs-comment">--repeat-flaky COUNT  Repeat a failing test until it passes or the specified run count limit is reached</span>
 <span class="hljs-comment">--timeout MS          Set a maximum duration for a test case in ms before timing out. (Default: 1h)</span>
 <span class="hljs-comment">--status-interval MS  Interval in MS to print a detailed list of the current runner state.</span>
-<span class="hljs-comment">--breadcrumbs         Keep track of the last successful browser operation (breadcrumbs). This helps with</span>
+<span class="hljs-comment">--breadcrumbs         Keep track of the last successful browser operation (breadcrumbs). This helps with </span>
                       debugging test cases that timed out.
 -w, <span class="hljs-comment">--watch           Re-run tests if a test file changes.</span>
 <span class="hljs-comment">--watch-files [WATCH_FILES [WATCH_FILES ...]]</span>

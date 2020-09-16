@@ -6,7 +6,7 @@ const lockserver = require('./lockserver/lockserver');
 
 pentf.main({
     rootDir: __dirname, // Mandatory
-    testsGlob: 'tests/*.{js,mjs,cjs}',
+    testsGlob: 'tests/*.test.{js,mjs,cjs}',
     // All further properties are optional
     beforeAllTests: lockserver.beforeAllTests,
     afterAllTests: lockserver.afterAllTests,

@@ -8,7 +8,7 @@ async function run(config) {
     };
 
     assertIncludes(makeRandomEmail(testConfig, 'foobar'), '+foobar');
-    assertIncludes(makeRandomEmail(testConfig), '+selftest_makeRandomEmail');
+    assertIncludes(makeRandomEmail(testConfig), '+makeRandomEmail');
 }
 
 module.exports = {

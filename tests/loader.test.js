@@ -6,20 +6,20 @@ async function run(config) {
     assert.deepStrictEqual(
         (await loadTests(
             {
-                filter: 'selftest_lo[ao]der',
+                filter: 'lo[ao]der',
                 rootDir: config.rootDir
             },
             'tests/*.js'
         )).map(
             t => t.name
         ),
-        ['selftest_loader']
+        ['loader.test']
     );
 
     // random string: he5Eih1ohhhhhhai8sho
     const byBody = await loadTests(
         {
-            filter: 'selftest_[a-l]',
+            filter: '[a-l]',
             filter_body: 'he5Eih1oh+ai8sho',
             rootDir: config.rootDir,
         },
@@ -27,7 +27,7 @@ async function run(config) {
     );
     assert.deepStrictEqual(
         byBody.map(t => t.name),
-        ['selftest_loader']
+        ['loader.test']
     );
 }
 

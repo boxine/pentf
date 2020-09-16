@@ -345,7 +345,7 @@ The keys are up to you; for example you probably want to have a main entry point
 --print-config        Output the effective configuration and exit.
 -c, --print-curl      Print curl commands for each HTTP request
 -I REGEXP, --ignore-errors REGEXP
-                      Do not output error messages matching the regular expression. Example: -I
+                      Do not output error messages matching the regular expression. Example: -I 
                       "\(TOC-[0-9]+\)"
 -E, --expect-nothing  Ignore expectedToFail attributes on tests
 --no-colors           Disable colors in stdout
@@ -368,7 +368,7 @@ The keys are up to you; for example you probably want to have a main entry point
                       Markdown file to write a report to. Defaults to results.md .
 --load-json INPUT.json
                       Load test results from JSON (instead of executing tests)
---sentry              Enable error reporting via Sentry. By default, this will be activated if the CI
+--sentry              Enable error reporting via Sentry. By default, this will be activated if the CI 
                       environment variable is set and a SENTRY_DSN is configured.
 --no-sentry           Disable error reporting via Sentry even if it is configured
 --sentry-dsn OVERRIDE_SENTRY_DSN
@@ -406,7 +406,7 @@ The keys are up to you; for example you probably want to have a main entry point
 -s MS, --slow-mo MS   Wait this many milliseconds after every call to the virtual browser
 -k, --keep-open       Keep browser sessions open in case of failures. Implies -V.
 --devtools            Start browser with devtools open. Implies -V
---devtools-preserve   Configure devtools to preserve logs and network requests upon navigation. Implies
+--devtools-preserve   Configure devtools to preserve logs and network requests upon navigation. Implies 
                       --devtools
 --extensions [EXTENSION_DIR [EXTENSION_DIR ...]]
                       Load unpacked browser extensions
@@ -419,18 +419,18 @@ The keys are up to you; for example you probably want to have a main entry point
 
 ```
 -C COUNT, --concurrency COUNT
-                      Maximum number of tests to run in parallel. 0 to run without a pool, sequentially.
+                      Maximum number of tests to run in parallel. 0 to run without a pool, sequentially. 
                       Can include *, +, and cpus for the number of CPUs. Defaults to 4+cpus.
 -S, --sequential      Do not run tests in parallel (same as -C 0)
 --fail-fast           Abort once a test fails
 --print-tasks         Output all tasks that the runner would perform, and exit
---exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still
+--exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still 
                       emitted in cases of internal crashes)
 --repeat COUNT        Run the tests the specified number of times
 --repeat-flaky COUNT  Repeat a failing test until it passes or the specified run count limit is reached
 --timeout MS          Set a maximum duration for a test case in ms before timing out. (Default: 1h)
 --status-interval MS  Interval in MS to print a detailed list of the current runner state.
---breadcrumbs         Keep track of the last successful browser operation (breadcrumbs). This helps with
+--breadcrumbs         Keep track of the last successful browser operation (breadcrumbs). This helps with 
                       debugging test cases that timed out.
 -w, --watch           Re-run tests if a test file changes.
 --watch-files [WATCH_FILES [WATCH_FILES ...]]
@@ -456,6 +456,7 @@ The keys are up to you; for example you probably want to have a main entry point
 --display-locking-client
                       Display the locking client ID we would use if we would lock something now
 ```
+
 
 ## Environment Variables
 

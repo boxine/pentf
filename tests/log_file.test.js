@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 const path = require('path');
 const fs = require('fs');
-const child_process = require('child_process');
+const { execFile } = require('./helpers');
 
 async function run() {
     const logFile = path.join(__dirname, 'log_file_tests', 'output.log');
@@ -18,17 +18,10 @@ async function run() {
     // Delete log file if it exists
     remove();
 
-    await new Promise((resolve, reject) => {
-        child_process.execFile(
-            sub_run,
-            ['--exit-zero', '--no-screenshots', '--log-file', logFile],
-            { cwd: path.dirname(sub_run) },
-            (err, stdout, stderr) => {
-                if (err) reject(err);
-                else resolve({stdout, stderr});
-            }
-        );
-    });
+    await execFile(
+        sub_run,
+        ['--exit-zero', '--no-screenshots', '--log-file', logFile],
+    );
 
     const content = await fs.promises.readFile(logFile, 'utf8');
 

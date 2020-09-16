@@ -1,20 +1,13 @@
 const assert = require('assert').strict;
 const path = require('path');
-const child_process = require('child_process');
+const { execFile } = require('./helpers');
 
 async function run() {
     const sub_run = path.join(__dirname, 'suite', 'run');
-    const {stderr} = await new Promise((resolve, reject) => {
-        child_process.execFile(
-            sub_run,
-            ['--exit-zero', '--no-screenshots', '-f', '^skip'],
-            { cwd: path.dirname(sub_run) },
-            (err, stdout, stderr) => {
-                if (err) reject(err);
-                else resolve({stdout, stderr});
-            }
-        );
-    });
+    const {stderr} = await execFile(
+        sub_run,
+        ['--exit-zero', '--no-screenshots', '-f', '^skip'],
+    );
 
     assert(/3 tests passed/.test(stderr), 'Expected 3 tests to pass');
     assert(/3 skipped/.test(stderr), 'Expected 3 tests to be marked as skipped');

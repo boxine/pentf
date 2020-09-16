@@ -1,9 +1,9 @@
 const assert = require('assert').strict;
 const path = require('path');
 const fs = require('fs');
-const child_process = require('child_process');
 const rimrafCb = require('rimraf');
 const {promisify} = require('util');
+const { execFile } = require('./helpers');
 
 const rimraf = promisify(rimrafCb);
 
@@ -20,17 +20,11 @@ async function run() {
     await rimraf(json_file);
     await rimraf(screenshot_dir);
 
-    await new Promise((resolve, reject) => {
-        child_process.execFile(
-            path.join(fixture, 'run'),
-            ['--exit-zero', '--html', '--json', '--markdown', '--pdf'],
-            { cwd: fixture },
-            (err, stdout, stderr) => {
-                if (err) reject(err);
-                else resolve({stdout, stderr});
-            }
-        );
-    });
+    await execFile(
+        path.join(fixture, 'run'),
+        ['--exit-zero', '--html', '--json', '--markdown', '--pdf'],
+        { cwd: fixture },
+    );
 
     const html = await fs.promises.readFile(html_file, 'utf-8');
     assert(

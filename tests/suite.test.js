@@ -1,21 +1,13 @@
 const assert = require('assert').strict;
 const path = require('path');
-const child_process = require('child_process');
+const { execFile } = require('./helpers');
 
 async function run() {
-    // Run in subprocess so that handle exhaustion does not affect this process
     const sub_run = path.join(__dirname, 'suite', 'run');
-    const {stderr} = await new Promise((resolve, reject) => {
-        child_process.execFile(
-            sub_run,
-            ['--exit-zero', '--no-screenshots', '-f', 'suite$'],
-            { cwd: path.dirname(sub_run) },
-            (err, stdout, stderr) => {
-                if (err) reject(err);
-                else resolve({stdout, stderr});
-            }
-        );
-    });
+    const {stderr} = await execFile(
+        sub_run,
+        ['--exit-zero', '--no-screenshots', '-f', 'suite$'],
+    );
 
     assert(/2 tests passed/.test(stderr), 'finds 2 tests');
 }

@@ -1,21 +1,14 @@
 
 const assert = require('assert').strict;
 const path = require('path');
-const child_process = require('child_process');
+const { execFile } = require('./helpers');
 
 async function run() {
     const sub_run = path.join(__dirname, 'flaky_tests', 'run');
-    const {stderr} = await new Promise((resolve, reject) => {
-        child_process.execFile(
-            sub_run,
-            ['--exit-zero', '--no-colors', '--no-screenshots',  '--repeat', '3', '--repeat-flaky', '3', '--quiet'],
-            { cwd: path.dirname(sub_run) },
-            (err, stdout, stderr) => {
-                if (err) reject(err);
-                else resolve({stdout, stderr});
-            }
-        );
-    });
+    const {stderr} = await execFile(
+        sub_run,
+        ['--exit-zero', '--no-colors', '--no-screenshots',  '--repeat', '3', '--repeat-flaky', '3', '--quiet'],
+    );
 
     const lines = stderr.split('\n').filter(Boolean);
     const status = lines.slice(0, -3);

@@ -1,19 +1,13 @@
 const assert = require('assert').strict;
 const path = require('path');
-const child_process = require('child_process');
+const { execFile } = require('./helpers');
 
 async function run() {
     const script = path.join(__dirname, '..', 'bin', 'cli.js');
-    const {stderr} = await new Promise((resolve, reject) => {
-        child_process.execFile(
-            'node',
-            ['-r', 'ts-node/register', script, '--exit-zero', '--no-screenshots', '--tests-glob', 'tests/ts_node/*.ts', '--no-pdf'],
-            (err, stdout, stderr) => {
-                if (err) reject(err);
-                else resolve({stdout, stderr});
-            }
-        );
-    });
+    const {stderr} = await execFile(
+        'node',
+        ['-r', 'ts-node/register', script, '--exit-zero', '--no-screenshots', '--tests-glob', 'tests/ts_node/*.ts', '--no-pdf'],
+    );
 
     assert(/1 tests passed/.test(stderr), 'Did run any tests');
 }

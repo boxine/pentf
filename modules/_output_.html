@@ -77,6 +77,7 @@
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_output_.html#log" class="tsd-kind-icon">log</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_output_.html#logtaskerror" class="tsd-kind-icon">log<wbr>Task<wbr>Error</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_output_.html#logverbose" class="tsd-kind-icon">log<wbr>Verbose</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_output_.html#proxyconsole" class="tsd-kind-icon">proxy<wbr>Console</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_output_.html#reportlogfile" class="tsd-kind-icon">report<wbr>Log<wbr>File</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_output_.html#shouldshowerror" class="tsd-kind-icon">should<wbr>Show<wbr>Error</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_output_.html#status" class="tsd-kind-icon">status</a></li>
@@ -98,7 +99,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L113">output.js:113</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L145">output.js:145</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -128,7 +129,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L210">output.js:210</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L242">output.js:242</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -162,7 +163,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L86">output.js:86</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L118">output.js:118</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -196,7 +197,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L489">output.js:489</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L521">output.js:521</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -254,7 +255,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L473">output.js:473</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L505">output.js:505</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -288,7 +289,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L270">output.js:270</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L302">output.js:302</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -320,7 +321,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L605">output.js:605</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L637">output.js:637</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -352,7 +353,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L295">output.js:295</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L327">output.js:327</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -374,6 +375,40 @@
 						</li>
 					</ul>
 				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="proxyconsole" class="tsd-anchor"></a>
+					<h3>proxy<wbr>Console</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">proxy<wbr>Console<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">(Anonymous function)</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L23">output.js:23</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-symbol">{}</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+								<li>
+									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">(Anonymous function)</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module tsd-is-private">
 					<a name="reportlogfile" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> report<wbr>Log<wbr>File</h3>
@@ -384,7 +419,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L256">output.js:256</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L288">output.js:288</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -414,7 +449,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L594">output.js:594</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L626">output.js:626</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -446,7 +481,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L32">output.js:32</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L64">output.js:64</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -478,7 +513,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f0ee9c3/src/output.js#L465">output.js:465</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/93a2490/src/output.js#L497">output.js:497</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -593,6 +628,9 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_output_.html#logverbose" class="tsd-kind-icon">log<wbr>Verbose</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_output_.html#proxyconsole" class="tsd-kind-icon">proxy<wbr>Console</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module tsd-is-private">
 						<a href="_output_.html#reportlogfile" class="tsd-kind-icon">report<wbr>Log<wbr>File</a>

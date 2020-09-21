@@ -586,7 +586,11 @@ async function formatError(config, err) {
                 }
 
                 const location = link(config, frame.fileName, `file://${frame.fileName}`);
-                return color(config, 'dim', `at ${frame.name} (`) + color(config, 'cyan', location) + color(config, 'dim', `:${frame.line}:${frame.column})`);
+                // Differentiate files that either are in user-space or were used to display the code-frame clearly.
+                const locationLink = nearestFrame === frame || (!/node_modules/.test(frame.fileName) && frame.fileName.startsWith(config.rootDir))
+                    ? color(config, 'lightCyan', location)
+                    : color(config, 'cyan', location);
+                return color(config, 'dim', `at ${frame.name} (`) + locationLink + color(config, 'dim', `:${frame.line}:${frame.column})`);
             } else {
                 // Internal native code in node (or CI system)
                 return color(config, 'dim', frame.raw.trim());

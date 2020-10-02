@@ -102,6 +102,31 @@ function assertIncludes(haystack, needle, message = undefined) {
 }
 
 /**
+* Assert that a string is <b>not</b> included in another, or object is <b>not</b> included in an array.
+*
+* @example
+* ```javascript
+* assertNotIncludes('foobar', 'xxx');
+* assertNotIncludes([9, 5, 3], 2);
+* ```
+* @template T
+* @param {T[]} haystack The thing to search in.
+* @param {T} needle The thing to search for.
+* @param {string?} message Optional error message if the assertion does not hold.
+*/
+function assertNotIncludes(haystack, needle, message = undefined) {
+    lazyAssert(
+        haystack.includes, () => `Haystack object ${haystack} does not have an includes method`);
+
+    lazyAssert(
+        !haystack.includes(needle),
+        () => (
+            `Expected ${JSON.stringify(haystack)} to not include ${JSON.stringify(needle)}.` +
+            (message ? ' ' + message : '')
+        )
+    );
+}
+/**
  * Assert that a condition is eventually true.
  *
  * @example
@@ -258,6 +283,7 @@ module.exports = {
     assertIncludes,
     assertLess,
     assertLessEqual,
+    assertNotIncludes,
     assertNumeric,
     lazyAssert,
 };

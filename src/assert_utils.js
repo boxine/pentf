@@ -109,8 +109,9 @@ function assertIncludes(haystack, needle, message = undefined) {
 * assertNotIncludes('foobar', 'xxx');
 * assertNotIncludes([9, 5, 3], 2);
 * ```
-* @param {string|array} haystack The thing to search in.
-* @param {string|array} needle The thing to search for.
+* @template T
+* @param {T[]} haystack The thing to search in.
+* @param {T} needle The thing to search for.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
 function assertNotIncludes(haystack, needle, message = undefined) {

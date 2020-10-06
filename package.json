@@ -134,7 +134,7 @@
     "lint": "eslint . run",
     "types": "tsc && cp dist/types/* .",
     "build": "babel --out-dir dist/ --out-file-extension .mjs src/*.js",
-    "clean": "rimraf doc dist",
+    "clean": "rimraf doc dist *.d.ts",
     "prepublishOnly": "npm run clean && npm run types && npm run build"
   },
   "repository": {

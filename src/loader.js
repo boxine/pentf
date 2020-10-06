@@ -5,6 +5,26 @@ const {promisify} = require('util');
 const {pathToFileURL} = require('url');
 
 /**
+ * Find nearest `package.json` file
+ * @param {string} dir
+ * @returns {string | null} Path to package.json or null if not found
+ */
+async function findPackageJson(dir) {
+    let fileName = path.join(dir, 'package.json');
+    try {
+        await fs.promises.readFile(fileName);
+        return fileName;
+    } catch(e) {
+        // File doesn't exist, traverse upwards
+        if (e.code === 'ENOENT' && dir !== path.dirname(dir)) {
+            return await findPackageJson(path.dirname(dir));
+        }
+    }
+
+    return null;
+}
+
+/**
  * Check if the current running node version supports import statements.
  * Node doesn't have a native way to check for this.
  */
@@ -22,6 +42,8 @@ async function supportsImports() {
 }
 
 let canUseImport;
+/** @type {"module" | "commonjs" | undefined} */
+let moduleType;
 
 /**
  * Load module via CommonJS or ES Modules depending on the environment
@@ -31,13 +53,18 @@ async function importFile(file) {
     if (canUseImport === undefined) {
         canUseImport = await supportsImports();
     }
+    if (moduleType === undefined) {
+        const pkg = await findPackageJson(path.dirname(file));
+        const content = await fs.promises.readFile(pkg, 'utf-8');
+        moduleType = JSON.parse(content).module || 'commonjs';
+    }
 
     // Only use import() for JavaScript files. Patching module
     // resolution of import() calls is still very experimental, so
     // tools like `ts-node´ need to keep using `require` calls.
     // Note that we still need to forward loading from `node_modules`
     // to `import()` regardless.
-    if ((/\.[cm]?js$/.test(file) || !file.includes('.')) && canUseImport) {
+    if ((moduleType === 'module' || file.endsWith('.mjs')) && (/\.[cm]?js$/.test(file) || !file.includes('.')) && canUseImport) {
         // Use dynamic import statement to be able to load both native esm
         // and commonjs modules.
 
@@ -244,6 +271,7 @@ async function loadTests(config, globPattern) {
 
 module.exports = {
     applyTestFilters,
+    findPackageJson,
     importFile,
     loadTests,
     supportsImports,

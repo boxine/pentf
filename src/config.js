@@ -8,7 +8,7 @@ const path = require('path');
 const {promisify} = require('util');
 
 const utils = require('./utils');
-const { importFile } = require('./loader');
+const { importFile, findPackageJson } = require('./loader');
 
 class AutoWidthArgumentParser extends argparse.ArgumentParser {
     _getFormatter() {
@@ -481,26 +481,6 @@ async function readConfigFile(configDir, env) {
 /**
  * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string}} Config
  */
-
-/**
- * Find nearest `package.json` file
- * @param {string} dir
- * @returns {string | null} Path to package.json or null if not found
- */
-async function findPackageJson(dir) {
-    let fileName = path.join(dir, 'package.json');
-    try {
-        await fs.promises.readFile(fileName);
-        return fileName;
-    } catch(e) {
-        // File doesn't exist, traverse upwards
-        if (e.code === 'ENOENT' && dir !== path.dirname(dir)) {
-            return await findPackageJson(path.dirname(dir));
-        }
-    }
-
-    return null;
-}
 
 /**
  * @param {import('./main').PentfOptions} options

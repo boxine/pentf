@@ -7,6 +7,9 @@
   "directories": {
     "test": "tests"
   },
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "bin": {
     "pentf": "./bin/cli.js"
   },

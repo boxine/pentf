@@ -76,6 +76,16 @@ async function run(config) {
     await clickNestedText(page, /foo$/);
     assert.deepStrictEqual(clicks, ['clickme', 'clickme']);
 
+    // Option: assertSuccess
+    let success = false;
+    await clickNestedText(page, /^clickme/, {
+        assertSuccess: () => {
+            const old = success;
+            success = !success;
+            return old;
+        }
+    });
+    assert(success, 'assertSuccess was not invoked');
 
     await closePage(page);
 }

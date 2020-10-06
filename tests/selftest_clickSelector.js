@@ -63,6 +63,17 @@ async function run(config) {
         e => e.stack.includes("'invalid[' is not a valid selector")
     );
 
+    // Option: assertSuccess
+    let success = false;
+    await clickSelector(page, 'button#clickme', {
+        assertSuccess: () => {
+            const old = success;
+            success = !success;
+            return old;
+        }
+    });
+    assert(success, 'assertSuccess was not invoked');
+
     await closePage(page);
 }
 

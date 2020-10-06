@@ -39,6 +39,17 @@ async function run(config) {
     await clickTestId(page, 'invisible', {visible: false, timeout: 1000});
     assert.deepStrictEqual(clicks, ['invisible']);
 
+    // Option: assertSuccess
+    let success = false;
+    await clickTestId(page, 'first', {
+        assertSuccess: () => {
+            const old = success;
+            success = !success;
+            return old;
+        }
+    });
+    assert(success, 'assertSuccess was not invoked');
+
     await closePage(page);
 }
 

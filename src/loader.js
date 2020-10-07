@@ -28,6 +28,12 @@ async function findPackageJson(dir) {
 let moduleType;
 
 /**
+ * Will be set during compilation. Prevents ESM modules trying to use
+ * `require` for loading modules
+ */
+const BUILD_TYPE = 'commonjs';
+
+/**
  * Load module via CommonJS or ES Modules depending on the environment
  * @param {string} file
  */
@@ -43,7 +49,7 @@ async function importFile(file) {
     // tools like `ts-node´ need to keep using `require` calls.
     // Note that we still need to forward loading from `node_modules`
     // to `import()` regardless.
-    if (moduleType === 'module' || /\.mjs$/.test(file)) {
+    if (BUILD_TYPE === 'module' || moduleType === 'module' || /\.mjs$/.test(file)) {
         // Use dynamic import statement to be able to load both native esm
         // and commonjs modules.
 

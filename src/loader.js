@@ -24,24 +24,6 @@ async function findPackageJson(dir) {
     return null;
 }
 
-/**
- * Check if the current running node version supports import statements.
- * Node doesn't have a native way to check for this.
- */
-async function supportsImports() {
-    let canUseImport = true;
-    try {
-        await import('./file-that-does-not-exist');
-    } catch (err) {
-        if (/Not\ssupported/.test(err.message)) {
-            canUseImport = false;
-        }
-    }
-
-    return canUseImport;
-}
-
-let canUseImport;
 /** @type {"module" | "commonjs" | undefined} */
 let moduleType;
 
@@ -50,9 +32,6 @@ let moduleType;
  * @param {string} file
  */
 async function importFile(file) {
-    if (canUseImport === undefined) {
-        canUseImport = await supportsImports();
-    }
     if (moduleType === undefined) {
         const pkg = await findPackageJson(path.dirname(file));
         const content = await fs.promises.readFile(pkg, 'utf-8');
@@ -64,7 +43,7 @@ async function importFile(file) {
     // tools like `ts-node´ need to keep using `require` calls.
     // Note that we still need to forward loading from `node_modules`
     // to `import()` regardless.
-    if ((moduleType === 'module' || file.endsWith('.mjs')) && (/\.[cm]?js$/.test(file) || !file.includes('.')) && canUseImport) {
+    if (moduleType === 'module' || /\.mjs$/.test(file)) {
         // Use dynamic import statement to be able to load both native esm
         // and commonjs modules.
 
@@ -274,5 +253,4 @@ module.exports = {
     findPackageJson,
     importFile,
     loadTests,
-    supportsImports,
 };

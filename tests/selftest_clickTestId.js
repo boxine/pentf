@@ -41,14 +41,16 @@ async function run(config) {
 
     // Option: assertSuccess
     let success = false;
+    let called = false;
     await clickTestId(page, 'first', {
         assertSuccess: () => {
+            called = true;
             const old = success;
             success = !success;
             return old;
         }
     });
-    assert(success, 'assertSuccess was not invoked');
+    assert(called, 'assertSuccess was not invoked');
 
     await closePage(page);
 }

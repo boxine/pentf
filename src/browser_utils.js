@@ -544,8 +544,7 @@ async function onSuccess(fn) {
     if (!fn) return true;
 
     try {
-        await fn();
-        return true;
+        return await fn();
     } catch(err) {
         return false;
     }

@@ -282,6 +282,18 @@ module.exports = function cjs2esm({types: t}) {
                 },
             },
 
+            StringLiteral(path) {
+                // Replace `const BUILD_TYPE = 'commonjs';` with `const BUILD_TYPE = 'module';`
+                if (
+                    t.isVariableDeclarator(path.parent) &&
+                    t.isIdentifier(path.parent.id) &&
+                    path.parent.id.name === 'BUILD_TYPE' &&
+                    path.node.value === 'commonjs'
+                ) {
+                    path.replaceWith(t.stringLiteral('module'));
+                }
+            },
+
             Directive(path) {
                 // ES Modules are always strict, therefore delete any
                 // present "use strict"; directives

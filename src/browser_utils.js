@@ -120,6 +120,12 @@ async function newPage(config, chrome_args=[]) {
             HOME: tmp_home,
         };
     }
+
+    // Resize browser to actual viewport width
+    if (!config.headless) {
+        params.defaultViewport = null;
+    }
+
     const browser = await puppeteer.launch(params);
     const page = (await browser.pages())[0];
 
@@ -156,6 +162,44 @@ async function newPage(config, chrome_args=[]) {
         browser.on('targetcreated', configureDevtools);
         const targets = await browser.targets();
         await Promise.all(targets.map(t => configureDevtools(t)));
+    }
+
+    // Make sure that the browser window matches the viewport size
+    if (!config.headless) {
+        // Default puppeteer viewport size
+        // TODO: Make this configurable for users
+        const expected = { width: 800, height: 600 };
+        const actual = await page.evaluate(() => {
+            return { width: window.innerWidth, height: window.innerHeight };
+        });
+
+        if (actual.width !== expected.width || actual.height !== expected.height) {
+            // Get browser tab and resize window via devtools protocol
+            const targets = await browser._connection.send(
+                'Target.getTargets'
+            );
+            const target = targets.targetInfos.find(t => t.attached === true && t.type === 'page');
+            if (!target) {
+                throw new Error('INTERNAL ERROR: Missing page in window');
+            }
+            const {windowId} = await browser._connection.send(
+                'Browser.getWindowForTarget',
+                {targetId: target.targetId}
+            );
+            const {bounds} = await browser._connection.send(
+                'Browser.getWindowBounds',
+                {windowId}
+            );
+
+            // Resize to correct dimensions
+            await browser._connection.send('Browser.setWindowBounds', {
+                bounds: {
+                    width: bounds.width + expected.width - actual.width,
+                    height: bounds.height + expected.height - actual.height
+                },
+                windowId
+            });
+        }
     }
 
     browser._logs = [];

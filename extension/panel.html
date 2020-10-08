@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Pentf Extensions</title>
+		<!-- Paths must be relative to HTML file -->
+		<link rel="stylesheet" href="panel.css" />
+	</head>
+	<body>
+		<div id="app">
+            <h1>DOM Snapshots</h1>
+
+            <form>
+                <ol class="list-none p-0">
+                    <li class="p-4 pt-2 pb-2 bg-gray mb-2 flex justify-between items-center">
+                        <p class="m-0">First</p>
+
+                        <span class="flex items-center">
+                            <input id="snapshot-type-before" type="radio" name="snapshot-type" value="before" checked="" />
+                            <label for="snapshot-type-before" class="mr-2">Before</label>
+
+                            <input id="snapshot-type-after" type="radio" name="snapshot-type" value="after" />
+                            <label for="snapshot-type-after">After</label>
+                        </span>
+                    </li>
+                    <li class="p-4 pt-2 pb-2 bg-gray mb-2 flex justify-between items-center">
+                        <p class="m-0">Current</p>
+
+                        <span></span>
+                    </li>
+                </ol>
+            </form>
+        </div>
+	</body>
+</html>

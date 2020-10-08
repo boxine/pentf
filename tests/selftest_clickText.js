@@ -1,6 +1,7 @@
 const assert = require('assert').strict;
 
 const {closePage, newPage, clickText} = require('../src/browser_utils');
+const { wait } = require('../src/utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -39,6 +40,8 @@ async function run(config) {
     });
     assert(called, 'assertSuccess was not invoked');
     assert.deepStrictEqual(clicks, ['first', 'first']);
+
+    await wait(1000000)
 
     await closePage(page);
 }

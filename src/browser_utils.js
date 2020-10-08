@@ -73,8 +73,9 @@ async function newPage(config, chrome_args=[]) {
         params.headless = false;
 
         // Browser extensions only work in non-headless mode
-        if (config.extensions && config.extensions.length) {
-            const extensions = config.extensions.join(',');
+        if (config.debug || config.extensions) {
+            const pentfExtension = path.join(__dirname, '..', 'extension');
+            const extensions = [pentfExtension, ...config.extensions].join(',');
 
             args.push(
                 // Without this flag the supplied extensions are not

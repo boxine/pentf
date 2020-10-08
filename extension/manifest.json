@@ -1,0 +1,29 @@
+{
+	"manifest_version": 2,
+	"name": "Pentf Debugger",
+	"description": "Adds debugging tools for Pentf",
+	"version": "1.2.0",
+	"devtools_page": "index.html",
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+	"permissions": ["file:///*", "http://*/*", "https://*/*", "storage"],
+	"icons": {
+		"16": "icons/icon-16.png",
+		"32": "icons/icon-32.png",
+		"48": "icons/icon-48.png",
+		"128": "icons/icon-128.png",
+		"192": "icons/icon-192.png"
+	},
+	"background": {
+		"scripts": ["background.js"],
+		"persistent": false
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["content-script.js"],
+			"all_frames": true,
+			"run_at": "document_start"
+		}
+	],
+	"web_accessible_resources": ["pentf.css"]
+}

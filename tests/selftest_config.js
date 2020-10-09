@@ -4,7 +4,7 @@ const {_readConfigFile: readConfigFile} = require('../src/config');
 
 async function run() {
     const exampleDir = path.join(__dirname, 'config_examples');
-    const exampleConfig = await readConfigFile(exampleDir, 'json');
+    const exampleConfig = await readConfigFile(exampleDir, 'json', 'commonjs');
 
     assert(exampleConfig.json_loaded);
     assert(exampleConfig.simple_loaded);

@@ -3,6 +3,7 @@ const path = require('path');
 const glob = require('glob');
 const {promisify} = require('util');
 const {pathToFileURL} = require('url');
+const assert = require('assert').strict;
 
 /**
  * Find nearest `package.json` file
@@ -24,9 +25,6 @@ async function findPackageJson(dir) {
     return null;
 }
 
-/** @type {"module" | "commonjs" | undefined} */
-let moduleType;
-
 /**
  * Will be set during compilation. Prevents ESM modules trying to use
  * `require` for loading modules
@@ -36,20 +34,16 @@ const BUILD_TYPE = 'commonjs';
 /**
  * Load module via CommonJS or ES Modules depending on the environment
  * @param {string} file
+ * @param {"commonjs" | "module"} moduleType
  */
-async function importFile(file) {
-    if (moduleType === undefined) {
-        const pkg = await findPackageJson(path.dirname(file));
-        const content = await fs.promises.readFile(pkg, 'utf-8');
-        moduleType = JSON.parse(content).module || 'commonjs';
-    }
-
+async function importFile(file, moduleType) {
+    assert(moduleType, 'Module type argument was undefined. Expected "commonjs" or "esm"');
     // Only use import() for JavaScript files. Patching module
     // resolution of import() calls is still very experimental, so
     // tools like `ts-node´ need to keep using `require` calls.
     // Note that we still need to forward loading from `node_modules`
     // to `import()` regardless.
-    if (BUILD_TYPE === 'module' || moduleType === 'module' || /\.mjs$/.test(file)) {
+    if (BUILD_TYPE === 'module' || moduleType === 'esm' || /\.mjs$/.test(file)) {
         // Use dynamic import statement to be able to load both native esm
         // and commonjs modules.
 
@@ -239,7 +233,7 @@ async function loadTests(config, globPattern) {
     const testCases = [];
     await Promise.all(
         tests.map(async t => {
-            let tc = await importFile(t.fileName);
+            let tc = await importFile(t.fileName, config.moduleType);
 
             if (typeof tc.suite === 'function') {
                 testCases.push(...loadSuite(t.fileName, t.name, tc.suite));

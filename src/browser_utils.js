@@ -49,9 +49,9 @@ async function newPage(config, chrome_args=[]) {
     let puppeteer;
     try {
         if(config.puppeteer_firefox) {
-            puppeteer = await importFile('puppeteer-firefox');
+            puppeteer = await importFile('puppeteer-firefox', config.moduleType);
         } else {
-            puppeteer = await importFile('puppeteer');
+            puppeteer = await importFile('puppeteer', config.moduleType);
         }
     } catch(e) {
         // puppeteer/puppeteer-firefox is a peer dependency. Show a helpful error message when it's missing.

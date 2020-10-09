@@ -7,7 +7,8 @@ async function run(config) {
         (await loadTests(
             {
                 filter: 'selftest_lo[ao]der',
-                rootDir: config.rootDir
+                rootDir: config.rootDir,
+                moduleType: 'commonjs'
             },
             'tests/*.js'
         )).map(
@@ -22,6 +23,7 @@ async function run(config) {
             filter: 'selftest_[a-l]',
             filter_body: 'he5Eih1oh+ai8sho',
             rootDir: config.rootDir,
+            moduleType: 'commonjs'
         },
         'tests/*.js'
     );

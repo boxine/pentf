@@ -7,6 +7,7 @@ async function run() {
         afterAllTests: undefined,
         beforeAllTests: undefined,
         rootDir: process.cwd(),
+        moduleType: 'commonjs',
         sentry: undefined,
         sentry_dsn: undefined
     });

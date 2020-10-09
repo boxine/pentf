@@ -70,7 +70,6 @@
 							<h3>Variables</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-variable tsd-parent-kind-module"><a href="_loader_.html#build_type" class="tsd-kind-icon">BUILD_<wbr>TYPE</a></li>
-								<li class="tsd-kind-variable tsd-parent-kind-module"><a href="_loader_.html#moduletype" class="tsd-kind-icon">module<wbr>Type</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -94,7 +93,7 @@
 					<div class="tsd-signature tsd-kind-icon">BUILD_<wbr>TYPE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"commonjs"</span><span class="tsd-signature-symbol"> = &quot;commonjs&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/boxine/pentf/blob/7901042/src/loader.js#L34">loader.js:34</a></li>
+							<li>Defined in <a href="https://github.com/boxine/pentf/blob/f18e857/src/loader.js#L32">loader.js:32</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -102,18 +101,6 @@
 							<p>Will be set during compilation. Prevents ESM modules trying to use
 							<code>require</code> for loading modules</p>
 						</div>
-					</div>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-module">
-					<a name="moduletype" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagLet">Let</span> module<wbr>Type</h3>
-					<div class="tsd-signature tsd-kind-icon">module<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"module"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"commonjs"</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/boxine/pentf/blob/7901042/src/loader.js#L28">loader.js:28</a></li>
-						</ul>
-					</aside>
-					<div class="tsd-comment tsd-typography">
 					</div>
 				</section>
 			</section>
@@ -129,7 +116,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7901042/src/loader.js#L209">loader.js:209</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f18e857/src/loader.js#L203">loader.js:203</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -159,7 +146,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7901042/src/loader.js#L12">loader.js:12</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f18e857/src/loader.js#L13">loader.js:13</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -182,13 +169,13 @@
 					<a name="importfile" class="tsd-anchor"></a>
 					<h3>import<wbr>File</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">import<wbr>File<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">import<wbr>File<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, moduleType<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"commonjs"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"module"</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7901042/src/loader.js#L40">loader.js:40</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f18e857/src/loader.js#L39">loader.js:39</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -200,6 +187,9 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>file: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>moduleType: <span class="tsd-signature-type">"commonjs"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"module"</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
@@ -218,7 +208,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7901042/src/loader.js#L97">loader.js:97</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f18e857/src/loader.js#L91">loader.js:91</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -270,7 +260,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7901042/src/loader.js#L230">loader.js:230</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/f18e857/src/loader.js#L224">loader.js:224</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -364,9 +354,6 @@
 				<ul class="before-current">
 					<li class=" tsd-kind-variable tsd-parent-kind-module">
 						<a href="_loader_.html#build_type" class="tsd-kind-icon">BUILD_<wbr>TYPE</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-module">
-						<a href="_loader_.html#moduletype" class="tsd-kind-icon">module<wbr>Type</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_loader_.html#applytestfilters" class="tsd-kind-icon">apply<wbr>Test<wbr>Filters</a>

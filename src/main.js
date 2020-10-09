@@ -81,10 +81,12 @@ async function real_main(options={}) {
 
     const test_cases = await loadTests(config, config.testsGlob);
 
-    if (args.print_version) {
+    if (args.print_version || process.env.CI) {
         console.log(await testsVersion(config));
         console.log('pentf ' + pentfVersion());
-        return;
+        if (args.print_version) {
+            return;
+        }
     }
 
     // Argparse wraps argument lists with another array

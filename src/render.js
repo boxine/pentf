@@ -206,7 +206,7 @@ function markdown(results) {
 ${report_header_md}
 ### Options
 Tested Environment: **${results.config.env}**
-Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}
+Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}${results.cpuCount ? ' (' + results.cpuCount + ' CPUs)' : ''}
 ${((results.config.repeat || 1) > 1) ?
         'Each test repeated **' + escape_html(results.config.repeat + '') + '** times  \n' : ''
 }Start: ${format_timestamp(results.start)}
@@ -451,7 +451,7 @@ td.test_footer {
 ${report_header_html}
 <h2>Options</h2>
 <p>Tested Environment: <strong>${results.config.env}</strong><br/>
-Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}<br/>
+Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}${results.cpuCount ? ' (' + results.cpuCount + ' CPUs)' : ''}<br/>
 ${((results.config.repeat || 1) > 1) ? 'Each test repeated <strong>' + escape_html(results.config.repeat + '') + '</strong> times<br/>' : ''}
 Start: ${format_timestamp(results.start)}<br/>
 Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>

@@ -15,6 +15,7 @@ const output = require('./output');
 const utils = require('./utils');
 const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
+const { getCPUCount } = require('./config');
 const { shouldShowError } = require('./output');
 
 /**
@@ -713,8 +714,10 @@ async function run(config, testCases) {
     const testsVersion = await timeoutPromise(
         config, version.testsVersion(config), {message: 'version determination', warning: true});
     const pentfVersion = version.pentfVersion();
+    const cpuCount = getCPUCount();
 
     return {
+        cpuCount,
         test_start,
         test_end,
         pentfVersion,

@@ -32,12 +32,17 @@ function listEnvs(configDir) {
     return res;
 }
 
+function getCPUCount() {
+    return os.cpus().length;
+    // TODO handle scenarios where our process is limited to less
+}
+
 function computeConcurrency(spec, {cpuCount=undefined}={}) {
     if (typeof spec === 'number') { // Somebody passed in result value directly
         return spec;
     }
     if (cpuCount === undefined) {
-        cpuCount = os.cpus().length;
+        cpuCount = getCPUCount();
     }
 
     return spec.split('+').map(
@@ -540,6 +545,7 @@ module.exports = {
     listEnvs,
     parseArgs,
     readConfig,
+    getCPUCount,
     // tests only
     _readConfigFile: readConfigFile,
     _computeConcurrency: computeConcurrency,

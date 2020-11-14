@@ -504,7 +504,7 @@ async function readConfig(options, args) {
     if (pkgJsonPath !== null) {
         const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath));
         config = pkgJson.pentf || config;
-        if (pkgJson.module) moduleType = 'esm';
+        if (pkgJson.type === 'module') moduleType = 'esm';
     }
 
     // "pentf.config.js" configuration file

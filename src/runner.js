@@ -131,11 +131,24 @@ async function run_task(config, task) {
                         await promisify(mkdirp)(config.screenshot_directory);
                         const fn = path.join(
                             config.screenshot_directory, `${task.id || task.name}-${i}.png`);
-                        return await page.screenshot({
+
+                        const viewport = page.viewport();
+                        const img = await page.screenshot({
                             path: fn,
                             type: 'png',
                             fullPage: true,
                         });
+
+                        // Restore emulation, fixes unable to resize window after taking a screenshot.
+                        await page._client.send('Emulation.clearDeviceMetricsOverride');
+
+                        // Restore potential emulation settings that were active before
+                        // we took the screenshot.
+                        if (viewport !== null) {
+                            await page.setViewport(viewport);
+                        }
+
+                        return img;
                     })
                 );
                 task.error_screenshots = await timeoutPromise(

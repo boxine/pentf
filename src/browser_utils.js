@@ -608,10 +608,11 @@ async function onSuccess(fn) {
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
- * @param {() => Promise<boolean>?} assertSuccess Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess} = {}) {
+async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickSelector(${selector})`);
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
@@ -636,7 +637,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
             }
         }
 
-        if (found && await onSuccess(assertSuccess)) {
+        if (found && await onSuccess(retryUntil || assertSuccess)) {
             const config = getBrowser(page)._pentf_config;
             addBreadcrumb(config, `exit clickSelector(${selector})`);
             return;
@@ -690,15 +691,16 @@ async function assertNotSelector(page, selector, {timeout=getDefaultTimeout(page
  * ```
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string} xpath XPath selector to match the element.
- * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the element is not visible in time.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
- * @param {() => Promise<boolean>?} assertSuccess Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess} = {}) {
+async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickXPath(${xpath})`);
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
@@ -724,7 +726,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
             }
         }
 
-        if (found && await onSuccess(assertSuccess)) {
+        if (found && await onSuccess(retryUntil || assertSuccess)) {
             addBreadcrumb(config, `exit clickXPath(${xpath})`);
             return;
         }
@@ -754,10 +756,11 @@ const DEFAULT_CLICKABLE = (
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
- * @param {() => Promise<boolean>?} assertSuccess Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined, assertSuccess}={}) {
+async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined, assertSuccess, retryUntil}={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickText(${text})`);
     checkText(text);
@@ -768,7 +771,7 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
     const res = await clickXPath(page, xpath, {
         timeout,
         checkEvery,
-        assertSuccess,
+        retryUntil: retryUntil || assertSuccess,
         message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`,
     });
     addBreadcrumb(config, `exit clickText(${text})`);
@@ -787,10 +790,11 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
  * @param {boolean?} visible Optional check if element is visible (default: true)
- * @param {() => Promise<boolean>?} assertSuccess Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage=undefined, visible=true, assertSuccess}={}) {
+async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage=undefined, visible=true, assertSuccess, retryUntil}={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickNestedText(${textOrRegExp})`);
     if (typeof textOrRegExp === 'string') {
@@ -872,7 +876,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
             }
         }
 
-        if (found && await onSuccess(assertSuccess)) {
+        if (found && await onSuccess(retryUntil || assertSuccess)) {
             addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
             return;
         }
@@ -892,13 +896,14 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
  *
  * @param {import('puppeteer').Page} page The puppeteer page handle.
  * @param {string} testId The test ID to look for.
- * @param {{extraMessage?: string, timeout?: number, visible?: boolean, assertSuccess?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{extraMessage?: string, timeout?: number, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} extraMessage Optional error message shown if the element is not present in time.
  * @param {number?} timeout How long to wait, in milliseconds. (default: true)
- * @param {() => Promise<boolean>?} assertSuccess Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true, assertSuccess} = {}) {
+async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true, assertSuccess, retryUntil} = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickTestId(${testId})`);
     _checkTestId(testId);
@@ -906,7 +911,7 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
     const xpath = `//*[@data-testid="${testId}"]`;
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
     const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
-    const res = await clickXPath(page, xpath, {timeout, message, visible, assertSuccess});
+    const res = await clickXPath(page, xpath, {timeout, message, visible, retryUntil: retryUntil || assertSuccess});
     addBreadcrumb(config, `exit clickTestId(${testId})`);
     return res;
 }

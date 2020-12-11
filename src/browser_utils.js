@@ -587,11 +587,12 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
 async function onSuccess(fn) {
     if (!fn) return true;
 
-    try {
-        return await fn();
-    } catch(err) {
-        return false;
+    const res = await fn();
+    if (!res) {
+        throw new Error('retryUntil/assertSuccess returned a falsy value');
     }
+
+    return true;
 }
 
 /**
@@ -618,6 +619,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
+    let retryUntilError = null;
     // eslint-disable-next-line no-constant-condition
     while (true) {
         let found = false;
@@ -637,13 +639,21 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
             }
         }
 
-        if (found && await onSuccess(retryUntil || assertSuccess)) {
-            const config = getBrowser(page)._pentf_config;
-            addBreadcrumb(config, `exit clickSelector(${selector})`);
-            return;
+        try {
+            if (found && (await onSuccess(retryUntil || assertSuccess))) {
+                const config = getBrowser(page)._pentf_config;
+                addBreadcrumb(config, `exit clickSelector(${selector})`);
+                return;
+            }
+        } catch (err) {
+            retryUntilError = err;
         }
 
         if (remainingTimeout <= 0) {
+            if (retryUntilError) {
+                throw retryUntilError;
+            }
+
             if (!message) {
                 message = `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${timeout}ms`;
             }
@@ -706,6 +716,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
+    let retryUntilError = null;
     // eslint-disable-next-line no-constant-condition
     while (true) {
         let found = false;
@@ -726,12 +737,20 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
             }
         }
 
-        if (found && await onSuccess(retryUntil || assertSuccess)) {
-            addBreadcrumb(config, `exit clickXPath(${xpath})`);
-            return;
+        try {
+            if (found && await onSuccess(retryUntil || assertSuccess)) {
+                addBreadcrumb(config, `exit clickXPath(${xpath})`);
+                return;
+            }
+        } catch (err) {
+            retryUntilError = err;
         }
 
         if (remainingTimeout <= 0) {
+            if (retryUntilError) {
+                throw retryUntilError;
+            }
+
             if (!message) {
                 message = `Unable to find XPath ${xpath} after ${timeout}ms`;
             }
@@ -806,6 +825,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         : textOrRegExp;
 
     let remainingTimeout = timeout;
+    let retryUntilError = null;
     // eslint-disable-next-line no-constant-condition
     while (true) {
         let found = false;
@@ -876,12 +896,20 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
             }
         }
 
-        if (found && await onSuccess(retryUntil || assertSuccess)) {
-            addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
-            return;
+        try {
+            if (found && await onSuccess(retryUntil || assertSuccess)) {
+                addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
+                return;
+            }
+        } catch (err) {
+            retryUntilError = err;
         }
 
         if (remainingTimeout <= 0) {
+            if (retryUntilError) {
+                throw retryUntilError;
+            }
+
             const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
             throw new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`);
         }

@@ -604,7 +604,7 @@ async function onSuccess(fn) {
  * ```
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string} selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
- * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the element is not visible in time.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
@@ -770,7 +770,7 @@ const DEFAULT_CLICKABLE = (
  *
  * @param {import('puppeteer').Page} page  puppeteer page object.
  * @param {string} text Text that the element must contain.
- * @param {{timeout?: number, checkEvery?: number, elementXPath?: string, extraMessage?: string, assertSuccess: () => Promise<boolean>, retryUntil: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{timeout?: number, checkEvery?: number, elementXPath?: string, extraMessage?: string, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
@@ -804,7 +804,7 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string | RegExp} textOrRegExp Text or regex to match the text that the element must contain.
- * @param {{extraMessage?: string, timeout?: number, checkEvery?: number, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{extraMessage?: string, timeout?: number, checkEvery?: number, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.

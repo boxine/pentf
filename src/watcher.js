@@ -15,6 +15,29 @@ function removeFromModuleCache(fileName) {
 }
 
 /**
+ * 
+ * @param {import('./config').Config} config 
+ * @param {string} key 
+ * @param {string} description 
+ */
+function keyHint(config, key, description) {
+    return output.color(config, 'dim', 'Press ') +
+        key + output.color(config, 'dim', ' ' + description);
+}
+
+/**
+ * 
+ * @param {import('./config').Config} config 
+ */
+function watchFooter(config) {
+    return '\n' + [
+        keyHint(config, 'a', 'to re-run all tests'),
+        keyHint(config, 'q', 'to quit watch mode'),
+        keyHint(config, 'Enter', 'to re-run current tests'),
+    ].join('\n');
+}
+
+/**
  * @typedef {{running: boolean, last_changed_file: string}} WatchState
  */
 
@@ -62,6 +85,8 @@ async function scheduleRun(config, state, onChange) {
         console.log(err);
     }
     state.running = false;
+
+    output.log(config, watchFooter(config));
 }
 
 /**
@@ -82,7 +107,8 @@ async function createWatcher(config, onChange) {
 
     watcher.on('ready', () => {
         if (!config.ci) console.clear();
-        console.log('Waiting for file changes...');
+        output.log(config, 'Waiting for file changes...');
+        output.log(config, watchFooter(config));
     });
 
     watcher.on('unlink', fileOrDir => {

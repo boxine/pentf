@@ -108,6 +108,9 @@ async function createWatcher(config, onChange) {
     async function onKeyPress(key) {
         if (key.name === 'return' && !watchState.running) {
             await scheduleRun(config, watchState, onChange);
+        } else if (key.name === 'a' && !watchState.running) {
+            config.filter = null;
+            await scheduleRun(config, watchState, onChange);
         } else if (key.name === 'q') {
             process.exit(0);
         }

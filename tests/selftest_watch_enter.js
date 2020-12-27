@@ -4,7 +4,7 @@ const {assertEventually} = require('../src/assert_utils');
 const {onTeardown} = require('../src/runner');
 
 async function run(config) {
-    const sub_run = path.join(__dirname, 'watch_tests', 'run');
+    const sub_run = path.join(__dirname, 'watch_tests_no_writes', 'run');
     const child = child_process.spawn(sub_run, ['--watch', '--ci', '--no-colors', '--no-pdf', '-f', 'foo']);
     onTeardown(config, () => child.kill());
 

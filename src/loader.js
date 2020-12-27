@@ -4,6 +4,7 @@ const glob = require('glob');
 const {promisify} = require('util');
 const {pathToFileURL} = require('url');
 const assert = require('assert').strict;
+const output = require('./output');
 
 /**
  * Find nearest `package.json` file
@@ -237,10 +238,12 @@ async function loadTests(config, globPattern) {
 
             if (typeof tc.suite === 'function') {
                 testCases.push(...loadSuite(t.fileName, t.name, tc.suite));
-            } else {
+            } else if (typeof tc.run === 'function') {
                 // ESM modules are readonly, so we need to create our own writable
                 // object.
                 testCases.push({...tc, name: t.name, fileName: t.fileName});
+            } else {
+                output.log(config, output.color(config, 'red', `No tests found in file "${t.fileName}", skipping.`));
             }
         })
     );

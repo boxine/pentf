@@ -102,17 +102,32 @@ async function createWatcher(config, onChange) {
         output: process.stdout,
     });
 
+    /**
+     * @param {{ name: string, sequence: string, ctrl: boolean, shift: boolean, meta: boolean }} key
+     */
+    async function onKeyPress(key) {
+        if (key.name === 'return' && !watchState.running) {
+            await scheduleRun(config, watchState, onChange);
+        } else if (key.name === 'q') {
+            process.exit(0);
+        }
+    }
+
     // Only for tests, can't simulate keycodes without a proper TTY
     process.stdin.on('data', async e => {
-        if (Buffer.isBuffer(e) && e.toString() === String.fromCharCode(13) && !watchState.running) {
-            await scheduleRun(config, watchState, onChange);
+        if (Buffer.isBuffer(e)) {
+            switch(e.toString()) {
+            case String.fromCharCode(13):
+                await onKeyPress({name: 'return'});
+                break;
+            default:
+                await onKeyPress({name: e.toString(), sequence: e.toString()});
+            }
         }
     });
 
     process.stdin.on('keypress', async (_, key) => {
-        if (key.name === 'return' && !watchState.running) {
-            await scheduleRun(config, watchState, onChange);
-        }
+        await onKeyPress(key);
     });
 
     watcher.on('change', async fileOrDir => {

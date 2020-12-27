@@ -29,6 +29,7 @@ async function scheduleRun(config, state, onChange) {
     if (state.running) {
         return;
     }
+    state.running = true;
 
     const absolute = path.join(config.rootDir, state.last_changed_file);
     if (state.last_changed_file) {
@@ -43,10 +44,9 @@ async function scheduleRun(config, state, onChange) {
 
     // Bail out if there are no tests to run
     if (test_cases.length === 0) {
+        state.running = false;
         return;
     }
-
-    state.running = true;
 
     if (!config.ci) console.clear();
     try {

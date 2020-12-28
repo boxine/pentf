@@ -462,11 +462,7 @@ async function parallel_run(config, state) {
 }
 
 /**
- * @typedef {Object} TestCase
- * @param {string} name
- * @param {(config: import('./config').Config) => Promise<void> | void} run
- * @param {(config: import('./config').Config) => Promise<boolean> | boolean} [skip]
- * @param {string} [expectedToFail]
+ * @typedef {{ name: string, run: (config: import('./config').Config) => Promise<void> | void, skip?: (config: import('./config').Config) => Promise<boolean> | boolean, expectedToFail?: string | boolean}} TestCase
  */
 
 /**

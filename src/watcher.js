@@ -81,7 +81,8 @@ function renderSearch(config, state, test_cases) {
             }
             results = test_cases.map((tc, i) => {
                 if (state.selection_active && state.selected_row === i) {
-                    return `  ${output.color(config, 'inverse', output.color(config, 'yellow', tc.name))}`;
+                    return output.color(config, 'dim', '- ') +
+                        output.color(config, 'inverse', output.color(config, 'yellow', tc.name));
                 }
 
                 let name = output.color(config, 'dim', tc.name);
@@ -231,6 +232,10 @@ async function createWatcher(config, onChange) {
                 await scheduleRun(config, watchState, onChange);
             } else if (key.name === 'c') {
                 config.filter = null;
+                watchState.file_pattern = '';
+                watchState.selected_file = null;
+                watchState.selected_row = 0;
+                watchState.selection_active = false;
                 renderDefault(config);
             } else if (key.name === 'p') {
                 watchState.current_view = 'pattern';
@@ -316,6 +321,9 @@ async function createWatcher(config, onChange) {
                     break;
                 case String.fromCharCode(27):
                     await onKeyPress({name: 'escape'});
+                    break;
+                case '↓':
+                    await onKeyPress({name: 'down'});
                     break;
                 default:
                     await onKeyPress({name: e.toString(), sequence: e.toString()});

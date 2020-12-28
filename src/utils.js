@@ -68,6 +68,15 @@ function regexEscape(s) {
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
+function isValidRegex(s) {
+    try {
+        new RegExp(s);
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
 function* range(count) {
     for (let i = 0;i < count;i++) {
         yield i;
@@ -209,9 +218,9 @@ function cmpKey(key) {
 
 /**
  * Delete n characters at a specific position in a string
- * @param {string} input 
- * @param {number} idx 
- * @param {number} count 
+ * @param {string} input
+ * @param {number} idx
+ * @param {number} count
  */
 function removeAt(input, idx, count) {
     if (idx >= 0 && input.length <= 1) return '';
@@ -229,6 +238,7 @@ module.exports = {
     cmpKey,
     count,
     filterMap,
+    isValidRegex,
     localIso8601,
     makeRandomEmail,
     pluck,

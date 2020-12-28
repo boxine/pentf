@@ -68,6 +68,10 @@ function regexEscape(s) {
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
 
+/**
+ * @param {string} s
+ * @returns {boolean} 
+ */
 function isValidRegex(s) {
     try {
         new RegExp(s);

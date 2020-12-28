@@ -225,7 +225,7 @@ function cmpKey(key) {
 function removeAt(input, idx, count) {
     if (idx >= 0 && input.length <= 1) return '';
     if (idx < 0) return input;
-    if (idx > input.length - 1) return input.substr(0, idx)
+    if (idx > input.length - 1) return input.substr(0, idx);
     return input.substr(0, idx) + input.substr(idx + count);
 }
 

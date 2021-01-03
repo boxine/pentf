@@ -271,13 +271,13 @@ function update_results(config, state, task) {
     assert(result);
 
     let status = task.status;
-    if (config.repeatFlaky > 0 && status === 'success' || status === 'error') {
+    if ((config.repeatFlaky > 0 || task.tc.retryTimes > 0) && status === 'success' || status === 'error') {
         const runs = flakyCounts.get(group) || 1;
         // Not flaky if the first run was successful
         if (!(runs === 1 && task.status === 'success')) {
             // If task is failing, but we haven't reached the limit, then
             // we are still trying to determine if the test is flaky.
-            if (runs < config.repeatFlaky && task.status === 'error') {
+            if ((runs < config.repeatFlaky || runs < task.tc.retryTimes) && task.status === 'error') {
                 status = 'todo';
             } else if (task.status === 'success') {
                 // At this point the test was run more than 1 time. This means
@@ -336,7 +336,7 @@ async function run_one(config, state, task) {
     await run_task(config, task);
 
     const repeat = config.repeat || 1;
-    if (count < config.repeatFlaky - 1 && task.status === 'error' && !task.expectedToFail) {
+    if ((count < config.repeatFlaky - 1 || count < task.tc.retryTimes - 1) && task.status === 'error' && !task.expectedToFail) {
         output.logVerbose(config, `[runner] Retrying task for flaky detection. Retry count: ${count + 1} (${task.id})`);
         const tcName = task.tc.name;
         state.tasks.push({

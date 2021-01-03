@@ -298,16 +298,16 @@ function parseArgs(options, raw_args) {
     });
 
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
+    const concurrency_default = '4+cpus';
     runner_group.addArgument(['-C', '--concurrency'], {
         metavar: 'COUNT',
         help: (
             'Maximum number of tests to run in parallel.' +
             ' 0 to run without a pool, sequentially.' +
             ' Can include *, +, and cpus for the number of CPUs.' +
-            ' Defaults to %(defaultValue)s.'
+            ' Defaults to ' + concurrency_default + '.'
         ),
         dest: 'concurrency',
-        defaultValue: '4+cpus',
     });
     runner_group.addArgument(['-S', '--sequential'], {
         help: 'Do not run tests in parallel (same as -C 0)',
@@ -407,12 +407,22 @@ function parseArgs(options, raw_args) {
         help: 'Display the locking client ID we would use if we would lock something now',
     });
 
+    const args = parser.parseArgs(raw_args);
+
+    // Watch mode is typically used for local development. In that case
+    // we need to keep some cores available for other stuff like
+    // a bundler and/or unit test runner for frontend developers.
+    if (!args.concurrency) {
+        args.concurrency = args.watch
+            ? Math.max(1, getCPUCount() - 2)
+            : concurrency_default;
+    }
+
     // Overwrite config object passed to `pentf.main()` with command line
     // arguments. But only overwrite any existing config properties passed
     // to `pentf.main()` if they were actually set via the cli. If the
     // property doesn't exist in the existing config and we didn't specify
     // it as a cli argument, we'll use the default value.
-    const args = parser.parseArgs(raw_args);
     for (const k in parser._actions) {
         const flag = parser._actions[k];
         if (flag.dest in options && args[flag.dest] === flag.defaultValue) {

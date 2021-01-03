@@ -32,6 +32,11 @@ function keyHint(config, key, description) {
  */
 function watchFooter(config) {
     let out = '\n';
+    if (config.debug) {
+        out += output.color(config, 'reset', 'Debug mode: ');
+        out += output.color(config, 'yellow', 'enabled') + '\n\n';
+    }
+
     if (config.filter) {
         out += output.color(config, 'reset', 'Active filter: ');
         out += output.color(config, 'yellow', config.filter) + '\n';
@@ -41,6 +46,7 @@ function watchFooter(config) {
     out += [
         keyHint(config, 'a', 'to re-run all tests'),
         keyHint(config, 'p', 'to search by file pattern'),
+        keyHint(config, 'd', `to ${config.debug ? 'disable' : 'enable'} debug mode`),
         keyHint(config, 'q', 'to quit watch mode'),
         keyHint(config, 'Enter', 'to re-run current tests'),
     ].join('\n');
@@ -236,6 +242,15 @@ async function createWatcher(config, onChange) {
                 watchState.selected_file = null;
                 watchState.selected_row = 0;
                 watchState.selection_active = false;
+                renderDefault(config);
+            } else if (key.name === 'd') {
+                const enabled = !config.debug;
+                config.headless = !enabled;
+                config.debug = enabled;
+                config.devtools = enabled;
+                config.devtools_preserve = enabled;
+                config.keep_open = enabled;
+                config.forward_console = enabled;
                 renderDefault(config);
             } else if (key.name === 'p') {
                 watchState.current_view = 'pattern';

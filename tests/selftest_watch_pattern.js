@@ -101,6 +101,12 @@ async function run(config) {
     await type(child, 'c', /(?!Active filter)/i);
     await type(child, 'p', /Start typing to filter/);
     await type(child, '*', /Pattern contains invalid characters/);
+
+    await type(child, ESCAPE, /waiting for file changes/i);
+    
+    // Toggle debug mode
+    await type(child, 'd', /Debug mode:/i);
+    await type(child, 'd', /(?!Debug mode:)/i);
 }
 
 module.exports = {

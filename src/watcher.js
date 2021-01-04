@@ -235,6 +235,10 @@ async function createWatcher(config, onChange) {
                 await scheduleRun(config, watchState, onChange);
             } else if (key.name === 'a') {
                 config.filter = null;
+                watchState.file_pattern = '';
+                watchState.selected_file = null;
+                watchState.selected_row = 0;
+                watchState.selection_active = false;
                 await scheduleRun(config, watchState, onChange);
             } else if (key.name === 'c') {
                 config.filter = null;

@@ -7,10 +7,11 @@ const {readConfig, parseArgs} = require('./config');
 const {localIso8601} = require('./utils');
 const runner = require('./runner');
 const render = require('./render');
-const {color, logVerbose} = require('./output');
+const {color, logVerbose, log} = require('./output');
 const {testsVersion, pentfVersion} = require('./version');
 const {loadTests} = require('./loader');
 const watcher = require('./watcher');
+const {timeoutPromise} = require('./promise_utils');
 
 /**
  * @param {import('./config').Config} config
@@ -18,6 +19,7 @@ const watcher = require('./watcher');
  */
 async function runTests(config, test_cases) {
     let results;
+    let test_info;
     if (config.load_json) {
         const json_input = await fs.promises.readFile(config.load_json, {encoding: 'utf-8'});
         results = JSON.parse(json_input);
@@ -30,7 +32,7 @@ async function runTests(config, test_cases) {
         }
 
         // Run tests
-        const test_info = await runner.run(config, test_cases);
+        test_info = await runner.run(config, test_cases);
         if (!test_info) { // Runner terminated early (e.g. --list-locks)
             return;
         }
@@ -39,7 +41,7 @@ async function runTests(config, test_cases) {
     }
 
     await render.doRender(config, results);
-    return results;
+    return {results, test_info};
 }
 
 /**
@@ -116,11 +118,29 @@ async function real_main(options={}) {
     }
 
     if (config.watch) {
+        let remaining_teardowns = [];
         await watcher.createWatcher(config, async test_cases => {
-            await runTests(config, test_cases);
+            logVerbose(`[runner] Executing ${remaining_teardowns.length} teardown hooks`);
+            try {
+                // Run teardown functions if there are any
+                const teardownPromise = Promise.all(remaining_teardowns.map(fn => fn()));
+                await timeoutPromise(
+                    config,
+                    teardownPromise,
+                    {timeout: 30000, message: 'teardown took too long'}
+                );
+            } catch(e) {
+                log(
+                    config,
+                    `INTERNAL ERROR: failed to run remaining teardown hooks: ${e}`
+                );
+            }
+
+            const { test_info } = await runTests(config, test_cases);
+            remaining_teardowns = test_info.state.remaining_teardowns;
         });
     } else {
-        const results = await runTests(config, test_cases);
+        const { results } = await runTests(config, test_cases);
 
         if (!config.keep_open && results) {
             const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);

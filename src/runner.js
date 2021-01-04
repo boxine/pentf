@@ -49,10 +49,11 @@ function onTeardown(config, callback) {
 
 /**
  * @param {import('./config').Config} config
+ * @param {RunnerState} state
  * @param {Task} task
  * @private
  */
-async function run_task(config, task) {
+async function run_task(config, state, task) {
     /** @type {TaskConfig} */
     const task_config = {
         ...config,
@@ -227,6 +228,8 @@ async function run_task(config, task) {
                     `INTERNAL ERROR: failed to run teardown for #${task.id} (${task.name}): ${e}`
                 );
             }
+        } else if (config.watch) {
+            state.remaining_teardowns.push(...task_config._teardown_hooks.map(fn => () => fn(config)));
         }
     }
 }
@@ -333,7 +336,7 @@ async function run_one(config, state, task) {
     task.start = performance.now();
     output.status(config, state);
 
-    await run_task(config, task);
+    await run_task(config, state, task);
 
     const repeat = config.repeat || 1;
     if (count < config.repeatFlaky - 1 && task.status === 'error' && !task.expectedToFail) {
@@ -573,6 +576,8 @@ async function testCases2tasks(config, testCases, resultByTaskGroup) {
  * to the console.
  * @property {Map<string, number>} flakyCounts Track flakyness run count of a test
  * @property {Map<string, import('./render').TestResult>} resultByTaskGroup
+ * @property {() => Promise<void>} remaining_teardowns Pending teardown hooks, most likely open
+ * browser windows that were kept open when a test failed
  */
 
 /**
@@ -604,7 +609,8 @@ async function run(config, testCases) {
         flakyCounts: new Map(),
         tasks,
         resultByTaskGroup,
-        last_logged_status: ''
+        last_logged_status: '',
+        remaining_teardowns: [],
     };
 
     const restoreConsole = output.proxyConsole(config, state);

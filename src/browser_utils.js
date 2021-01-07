@@ -11,12 +11,16 @@ const path = require('path');
 const {promisify} = require('util');
 const tmp = require('tmp-promise');
 const {performance} = require('perf_hooks');
+const mkdirpCb = require('mkdirp');
 
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove} = require('./utils');
 const {timeoutPromise} = require('./promise_utils');
 const { importFile } = require('./loader');
+const output = require('./output');
+
+const mkdirp = promisify(mkdirpCb);
 
 let tmp_home;
 
@@ -1082,6 +1086,132 @@ async function getSelectOptions(page, select) {
 }
 
 /**
+ *
+ * @param {import('./config').Config} config
+ * @param {import('puppeteer').Page} page
+ * @param {string} fileName
+ * @param {string} [selector]
+ */
+async function takeScreenshot(config, page, fileName, selector) {
+    await mkdirp(config.screenshot_directory);
+    const fn = path.join(config.screenshot_directory, fileName);
+
+    const viewport = page.viewport();
+    let img;
+    if (selector) {
+        const el = await page.waitForSelector(selector);
+        img = await el.screenshot({
+            path: fn,
+            type: 'png',
+        });
+    } else {
+        img = await page.screenshot({
+            path: fn,
+            type: 'png',
+            fullPage: true,
+        });
+    }
+
+    // Restore emulation, fixes unable to resize window after taking a screenshot.
+    await page._client.send('Emulation.clearDeviceMetricsOverride');
+
+    // Restore potential emulation settings that were active before
+    // we took the screenshot.
+    if (viewport !== null) {
+        await page.setViewport(viewport);
+    }
+
+    return img;
+}
+
+/**
+ * @typedef {"minor" | "moderate" | "serious" | "critical"} A11yImpact
+ */
+
+/**
+ * @typedef {{html: string, screenshots: Array<Buffer | null>, selectors: string[]}} A11yNode
+ */
+
+/**
+ *
+ * @typedef {{impact: A11yImpact, helpUrl?: string, description: string, nodes: A11yNode[]}} A11yResult
+ */
+
+/**
+ *
+ * @param {import('./config').Config}
+ * @param {import('puppeteer').Frame | import('puppeteer').Page} page
+ */
+async function assertAccessibility(config, page) {
+    assert(config, 'Missing config argument');
+    assert(page, 'Missing page argument');
+
+    output.logVerbose(config, '[a11y] Checking for accessibility errors...');
+
+    const url = page.url();
+
+    await page.addScriptTag({
+        path: require.resolve('axe-core')
+    });
+
+    /** @type {import('axe-core').AxeResults} */
+    const results = await page.evaluate(() => {
+        return new Promise((resolve, reject) => {
+            window.axe.run(document, { ancestry: true }, (err, results) => {
+                if (err !== null) reject(err);
+                else resolve(results);
+            });
+        });
+    });
+
+    const errors = config.accessibilityErrors;
+
+    let i = errors.length;
+    for (const v of results.violations) {
+
+        /** @type {A11yNode[]} */
+        const nodes = [];
+
+        for (const node of v.nodes) {
+            let imgs = [];
+            if (node.ancestry) {
+                // We can't postpone taking screenshots as the html may change later
+                const name = `${config._taskName}-a11y-${i++}`;
+                imgs = await Promise.all(node.ancestry.map(async selector => {
+                    try {
+                        return await takeScreenshot(config, page, name, selector);
+                    } catch (err) {
+                        output.logVerbose(config, '[runner] Could not take screenshot ' + err.message);
+                        return null;
+                    }
+                }));
+            }
+
+            nodes.push({
+                html: node.html,
+                selectors: node.ancestry || [],
+                screenshots: imgs
+            });
+        }
+
+        errors.push({
+            impact: v.impact || 'minor',
+            helpUrl: v.helpUrl,
+            description: v.help,
+            nodes
+        });
+    }
+
+    output.logVerbose(config, '[a11y] Checking for accessibility errors... Done');
+
+    if (errors.length > 0) {
+        const err = new Error(`There were ${errors.length} accessibility violations on ${url}`);
+        err.accessibilityErrors = errors;
+        throw err;
+    }
+}
+
+/**
  * Speed up all timeouts of calls to `setTimeout`/`setInterval`.
  *
  * @example
@@ -1216,6 +1346,7 @@ async function html2pdf(config, path, html, modifyPage=null) {
 }
 
 module.exports = {
+    assertAccessibility,
     assertNotSelector,
     assertNotTestId,
     assertNotXPath,
@@ -1236,6 +1367,7 @@ module.exports = {
     restoreTimeouts,
     setLanguage,
     speedupTimeouts,
+    takeScreenshot,
     typeSelector,
     waitForTestId,
     waitForText,

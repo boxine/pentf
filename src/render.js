@@ -29,11 +29,7 @@ function getTestOrder(config, result) {
 }
 
 /**
- * @typedef {Object} TaskResult
- * @param {import('./runner').TaskStatus} status
- * @param {number} duration
- * @param {*} error_screenshots  // FIXME
- * @param {string} error_stack
+ * @typedef {{status: import('./runner').TaskStatus, duration: number, error_screenshots: any, error_stack: string, axeResults: import('axe-core').AxeResults[]}} TaskResult
  */
 
 /**
@@ -41,21 +37,17 @@ function getTestOrder(config, result) {
  */
 
 /**
- * @typedef {Object} TestResult
- * @property {string} name
- * @property {string} group
- * @property {string} id
- * @property {string} description
- * @property {boolean} skipped
- * @property {TaskResult[]} taskResults
- * @property {TestStatus} status
- * @property {*} expectedToFail // FIXME
- * @property {*} skipReason // FIXME
+ * @typedef {{name: string, group: string, id: string, description: string, skipped: boolean; taskResults: TaskResult[], status: TestStatus, expectedToFail: any, skipReason: any}} TestResult
+ */
+
+/**
+ * @typedef {{start: number, duration: number, config: import('./config').Config, tests: TestResult[], pentfVersion: string, testsVersion: string}} CraftedResults
  */
 
 /**
  * @param {import('./config').Config} config
  * @param {import('./runner').RunnerResult} test_info
+ * @returns {CraftedResults}
  */
 function craftResults(config, test_info) {
     output.logVerbose(config, '[results] crafting results...');
@@ -96,7 +88,7 @@ function craftResults(config, test_info) {
 
 /**
  * @param {import('./config').Config} config
- * @param {ReturnType<typeof craftResults>} results
+ * @param {CraftedResults} results
  */
 async function doRender(config, results) {
     output.logVerbose(config, `[results] Render results JSON: ${config.json}, Markdown: ${config.markdown}, HTML: ${config.html}, PDF: ${config.pdf}`);
@@ -187,6 +179,9 @@ function heading(results) {
     return results.config.report_heading || 'End-To-End Test Report';
 }
 
+/**
+ * @param {CraftedResults} results
+ */
 function markdown(results) {
     const table = results.tests.map((test_result, idx) => {
         return (
@@ -222,13 +217,15 @@ ${table}
 `;
 }
 
-function screenshots_html(result) {
-    return result.error_screenshots.map(screenshot => {
-        const dataUri = 'data:image/png;base64,' + (screenshot.toString('base64'));
-        return (
-            `<img src="${dataUri}" ` +
-            'style="display:inline-block; width:250px; margin:2px 10px 2px 0; border: 1px solid #888;"/>');
-    }).join('\n');
+/**
+ * @param {Buffer} screenshot
+ * @returns {string}
+ */
+function screenshots_html(screenshot) {
+    const dataUri = 'data:image/png;base64,' + (screenshot.toString('base64'));
+    return (
+        `<img src="${dataUri}" ` +
+        'style="display:inline-block; width:250px; margin:2px 10px 2px 0; border: 1px solid #888;"/>');
 }
 
 function _calcSingleStatusStr(status) {
@@ -266,6 +263,9 @@ function _calcDuration(taskResults) {
     return format_duration(min) + ' - ' + format_duration(max);
 }
 
+/**
+ * @param {CraftedResults} results
+ */
 function html(results) {
     const table = results.tests.map((testResult, idx) => {
         const {skipped, taskResults} = testResult;
@@ -331,7 +331,54 @@ function html(results) {
                     '</div>'
                 );
                 if (tr.error_screenshots) {
-                    res += screenshots_html(tr);
+                    res += tr.error_screenshots
+                        .map(img => screenshots_html(img))
+                        .join('\n');
+                }
+
+                /** @type {import('./browser_utils').A11yResult[]} */
+                const violations = tr.accessibilityErrors;
+
+                if (violations.length) {
+                    res += '<h3>Accessibility Violations</h3>';
+                    for (const v of violations) {
+                        const elements = v.nodes.map(node => {
+                            let out = '<li class="axe-element">';
+                            out +=  '<p>HTML: <code>' + escape_html(node.html) + '</code><br />';
+
+                            for (let i = 0; i < node.selectors.length; i++) {
+                                out += 'Selector: ' + node.selectors[i];
+
+                                if (node.screenshots[i] !== null) {
+                                    out += '<span class="axe-img">' + screenshots_html(node.screenshots[i]);
+                                    out += '</span>';
+                                }
+
+                                out += '</p>';
+                            }
+
+                            out += '</li>';
+
+                            return out;
+                        });
+
+                        const labels = {
+                            minor: 'Minor',
+                            moderate: 'Moderate',
+                            serious: 'serious',
+                            critical: 'critical',
+                        };
+
+                        const impact = labels[v.impact] + ': ';
+
+                        res += (
+                            '<p class="axe-description">' +
+                                impact + escape_html(v.description) +
+                            '</p>' +
+                            '<span class="axe-link">' + linkify(v.helpUrl) + '</span>' +
+                            '<ul>' + elements + '</ul>'
+                        );
+                    }
                 }
             }
             res += '</td></tr>';
@@ -411,6 +458,23 @@ td.test_footer {
     font-size: 80%;
     color: #aa0000;
     padding-bottom: 4px;
+}
+.axe-description {
+    color: #aa0000;
+    font-size: 80%;
+    margin: 0;
+}
+.axe-link {
+    font-size: 70%;
+}
+.axe-element {
+    font-family: monospace;
+    color: #aa0000;
+    font-size: 80%;
+}
+.axe-img {
+    margin-top: 1rem;
+    display: block;
 }
 .result {
     vertical-align: top;

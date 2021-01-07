@@ -615,6 +615,12 @@ async function formatError(config, err) {
     let message = `${err.name}: ${err.message}`;
     if (!message.endsWith('\n')) message +='\n';
 
+    if (err.accessibilityErrors && err.accessibilityErrors.length) {
+        message += '\n';
+        message += err.accessibilityErrors.map(violation => formatA11yError(config, violation)).join('\n\n');
+        message += '\n';
+    }
+
     return '\n'
         + diff
         + indentLines(message, 1)
@@ -703,11 +709,37 @@ function valueRepr(value) {
     return '' + value;
 }
 
+/**
+ * @param {import('./config').Config} config
+ * @param {import('./browser_utils).Result} violation
+ * @private
+ */
+function formatA11yError(config, violation) {
+    /** @type {Record<import('./browser_utils').A11yImpact, { sign: string, color: string }>} */
+    const label = {
+        minor: { sign: 'Minor', color: 'yellow' },
+        moderate: { sign: 'Moderate', color: 'yellow' },
+        serious: { sign: 'Serious', color: 'red' },
+        critical: { sign: 'Critical', color: 'red' }
+    };
+
+    const sign = label[violation.impact].sign;
+    let out = color(config, label[violation.impact].color, `  ${sign}: ${violation.description}\n`);
+    out += color(config, 'yellow', color(config, 'dim', `  ${link(config, violation.helpUrl, violation.helpUrl)}\n`));
+
+    violation.nodes.forEach(node => {
+        out += '    - ' + color(config, 'cyan', node.html);
+    });
+
+    return out;
+}
+
 module.exports = {
     color,
     detailedStatus,
     finish,
     formatError,
+    formatA11yError,
     valueRepr,
     log,
     logTaskError,

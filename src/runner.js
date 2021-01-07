@@ -1,10 +1,7 @@
 /* eslint no-console: 0 */
 
 const assert = require('assert').strict;
-const path = require('path');
 const {performance} = require('perf_hooks');
-const {promisify} = require('util');
-const mkdirp = require('mkdirp');
 const kolorist = require('kolorist');
 
 const browser_utils = require('./browser_utils');
@@ -41,6 +38,7 @@ function onTeardown(config, callback) {
  * @property {string} _testName
  * @property {string} _taskName
  * @property {string} _taskGroup
+ * @property {import('./browser_utils').A11yResult[]} accessibilityErrors
  */
 
 /**
@@ -64,6 +62,7 @@ async function run_task(config, state, task) {
         _taskName: task.name,
         _taskGroup: task.group,
         start: task.start,
+        accessibilityErrors: [],
     };
     let timeout;
     try {
@@ -89,6 +88,7 @@ async function run_task(config, state, task) {
         clearTimeout(timeout);
 
         task.status = 'success';
+        task.accessibilityErrors = task_config.accessibilityErrors;
         output.logVerbose(
             config,
             `[task] Marked #${task._runner_task_id} (${task.name}) as success`
@@ -112,6 +112,7 @@ async function run_task(config, state, task) {
         task.error = e;
         task.breadcrumb = task_config._breadcrumb;
         task.status = 'error';
+        task.accessibilityErrors = task_config.accessibilityErrors;
 
         // Inline expectedToFail() calls
         if (e.pentf_expectedToFail) {
@@ -129,27 +130,7 @@ async function run_task(config, state, task) {
             try {
                 const screenshotPromise = Promise.all(task_config._browser_pages.map(
                     async (page, i) => {
-                        await promisify(mkdirp)(config.screenshot_directory);
-                        const fn = path.join(
-                            config.screenshot_directory, `${task.id || task.name}-${i}.png`);
-
-                        const viewport = page.viewport();
-                        const img = await page.screenshot({
-                            path: fn,
-                            type: 'png',
-                            fullPage: true,
-                        });
-
-                        // Restore emulation, fixes unable to resize window after taking a screenshot.
-                        await page._client.send('Emulation.clearDeviceMetricsOverride');
-
-                        // Restore potential emulation settings that were active before
-                        // we took the screenshot.
-                        if (viewport !== null) {
-                            await page.setViewport(viewport);
-                        }
-
-                        return img;
+                        return await browser_utils.takeScreenshot(config, page, `${task.id || task.name}-${i}.png`);
                     })
                 );
                 task.error_screenshots = await timeoutPromise(
@@ -309,6 +290,7 @@ function update_results(config, state, task) {
                 kolorist.stripColors(task.error.stack)
                 : null,
             error_screenshots: task.error_screenshots,
+            accessibilityErrors: task.accessibilityErrors,
         });
     }
 
@@ -484,6 +466,7 @@ async function parallel_run(config, state) {
  * @property {boolean} [skipReason]
  * @property {Buffer[]} error_screenshots
  * @property {boolean | ((config: import('./config').Config) => boolean)} [expectedToFail]
+ * @property {import('./browser_utils').A11yResult[]} accessibilityErrors
  */
 
 /**
@@ -526,6 +509,7 @@ async function testCases2tasks(config, testCases, resultByTaskGroup) {
             group: tc.name,
             id: tc.name,
             start: 0,
+            accessibilityErrors: []
         };
 
         const skipReason = tc.skip && await tc.skip(config);

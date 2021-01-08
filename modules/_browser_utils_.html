@@ -70,6 +70,7 @@
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-module tsd-is-private"><a href="_browser_utils_.html#addbreadcrumb" class="tsd-kind-icon">add<wbr>Breadcrumb</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#assertaccessibility" class="tsd-kind-icon">assert<wbr>Accessibility</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#assertnotselector" class="tsd-kind-icon">assert<wbr>Not<wbr>Selector</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#assertnottestid" class="tsd-kind-icon">assert<wbr>Not<wbr>Test<wbr>Id</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#assertnotxpath" class="tsd-kind-icon">assert<wbr>NotXPath</a></li>
@@ -94,6 +95,7 @@
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#restoretimeouts" class="tsd-kind-icon">restore<wbr>Timeouts</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#setlanguage" class="tsd-kind-icon">set<wbr>Language</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#speeduptimeouts" class="tsd-kind-icon">speedup<wbr>Timeouts</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#takescreenshot" class="tsd-kind-icon">take<wbr>Screenshot</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#typeselector" class="tsd-kind-icon">type<wbr>Selector</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#waitfortestid" class="tsd-kind-icon">wait<wbr>For<wbr>Test<wbr>Id</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_browser_utils_.html#waitfortext" class="tsd-kind-icon">wait<wbr>For<wbr>Text</a></li>
@@ -116,7 +118,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L277">browser_utils.js:277</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L281">browser_utils.js:281</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -139,6 +141,36 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="assertaccessibility" class="tsd-anchor"></a>
+					<h3>assert<wbr>Accessibility</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">assert<wbr>Accessibility<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Frame</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1145">browser_utils.js:1145</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5>page: <span class="tsd-signature-type">Page</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Frame</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
 					<a name="assertnotselector" class="tsd-anchor"></a>
 					<h3>assert<wbr>Not<wbr>Selector</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
@@ -148,7 +180,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L680">browser_utils.js:680</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L684">browser_utils.js:684</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -195,7 +227,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L960">browser_utils.js:960</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L964">browser_utils.js:964</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -242,7 +274,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L534">browser_utils.js:534</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L538">browser_utils.js:538</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -288,7 +320,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L490">browser_utils.js:490</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L494">browser_utils.js:494</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -325,7 +357,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L816">browser_utils.js:816</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L820">browser_utils.js:820</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -368,7 +400,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L616">browser_utils.js:616</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L620">browser_utils.js:620</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -415,7 +447,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L934">browser_utils.js:934</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L938">browser_utils.js:938</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -458,7 +490,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L782">browser_utils.js:782</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L786">browser_utils.js:786</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -500,7 +532,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L713">browser_utils.js:713</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L717">browser_utils.js:717</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -546,7 +578,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L305">browser_utils.js:305</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L309">browser_utils.js:309</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -577,7 +609,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L385">browser_utils.js:385</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L389">browser_utils.js:389</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -617,7 +649,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L1035">browser_utils.js:1035</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1039">browser_utils.js:1039</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -661,7 +693,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L253">browser_utils.js:253</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L257">browser_utils.js:257</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -689,7 +721,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L266">browser_utils.js:266</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L270">browser_utils.js:270</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -717,7 +749,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L1076">browser_utils.js:1076</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1080">browser_utils.js:1080</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -755,7 +787,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L1061">browser_utils.js:1061</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1065">browser_utils.js:1065</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -790,7 +822,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L1197">browser_utils.js:1197</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1329">browser_utils.js:1329</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -839,7 +871,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L27">browser_utils.js:27</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L31">browser_utils.js:31</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -869,7 +901,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L1161">browser_utils.js:1161</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1293">browser_utils.js:1293</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -920,7 +952,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L47">browser_utils.js:47</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L51">browser_utils.js:51</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -965,7 +997,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L587">browser_utils.js:587</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L591">browser_utils.js:591</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1005,7 +1037,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L1131">browser_utils.js:1131</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1263">browser_utils.js:1263</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1036,7 +1068,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L998">browser_utils.js:998</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1002">browser_utils.js:1002</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1073,7 +1105,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L1106">browser_utils.js:1106</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1238">browser_utils.js:1238</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1115,6 +1147,42 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="takescreenshot" class="tsd-anchor"></a>
+					<h3>take<wbr>Screenshot</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">take<wbr>Screenshot<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span>, fileName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, selector<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L1095">browser_utils.js:1095</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-symbol">{}</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+								<li>
+									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+								</li>
+								<li>
+									<h5>fileName: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>selector: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
 					<a name="typeselector" class="tsd-anchor"></a>
 					<h3>type<wbr>Selector</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
@@ -1124,7 +1192,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L984">browser_utils.js:984</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L988">browser_utils.js:988</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1169,7 +1237,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L457">browser_utils.js:457</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L461">browser_utils.js:461</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1212,7 +1280,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L421">browser_utils.js:421</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L425">browser_utils.js:425</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1255,7 +1323,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L336">browser_utils.js:336</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L340">browser_utils.js:340</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1301,7 +1369,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/380b36a/src/browser_utils.js#L290">browser_utils.js:290</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/7d540bd/src/browser_utils.js#L294">browser_utils.js:294</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1428,6 +1496,9 @@
 						<a href="_browser_utils_.html#addbreadcrumb" class="tsd-kind-icon">add<wbr>Breadcrumb</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_browser_utils_.html#assertaccessibility" class="tsd-kind-icon">assert<wbr>Accessibility</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_browser_utils_.html#assertnotselector" class="tsd-kind-icon">assert<wbr>Not<wbr>Selector</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
@@ -1498,6 +1569,9 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_browser_utils_.html#speeduptimeouts" class="tsd-kind-icon">speedup<wbr>Timeouts</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_browser_utils_.html#takescreenshot" class="tsd-kind-icon">take<wbr>Screenshot</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_browser_utils_.html#typeselector" class="tsd-kind-icon">type<wbr>Selector</a>

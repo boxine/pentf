@@ -1176,15 +1176,17 @@ async function assertAccessibility(config, page) {
             let imgs = [];
             if (node.ancestry) {
                 // We can't postpone taking screenshots as the html may change later
-                const name = `${config._taskName}-a11y-${i++}`;
-                imgs = await Promise.all(node.ancestry.map(async selector => {
+                for (const selector of node.ancestry) {
+                    const name = `${config._taskName}-a11y-${i++}`;
+
                     try {
-                        return await takeScreenshot(config, page, name, selector);
+                        const img = await takeScreenshot(config, page, name, selector);
+                        imgs.push(img);
                     } catch (err) {
                         output.logVerbose(config, '[runner] Could not take screenshot ' + err.message);
                         return null;
                     }
-                }));
+                }
             }
 
             nodes.push({

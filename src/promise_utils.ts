@@ -12,7 +12,7 @@ import * as output from './output';
  * ```
  * @param {Promise<any>} promise A promise to ignore for now (will be caught later)
  */
-export function catchLater(promise) {
+export function catchLater<T>(promise: Promise<T>) {
     promise.catch(() => undefined);
     return promise;
 }
@@ -32,7 +32,7 @@ export function catchLater(promise) {
  * @param {Promise<any>} promise The promise to wait for.
  * @param {string} message Custom message to attach to the error;
  */
-export async function customErrorMessage(promise, message) {
+export async function customErrorMessage<T>(promise: Promise<T>, message: string) {
     try {
         return await promise;
     } catch (e) {
@@ -92,6 +92,15 @@ export async function expectedToFail(config: Config, message: string, asyncFunc:
     }
 }
 
+export interface TimeoutPromiseOptions {
+    /** Timeout in ms (by default 10000=10s) */
+    timeout?: number;
+    /** Optional error message to show when the timeout fires. */
+    message?: string;
+    /** Only print an error message, do not throw. */
+    warning?: boolean;
+}
+
 /**
  * Raise an error if a promise does not finish within a certain timeframe.
  * Note this does not cancel the promise itself (because that's impossible).
@@ -99,20 +108,18 @@ export async function expectedToFail(config: Config, message: string, asyncFunc:
  * @param {*} config The pentf configuration.
  * @param {Promise} promise The promise to limit
  * @param {{expectNothing?: boolean, timeout?: number, warning?: number}} __namedParameters Options (currently not visible in output due to typedoc bug)
- * @param {number} timeout Timeout in ms (by default 10000=10s)
- * @param {string} message Optional error message to show when the timeout fires.
- * @param {boolean} warning Only print an error message, do not throw.
+
  * @returns {*} Whatever the promise returned, if it is successful
  */
-export async function timeoutPromise(config, promise, {timeout=10000, message=undefined, warning=false} = {}) {
-    const stacktraceAr = (new Error()).stack.split('\n', 3);
+export async function timeoutPromise<T>(config: Config, promise: Promise<T>, {timeout=10000, message, warning=false}: TimeoutPromiseOptions = {}) {
+    const stacktraceAr = (new Error()).stack!.split('\n', 3);
     const stacktrace = stacktraceAr[stacktraceAr.length - 1];
 
     let resolved = false;
     try {
         return await Promise.race([
             promise,
-            new Promise<void>((resolve, reject) => setTimeout(() => {
+            new Promise<undefined>((resolve, reject) => setTimeout(() => {
                 let wholeMessage = (
                     `Promise did not finish within ${timeout}ms` + (message ? '. ' + message : ''));
                 if (warning) {
@@ -121,7 +128,7 @@ export async function timeoutPromise(config, promise, {timeout=10000, message=un
                     }
                     wholeMessage = `WARNING: ${wholeMessage}\n${stacktrace}`;
                     output.log(config, wholeMessage);
-                    resolve();
+                    resolve(undefined);
                 } else {
                     reject(new Error(wholeMessage));
                 }

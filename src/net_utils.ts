@@ -1,7 +1,7 @@
 import { strict as assert } from 'assert';
 import * as http from 'http';
 import * as https from 'https';
-import * as node_fetch from 'node-fetch';
+import node_fetch from 'node-fetch';
 import * as tough from 'tough-cookie';
 import {URL} from 'url';
 import * as fs from 'fs';
@@ -9,6 +9,11 @@ import * as fs from 'fs';
 import {makeCurlCommand} from './curl_command';
 import * as output from './output';
 import { Config } from './config';
+
+export interface PentfResponse extends Response {
+    cookieJar?: tough.CookieJar
+    getCookieValue?: (name: string) => Promise<string | undefined>
+}
 
 /**
  * fetch a URL.
@@ -40,7 +45,7 @@ import { Config } from './config';
  *               Pass in the string `'create'` to create a new one (returned as `response.cookieJar`).
  *               The response will have a utility function `async getCookieValue(name)` to quickly retrieve a cookie value from the jar.
  */
-export async function fetch(config: Config, url: string, init: any) {
+export async function fetch<T = any>(config: Config, url: string, init: any): Promise<PentfResponse> {
     if (!init) init = {};
     if (!init._redirectChain && init.agent) {
         init._agentIsForced = true;
@@ -82,7 +87,7 @@ export async function fetch(config: Config, url: string, init: any) {
         output.log(config, await makeCurlCommand(init, url));
     }
 
-    const response = await node_fetch(url, init);
+    const response: PentfResponse = await node_fetch(url, init) as any;
 
     let {cookieJar} = init;
     if (cookieJar) {
@@ -90,7 +95,7 @@ export async function fetch(config: Config, url: string, init: any) {
             cookieJar = new tough.CookieJar();
         }
 
-        const setCookie = response.headers.raw()['set-cookie'];
+        const setCookie = (response.headers as any).raw()['set-cookie'];
         if (Array.isArray(setCookie)) {
             await Promise.all(
                 setCookie.map(c => cookieJar.setCookie(c, url))
@@ -100,7 +105,7 @@ export async function fetch(config: Config, url: string, init: any) {
         }
         response.cookieJar = cookieJar;
         response.getCookieValue = async function getCookieValue(name) {
-            const cookies = await response.cookieJar.getCookies(url);
+            const cookies = await response.cookieJar!.getCookies(url);
             const cookie = cookies.find(c => c.key === name);
             return cookie ? cookie.value : undefined;
         };
@@ -115,7 +120,7 @@ export async function fetch(config: Config, url: string, init: any) {
             }
             init.cookieJar = response.cookieJar;
 
-            const next = response.headers.get('location');
+            const next = response.headers.get('location')!;
             assert(next, `HTTP ${response.status} without Location header`);
             const nextURL = (new URL(next, url)).href;
             assert(
@@ -128,7 +133,7 @@ export async function fetch(config: Config, url: string, init: any) {
                 delete init.body;
             }
 
-            const res = await fetch(config, next, init);
+            const res: any = await fetch(config, next, init);
             if (!res.redirectChain) res.redirectChain = init._redirectChain;
             return res;
         } else if (redirect !== 'manual') {
@@ -154,7 +159,7 @@ export async function fetch(config: Config, url: string, init: any) {
 * @param {string} certFilename Name of the certificate file in PEM format (beginning with `-----BEGIN CERTIFICATE-----`)
 * @param {boolean} rejectUnauthorized to validate the server's certificate, false (=default) to accept invalid certificates as well.
 */
-export async function setupTLSClientAuth(fetchOptions, keyFilename: string, certFilename: string, rejectUnauthorized=false) {
+export async function setupTLSClientAuth(fetchOptions: any, keyFilename: string, certFilename: string, rejectUnauthorized=false) {
     assert.equal(typeof fetchOptions, 'object');
     const agentOptions: https.AgentOptions = {
         rejectUnauthorized,

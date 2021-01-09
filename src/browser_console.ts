@@ -7,7 +7,7 @@ import { ConsoleMessage, Page } from 'puppeteer';
  * Reconstruct original types from serialized message
  * @param {*} value
  */
-export function parseConsoleArg(value: any) {
+export function parseConsoleArg(value: any): any {
     if (Array.isArray(value)) {
         return value.map(item => parseConsoleArg(item));
     } else if (typeof value === 'object' && value !== null) {
@@ -19,10 +19,10 @@ export function parseConsoleArg(value: any) {
                 err.stack = value.stack;
                 return err;
             } else if (value.type === 'Set') {
-                return new Set(value.items.map(item => parseConsoleArg(item)));
+                return new Set(value.items.map((item: any) => parseConsoleArg(item)));
             } else if (value.type === 'Map') {
                 return new Map(
-                    value.items.map(item => {
+                    value.items.map((item: any) => {
                         return [parseConsoleArg(item[0]), parseConsoleArg(item[1])];
                     })
                 );
@@ -32,7 +32,7 @@ export function parseConsoleArg(value: any) {
             }
         }
 
-        let out = {};
+        let out: Record<string, any> = {};
         for (const key in value) {
             out[key] = parseConsoleArg(value[key]);
         }
@@ -48,7 +48,7 @@ export function parseConsoleArg(value: any) {
  * @param {*} value
  * @param {Set<any>} seen
  */
-function serialize(value: any, seen: Set<any>) {
+function serialize(value: any, seen: Set<any>): any {
     if (seen.has(value)) {
         return '[[Circular]]';
     }
@@ -90,7 +90,7 @@ function serialize(value: any, seen: Set<any>) {
             };
         }
 
-        let out = {};
+        let out: Record<string, any> = {};
         Object.keys(value).forEach(key => {
             out[key] = serialize(value[key], seen);
         });
@@ -115,7 +115,7 @@ function serialize(value: any, seen: Set<any>) {
  */
 function printRawMessage(config: Config, type: string, message: ConsoleMessage) {
     const loc = message.location();
-    let url = loc.url;
+    let url = loc.url || '';
     if (loc.lineNumber) {
         url += `:${loc.lineNumber}`;
         if (loc.columnNumber) {
@@ -124,7 +124,7 @@ function printRawMessage(config: Config, type: string, message: ConsoleMessage) 
     }
     url = kolorist.link(url, url);
 
-    const colors = {
+    const colors: Record<string, string> = {
         warn: 'yellow',
         error: 'red',
     };
@@ -154,8 +154,8 @@ export async function forwardBrowserConsole(config: Config, page: Page) {
         const serialize = new Function(`return ${fn}`)();
         const native: any = {};
         native.trace = console.trace;
-        console.trace = (...args) => {
-            const stack = new Error().stack.split('\n').slice(2).join('\n');
+        console.trace = (...args: any[]) => {
+            const stack = new Error().stack!.split('\n').slice(2).join('\n');
             args = ['\n' + stack, ...args];
             native.trace.apply(null, args.map(arg => serialize(arg, new Set())));
         };
@@ -163,12 +163,12 @@ export async function forwardBrowserConsole(config: Config, page: Page) {
 
     const browser = page.browser() as any;
     page.on('console', async message => {
-        let resolve;
+        let resolve: any;
         browser._logs.push(new Promise(r => resolve = r));
 
-        let type = message.type();
+        let type = message.type() as string;
         // Correct log type
-        const typeMap = {
+        const typeMap: Record<string, string> = {
             warning: 'warn',
             verbose: 'log'
         };
@@ -194,6 +194,7 @@ export async function forwardBrowserConsole(config: Config, page: Page) {
             if (type === 'trace') {
                 console.log(`Trace: ${parsed[1] || ''}${parsed[0]}`);
             } else {
+                // @ts-ignore
                 console[type].apply(console, parsed);
             }
         } catch (err) {

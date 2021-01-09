@@ -1,4 +1,4 @@
-import { Browser, ElementHandle, LaunchOptions, Page } from "puppeteer";
+import { Browser, ElementHandle, Frame, LaunchOptions, Page, Request, Target } from "puppeteer";
 import { Config } from "./config";
 
 /**
@@ -46,7 +46,7 @@ export interface PentfPage extends Page {
 
 const mkdirp = promisify(mkdirpCb);
 
-let tmp_home;
+let tmp_home: string;
 
 /**
  * Ignore these errors
@@ -129,8 +129,8 @@ export async function newPage(config: TaskConfig | Config, chrome_args: string[]
             const mkdir = promisify(fs.mkdir);
             await mkdir(path.join(future_tmp_home, '.pki'));
             await mkdir(path.join(future_tmp_home, '.pki', 'nssdb'));
-            const copyNssFile = async basename => {
-                const source_file = path.join(process.env.HOME, '.pki', 'nssdb', basename);
+            const copyNssFile = async (basename: string) => {
+                const source_file = path.join(process.env.HOME as string, '.pki', 'nssdb', basename);
                 const exists = await new Promise(resolve =>
                     fs.access(source_file, fs.constants.F_OK, err => resolve(!err))
                 );
@@ -153,11 +153,11 @@ export async function newPage(config: TaskConfig | Config, chrome_args: string[]
         params.defaultViewport = null;
     }
 
-    const browser = await puppeteer.launch(params) as PentfBrowser;
+    const browser = await puppeteer!.launch(params) as PentfBrowser;
     const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {
-        const configureDevtools = async (target) => {
+        const configureDevtools = async (target: any) => {
             if (! /^(?:chrome-)?devtools:\/\//.test(await target.url())) {
                 return;
             }
@@ -205,7 +205,7 @@ export async function newPage(config: TaskConfig | Config, chrome_args: string[]
             const targets = await browser._connection.send(
                 'Target.getTargets'
             );
-            const target = targets.targetInfos.find(t => t.attached === true && t.type === 'page');
+            const target = targets.targetInfos.find((t: any) => t.attached === true && t.type === 'page');
             if (!target) {
                 throw new Error('INTERNAL ERROR: Missing page in window');
             }
@@ -272,16 +272,20 @@ export async function newPage(config: TaskConfig | Config, chrome_args: string[]
     return page;
 }
 
+function isPage(x: any): x is Page {
+    return x !== null && typeof x === 'object' && typeof x.browser === 'function'
+}
+
 /**
  * Get browser instance from a Page or Frame instance
  * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
  * @private
  */
-function getBrowser(pageOrFrame) {
-    if (typeof pageOrFrame.browser === 'function') {
+function getBrowser(pageOrFrame: Page | Frame) {
+    if (isPage(pageOrFrame)) {
         return pageOrFrame.browser();
     } else {
-        return pageOrFrame._frameManager._page.browser();
+        return (pageOrFrame as any)._frameManager._page.browser();
     }
 }
 
@@ -290,7 +294,7 @@ function getBrowser(pageOrFrame) {
  * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
  * @private
  */
-function getDefaultTimeout(pageOrFrame) {
+function getDefaultTimeout(pageOrFrame: Page | Frame) {
     return getBrowser(pageOrFrame)._pentf_config.default_timeout;
 }
 
@@ -308,9 +312,9 @@ function addBreadcrumb(config: Config | TaskConfig, name: string) {
     }
 }
 
-function withBreadcrumb(config: TaskConfig, page: Page, prop: any, getName: any) {
-    const original = page[prop];
-    page[prop] = (...args) => {
+function withBreadcrumb<T extends keyof Page>(config: TaskConfig, page: Page, prop: T, getName: (...args: any[]) => string) {
+    const original = (page as any)[prop];
+    (page as any)[prop] = (...args: any[]) => {
         const name = getName.apply(null, args);
         addBreadcrumb(config, `enter ${name}`);
         const res = original.apply(page, args);
@@ -323,7 +327,7 @@ function withBreadcrumb(config: TaskConfig, page: Page, prop: any, getName: any)
  * Close a page (and its associated browser)
  * @param {import('puppeteer').Page} page puppeteer page object returned by `newPage`.
  */
-async function closePage(page: Page) {
+export async function closePage(page: Page) {
     const browser = getBrowser(page);
     const config = browser._pentf_config;
     addBreadcrumb(config, 'enter closePage()');
@@ -386,7 +390,7 @@ export interface ExtraMessageOption {
  
  * @returns A handle to the found element.
  */
-async function waitForVisible(page: Page, selector: string, {message, timeout=getDefaultTimeout(page)}: TimeoutOptions = {}): Promise<ElementHandle> {
+export async function waitForVisible(page: Page, selector: string, {message, timeout=getDefaultTimeout(page)}: TimeoutOptions = {}): Promise<ElementHandle> {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForVisible(${selector})`);
 
@@ -419,7 +423,7 @@ async function waitForVisible(page: Page, selector: string, {message, timeout=ge
     }
     assert(el !== null);
     addBreadcrumb(config, `exit waitForVisible(${selector})`);
-    return el;
+    return el as any;
 }
 
 /**
@@ -435,7 +439,7 @@ async function waitForVisible(page: Page, selector: string, {message, timeout=ge
  * ```
  * @param {string} text The text to encode. This can be user input or otherwise contain exotic characters.
  */
-function escapeXPathText(text: string) {
+export function escapeXPathText(text: string) {
     if (!text.includes('"')) {
         // No doubles quotes ("), simple case
         return `"${text}"`;
@@ -475,7 +479,7 @@ export interface WaitForTextOptions extends ExtraMessageOption {
 
  * @returns A handle to the text node.
  */
-async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMessage}: WaitForTextOptions={}): Promise<ElementHandle> {
+export async function waitForText(page: Page, text: string, {timeout=getDefaultTimeout(page), extraMessage}: WaitForTextOptions={}): Promise<ElementHandle> {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForText(${text})`);
     checkText(text);
@@ -513,7 +517,7 @@ export interface WaitForTestIdOptions extends VisibleOption, ExtraMessageOption 
  * @param options Options
  * @returns Handle to the element with the given test ID.
  */
-async function waitForTestId(page: Page, testId: string, {extraMessage, timeout=getDefaultTimeout(page), visible=true}: WaitForTestIdOptions = {}): Promise<ElementHandle> {
+export async function waitForTestId(page: Page, testId: string, {extraMessage, timeout=getDefaultTimeout(page), visible=true}: WaitForTestIdOptions = {}): Promise<ElementHandle> {
     _checkTestId(testId);
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForTestId(${testId})`);
@@ -528,7 +532,7 @@ async function waitForTestId(page: Page, testId: string, {extraMessage, timeout=
         el = await page.waitForFunction((qs, visible) => {
             const all = document.querySelectorAll(qs);
             if (all.length < 1) return null;
-            const [el] = all;
+            const [el] = all as any;
             if (visible && (el.offsetParent === null)) return null;
             return el;
         }, {timeout}, qs, visible);
@@ -537,7 +541,7 @@ async function waitForTestId(page: Page, testId: string, {extraMessage, timeout=
     }
     assert(el !== null);
     addBreadcrumb(config, `exit waitForTestId(${testId})`);
-    return el;
+    return el as any;
 }
 
 /**
@@ -546,20 +550,20 @@ async function waitForTestId(page: Page, testId: string, {extraMessage, timeout=
  * @param input A puppeteer handle to an input element.
  * @param expected The value that is expected to be present.
  */
-async function assertValue(input: ElementHandle, expected: string) {
+export async function assertValue(input: ElementHandle, expected: string) {
     const page = (input as any)._page;
     assert(page);
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertValue(${expected})`);
     try {
-        await page.waitForFunction((inp, expected) => {
+        await page.waitForFunction((inp: HTMLInputElement, expected: any) => {
             return inp.value === expected;
         }, {timeout: 2000}, input, expected);
         addBreadcrumb(config, `exit assertValue(${expected})`);
     } catch (e) {
         if (e.name !== 'TimeoutError') throw e;
 
-        const {value, name, id} = await page.evaluate(inp => {
+        const {value, name, id} = await page.evaluate((inp: HTMLInputElement) => {
             return {
                 value: inp.value,
                 name: inp.name,
@@ -647,7 +651,7 @@ export async function assertNotXPath(page: Page, xpath: string, options: AssertN
 /**
  * Optionally run post-assertion check
  */
-async function onSuccess(fn: () => Promise<boolean>) {
+async function onSuccess(fn?: () => Promise<boolean>) {
     if (!fn) return true;
 
     const res = await fn();
@@ -669,7 +673,7 @@ async function onSuccess(fn: () => Promise<boolean>) {
  * @param selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
  * @param options
  */
-async function clickSelector(page: PentfPage, selector: string, {timeout=getDefaultTimeout(page), checkEvery=200, message, visible=true, assertSuccess, retryUntil}: TimeoutOptions & RetryOptions & VisibleOption & CheckEveryOption = {}) {
+export async function clickSelector(page: PentfPage, selector: string, {timeout=getDefaultTimeout(page), checkEvery=200, message, visible=true, assertSuccess, retryUntil}: TimeoutOptions & RetryOptions & VisibleOption & CheckEveryOption = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickSelector(${selector})`);
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
@@ -684,7 +688,7 @@ async function clickSelector(page: PentfPage, selector: string, {timeout=getDefa
                 const element = document.querySelector(selector);
                 if (!element) return false;
 
-                if (visible && element.offsetParent === null) return null; // invisible
+                if (visible && element.offsetParent === null) return false; // invisible
 
                 element.click();
                 return true;
@@ -731,7 +735,7 @@ async function clickSelector(page: PentfPage, selector: string, {timeout=getDefa
  * @param selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
  * @param options Options (currently not visible in output due to typedoc bug)
  */
-async function assertNotSelector(page: PentfPage, selector: string, {timeout=getDefaultTimeout(page), message}: TimeoutOptions = {}) {
+export async function assertNotSelector(page: PentfPage, selector: string, {timeout=getDefaultTimeout(page), message}: TimeoutOptions = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotSelector(${selector})`);
     try {
@@ -757,7 +761,7 @@ async function assertNotSelector(page: PentfPage, selector: string, {timeout=get
  * @param xpath XPath selector to match the element.
  * @param options Options
  */
-async function clickXPath(
+export async function clickXPath(
     page: Page,
     xpath: string,
     options: RetryOptions & TimeoutOptions & VisibleOption & CheckEveryOption = {}
@@ -787,7 +791,7 @@ async function clickXPath(
                         .iterateNext() as any;
                     if (!element) return false;
 
-                    if (visible && element.offsetParent === null) return null; // invisible
+                    if (visible && element.offsetParent === null) return false; // invisible
 
                     element.click();
                     return true;
@@ -849,7 +853,7 @@ export interface ClickTextOptions extends TimeoutOptions, RetryOptions, CheckEve
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string} elementXPath
  */
-async function clickText(page: Page, text: string, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage, assertSuccess, retryUntil}: ClickTextOptions={}) {
+export async function clickText(page: Page, text: string, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage, assertSuccess, retryUntil}: ClickTextOptions={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickText(${text})`);
     checkText(text);
@@ -883,7 +887,7 @@ async function clickText(page: Page, text: string, {timeout=getDefaultTimeout(pa
  * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickNestedText(page: Page, textOrRegExp: string | RegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage, visible=true, assertSuccess, retryUntil}: VisibleOption & RetryOptions & TimeoutOptions & CheckEveryOption & ExtraMessageOption ={}) {
+export async function clickNestedText(page: Page, textOrRegExp: string | RegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage, visible=true, assertSuccess, retryUntil}: VisibleOption & RetryOptions & TimeoutOptions & CheckEveryOption & ExtraMessageOption ={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickNestedText(${textOrRegExp})`);
     if (typeof textOrRegExp === 'string') {
@@ -909,10 +913,10 @@ async function clickNestedText(page: Page, textOrRegExp: string | RegExp, {timeo
                 let matchFuncExact = null;
 
                 if (typeof matcher == 'string') {
-                    matchFunc = text => text.includes(matcher);
+                    matchFunc = (text: string) => text.includes(matcher);
                 } else {
                     const regexExact = new RegExp(matcher.source, matcher.flags);
-                    matchFuncExact = text => {
+                    matchFuncExact = (text: string) => {
                         // Reset regex state in case global flag was used
                         regexExact.lastIndex = 0;
                         return regexExact.test(text);
@@ -924,7 +928,7 @@ async function clickNestedText(page: Page, textOrRegExp: string | RegExp, {timeo
                         .replace(/^[^]/, '')
                         .replace(/[$]$/, '');
                     const regex = new RegExp(source, matcher.flags);
-                    matchFunc = text => {
+                    matchFunc = (text: string) => {
                         // Reset regex state in case global flag was used
                         regex.lastIndex = 0;
                         return regex.test(text);
@@ -946,16 +950,16 @@ async function clickNestedText(page: Page, textOrRegExp: string | RegExp, {timeo
                         const text = child.textContent || '';
                         if (child.childNodes.length > 0 && matchFunc(text)) {
                             if (matchFuncExact === null || matchFuncExact(text)) {
-                                lastFound = child;
+                                lastFound = child as any;
                             }
-                            stack.push(child);
+                            stack.push(child as any);
                         }
                     }
                 }
 
                 if (!lastFound) return false;
 
-                if (visible && lastFound.offsetParent === null) return null; // invisible)
+                if (visible && (lastFound as any).offsetParent === null) return false; // invisible)
 
                 lastFound.click();
                 return true;
@@ -997,7 +1001,7 @@ async function clickNestedText(page: Page, textOrRegExp: string | RegExp, {timeo
  * @param {{extraMessage?: string, timeout?: number, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} extraMessage Optional error message shown if the element is not present in time.
  */
-async function clickTestId(page: Page, testId: string, {extraMessage, timeout=getDefaultTimeout(page), visible=true, assertSuccess, retryUntil}: VisibleOption & TimeoutOptions & RetryOptions & ExtraMessageOption = {}) {
+export async function clickTestId(page: Page, testId: string, {extraMessage, timeout=getDefaultTimeout(page), visible=true, assertSuccess, retryUntil}: VisibleOption & TimeoutOptions & RetryOptions & ExtraMessageOption = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickTestId(${testId})`);
     _checkTestId(testId);
@@ -1021,7 +1025,7 @@ async function clickTestId(page: Page, testId: string, {extraMessage, timeout=ge
  * @param testId The test ID to look for.
  * @param options
  */
-async function assertNotTestId(page: Page, testId: string, {timeout=getDefaultTimeout(page), message}: TimeoutOptions = {}) {
+export async function assertNotTestId(page: Page, testId: string, {timeout=getDefaultTimeout(page), message}: TimeoutOptions = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotTestId(${testId})`);
     _checkTestId(testId);
@@ -1044,7 +1048,7 @@ async function assertNotTestId(page: Page, testId: string, {timeout=getDefaultTi
  * @param text text to type
  * @param options
  */
-async function typeSelector(page: Page, selector: string, text: string, {message=undefined, timeout=getDefaultTimeout(page)}: TimeoutOptions={}) {
+export async function typeSelector(page: Page, selector: string, text: string, {message=undefined, timeout=getDefaultTimeout(page)}: TimeoutOptions={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter typeSelector(${selector}, text: ${text})`);
     const el = await waitForVisible(page, selector, {timeout, message});
@@ -1058,7 +1062,7 @@ async function typeSelector(page: Page, selector: string, text: string, {message
  * @param page The puppeteer page handle.
  * @param lang Either be a single string (e.g. "en") or an array of supported languages (e.g. `['de-DE', 'en-US', 'gr']`)
  */
-async function setLanguage(page: Page, lang: string | string[]) {
+export async function setLanguage(page: Page, lang: string | string[]) {
     if (typeof lang === 'string') {
         lang = [lang];
     }
@@ -1095,7 +1099,7 @@ async function setLanguage(page: Page, lang: string | string[]) {
  * @param name Attribute name.
  * @returns The attribute value
  */
-async function getAttribute(page: Page, selector: string, name: string): Promise<string> {
+export async function getAttribute(page: Page, selector: string, name: string): Promise<string> {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter getAttribute(${selector}, attr: ${name})`);
     await page.waitForSelector(selector);
@@ -1103,7 +1107,7 @@ async function getAttribute(page: Page, selector: string, name: string): Promise
         selector,
         (el, propName) => {
             if (propName in el) {
-                const value = el[propName];
+                const value = (el as any)[propName];
                 return propName === 'style' ? value.cssText : value;
             }
             return el.getAttribute(propName);
@@ -1121,7 +1125,7 @@ async function getAttribute(page: Page, selector: string, name: string): Promise
  * @param selector Query selector.
  * @returns Text content of the selected element.
  */
-async function getText(page: Page, selector: string): Promise<string> {
+export async function getText(page: Page, selector: string): Promise<string> {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter getText(${selector})`);
     const res = await getAttribute(page, selector, 'textContent');
@@ -1136,7 +1140,7 @@ async function getText(page: Page, selector: string): Promise<string> {
  * @param select puppeteer handl eto the `<select>`.
  * @returns e.g. `['Option A', 'Option B(***)', 'Option C']`
  */
-async function getSelectOptions(page: Page, select: ElementHandle<HTMLSelectElement>): Promise<string[]> {
+export async function getSelectOptions(page: Page, select: ElementHandle<HTMLSelectElement>): Promise<string[]> {
     return await page.evaluate(select => {
         return Array.from((select as HTMLSelectElement).options).map(option => {
             return option.innerText + (option.selected ? '(***)' : '');
@@ -1150,7 +1154,7 @@ async function getSelectOptions(page: Page, select: ElementHandle<HTMLSelectElem
  * @param fileName Where to write the screenshot to
  * @param selector if specified only the element matching the selector will be screenshotted
  */
-async function takeScreenshot(config: Config, page: Page, fileName: string, selector?: string) {
+export async function takeScreenshot(config: Config, page: Page, fileName: string, selector?: string) {
     await (mkdirp as any)(config.screenshot_directory);
     const fn = path.join(config.screenshot_directory, fileName);
 
@@ -1197,7 +1201,7 @@ export interface A11yResult {
     nodes: A11yNode[];
 }
 
-async function assertAccessibility(config: TaskConfig, page: Page) {
+export async function assertAccessibility(config: TaskConfig, page: Page) {
     assert(config, 'Missing config argument');
     assert(page, 'Missing page argument');
 
@@ -1211,7 +1215,7 @@ async function assertAccessibility(config: TaskConfig, page: Page) {
 
     const results: AxeResults = await page.evaluate(() => {
         return new Promise((resolve, reject) => {
-            window.axe.run(document, { ancestry: true }, (err, results) => {
+            window.axe.run(document, { ancestry: true }, (err: Error, results: AxeResults) => {
                 if (err !== null) reject(err);
                 else resolve(results);
             });
@@ -1289,17 +1293,17 @@ async function assertAccessibility(config: TaskConfig, page: Page) {
  * @param number? factor Speedup factor (e.g. a timeout of 20 seconds with a speedup of 100 will fire after 200ms). (default: 100)
  * @param boolean? persistent Whether this change should persist in case of page navigation. Set this if the next line is `await page.goto(..)` or similar. (default: false)
  */
-async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
-    function applyTimeouts(factor) {
+export async function speedupTimeouts(page: Page, {factor=100, persistent=false}={}) {
+    function applyTimeouts(factor: number) {
         window._pentf_real_setTimeout = window._pentf_real_setTimeout || window.setTimeout;
-        window.setTimeout = ((func, delay, ...args) => {
+        window.setTimeout = ((func: any, delay: number, ...args: any[]) => {
             return window._pentf_real_setTimeout(func, delay && (delay / factor), ...args);
         }) as any;
 
         window._pentf_real_setInterval = window._pentf_real_setInterval || window.setInterval;
-        window.setInterval = (func, delay, ...args) => {
+        window.setInterval = ((func: any, delay: number, ...args: any[]) => {
             return window._pentf_real_setInterval(func, delay && (delay / factor), ...args);
-        };
+        }) as any;
     }
 
     if (persistent) {
@@ -1314,7 +1318,7 @@ async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
  *
  * @param {import('puppeteer').Page} page The puppeteer page handle.
  */
-async function restoreTimeouts(page) {
+export async function restoreTimeouts(page: Page) {
     await page.evaluate(() => {
         if (window._pentf_real_setTimeout) {
             window.setTimeout = window._pentf_real_setTimeout;
@@ -1328,7 +1332,7 @@ async function restoreTimeouts(page) {
 /**
  * @hidden
  */
-async function workaround_setContent(page: Page, html: string) {
+export async function workaround_setContent(page: Page, html: string) {
     // Workaround for https://github.com/GoogleChrome/puppeteer/issues/4464
     const waiter = page.waitForNavigation({waitUntil: 'load'});
     await page.evaluate(html => {
@@ -1344,7 +1348,7 @@ async function workaround_setContent(page: Page, html: string) {
  * @param {import('puppeteer').Page} page
  * @param {(request: import('puppeteer').Request) => Promise<void> | void} fn
  */
-async function interceptRequest(page: PentfPage, fn) {
+export async function interceptRequest(page: PentfPage, fn: (request: Request) => Promise<void> | void) {
     if (!page._pentf_intercept_handlers) {
         await page.setRequestInterception(true);
 
@@ -1380,7 +1384,7 @@ async function interceptRequest(page: PentfPage, fn) {
  * @param {string} html Full HTML document to render.
  * @param {*} modifyPage An optional async function to modify the `page` object.
  */
-export async function html2pdf(config: Config, path: string, html: string, modifyPage: (page: Page) => Promise<void> =null) {
+export async function html2pdf(config: Config, path: string, html: string, modifyPage?: (page: Page) => Promise<void> ) {
     const pdfConfig = {...config};
     pdfConfig.headless = true;
     // The headless option will be overwritten if devtools=true, leading to a
@@ -1400,30 +1404,3 @@ export async function html2pdf(config: Config, path: string, html: string, modif
     });
     await closePage(page);
 }
-
-module.exports = {
-    assertAccessibility,
-    assertNotSelector,
-    assertNotTestId,
-    assertValue,
-    clickNestedText,
-    clickSelector,
-    clickTestId,
-    clickText,
-    clickXPath,
-    closePage,
-    escapeXPathText,
-    getAttribute,
-    getSelectOptions,
-    getText,
-    interceptRequest,
-    restoreTimeouts,
-    setLanguage,
-    speedupTimeouts,
-    takeScreenshot,
-    typeSelector,
-    waitForTestId,
-    waitForText,
-    waitForVisible,
-    workaround_setContent
-};

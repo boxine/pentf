@@ -13,7 +13,7 @@ import { Config } from './config';
  * @param {string} dir
  * @returns {string | null} Path to package.json or null if not found
  */
-export async function findPackageJson(dir) {
+export async function findPackageJson(dir: string): Promise<string | null> {
     let fileName = path.join(dir, 'package.json');
     try {
         await fs.promises.readFile(fileName);
@@ -34,12 +34,14 @@ export async function findPackageJson(dir) {
  */
 let BUILD_TYPE: 'commonjs' | 'module' = 'commonjs';
 
+export type ModuleType = 'commonjs' | 'esm';
+
 /**
  * Load module via CommonJS or ES Modules depending on the environment
  * @param {string} file
  * @param {"commonjs" | "module"} moduleType
  */
-export async function importFile(file, moduleType) {
+export async function importFile(file: string, moduleType: ModuleType) {
     assert(moduleType, 'Module type argument was undefined. Expected "commonjs" or "esm"');
     // Only use import() for JavaScript files. Patching module
     // resolution of import() calls is still very experimental, so
@@ -91,9 +93,9 @@ export type DescribeFn = {
  * @param {SuiteBuilder} builder
  * @private
  */
-function loadSuite(fileName, suiteName, builder) {
-    const tests = [];
-    const only = [];
+function loadSuite(fileName: string, suiteName: string, builder: SuiteBuilder) {
+    const tests: TestCase[] = [];
+    const only: TestCase[] = [];
     let onlyInScope = false;
     let skipInScope = false;
     const groups = [suiteName];
@@ -109,6 +111,7 @@ function loadSuite(fileName, suiteName, builder) {
             run,
             skip: skipInScope ? skipFn : options.skip,
             path: fileName,
+            fileName,
             ...options,
         });
     }
@@ -120,6 +123,7 @@ function loadSuite(fileName, suiteName, builder) {
             run,
             skip: skipInScope ? skipFn : options.skip,
             path: fileName,
+            fileName,
             ...options,
         });
     };
@@ -132,6 +136,7 @@ function loadSuite(fileName, suiteName, builder) {
             run,
             skip: skipFn,
             path: fileName,
+            fileName,
             ...options,
         });
     };
@@ -168,21 +173,21 @@ function loadSuite(fileName, suiteName, builder) {
 
 export async function applyTestFilters<T extends { name: string, fileName: string }>(config: Config, tests: T[]): Promise<T[]> {
     if (config.filter) {
-        tests = tests.filter(n => new RegExp(config.filter).test(n.name));
+        tests = tests.filter(n => new RegExp(config.filter!).test(n.name));
     }
     if (config.filter_body) {
         const bodyFilterRe = new RegExp(config.filter_body);
         tests = (await Promise.all(tests.map(async test => {
             const contents = await fs.promises.readFile(test.fileName, {encoding: 'utf-8'});
             return bodyFilterRe.test(contents) ? test : null;
-        }))).filter(t => t);
+        }))).filter(t => t) as any;
     }
 
     return tests;
 }
 
 export async function loadTests(config: Config, globPattern: string): Promise<TestCase[]> {
-    const testFiles = await promisify((glob as any).glob)(globPattern, {cwd: config.rootDir, absolute: true});
+    const testFiles = await promisify((glob as any).glob)(globPattern, {cwd: config.rootDir, absolute: true}) as string[];
     let tests = testFiles.map(n => ({
         fileName: n,
         name: path.basename(n, path.extname(n)),
@@ -190,7 +195,7 @@ export async function loadTests(config: Config, globPattern: string): Promise<Te
 
     tests = await applyTestFilters(config, tests);
 
-    const testCases = [];
+    const testCases: TestCase[] = [];
     await Promise.all(
         tests.map(async t => {
             let tc = await importFile(t.fileName, config.moduleType);

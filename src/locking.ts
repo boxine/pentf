@@ -3,13 +3,15 @@ import { strict as assert } from 'assert';
 import * as output from './output';
 import {wait} from './utils';
 import * as external_locking from './external_locking';
+import { Config } from './config';
+import { RunnerState, Task } from './runner';
 
 /**
  * @param {import('./config').Config} config
  * @param {import('./runner').Task} task
  * @private
  */
-export function annotateTaskResources(config, task) {
+export function annotateTaskResources(config: Config, task: Task) {
     if (config.no_locking) {
         return;
     }
@@ -24,7 +26,7 @@ export function annotateTaskResources(config, task) {
  * @param {import('./runner').RunnerState} state
  * @private
  */
-export async function init(config, state) {
+export async function init(config: Config, state: RunnerState) {
     assert(config);
     assert(state);
     state.locks = new Set();
@@ -36,12 +38,11 @@ export async function init(config, state) {
  * @param {import('./runner').RunnerState} state
  * @private
  */
-export async function shutdown(config, state) {
+export async function shutdown(config: Config, state: RunnerState) {
     external_locking.shutdown(config, state);
-    state.locks.length = 0;
     assert.equal(
-        state.locks.size, 0,
-        `Still got some locks on shutdown: ${Array.from(state.locks).sort().join(',')}`);
+        state.locks!.size, 0,
+        `Still got some locks on shutdown: ${Array.from(state.locks!).sort().join(',')}`);
 }
 
 /**
@@ -50,7 +51,7 @@ export async function shutdown(config, state) {
  * @param {import('./runner').RunnerState} state
  * @param {import('./runner').Task} task
  */
-export async function acquire(config, state, task) {
+export async function acquire(config: Config, state: RunnerState, task: Task) {
     if (config.no_locking) return true;
 
     assert(task);
@@ -60,9 +61,9 @@ export async function acquire(config, state, task) {
 
     const {locks} = state;
     assert(locks);
-    if (task.resources.some(r => locks.has(r))) {
+    if (task.resources.some(r => locks!.has(r))) {
         if (config.locking_verbose || config.log_file) {
-            const failed = task.resources.filter(r => locks.has(r));
+            const failed = task.resources.filter(r => locks!.has(r));
 
             output.logVerbose(config, `[locking] ${task.id}: Failed to acquire ${failed.join(',')}`);
         }
@@ -89,7 +90,7 @@ export async function acquire(config, state, task) {
     }
 
     for (const r of task.resources) {
-        locks.add(r);
+        locks!.add(r);
     }
     if (config.locking_verbose || config.log_file) {
         output.logVerbose(config, `[locking] ${task.id}: Acquired ${task.resources.join(',')}`);
@@ -102,7 +103,7 @@ export async function acquire(config, state, task) {
  * @param {import('./runner').RunnerState} state
  * @param {import('./runner').Task} task
  */
-export async function acquireEventually(config, state, task) {
+export async function acquireEventually(config: Config, state: RunnerState, task: Task) {
     if (config.no_locking) return true;
     if (config.locking_verbose || config.log_file) {
         output.logVerbose(config, `[locking] ${task.id}: Trying to eventually acquire ${task.resources.join(',')}`);
@@ -121,7 +122,7 @@ export async function acquireEventually(config, state, task) {
  * @param {import('./runner').RunnerState} state
  * @param {import('./runner').Task} task
  */
-export async function release(config, state, task) {
+export async function release(config: Config, state: RunnerState, task: Task) {
     if (config.no_locking) return true;
     if (! task.resources.length) {
         return;
@@ -144,8 +145,8 @@ export async function release(config, state, task) {
 
     const {locks} = state;
     for (const r of task.resources) {
-        assert(locks.has(r), `Trying to release ${r} for ${task.id}, but not in current locks ${Array.from(locks).sort().join(',')}`);
-        locks.delete(r);
+        assert(locks!.has(r), `Trying to release ${r} for ${task.id}, but not in current locks ${Array.from(locks!).sort().join(',')}`);
+        locks!.delete(r);
     }
     if (config.locking_verbose || config.log_file) {
         output.logVerbose(config, `[locking] ${task.id}: Released ${task.resources.join(',')}`);
@@ -157,8 +158,8 @@ export async function release(config, state, task) {
  * @param {import('./runner').Task[]} tasks
  * @private
  */
-export function listConflicts(config, tasks) {
-    const tasksByResource = new Map();
+export function listConflicts(config: Config, tasks: Task[]) {
+    const tasksByResource = new Map<string, Task[]>();
     for (const t of tasks) {
         for (const r of t.resources) {
             let tasks = tasksByResource.get(r);

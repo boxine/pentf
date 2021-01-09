@@ -96,7 +96,10 @@
   "dependencies": {
     "@sentry/node": "^5.15.5",
     "@types/glob": "^7.1.1",
+    "@types/node-fetch": "^2.5.7",
     "@types/puppeteer": "^5.4.0",
+    "@types/tmp": "^0.2.0",
+    "@types/tough-cookie": "^4.0.0",
     "argparse": "^1.0.10",
     "axe-core": "^4.1.1",
     "chokidar": "^3.4.2",
@@ -119,7 +122,9 @@
   "devDependencies": {
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.1",
+    "@types/argparse": "^2.0.5",
     "@types/diff": "^4.0.2",
+    "@types/mkdirp": "^1.0.1",
     "deep-equal": "^1.0.1",
     "eslint": "^7.0.0",
     "nodemon": "^2.0.4",
@@ -137,7 +142,7 @@
     "test": "./run",
     "lint": "eslint . run",
     "types": "tsc && cp dist/types/* .",
-    "build": "tsc && babel --out-dir dist/ --out-file-extension .mjs src/*.js",
+    "build": "tsc && tsc -p tsconfig.esm.json",
     "clean": "rimraf doc dist *.d.ts",
     "prepublishOnly": "npm run clean && npm run types && npm run build"
   },

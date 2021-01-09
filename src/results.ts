@@ -14,10 +14,10 @@ export function getResults(config: Config, results: TestResult[]) {
         t => t.status === 'error' && (!t.expectedToFail || expectNothing));
     const flaky = results.filter(t => t.status === 'flaky');
     const skipped = results.filter(t => t.status === 'skipped');
-    const expectedToFail = !expectNothing && results.filter(
-        t => t.expectedToFail && t.status === 'error');
-    const expectedToFailButPassed = !expectNothing && results.filter(
-        t => t.expectedToFail && t.status === 'success');
+    const expectedToFail = !expectNothing ? results.filter(
+        t => t.expectedToFail && t.status === 'error') : [];
+    const expectedToFailButPassed = !expectNothing ? results.filter(
+        t => t.expectedToFail && t.status === 'success') : [];
     const todo = results.filter(t => t.status === 'todo');
 
     return {

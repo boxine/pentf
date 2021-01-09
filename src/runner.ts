@@ -4,20 +4,20 @@ import { strict as assert } from 'assert';
 import { Page } from 'puppeteer';
 import { A11yResult } from './browser_utils';
 import { Config } from './config';
-import { TestResult } from './render';
-const {performance} = require('perf_hooks');
-const kolorist = require('kolorist');
+import { TestResult, TestStatus } from './render';
+import {performance} from 'perf_hooks';
+import * as kolorist from 'kolorist';
 
-const browser_utils = require('./browser_utils');
-const email = require('./email');
-const external_locking = require('./external_locking');
-const locking = require('./locking');
-const output = require('./output');
-const utils = require('./utils');
-const version = require('./version');
-const {timeoutPromise} = require('./promise_utils');
-const { getCPUCount } = require('./config');
-const { shouldShowError } = require('./output');
+import * as browser_utils from './browser_utils';
+import * as email from './email';
+import * as external_locking from './external_locking';
+import * as locking from './locking';
+import * as output from './output';
+import * as utils from './utils';
+import * as version from './version';
+import {timeoutPromise} from './promise_utils';
+import { getCPUCount } from './config';
+import { shouldShowError } from './output';
 
 export type TeardownHook = (config: Config) => Promise<void> | void;
 
@@ -32,11 +32,12 @@ export interface TaskConfig extends Config {
     start: number;
     _teardown_hooks: TeardownHook[]
     _browser_pages: Page[];
-    _breadcrumb: Error |null;
+    _breadcrumb: Error | null;
     _testName: string;
     _taskName: string;
     _taskGroup: string;
     accessibilityErrors: A11yResult[]
+    email_new_client?: any;
 }
 
 export function isTaskConfig(x: any): x is TaskConfig {
@@ -162,7 +163,7 @@ async function run_task(config: Config, state: RunnerState, task: Task) {
 
             try {
                 const Sentry = require('@sentry/node');
-                Sentry.withScope(scope => {
+                Sentry.withScope((scope: any) => {
                     scope.setTag('task', task.name);
                     scope.setTag('testcase', task.tc.name);
                     if (process.env.CI_JOB_URL) {
@@ -185,7 +186,7 @@ async function run_task(config: Config, state: RunnerState, task: Task) {
         }
     } finally {
         if (!config.keep_open || task.status === 'success') {
-            output.logVerbose(`[runner] Executing ${task_config._teardown_hooks.length} teardown hooks`);
+            output.logVerbose(config, `[runner] Executing ${task_config._teardown_hooks.length} teardown hooks`);
             try {
                 // Run teardown functions if there are any
                 const teardownPromise = Promise.all(task_config._teardown_hooks.map(fn => fn(config)));
@@ -211,7 +212,7 @@ async function run_task(config: Config, state: RunnerState, task: Task) {
  * @param {RunnerState} state
  * @private
  */
-async function sequential_run(config, state) {
+async function sequential_run(config: Config, state: RunnerState) {
     const skipped = state.tasks.filter(s => s.status === 'skipped');
     if (!config.quiet && skipped.length > 0) {
         console.log(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})`);
@@ -237,15 +238,15 @@ async function sequential_run(config, state) {
  * @param {RunnerState} state
  * @param {Task} task
  */
-function update_results(config, state, task) {
+function update_results(config: Config, state: RunnerState, task: Task) {
     const { resultByTaskGroup, flakyCounts } = state;
     const {group} = task;
     assert(group);
 
-    const result = resultByTaskGroup.get(group);
+    const result = resultByTaskGroup.get(group)!;
     assert(result);
 
-    let status = task.status;
+    let status: TestStatus = task.status;
     if (config.repeatFlaky > 0 && status === 'success' || status === 'error') {
         const runs = flakyCounts.get(group) || 1;
         // Not flaky if the first run was successful
@@ -271,14 +272,14 @@ function update_results(config, state, task) {
     if (task.status === 'error' || task.status === 'success' || task.status === 'skipped') {
         result.taskResults.push({
             status: task.status,
-            duration: task.duration, // TODO,
+            duration: task.duration!, // TODO,
             error_stack: task.error ?
                 // Node's assert module modifies the Error's stack property and
                 // adds ansi color codes. These can only be disabled globally via
                 // an environment variable, but we want to keep colorized output
                 // for the cli. So we need to strip the ansi codes from the assert
                 // stack.
-                kolorist.stripColors(task.error.stack)
+                kolorist.stripColors(task.error.stack!)
                 : null,
             error_screenshots: task.error_screenshots,
             accessibilityErrors: task.accessibilityErrors,
@@ -292,12 +293,9 @@ function update_results(config, state, task) {
 }
 
 /**
- * @param {import('./config').Config} config
- * @param {RunnerState} state
- * @param {Task} task
  * @private
  */
-async function run_one(config, state, task) {
+async function run_one(config: Config, state: RunnerState, task: Task) {
     output.status(config, state);
 
     if (task.status === 'skipped') return task;
@@ -312,7 +310,7 @@ async function run_one(config, state, task) {
     await run_task(config, state, task);
 
     const repeat = config.repeat || 1;
-    if (count < config.repeatFlaky - 1 && task.status === 'error' && !task.expectedToFail) {
+    if (count < config.repeatFlaky - 1 && (task.status as any) === 'error' && !task.expectedToFail) {
         output.logVerbose(config, `[runner] Retrying task for flaky detection. Retry count: ${count + 1} (${task.id})`);
         const tcName = task.tc.name;
         state.tasks.push({
@@ -357,7 +355,7 @@ async function parallel_run(config: Config, state: RunnerState) {
     // eslint-disable-next-line no-constant-condition
     while (true) {
         if (config.verbose) {
-            const tasksStr = state.running.map(t => `#${t._runner_task_id}`).join(' ');
+            const tasksStr = state.running.map(t => `#${(t as any)._runner_task_id}`).join(' ');
             output.log(config, `[runner] running tasks: ${tasksStr}`);
         }
 
@@ -422,24 +420,25 @@ async function parallel_run(config: Config, state: RunnerState) {
 
         // Wait for one task to finish
         if (config.verbose) {
-            const tasksStr = state.running.map(t => `#${t._runner_task_id}`).join(' ');
+            const tasksStr = state.running.map(t => `#${(t as any)._runner_task_id}`).join(' ');
             output.log(config, `[runner] waiting for one of the tasks ${tasksStr} to finish`);
         }
         const done_task = await Promise.race(state.running);
         output.logVerbose(config, `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`);
         await locking.release(config, state, done_task);
-        utils.remove(state.running, promise => promise._runner_task_id === done_task._runner_task_id);
+        utils.remove(state.running, promise => (promise as any)._runner_task_id === done_task._runner_task_id);
     }
 }
 
 export interface TestCase {
     name: string;
     fileName: string;
-    run: (config: Config) => Promise<void> | void;
+    run: (config: TaskConfig) => Promise<void> | void;
     skip?: (config: Config) => Promise<boolean> | boolean;
     expectedToFail?: string | boolean | ((config: Config) => boolean);
     resources?: string[]
     description: string;
+    path?: string;
 }
 
 export type TaskStatus = "success" | "running" | "error" | "todo" | "skipped"
@@ -455,7 +454,7 @@ export interface Task {
     group: string;
     tc: TestCase;
     duration?: number;
-    _runner_task_id?: string;
+    _runner_task_id?: number;
     error?: Error;
     status: TaskStatus;
     start: number;
@@ -545,7 +544,7 @@ export interface RunnerState {
      * The last status string that was logged
      * to the console.
      */
-    last_logged_status: string;
+    last_logged_status?: string;
     /** Track flakyness run count of a test */
     flakyCounts: Map<string, number>
     resultByTaskGroup: Map<string, TestResult>;
@@ -556,7 +555,7 @@ export interface RunnerState {
     remaining_teardowns: Array<() => Promise<void>>
     external_locking_failed?: boolean;
     pending_locks?: Map<string, any>;
-    running?: any[];
+    running?: Promise<any>[];
     locking_backoff?: number;
 }
 
@@ -569,7 +568,7 @@ export interface RunnerResult {
     cpuCount: number;
 }
 
-export async function run(config: Config, testCases: TestCase[]): Promise<RunnerResult> {
+export async function run(config: Config, testCases: TestCase[]): Promise<RunnerResult | undefined> {
     const test_start = Date.now();
 
     external_locking.prepare(config);
@@ -600,7 +599,7 @@ export async function run(config: Config, testCases: TestCase[]): Promise<Runner
         Sentry.init({
             dsn: sentry_dsn,
             environment: config.env,
-            beforeBreadcrumb(breadcrumb) {
+            beforeBreadcrumb(breadcrumb: any) {
                 // Strip ansi color codes from sentry messages.
                 if (breadcrumb.message && typeof breadcrumb.message === 'string') {
                     breadcrumb.message = kolorist.stripColors(breadcrumb.message);
@@ -701,7 +700,7 @@ export async function run(config: Config, testCases: TestCase[]): Promise<Runner
 
     output.logVerbose(config, `Test run ended at ${utils.localIso8601(now)}`);
     const testsVersion = await timeoutPromise(
-        config, version.testsVersion(config), {message: 'version determination', warning: true});
+        config, version.testsVersion(config), {message: 'version determination', warning: true}) as string;
     const pentfVersion = version.pentfVersion();
     const cpuCount = getCPUCount();
 

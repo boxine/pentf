@@ -3,14 +3,15 @@ import {promisify} from 'util';
 import {EOL} from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Config } from './config';
 
-async function _cmd(cmd, args, options) {
+async function _cmd(cmd: string, args: string[], options: any) {
     return ((await (promisify(child_process.execFile)(cmd, args, options))).stdout as any).trim();
 }
 
-export async function testsVersion(config) {
+export async function testsVersion(config: Config) {
     try {
-        const tagsOutput = await _cmd(
+        const tagsOutput: string = await _cmd(
             'git', ['tag', '--points-at', 'HEAD'], {cwd: config.rootDir});
         const tags = tagsOutput.split(EOL).filter(line => line);
         const tagsRepr = (tags.length > 0) ? tags.join('/') + '/' : '';
@@ -18,7 +19,7 @@ export async function testsVersion(config) {
         const gitVersion = await _cmd(
             'git', ['show', '--pretty=format:%h (%ai)', '--no-patch', 'HEAD'],
             {cwd: config.rootDir});
-        const changesOutput = await _cmd('git', ['status', '--porcelain'], {cwd: config.rootDir});
+        const changesOutput: string = await _cmd('git', ['status', '--porcelain'], {cwd: config.rootDir});
         const changedFiles = (
             changesOutput.split(EOL)
                 .filter(line => line)

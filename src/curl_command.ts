@@ -1,4 +1,5 @@
 import { strict as assert } from 'assert';
+// @ts-ignore
 import * as streamBuffers from 'stream-buffers';
 
 async function stream2buf(stream: any) {
@@ -8,13 +9,13 @@ async function stream2buf(stream: any) {
         write_stream.on('finish', () => {
             resolve(write_stream.getContents());
         });
-        write_stream.on('error', (e) => {
+        write_stream.on('error', (e: any) => {
             reject(e);
         });
     });
 }
 
-function escape_shell(arg) {
+function escape_shell(arg: string) {
     if (/^[-.a-zA-Z0-9_:/]+$/.test(arg)) {
         return arg;
     }
@@ -22,11 +23,11 @@ function escape_shell(arg) {
     return '\'' + arg.replace(/'/g, '\'"\'"\'') + '\'';
 }
 
-function add_binary_data(curl_command, data_b64) {
+function add_binary_data(curl_command: string, data_b64: string) {
     return 'echo ' + escape_shell(data_b64) + ' | base64 -d | ' + curl_command + ' -d @-';
 }
 
-export async function makeCurlCommand(options, url) {
+export async function makeCurlCommand(options: any, url: string) {
     let curl_command = 'curl';
 
     if (options.agent && (options.agent.options.rejectUnauthorized === false)) {
@@ -73,7 +74,7 @@ export async function makeCurlCommand(options, url) {
     assert(! /^-/.test(url));
 
     if (options.curl_extra_options) {
-        curl_command += ' ' + options.curl_extra_options.map(ce => escape_shell(ce)).join(' ');
+        curl_command += ' ' + options.curl_extra_options.map((ce: any) => escape_shell(ce)).join(' ');
     }
 
     curl_command += ' ' + escape_shell(url);

@@ -12,22 +12,29 @@ import {performance} from 'perf_hooks';
 import * as utils from './utils';
 import {getResults} from './results';
 import { Config } from './config';
-import { RunnerState } from './runner';
+import { RunnerState, Task } from './runner';
+import { CraftedResults } from './render';
+import { A11yResult } from './browser_utils';
 
 const STATUS_STREAM = process.stderr;
 
-var last_state;
+let last_state: RunnerState | null = null;
 
 export function proxyConsole(config: Config, state: RunnerState) {
     let org = {};
     Object.keys(console).forEach(key => {
-        if (typeof console[key] === 'function') {
-            org[key] = console[key];
-            console[key] = new Proxy(console[key], {
+        // @ts-ignore
+        const fn = console[key];
+        if (typeof fn === 'function') {
+            // @ts-ignore
+            org[key] = fn;
+            // @ts-ignore
+            console[key] = new Proxy(fn, {
                 apply(target, thisArg, args) {
                     if (last_state) {
                         clean(config);
                     }
+                    // @ts-ignore
                     org[key].apply(console, args);
 
                     if (last_state) {
@@ -41,6 +48,7 @@ export function proxyConsole(config: Config, state: RunnerState) {
     return () => {
         // Reset
         Object.keys(org).forEach(key => {
+            // @ts-ignore
             console[key] = org[key];
         });
     };
@@ -97,7 +105,7 @@ export function status(config: Config, state: RunnerState) {
     state.last_logged_status = status_str;
 
     clean(config);
-    STATUS_STREAM.write(status_str);
+    STATUS_STREAM.write(status_str || '');
     if (no_clear_line) {
         STATUS_STREAM.write('\n');
     }
@@ -183,7 +191,7 @@ export function detailedStatus(config: Config, state: RunnerState) {
 * @param {ReturnType<typeof import('./results').getResults>} results
 * @returns {string} A string with counts of the results.
 **/
-function resultSummary(config: Config, results) {
+function resultSummary(config: Config, results: ReturnType<typeof getResults>) {
     const {
         success,
         errored,
@@ -197,7 +205,7 @@ function resultSummary(config: Config, results) {
         ...[success.length, errored.length, flaky.length, skipped.length, expectedToFail.length, expectedToFailButPassed.length]
             .map(x => ('' + x).length)
     );
-    const pad = str => (' '.repeat(maxChars) + str).slice(-maxChars);
+    const pad = (str: string | number) => (' '.repeat(maxChars) + str).slice(-maxChars);
 
     let res = '';
     if (success.length > 0) {
@@ -269,7 +277,7 @@ function reportLogFile(config: Config, message: string) {
         message += '\n';
     }
 
-    config.log_file_stream.write(message);
+    config.log_file_stream!.write(message);
 }
 
 export function log(config: Config, message: any) {
@@ -316,7 +324,7 @@ function indent(n: number) {
  * @returns {string}
  * @hidden
  */
-export function stringify(value, level = 0) {
+export function stringify(value: any, level = 0): string {
     if (typeof value === 'string') return `"${value}"`;
     if (
         typeof value === 'number'
@@ -352,7 +360,7 @@ export function stringify(value, level = 0) {
     return `{\n${items},\n${end}}`;
 }
 
-function shouldShowDiff(err) {
+function shouldShowDiff(err: any) {
     if (err.expected === undefined || err.actual === undefined) {
         return false;
     }
@@ -382,7 +390,7 @@ function shouldShowDiff(err) {
  * @returns {string}
  * @hidden
  */
-export function generateDiff(config, err) {
+export function generateDiff(config: Config, err: any) {
     assert(err);
 
     // The "diff" package works on strings only
@@ -411,7 +419,7 @@ export function generateDiff(config, err) {
     return `\n${formatted}\n`;
 }
 
-export function color(config, colorName, str) {
+export function color(config: Config, colorName: string, str: string) {
     if (!config.colors) {
         return str;
     }
@@ -424,19 +432,19 @@ export function color(config, colorName, str) {
     const m = /^inverse-(.*)$/.exec(colorName);
     if (m) {
         colorName = m[1];
-        assert(kolorist[colorName], `Unsupported color ${colorName}`);
-        return kolorist.inverse(kolorist[colorName](str));
+        assert((kolorist as any)[colorName], `Unsupported color ${colorName}`);
+        return kolorist.inverse((kolorist as any)[colorName](str));
     }
 
     const m2 = /^bold-(.*)$/.exec(colorName);
     if (m2) {
         colorName = m2[1];
-        assert(kolorist[colorName], `Unsupported color ${colorName}`);
-        return kolorist.bold(kolorist[colorName](str));
+        assert((kolorist as any)[colorName], `Unsupported color ${colorName}`);
+        return kolorist.bold((kolorist as any)[colorName](str));
     }
 
-    assert(kolorist[colorName], `Unsupported color ${colorName}`);
-    return kolorist[colorName](str);
+    assert((kolorist as any)[colorName], `Unsupported color ${colorName}`);
+    return (kolorist as any)[colorName](str);
 }
 
 /**
@@ -446,7 +454,7 @@ export function color(config, colorName, str) {
  * @param {string} target
  * @hidden
  */
-function link(config, text, target) {
+function link(config: Config, text: string, target: string) {
     if (!config.colors || process.env.CI) {
         return text;
     }
@@ -458,7 +466,7 @@ function link(config, text, target) {
  * Convert tabs indentation to two spaces.
  * @param {string} str
  */
-function tabs2Spaces(str) {
+function tabs2Spaces(str: string) {
     return str.replace(/^\t+/, tabs => '  '.repeat(tabs.length));
 }
 
@@ -466,7 +474,7 @@ function tabs2Spaces(str) {
  * @param {string} str String to indent
  * @param {number} n Indentation level
  */
-function indentLines(str, n) {
+function indentLines(str: string, n: number) {
     return str.split(/\n/g)
         .map(line => line && line !== '\n' ? '  '.repeat(n) + line : line)
         .join('\n');
@@ -482,7 +490,7 @@ function indentLines(str, n) {
  * @param {number} before Number of lines to show before the marker
  * @param {number} columnNum Number of lines to show after the marker
  */
-function genCodeFrame(config, content, lineNum, columnNum, before, after) {
+function genCodeFrame(config: Config, content: string, lineNum: number, columnNum: number, before: number, after: number) {
     const lines = content.split('\n');
     const startLine = Math.max(0, lineNum - before);
     const endLine = Math.min(lines.length - 1, lineNum + after);
@@ -517,7 +525,7 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
  * @returns {Promise<string>}
  * @hidden
  */
-export async function formatError(config, err) {
+export async function formatError(config: Config, err: Error) {
     let diff = '';
     if (shouldShowDiff(err)) {
         diff += generateDiff(config, err);
@@ -527,10 +535,10 @@ export async function formatError(config, err) {
      * The nearest location where the user's code triggered the error.
      * @type {import('errorstacks').StackFrame}
      */
-    let nearestFrame;
+    let nearestFrame: errorstacks.StackFrame;
 
     // Assertion libraries often add multiline messages to the error stack.
-    const actualStack = err.stack
+    const actualStack = err.stack!
         .replace(`${err.name}: ${err.message}`, '')
         .replace(err.message, '');
 
@@ -565,7 +573,8 @@ export async function formatError(config, err) {
 
     let codeFrame = '';
     try {
-        if (nearestFrame) {
+        if (nearestFrame!) {
+            // @ts-ignore
             const { fileName, line, column } = nearestFrame;
             if (isAbsolute(fileName)) { // relative path = node internals
                 const content = await fs.promises.readFile(fileName, 'utf-8');
@@ -579,9 +588,10 @@ export async function formatError(config, err) {
     let message = `${err.name}: ${err.message}`;
     if (!message.endsWith('\n')) message +='\n';
 
-    if (err.accessibilityErrors && err.accessibilityErrors.length) {
+    const a11yErrors: A11yResult[] = (err as any).accessibilityErrors
+    if (a11yErrors && a11yErrors.length) {
         message += '\n';
-        message += err.accessibilityErrors.map(violation => formatA11yError(config, violation)).join('\n\n');
+        message += a11yErrors.map(violation => formatA11yError(config, violation)).join('\n\n');
         message += '\n';
     }
 
@@ -597,9 +607,9 @@ export async function formatError(config, err) {
  * @param {import('./runner').Task} task
  * @private
  */
-export function shouldShowError(config, task) {
+export function shouldShowError(config: Config, task: Task) {
     return (
-        !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(task.error.stack)) &&
+        !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(task.error!.stack!)) &&
         (config.expect_nothing || !task.expectedToFail || task.expectedToFail && task.status === 'success'));
 }
 
@@ -608,9 +618,9 @@ export function shouldShowError(config, task) {
  * @param {import('./runner').Task} task
  * @private
  */
-export async function logTaskError(config, task) {
+export async function logTaskError(config: Config, task: Task) {
     const show_error = shouldShowError(config, task);
-    const e = task.error;
+    const e: any = task.error;
     if (config.verbose) {
         log(
             config,
@@ -654,7 +664,7 @@ export async function logTaskError(config, task) {
  * @param {*} value A random value.
  * @hidden
  */
-export function valueRepr(value) {
+export function valueRepr(value: any) {
     if (typeof value === 'symbol') {
         return value.toString();
     }
@@ -678,7 +688,7 @@ export function valueRepr(value) {
  * @param {import('./browser_utils).Result} violation
  * @private
  */
-export function formatA11yError(config, violation) {
+export function formatA11yError(config: Config, violation: A11yResult) {
     /** @type {Record<import('./browser_utils').A11yImpact, { sign: string, color: string }>} */
     const label = {
         minor: { sign: 'Minor', color: 'yellow' },
@@ -689,7 +699,7 @@ export function formatA11yError(config, violation) {
 
     const sign = label[violation.impact].sign;
     let out = color(config, label[violation.impact].color, `  ${sign}: ${violation.description}\n`);
-    out += color(config, 'yellow', color(config, 'dim', `  ${link(config, violation.helpUrl, violation.helpUrl)}\n`));
+    out += color(config, 'yellow', color(config, 'dim', `  ${link(config, violation.helpUrl || '', violation.helpUrl || '')}\n`));
 
     violation.nodes.forEach(node => {
         out += '    - ' + color(config, 'cyan', node.html);

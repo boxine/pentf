@@ -11,28 +11,18 @@ import { TestCase } from './runner';
 
 /**
  * Delete a file from node's module cache. Only CJS is supported for now.
- * @param {string} fileName Absolute path to file
+ * @param fileName Absolute path to file
  */
-function removeFromModuleCache(fileName) {
+function removeFromModuleCache(fileName: string) {
     delete require.cache[fileName];
 }
 
-/**
- *
- * @param {import('./config').Config} config
- * @param {string} key
- * @param {string} description
- */
-function keyHint(config, key, description) {
+function keyHint(config: Config, key: string, description: string) {
     return output.color(config, 'dim', 'Press ') +
         key + output.color(config, 'dim', ' ' + description);
 }
 
-/**
- *
- * @param {import('./config').Config} config
- */
-function watchFooter(config) {
+function watchFooter(config: Config) {
     let out = '\n';
     if (config.debug) {
         out += output.color(config, 'reset', 'Debug mode: ');
@@ -56,13 +46,7 @@ function watchFooter(config) {
     return out;
 }
 
-/**
- *
- * @param {import('./config').Config} config
- * @param {WatchState} state
- * @param {import('./runner').TestCase[]} test_cases
- */
-function renderSearch(config, state, test_cases) {
+function renderSearch(config: Config, state: WatchState, test_cases: TestCase[]) {
     if (!config.ci) console.clear();
 
     const { file_pattern, cursor_pos } = state;
@@ -96,9 +80,10 @@ function renderSearch(config, state, test_cases) {
                 let name = output.color(config, 'dim', tc.name);
                 const match = tc.name.match(new RegExp(file_pattern));
                 if (match) {
+                    const idx = match.index || 0;
                     name = output.color(config, 'dim', tc.name.slice(0, match.index)) +
-                        tc.name.slice(match.index, match.index + match[0].length) +
-                        output.color(config, 'dim', tc.name.slice(match.index + match[0].length));
+                        tc.name.slice(match.index, idx + match[0].length) +
+                        output.color(config, 'dim', tc.name.slice(idx + match[0].length));
                 }
 
                 return `  ${name}`;
@@ -183,7 +168,7 @@ async function scheduleRun(config: Config, state: WatchState, onChange: (test_ca
 }
 
 export async function createWatcher(config: Config, onChange: (test_cases: TestCase[]) => Promise<void>) {
-    const patterns = [...config.watch_files, config.testsGlob].map(pattern =>
+    const patterns = [...(config.watch_files || []), config.testsGlob].filter(Boolean).map(pattern =>
         path.join(config.rootDir, pattern)
     );
 
@@ -217,10 +202,7 @@ export async function createWatcher(config: Config, onChange: (test_cases: TestC
         output: process.stdout,
     });
 
-    /**
-     * @param {{ name: string, sequence: string, ctrl: boolean, shift: boolean, meta: boolean }} key
-     */
-    async function onKeyPress(key) {
+    async function onKeyPress(key: {name: string, sequence?: string, ctrl?: boolean, shift?: boolean, meta?: boolean}) {
         if (watchState.running) {
             return;
         } else if (watchState.current_view === 'default') {
@@ -229,14 +211,14 @@ export async function createWatcher(config: Config, onChange: (test_cases: TestC
             } else if (key.name === 'return') {
                 await scheduleRun(config, watchState, onChange);
             } else if (key.name === 'a') {
-                config.filter = null;
+                config.filter = undefined;
                 watchState.file_pattern = '';
                 watchState.selected_file = null;
                 watchState.selected_row = 0;
                 watchState.selection_active = false;
                 await scheduleRun(config, watchState, onChange);
             } else if (key.name === 'c') {
-                config.filter = null;
+                config.filter = undefined;
                 watchState.file_pattern = '';
                 watchState.selected_file = null;
                 watchState.selected_row = 0;
@@ -304,7 +286,7 @@ export async function createWatcher(config: Config, onChange: (test_cases: TestC
                     }
                 }
 
-                let test_cases = [];
+                let test_cases: TestCase[] = [];
                 if (file_pattern.length && utils.isValidRegex(file_pattern)) {
                     test_cases = await loadTests({ ...config, filter: file_pattern}, config.testsGlob);
                     if (selection_active) {

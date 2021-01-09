@@ -28,8 +28,8 @@ function getTestOrder(config: Config, result: TestResult) {
 export interface TaskResult {
     status: TaskStatus;
     duration: number;
-    error_screenshots: Buffer[];
-    error_stack: string;
+    error_screenshots?: Buffer[];
+    error_stack: string | null;
     accessibilityErrors: A11yResult[]
 }
 
@@ -121,7 +121,7 @@ export async function doRender(config: Config, results: CraftedResults) {
     }
 }
 
-function format_duration(ms) {
+function format_duration(ms?: number) {
     if (ms === undefined) {
         return '';
     }
@@ -138,8 +138,8 @@ function format_duration(ms) {
     return rounded_str + 's';
 }
 
-function format_timestamp(ts) {
-    const _pad = num => ('' + num).padStart(2, '0');
+function format_timestamp(ts: number) {
+    const _pad = (num: number) => ('' + num).padStart(2, '0');
     const date = new Date(ts);
 
     return (
@@ -153,7 +153,7 @@ function format_timestamp(ts) {
     );
 }
 
-function linkify(str) {
+function linkify(str: string) {
     let res = '';
     let pos = 0;
 
@@ -171,7 +171,7 @@ function linkify(str) {
 // Tests only
 export const _linkify = linkify;
 
-function escape_html(str) {
+function escape_html(str: string) {
     // From https://stackoverflow.com/a/6234804/35070
     return (str
         .replace(/&/g, '&amp;')
@@ -181,7 +181,7 @@ function escape_html(str) {
         .replace(/'/g, '&#039;'));
 }
 
-function heading(results) {
+function heading(results: CraftedResults) {
     return results.config.report_heading || 'End-To-End Test Report';
 }
 
@@ -224,21 +224,21 @@ ${table}
  * @param {Buffer} screenshot
  * @returns {string}
  */
-function screenshots_html(screenshot) {
+function screenshots_html(screenshot: Buffer) {
     const dataUri = 'data:image/png;base64,' + (screenshot.toString('base64'));
     return (
         `<img src="${dataUri}" ` +
         'style="display:inline-block; width:250px; margin:2px 10px 2px 0; border: 1px solid #888;"/>');
 }
 
-function _calcSingleStatusStr(status) {
-    return ({
+function _calcSingleStatusStr(status: string) {
+    return (({
         'success': '✔️',
         'error': '✘',
-    }[status] || status);
+    } as any)[status] || status);
 }
 
-function _calcSummaryStatus(taskResults) {
+function _calcSummaryStatus(taskResults: TaskResult[]) {
     if (taskResults.every(tr => tr.status === taskResults[0].status)) {
         return _calcSingleStatusStr(taskResults.length ? taskResults[0].status : 'skipped');
     }
@@ -255,7 +255,7 @@ function _calcSummaryStatus(taskResults) {
         .join(' '));
 }
 
-function _calcDuration(taskResults) {
+function _calcDuration(taskResults: TaskResult[]) {
     if (taskResults.length === 1) {
         return format_duration(taskResults[0].duration);
     }
@@ -350,7 +350,7 @@ function html(results: CraftedResults) {
                                 out += 'Selector: ' + node.selectors[i];
 
                                 if (node.screenshots[i] !== null) {
-                                    out += '<span class="axe-img">' + screenshots_html(node.screenshots[i]);
+                                    out += '<span class="axe-img">' + screenshots_html(node.screenshots[i]!);
                                     out += '</span>';
                                 }
 
@@ -375,7 +375,7 @@ function html(results: CraftedResults) {
                             '<p class="axe-description">' +
                                 impact + escape_html(v.description) +
                             '</p>' +
-                            '<span class="axe-link">' + linkify(v.helpUrl) + '</span>' +
+                            '<span class="axe-link">' + linkify(v.helpUrl ||'') + '</span>' +
                             '<ul>' + elements + '</ul>'
                         );
                     }
@@ -539,6 +539,6 @@ ${table}
 // Tests only
 export const _html = html;
 
-async function pdf(config: Config, path: string, results) {
+async function pdf(config: Config, path: string, results: CraftedResults) {
     return html2pdf(config, path, html(results));
 }

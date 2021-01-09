@@ -1,16 +1,20 @@
 import { strict as assert } from 'assert';
 import {TextDecoder} from 'util';
 
+// @ts-ignore
 import * as imap_client_module from 'emailjs-imap-client';
 const ImapClient = imap_client_module.default;
+// @ts-ignore
 import mime_parse from 'emailjs-mime-parser';
+// @ts-ignore
 import * as libmime from 'libmime';
 
 import * as utils from './utils';
 import * as output from './output';
 import { Config } from './config';
+import { TaskConfig } from './runner';
 
-function parseDeep(mime_part) {
+function parseDeep(mime_part: any) : {text: string |null, html: string | null}{
 
     let text = null;
     let html = null;
@@ -30,17 +34,23 @@ function parseDeep(mime_part) {
     return { text, html };
 }
 
-export function parseBody(body) {
+export interface ParsedBody {
+    subject: string;
+    text: string |null;
+    html: string |null;
+    header?: string
+}
+
+export function parseBody(body: Uint8Array) {
     assert(body instanceof Uint8Array);
     const parsed = mime_parse(body);
     const subject = parsed.headers.subject[0].value;
     assert(subject);
     const parse_result = parseDeep(parsed);
-    const res = {
+    const res: ParsedBody = {
         subject,
         text: parse_result.text,
         html: parse_result.html,
-        header: undefined
     };
 
 
@@ -53,7 +63,7 @@ export function parseBody(body) {
     return res;
 }
 
-export function parseHeader(name, value) {
+export function parseHeader(name: string, value: string) {
     assert(/^[a-zA-Z0-9]+$/.test(name));
     if (!value) return '';
     const expect = name.toLowerCase() + ':';
@@ -68,7 +78,7 @@ export function parseHeader(name, value) {
     return libmime.decodeWords(value.trim());
 }
 
-async function _find_message(config, client, since, to, subjectContains) {
+async function _find_message(config: Config, client: any, since: Date, to: string, subjectContains: string) {
     const messages = await client.listMessages(
         'INBOX', '1:*', [
             'UID',
@@ -118,7 +128,7 @@ async function _find_message(config, client, since, to, subjectContains) {
     return undefined;
 }
 
-export async function connect(config, user) {
+export async function connect(config: Config, user: string) {
     const client = new ImapClient(config.imap.host, config.imap.port, {
         logLevel: config.email_verbose ? imap_client_module.LOG_LEVEL_DEBUG : imap_client_module.LOG_LEVEL_NONE,
         auth: {
@@ -153,7 +163,7 @@ export async function connect(config, user) {
  * @returns {Object} Email object with `html` and `text` properties.
  */
 export async function getMail(
-    config, since, to, subjectContains,
+    config: TaskConfig, since: Date, to: string, subjectContains: string,
     wait_times=[
         200, 500, 1000, 2000, // for local setups where the email arrives immediately
         5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, // 1 minute for decent mail servers

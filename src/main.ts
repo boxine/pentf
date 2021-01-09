@@ -14,7 +14,7 @@ import * as watcher from './watcher';
 import {timeoutPromise} from './promise_utils';
 
 async function runTests(config: Config, test_cases: runner.TestCase[]) {
-    let results;
+    let results: render.CraftedResults;
     let test_info;
     if (config.load_json) {
         const json_input = await fs.promises.readFile(config.load_json, {encoding: 'utf-8'});
@@ -97,7 +97,7 @@ async function real_main(options: PentfOptions={}) {
     // Argparse wraps argument lists with another array
     if (config.extensions.length) {
         config.extensions = config.extensions
-            .reduce((acc, item) => acc.concat(item), []);
+            .reduce((acc, item) => acc.concat(item as any), []);
     }
 
     if (args.list) {
@@ -122,7 +122,7 @@ async function real_main(options: PentfOptions={}) {
     }
 
     if (config.watch) {
-        let remaining_teardowns = [];
+        let remaining_teardowns: Array<() => any> = [];
         await watcher.createWatcher(config, async test_cases => {
             logVerbose(config, `[runner] Executing ${remaining_teardowns.length} teardown hooks`);
             try {
@@ -140,22 +140,27 @@ async function real_main(options: PentfOptions={}) {
                 );
             }
 
-            const { test_info } = await runTests(config, test_cases);
-            remaining_teardowns = test_info.state.remaining_teardowns;
+            const result = await runTests(config, test_cases);
+            if (result && result.test_info) {
+                remaining_teardowns = result.test_info.state.remaining_teardowns;
+            }
         });
     } else {
-        const { results } = await runTests(config, test_cases);
-
-        if (!config.keep_open && results) {
-            const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
-            const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
-            logVerbose(config, `Terminating with exit code ${retCode}`);
-            process.exit(retCode);
+        const out = await runTests(config, test_cases);
+        if (out) {
+            const { results } = out;
+            
+            if (!config.keep_open && results) {
+                const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
+                const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
+                logVerbose(config, `Terminating with exit code ${retCode}`);
+                process.exit(retCode);
+            }
         }
     }
 }
 
-export function main(options) {
+export function main(options: PentfOptions) {
     (async () => {
         try {
             await real_main(options);

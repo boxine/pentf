@@ -12,7 +12,7 @@ import { wait } from './utils';
 * Assert that a value is a Number or BigInt.
 * @param x {number|BigInt} The value to check.
 */
-export function assertNumeric(x: number | bigint, message?: string) {
+export function assertNumeric(x: number, message?: string) {
     assert(
         ['number', 'bigint'].includes(typeof x),
         `${x} is not a number, but ${typeof x}.` + (message ? ' ' + message : ''));
@@ -24,7 +24,7 @@ export function assertNumeric(x: number | bigint, message?: string) {
 * @param {number|BigInt} y The ostensibly larger value.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-export function assertLess(x: number | bigint, y: number | bigint, message?: string) {
+export function assertLess(x: number, y: number, message?: string) {
     assertNumeric(x);
     assertNumeric(y);
     assert(!Number.isNaN(x));
@@ -38,7 +38,7 @@ export function assertLess(x: number | bigint, y: number | bigint, message?: str
 * @param {number|BigInt} y The ostensibly larger or equal value.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-export function assertLessEqual(x: number | bigint, y: number | bigint, message?: string) {
+export function assertLessEqual(x: number, y: number, message?: string) {
     assertNumeric(x);
     assertNumeric(y);
     assert(!Number.isNaN(x));
@@ -52,7 +52,7 @@ export function assertLessEqual(x: number | bigint, y: number | bigint, message?
 * @param {number|BigInt} y The ostensibly smaller value.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-export function assertGreater(x: number | bigint, y: number | bigint, message?: string) {
+export function assertGreater(x: number, y: number, message?: string) {
     assertNumeric(x);
     assertNumeric(y);
     assert(!Number.isNaN(x));
@@ -66,7 +66,7 @@ export function assertGreater(x: number | bigint, y: number | bigint, message?: 
 * @param {number|BigInt} y The ostensibly larger or equal value.
 * @param {string?} message Optional error message if the assertion does not hold.
 */
-function assertGreaterEqual(x: number | bigint, y: number | bigint, message?: string) {
+function assertGreaterEqual(x: number, y: number, message?: string) {
     assertNumeric(x);
     assertNumeric(y);
     assert(!Number.isNaN(x));

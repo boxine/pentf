@@ -20,7 +20,7 @@ export async function externalAcquire(config: Config, resources: string[], expir
     assert(resources.every(r => typeof r === 'string'));
     assert(Number.isInteger(expireIn));
 
-    const response = await fetch(config, config.external_locking_url, {
+    const response = await fetch(config, config.external_locking_url!, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export async function externalRelease(config: Config, resources: string[], overr
     assert(Array.isArray(resources));
     assert(resources.every(r => typeof r === 'string'));
 
-    const response = await fetch(config, config.external_locking_url, {
+    const response = await fetch(config, config.external_locking_url!, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -77,15 +77,20 @@ export async function externalRelease(config: Config, resources: string[], overr
     return true;
 }
 
+export interface Lock {
+    client: string;
+    resource: string;
+}
+
 /**
  * @param {import('./config').Config} config
  * @returns {Promise<Array<import('./locking').Lock>>}
  */
-export async function externalList(config) {
+export async function externalList(config: Config): Promise<Lock[]> {
     assert(config.external_locking_client);
     assert(config.external_locking_url);
 
-    const response = await fetch(config, config.external_locking_url, {
+    const response = await fetch(config, config.external_locking_url!, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -102,7 +107,7 @@ export async function externalList(config) {
  * @param {import('./config').Config} config
  * @private
  */
-export async function listLocks(config) {
+export async function listLocks(config: Config) {
     const locks = await externalList(config);
     console.table(locks); // eslint-disable-line no-console
 }
@@ -110,7 +115,7 @@ export async function listLocks(config) {
 /**
  * @param {import('./config').Config} config
  */
-export async function clearAllLocks(config) {
+export async function clearAllLocks(config: Config) {
     const locks = await externalList(config);
     await Promise.all(locks.map(async l => {
         const res = await externalRelease(config, [l.resource], l.client);
@@ -119,7 +124,7 @@ export async function clearAllLocks(config) {
 }
 
 function generateClientName({env=process.env, nowStr=localIso8601(new Date())} = {}) {
-    function _format(s, maxLen=30) {
+    function _format(s: string, maxLen=30) {
         if (!s) return '';
         s = s.trim().slice(0, maxLen);
         return ' ' + s;
@@ -128,10 +133,10 @@ function generateClientName({env=process.env, nowStr=localIso8601(new Date())} =
     if (env.CI_PROJECT_NAME && env.CI_COMMIT_SHA) {
         // Running in CI
         const projectName = _format(env.CI_PROJECT_NAME);
-        const commitName = _format(env.CI_COMMIT_TAG || env.CI_BRANCH, 50);
+        const commitName = _format(env.CI_COMMIT_TAG || env.CI_BRANCH!, 50);
         const commitHash = _format(env.CI_COMMIT_SHORT_SHA || env.CI_COMMIT_SHA);
-        const envName = _format(env.CI_ENVIRONMENT_NAME);
-        const jobURL = _format(env.CI_JOB_URL, 100);
+        const envName = _format(env.CI_ENVIRONMENT_NAME!);
+        const jobURL = _format(env.CI_JOB_URL!, 100);
 
         return (
             `ci${projectName}${commitName}${commitHash}${envName}${jobURL} ${pentfVersion()}` +
@@ -148,7 +153,7 @@ export const _generateClientName = generateClientName;
  * @param {import('./config').Config} config
  * @private
  */
-export function prepare(config) {
+export function prepare(config: Config) {
     if (! config.external_locking_url) {
         config.no_external_locking = true;
     }
@@ -162,8 +167,8 @@ export function prepare(config) {
 async function refresh(config: Config, state: RunnerState) {
     const {locks} = state;
     assert(locks);
-    if (locks.size > 0) {
-        const locksArray = Array.from(locks);
+    if (locks!.size > 0) {
+        const locksArray = Array.from(locks!);
 
         try {
             const acquireRes = await externalAcquire(config, locksArray, REQUEST_EXPIRE_IN);
@@ -190,7 +195,7 @@ async function refresh(config: Config, state: RunnerState) {
  * @param {import('./runner').RunnerState} state
  * @private
  */
-export async function init(config, state) {
+export async function init(config: Config, state: RunnerState) {
     if (config.no_external_locking) return;
     state.external_locking_refresh_timeout = setTimeout(() => refresh(config, state), REFRESH_INTERVAL);
 }
@@ -200,8 +205,8 @@ export async function init(config, state) {
  * @param {import('./runner').RunnerState} state
  * @private
  */
-export async function shutdown(config, state) {
+export async function shutdown(config: Config, state: RunnerState) {
     if (config.no_external_locking) return;
     assert(state.external_locking_refresh_timeout);
-    clearTimeout(state.external_locking_refresh_timeout);
+    clearTimeout(state.external_locking_refresh_timeout!);
 }

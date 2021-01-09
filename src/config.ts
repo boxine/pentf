@@ -6,7 +6,7 @@ import * as path from 'path';
 import {promisify} from 'util';
 
 import * as utils from './utils';
-import { importFile, findPackageJson } from './loader';
+import { importFile, findPackageJson, ModuleType } from './loader';
 import { Page } from 'puppeteer';
 import { TeardownHook } from './runner';
 import { PentfOptions } from './main';
@@ -42,7 +42,7 @@ export function getCPUCount() {
     // TODO handle scenarios where our process is limited to less
 }
 
-function computeConcurrency(spec, {cpuCount=undefined}={}) {
+function computeConcurrency(spec: number | string, {cpuCount}: {cpuCount?:number}={}) {
     if (typeof spec === 'number') { // Somebody passed in result value directly
         return spec;
     }
@@ -55,7 +55,7 @@ function computeConcurrency(spec, {cpuCount=undefined}={}) {
             numeric => {
                 numeric = numeric.trim();
                 if (numeric === 'cpus') {
-                    return cpuCount;
+                    return cpuCount!;
                 }
                 assert(
                     /^[0-9]+$/.test(numeric), `Invalid concurrency spec ${JSON.stringify(spec)}`);
@@ -67,7 +67,7 @@ function computeConcurrency(spec, {cpuCount=undefined}={}) {
 // Tests only
 export const _computeConcurrency = computeConcurrency;
 
-export function parseArgs(options, raw_args) {
+export function parseArgs(options: PentfOptions, raw_args: string[]) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
@@ -434,7 +434,7 @@ export function parseArgs(options, raw_args) {
     for (const k in parser._actions) {
         const flag = parser._actions[k];
         if (flag.dest in options && args[flag.dest] === flag.defaultValue) {
-            args[flag.dest] = options[flag.dest];
+            args[flag.dest] = (options as any)[flag.dest];
         }
     }
 
@@ -478,7 +478,7 @@ export function parseArgs(options, raw_args) {
     return args;
 }
 
-async function readConfigFile(configDir, env, moduleType) {
+async function readConfigFile(configDir: string, env: string, moduleType: ModuleType): Promise<any> {
     let config;
 
     const jsFilename = path.join(configDir, env + '.js');
@@ -516,11 +516,13 @@ export interface Config {
     devtools?: boolean;
     devtools_preserve?: boolean;
     display_locking_client?: boolean;
+    email?: string;
     email_cached_clients?: Map<string, any>;
+    email_verbose?: boolean;
     env: string;
     exit_zero?: boolean;
     expect_nothing?: boolean;
-    extensions?: string[],
+    extensions: string[],
     external_locking_client?: string;
     external_locking_url?: string;
     fail_fast?: boolean;
@@ -529,9 +531,12 @@ export interface Config {
     forward_console?: boolean
     headless?: boolean;
     html?: boolean;
-    html_file?: string;
+    html_file: string;
+    ignore_errors?: string;
+    imap: any;
     json?: boolean;
-    json_file?: string;
+    json_file: string;
+    keep_emails: boolean;
     keep_open?: boolean;
     list_conflicts?: boolean;
     list_locks?: boolean;
@@ -544,10 +549,10 @@ export interface Config {
     no_locking?: boolean;
     manually_lock?: string;
     markdown?: boolean;
-    markdown_file?: string;
+    markdown_file: string;
     moduleType: 'commonjs' | 'esm';
     pdf?: boolean;
-    pdf_file?: string;
+    pdf_file: string;
     print_curl?: boolean;
     print_tasks?: boolean;
     puppeteer_firefox?: boolean;
@@ -555,6 +560,7 @@ export interface Config {
     rejectUnauthorized?: any;
     repeat?: number;
     repeatFlaky: number;
+    report_heading?: string;
     report_header_html?: string;
     report_header_md?: string;
     rootDir: string;
@@ -570,7 +576,7 @@ export interface Config {
     watch: boolean;
     watch_files?: string[];
     _browser_pages?: Page[]
-    _teardown_hooks?: TeardownHook[]
+    _teardown_hooks: TeardownHook[]
 }
 
 export async function readConfig(options: PentfOptions, args: any): Promise<Config> {
@@ -581,7 +587,7 @@ export async function readConfig(options: PentfOptions, args: any): Promise<Conf
 
     // Add support for `pentf` configuration key in `package.json`.
     const pkgJsonPath = await findPackageJson(config.rootDir);
-    let moduleType = 'commonjs';
+    let moduleType: ModuleType = 'commonjs';
     if (pkgJsonPath !== null) {
         const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath, 'utf-8'));
         config = pkgJson.pentf || config;

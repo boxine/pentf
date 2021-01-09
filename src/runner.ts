@@ -39,6 +39,10 @@ export interface TaskConfig extends Config {
     accessibilityErrors: A11yResult[]
 }
 
+export function isTaskConfig(x: any): x is TaskConfig {
+    return x !== null && typeof x === 'object' && typeof x.start === 'number'
+}
+
 async function run_task(config: Config, state: RunnerState, task: Task) {
     const task_config: TaskConfig = {
         ...config,

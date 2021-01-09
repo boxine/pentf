@@ -21,7 +21,7 @@ import {wait, remove} from './utils';
 import {timeoutPromise} from './promise_utils';
 import { importFile } from './loader';
 import * as output from './output';
-import { TaskConfig } from "./runner";
+import { isTaskConfig, TaskConfig } from "./runner";
 import { AxeResults } from "axe-core";
 
 declare global {
@@ -71,7 +71,7 @@ function ignorerError(err: Error) {
  * @param {string[]} [chrome_args] Additional arguments for Chrome (optional).
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
-export async function newPage(config: TaskConfig, chrome_args: string[]=[]) {
+export async function newPage(config: TaskConfig | Config, chrome_args: string[]=[]) {
     addBreadcrumb(config, 'enter newPage()');
     let puppeteer: typeof import('puppeteer');
     try {
@@ -238,7 +238,7 @@ export async function newPage(config: TaskConfig, chrome_args: string[]=[]) {
         config._browser_pages.push(page);
     }
 
-    if (config.breadcrumbs) {
+    if (config.breadcrumbs && isTaskConfig(config)) {
         withBreadcrumb(config, page, '$', (selector) => `page.$(${selector})`);
         withBreadcrumb(config, page, '$$', (selector) => `page.$$(${selector})`);
         withBreadcrumb(config, page, '$eval', () => 'page.$eval()');
@@ -254,7 +254,7 @@ export async function newPage(config: TaskConfig, chrome_args: string[]=[]) {
 
     // The Browser instance is the nearest shared ancestor across pages
     // and frames.
-    browser._pentf_config = config;
+    (browser as any)._pentf_config = config;
     addBreadcrumb(config, 'exit newPage()');
 
     // PDF renderer invokes newPage with a raw config object which doesn't
@@ -297,12 +297,12 @@ function getDefaultTimeout(pageOrFrame) {
 /**
  * Mark progress in test. Useful for when the test times out and there is no
  * hint as to why.
- * @param {import('./runner').TaskConfig} config
- * @param {string} name
+ * @param config
+ * @param name
  * @private
  */
-function addBreadcrumb(config: TaskConfig, name: string) {
-    if (config.breadcrumbs) {
+function addBreadcrumb(config: Config | TaskConfig, name: string) {
+    if (config.breadcrumbs && isTaskConfig(config)) {
         const time = Math.round(performance.now() - config.start);
         config._breadcrumb = new Error(`Last breadcrumb "${name}" at ${time}ms after test started.`);
     }
@@ -341,20 +341,52 @@ async function closePage(page: Page) {
     addBreadcrumb(config, 'exit closePage()');
 }
 
+export interface TimeoutOptions {
+    /** Error message shown if the element is not visible in time. */
+    message?: string;
+    /** How long to wait, in milliseconds. */
+    timeout?: number;
+}
+
+export interface RetryOptions {
+    /** @deprecated Use `retryUntil` instead */
+    assertSuccess?: () => Promise<boolean>;
+    /**
+     * Additional check to verify that the operation was successful. This is needed in cases where
+     * a DOM node is present and we clicked on it, but the framework that rendered the node
+     * didn't set up any event listeners yet.
+     */
+    retryUntil?: () => Promise<boolean>;
+}
+
+export interface VisibleOption {
+    /** Whether the element must be visible within the timeout. (default: `true`) */
+    visible?: boolean;
+}
+
+export interface CheckEveryOption {
+    /** Intervals between checks, in milliseconds. (default: 200ms) */
+    checkEvery?: number;
+}
+
+export interface ExtraMessageOption {
+    /** Optional error message shown if the element is not present in time. */
+    extraMessage?: string;
+}
+
 /**
  * Wait for an element matched by a CSS query selector to become visible.
  * Visible means the element has neither `display:none` nor `visibility:hidden`.
  * Elements outside the current viewport (e.g. you'd need to scroll) and hidden with CSS trickery
  * (opacity, overlaid with z-index, or permanently positioned outside the viewport) count as visible.
  *
- * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} selector Query selector, e.g. `div > a[href="/"]:visited`
- * @param {{timeout?: number, message?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} [message] Error message shown if the element is not visible in time.
- * @param {number?} [timeout] How long to wait, in milliseconds.
- * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
+ * @param page puppeteer page object.
+ * @param selector Query selector, e.g. `div > a[href="/"]:visited`
+ * @param options Options
+ 
+ * @returns A handle to the found element.
  */
-async function waitForVisible(page: Page, selector: string, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
+async function waitForVisible(page: Page, selector: string, {message, timeout=getDefaultTimeout(page)}: TimeoutOptions = {}): Promise<ElementHandle> {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForVisible(${selector})`);
 
@@ -429,17 +461,21 @@ function checkText(text: string) {
     }
 }
 
+export interface WaitForTextOptions extends ExtraMessageOption {
+    /** How long to wait, in milliseconds. */
+    timeout?: number;
+}
+
 /**
  * Wait for text to appear on the page.
  *
- * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} text String to look for.
- * @param {{timeout?: number, extraMessage?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} extraMessage Error message shown if the element is not present in time.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the text node.
+ * @param page puppeteer page object.
+ * @param text String to look for.
+ * @param options
+
+ * @returns A handle to the text node.
  */
-async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMessage=undefined}={}) {
+async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMessage}: WaitForTextOptions={}): Promise<ElementHandle> {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForText(${text})`);
     checkText(text);
@@ -464,18 +500,20 @@ function _checkTestId(testId: string) {
     assert(/^[-a-zA-Z0-9_.]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
 }
 
+export interface WaitForTestIdOptions extends VisibleOption, ExtraMessageOption {
+    /** How long to wait, in milliseconds. */
+    timeout?: number;
+}
+
 /**
  * Search for an element with the given `data-testid` attribute.
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} testId The test id to search
- * @param {{extraMessage?: string, timeout?: number, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} extraMessage Error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
- * @returns {Promise<import('puppeteer').ElementHandle>} Handle to the element with the given test ID.
+ * @param testId The test id to search
+ * @param options Options
+ * @returns Handle to the element with the given test ID.
  */
-async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true} = {}) {
+async function waitForTestId(page: Page, testId: string, {extraMessage, timeout=getDefaultTimeout(page), visible=true}: WaitForTestIdOptions = {}): Promise<ElementHandle> {
     _checkTestId(testId);
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForTestId(${testId})`);
@@ -505,8 +543,8 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
 /**
  * Assert an `<input>` element having a certain value (after a wait if necessary).
  *
- * @param {import('puppeteer').ElementHandle} input A puppeteer handle to an input element.
- * @param {string} expected The value that is expected to be present.
+ * @param input A puppeteer handle to an input element.
+ * @param expected The value that is expected to be present.
  */
 async function assertValue(input: ElementHandle, expected: string) {
     const page = (input as any)._page;
@@ -542,17 +580,23 @@ async function assertValue(input: ElementHandle, expected: string) {
     }
 }
 
+export interface AssertNotXPathOptions {
+    /** Error message shown if the element is not visible in time. */
+    message?: string;
+    /** How long to wait, in milliseconds. (Default: 2s) */
+    timeout?: number;
+     /** Intervals between checks, in milliseconds. */
+    checkEvery?: number;
+}
+
 /**
  * Assert that there is currently no element matching the XPath on the page.
  *
- * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} xpath XPath to search for.
- * @param {{timeout?: number, message?: string, checkEvery?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} message Error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds. (Default: 2s)
- * @param {number?} checkEvery Intervals between checks, in milliseconds.
+ * @param page puppeteer page object.
+ * @param xpath XPath to search for.
+ * @param options
  */
-export async function assertNotXPath(page: Page, xpath: string, options: any, _timeout=2000, _checkEvery=200) {
+export async function assertNotXPath(page: Page, xpath: string, options: AssertNotXPathOptions, _timeout=2000, _checkEvery=200) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotXPath(${xpath})`);
     assert.equal(
@@ -621,18 +665,11 @@ async function onSuccess(fn: () => Promise<boolean>) {
  * ```javascript
  * await clickSelector(page, 'div[data-id="foo"] a.view', {message: 'Could not click foo link'});
  * ```
- * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
- * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} message Error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
- * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
- * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
+ * @param page puppeteer page object.
+ * @param selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
+ * @param options
  */
-async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
+async function clickSelector(page: PentfPage, selector: string, {timeout=getDefaultTimeout(page), checkEvery=200, message, visible=true, assertSuccess, retryUntil}: TimeoutOptions & RetryOptions & VisibleOption & CheckEveryOption = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickSelector(${selector})`);
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
@@ -690,13 +727,11 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
  * ```javascript
  * await assertNotSelector(page, 'div[data-id="foo"] a.view', {message: 'Expected foo to not be present'});
  * ```
- * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
- * @param {{timeout?: number, message?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} message Error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds.
+ * @param page puppeteer page object.
+ * @param selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
+ * @param options Options (currently not visible in output due to typedoc bug)
  */
-async function assertNotSelector(page, selector, {timeout=getDefaultTimeout(page), message} = {}) {
+async function assertNotSelector(page: PentfPage, selector: string, {timeout=getDefaultTimeout(page), message}: TimeoutOptions = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotSelector(${selector})`);
     try {
@@ -718,18 +753,23 @@ async function assertNotSelector(page, selector, {timeout=getDefaultTimeout(page
  *     {message: 'Could not find the button in the foobar form'}
  * );
  * ```
- * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} xpath XPath selector to match the element.
- * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} message Error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
- * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
- * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
+ * @param page puppeteer page object.
+ * @param xpath XPath selector to match the element.
+ * @param options Options
  */
-async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
+async function clickXPath(
+    page: Page,
+    xpath: string,
+    options: RetryOptions & TimeoutOptions & VisibleOption & CheckEveryOption = {}
+) {
+    let {
+        timeout = getDefaultTimeout(page),
+        checkEvery = 200,
+        message = undefined,
+        visible = true,
+        assertSuccess,
+        retryUntil,
+    } = options;
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickXPath(${xpath})`);
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
@@ -740,16 +780,21 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     while (true) {
         let found = false;
         try {
-            found = await page.evaluate((xpath, visible) => {
-                const element = document.evaluate(
-                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext() as any;
-                if (!element) return false;
+            found = await page.evaluate(
+                (xpath, visible) => {
+                    const element = document
+                        .evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null)
+                        .iterateNext() as any;
+                    if (!element) return false;
 
-                if (visible && element.offsetParent === null) return null; // invisible
+                    if (visible && element.offsetParent === null) return null; // invisible
 
-                element.click();
-                return true;
-            }, xpath, visible);
+                    element.click();
+                    return true;
+                },
+                xpath,
+                visible
+            );
         } catch (err) {
             if (!ignorerError(err)) {
                 throw err;
@@ -757,7 +802,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
         }
 
         try {
-            if (found && await onSuccess(retryUntil || assertSuccess)) {
+            if (found && (await onSuccess(retryUntil || assertSuccess))) {
                 addBreadcrumb(config, `exit clickXPath(${xpath})`);
                 return;
             }
@@ -784,21 +829,27 @@ const DEFAULT_CLICKABLE_ELEMENTS = ['a', 'button', 'input', 'label'];
 const DEFAULT_CLICKABLE = (
     '//*[' + DEFAULT_CLICKABLE_ELEMENTS.map(e => `local-name()="${e}"`).join(' or ') + ']');
 
+export interface ClickTextOptions extends TimeoutOptions, RetryOptions, CheckEveryOption {
+    /**
+     * XPath selector for the elements to match. By default matching `a`, `button`, `input`,
+     * `label`. `'//*'` to match any element.
+     */
+    elementXPath?: string;
+    /** Optional error message shown if the element is not visible in time. */
+    extraMessage?: string;
+}
+
 /**
  * Click a link, button, label, or input by its text content.
  *
- * @param {import('puppeteer').Page} page  puppeteer page object.
- * @param {string} text Text that the element must contain.
- * @param {{timeout?: number, checkEvery?: number, elementXPath?: string, extraMessage?: string, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param page puppeteer page object.
+ * @param text Text that the element must contain.
+ * @param options Options (currently not visible in output due to typedoc bug)
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
- * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
- * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
+ * @param {string} elementXPath
  */
-async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined, assertSuccess, retryUntil}={}) {
+async function clickText(page: Page, text: string, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage, assertSuccess, retryUntil}: ClickTextOptions={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickText(${text})`);
     checkText(text);
@@ -832,7 +883,7 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
  * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage=undefined, visible=true, assertSuccess, retryUntil}={}) {
+async function clickNestedText(page: Page, textOrRegExp: string | RegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage, visible=true, assertSuccess, retryUntil}: VisibleOption & RetryOptions & TimeoutOptions & CheckEveryOption & ExtraMessageOption ={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickNestedText(${textOrRegExp})`);
     if (typeof textOrRegExp === 'string') {
@@ -945,12 +996,8 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
  * @param {string} testId The test ID to look for.
  * @param {{extraMessage?: string, timeout?: number, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} extraMessage Optional error message shown if the element is not present in time.
- * @param {number?} timeout How long to wait, in milliseconds. (default: true)
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
- * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true, assertSuccess, retryUntil} = {}) {
+async function clickTestId(page: Page, testId: string, {extraMessage, timeout=getDefaultTimeout(page), visible=true, assertSuccess, retryUntil}: VisibleOption & TimeoutOptions & RetryOptions & ExtraMessageOption = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickTestId(${testId})`);
     _checkTestId(testId);
@@ -970,13 +1017,11 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
  * ```javascript
  * await assertNotTestId(page, 'foo', {message: 'Expected Test ID "foo" to not be present'});
  * ```
- * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} testId The test ID to look for.
- * @param {{timeout?: number, message?: string}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} message Error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds.
+ * @param page puppeteer page object.
+ * @param testId The test ID to look for.
+ * @param options
  */
-async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), message} = {}) {
+async function assertNotTestId(page: Page, testId: string, {timeout=getDefaultTimeout(page), message}: TimeoutOptions = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotTestId(${testId})`);
     _checkTestId(testId);
@@ -994,13 +1039,12 @@ async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), m
 /**
  * Type text into an element identified by a query selector.
  *
- * @param {import('puppeteer').Page} page puppeteer page object.
- * @param {string} selector selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the element to type in.
- * @param {{message?: string, timeout?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {string?} message Message shown if the element can not be found.
+ * @param page puppeteer page object.
+ * @param selector selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the element to type in.
+ * @param text text to type
+ * @param options
  */
-async function typeSelector(page, selector, text, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
+async function typeSelector(page: Page, selector: string, text: string, {message=undefined, timeout=getDefaultTimeout(page)}: TimeoutOptions={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter typeSelector(${selector}, text: ${text})`);
     const el = await waitForVisible(page, selector, {timeout, message});
@@ -1011,10 +1055,10 @@ async function typeSelector(page, selector, text, {message=undefined, timeout=ge
 /**
  * Configure the browser's language.
  *
- * @param {import('puppeteer').Page} page The puppeteer page handle.
- * @param {string | string[]} lang Either be a single string (e.g. "en") or an array of supported languages (e.g. `['de-DE', 'en-US', 'gr']`)
+ * @param page The puppeteer page handle.
+ * @param lang Either be a single string (e.g. "en") or an array of supported languages (e.g. `['de-DE', 'en-US', 'gr']`)
  */
-async function setLanguage(page, lang) {
+async function setLanguage(page: Page, lang: string | string[]) {
     if (typeof lang === 'string') {
         lang = [lang];
     }
@@ -1046,12 +1090,12 @@ async function setLanguage(page, lang) {
 /**
  * Retrieve attribute value of a DOM element.
  *
- * @param {import('puppeteer').Page} page The puppeteer page handle.
- * @param {string} selector Query selector for the element.
- * @param {string} name Attribute name.
- * @returns {Promise<string>} The attribute value
+ * @param page The puppeteer page handle.
+ * @param selector Query selector for the element.
+ * @param name Attribute name.
+ * @returns The attribute value
  */
-async function getAttribute(page, selector, name) {
+async function getAttribute(page: Page, selector: string, name: string): Promise<string> {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter getAttribute(${selector}, attr: ${name})`);
     await page.waitForSelector(selector);
@@ -1073,11 +1117,11 @@ async function getAttribute(page, selector, name) {
 /**
  * Get the text content of a given DOM Element.
  *
- * @returns {import('puppeteer').Page} The puppeteer page handle.
- * @param {string} selector Query selector.
- * @returns {Promise<string>} Text content of the selected element.
+ * @param page The puppeteer page handle.
+ * @param selector Query selector.
+ * @returns Text content of the selected element.
  */
-async function getText(page, selector) {
+async function getText(page: Page, selector: string): Promise<string> {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter getText(${selector})`);
     const res = await getAttribute(page, selector, 'textContent');
@@ -1088,27 +1132,26 @@ async function getText(page, selector) {
 /**
  * Get all options of a `<select>` as an array of strings. The selected option is suffixed with `(***)`.
  *
- * @param {import('puppeteer').Page} page  The puppeteer page handle.
- * @param {import('puppeteer').ElementHandle<HTMLSelectElement>} select puppeteer handl eto the `<select>`.
- * @returns {Promise<string[]>} e.g. `['Option A', 'Option B(***)', 'Option C']`
+ * @param page The puppeteer page handle.
+ * @param select puppeteer handl eto the `<select>`.
+ * @returns e.g. `['Option A', 'Option B(***)', 'Option C']`
  */
-async function getSelectOptions(page, select) {
+async function getSelectOptions(page: Page, select: ElementHandle<HTMLSelectElement>): Promise<string[]> {
     return await page.evaluate(select => {
-        return Array.from(select.options).map(option => {
+        return Array.from((select as HTMLSelectElement).options).map(option => {
             return option.innerText + (option.selected ? '(***)' : '');
         });
     }, select);
 }
 
 /**
- *
- * @param {import('./config').Config} config
- * @param {import('puppeteer').Page} page
- * @param {string} fileName
- * @param {string} [selector]
+ * @param config
+ * @param page The puppeteer page handle.
+ * @param fileName Where to write the screenshot to
+ * @param selector if specified only the element matching the selector will be screenshotted
  */
 async function takeScreenshot(config: Config, page: Page, fileName: string, selector?: string) {
-    await mkdirp(config.screenshot_directory);
+    await (mkdirp as any)(config.screenshot_directory);
     const fn = path.join(config.screenshot_directory, fileName);
 
     const viewport = page.viewport();
@@ -1128,7 +1171,7 @@ async function takeScreenshot(config: Config, page: Page, fileName: string, sele
     }
 
     // Restore emulation, fixes unable to resize window after taking a screenshot.
-    await page._client.send('Emulation.clearDeviceMetricsOverride');
+    await (page as any)._client.send('Emulation.clearDeviceMetricsOverride');
 
     // Restore potential emulation settings that were active before
     // we took the screenshot.
@@ -1219,7 +1262,7 @@ async function assertAccessibility(config: TaskConfig, page: Page) {
 
     if (errors.length > 0) {
         const err = new Error(`There were ${errors.length} accessibility violations on ${url}`);
-        err.accessibilityErrors = errors;
+        (err as any).accessibilityErrors = errors;
         throw err;
     }
 }

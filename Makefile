@@ -17,9 +17,8 @@ prettier:
 test:
 	@npm run test --silent
 
-doc: src/* *.js tsconfig.json
-	./node_modules/.bin/typedoc --out doc --noEmit --excludeNotExported --excludeNotDocumented --excludeExternals \
-		src/*.js
+doc: src/* *.ts tsconfig.json
+	@node_modules/.bin/tsc && node_modules/.bin/api-extractor run --local --verbose && node_modules/.bin/api-documenter markdown -i temp -o new-docs
 
 lockserver-dev:
 	node_modules/.bin/nodemon lockserver/lockserver.js
@@ -27,4 +26,4 @@ lockserver-dev:
 clean:
 	@npm run clean
 
-.PHONY: default lint test lockserver-dev clean eslint prettier-lint prettier
+.PHONY: default lint test lockserver-dev clean eslint prettier-lint prettier doc

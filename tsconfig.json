@@ -8,5 +8,5 @@
     "alwaysStrict": true,
     "outDir": "dist/"
   },
-  "files": ["./src/index.ts"]
+  "files": ["./src/index.ts", "./src/api-docs-entry.ts"]
 }

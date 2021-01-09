@@ -1,24 +1,27 @@
-'use strict';
+import { ElementHandle, LaunchOptions, Page } from "puppeteer";
+import { Config } from "./config";
+
 /**
  * Browser functions, based upon puppeteer.
  * These functions extend [the puppeteer API](https://github.com/puppeteer/puppeteer/blob/master/docs/api.md).
  * @packageDocumentation
  */
 
-const assert = require('assert').strict;
-const fs = require('fs');
-const path = require('path');
-const {promisify} = require('util');
-const tmp = require('tmp-promise');
-const {performance} = require('perf_hooks');
-const mkdirpCb = require('mkdirp');
+import {strict as assert} from 'assert';
+import * as fs from 'fs';
+import * as path from 'path';
+import {promisify} from 'util';
+import * as tmp from 'tmp-promise';
+import {performance} from 'perf_hooks';
+import mkdirpCb from 'mkdirp';
 
-const {assertAsyncEventually} = require('./assert_utils');
-const {forwardBrowserConsole} = require('./browser_console');
-const {wait, remove} = require('./utils');
-const {timeoutPromise} = require('./promise_utils');
-const { importFile } = require('./loader');
-const output = require('./output');
+import {assertAsyncEventually} from './assert_utils';
+import {forwardBrowserConsole} from './browser_console';
+import {wait, remove} from './utils';
+import {timeoutPromise} from './promise_utils';
+import { importFile } from './loader';
+import * as output from './output';
+import { TaskConfig } from "./runner";
 
 const mkdirp = promisify(mkdirpCb);
 
@@ -26,9 +29,8 @@ let tmp_home;
 
 /**
  * Ignore these errors
- * @param {Error} err
  */
-function ignorerError(err) {
+function ignorerError(err: Error) {
     return /Execution context was destroyed/.test(err.message);
 }
 
@@ -48,9 +50,9 @@ function ignorerError(err) {
  * @param {string[]} [chrome_args] Additional arguments for Chrome (optional).
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
-async function newPage(config, chrome_args=[]) {
+export async function newPage(config: TaskConfig, chrome_args: string[]=[]) {
     addBreadcrumb(config, 'enter newPage()');
-    let puppeteer;
+    let puppeteer: typeof import('puppeteer');
     try {
         if(config.puppeteer_firefox) {
             puppeteer = await importFile('puppeteer-firefox', config.moduleType);
@@ -69,7 +71,7 @@ async function newPage(config, chrome_args=[]) {
     const args = ['--no-sandbox'];
     args.push(...chrome_args);
 
-    const params = {
+    const params: LaunchOptions = {
         args,
         ignoreHTTPSErrors: (config.env === 'local'),
     };
@@ -278,20 +280,14 @@ function getDefaultTimeout(pageOrFrame) {
  * @param {string} name
  * @private
  */
-function addBreadcrumb(config, name) {
+function addBreadcrumb(config: TaskConfig, name: string) {
     if (config.breadcrumbs) {
         const time = Math.round(performance.now() - config.start);
         config._breadcrumb = new Error(`Last breadcrumb "${name}" at ${time}ms after test started.`);
     }
 }
 
-/**
- * @template {K}
- * @param {import('puppeteer').Page} page
- * @param {K extends keyof import('puppeteer').Page} prop
- * @param {(...any[]) => string} getName
- */
-function withBreadcrumb(config, page, prop, getName) {
+function withBreadcrumb(config: TaskConfig, page: Page, prop: any, getName: any) {
     const original = page[prop];
     page[prop] = (...args) => {
         const name = getName.apply(null, args);
@@ -306,7 +302,7 @@ function withBreadcrumb(config, page, prop, getName) {
  * Close a page (and its associated browser)
  * @param {import('puppeteer').Page} page puppeteer page object returned by `newPage`.
  */
-async function closePage(page) {
+async function closePage(page: Page) {
     const browser = getBrowser(page);
     const config = browser._pentf_config;
     addBreadcrumb(config, 'enter closePage()');
@@ -337,7 +333,7 @@ async function closePage(page) {
  * @param {number?} [timeout] How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
  */
-async function waitForVisible(page, selector, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
+async function waitForVisible(page: Page, selector: string, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForVisible(${selector})`);
 
@@ -386,7 +382,7 @@ async function waitForVisible(page, selector, {message=undefined, timeout=getDef
  * ```
  * @param {string} text The text to encode. This can be user input or otherwise contain exotic characters.
  */
-function escapeXPathText(text) {
+function escapeXPathText(text: string) {
     if (!text.includes('"')) {
         // No doubles quotes ("), simple case
         return `"${text}"`;
@@ -397,7 +393,7 @@ function escapeXPathText(text) {
 /**
  * @hidden
  */
-function checkText(text) {
+function checkText(text: string) {
     if (typeof text !== 'string') {
         let repr;
         try {
@@ -442,7 +438,7 @@ async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMe
 /**
  * @hidden
  */
-function _checkTestId(testId) {
+function _checkTestId(testId: string) {
     if (typeof testId !== 'string') throw new Error(`Invalid testId type ${testId}`);
     assert(/^[-a-zA-Z0-9_.]+$/.test(testId), `Invalid testId ${JSON.stringify(testId)}`);
 }
@@ -491,7 +487,7 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
  * @param {import('puppeteer').ElementHandle} input A puppeteer handle to an input element.
  * @param {string} expected The value that is expected to be present.
  */
-async function assertValue(input, expected) {
+async function assertValue(input: ElementHandle, expected: string) {
     const page = input._page;
     assert(page);
     const config = getBrowser(page)._pentf_config;
@@ -535,7 +531,7 @@ async function assertValue(input, expected) {
  * @param {number?} timeout How long to wait, in milliseconds. (Default: 2s)
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
-async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=200) {
+export async function assertNotXPath(page: Page, xpath: string, options: any, _timeout=2000, _checkEvery=200) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotXPath(${xpath})`);
     assert.equal(
@@ -585,10 +581,8 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
 
 /**
  * Optionally run post-assertion check
- * @param {() => Promise<boolean>} fn
- * @returns {Promise<boolean>}
  */
-async function onSuccess(fn) {
+async function onSuccess(fn: () => Promise<boolean>) {
     if (!fn) return true;
 
     const res = await fn();
@@ -1124,25 +1118,22 @@ async function takeScreenshot(config, page, fileName, selector) {
     return img;
 }
 
-/**
- * @typedef {"minor" | "moderate" | "serious" | "critical"} A11yImpact
- */
+export type A11yImpact = "minor" | "moderate" | "serious" | "critical";
 
-/**
- * @typedef {{html: string, screenshots: Array<Buffer | null>, selectors: string[]}} A11yNode
- */
+export interface A11yNode {
+    html: string;
+    screenshots: Array<Buffer | null>;
+    selectors: string[];
+}
 
-/**
- *
- * @typedef {{impact: A11yImpact, helpUrl?: string, description: string, nodes: A11yNode[]}} A11yResult
- */
+export interface A11yResult {
+    impact: A11yImpact;
+    helpUrl?: string;
+    description: string;
+    nodes: A11yNode[];
+}
 
-/**
- *
- * @param {import('./config').Config}
- * @param {import('puppeteer').Frame | import('puppeteer').Page} page
- */
-async function assertAccessibility(config, page) {
+async function assertAccessibility(config: Config, page: Page) {
     assert(config, 'Missing config argument');
     assert(page, 'Missing page argument');
 
@@ -1274,7 +1265,7 @@ async function restoreTimeouts(page) {
 /**
  * @hidden
  */
-async function workaround_setContent(page, html) {
+async function workaround_setContent(page: Page, html: string) {
     // Workaround for https://github.com/GoogleChrome/puppeteer/issues/4464
     const waiter = page.waitForNavigation({waitUntil: 'load'});
     await page.evaluate(html => {
@@ -1290,7 +1281,7 @@ async function workaround_setContent(page, html) {
  * @param {import('puppeteer').Page} page
  * @param {(request: import('puppeteer').Request) => Promise<void> | void} fn
  */
-async function interceptRequest(page, fn) {
+async function interceptRequest(page: Page, fn) {
     if (!page._pentf_intercept_handlers) {
         await page.setRequestInterception(true);
 
@@ -1326,7 +1317,7 @@ async function interceptRequest(page, fn) {
  * @param {string} html Full HTML document to render.
  * @param {*} modifyPage An optional async function to modify the `page` object.
  */
-async function html2pdf(config, path, html, modifyPage=null) {
+export async function html2pdf(config: Config, path: string, html: string, modifyPage: (page: Page) => Promise<void> =null) {
     const pdfConfig = {...config};
     pdfConfig.headless = true;
     // The headless option will be overwritten if devtools=true, leading to a
@@ -1351,7 +1342,6 @@ module.exports = {
     assertAccessibility,
     assertNotSelector,
     assertNotTestId,
-    assertNotXPath,
     assertValue,
     clickNestedText,
     clickSelector,
@@ -1363,9 +1353,7 @@ module.exports = {
     getAttribute,
     getSelectOptions,
     getText,
-    html2pdf,
     interceptRequest,
-    newPage,
     restoreTimeouts,
     setLanguage,
     speedupTimeouts,

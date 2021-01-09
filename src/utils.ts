@@ -1,4 +1,4 @@
-const assert = require('assert').strict;
+import { strict as assert } from 'assert';
 
 function makeEmailAddress(config, suffix) {
     assert(config.email, 'Missing `email` key in pentf configuration');
@@ -14,7 +14,7 @@ function makeEmailAddress(config, suffix) {
                            If no prefix is specified, the test name is used if available.
  * @returns {string} If `config.email` is `'foo@bar.com'`, something like `foo+prefix129ad12@bar.com`
  */
-function makeRandomEmail(config, prefix=undefined) {
+export function makeRandomEmail(config, prefix=undefined) {
     if (prefix === undefined) {
         prefix = config._testName || '';
     }
@@ -30,11 +30,11 @@ function makeRandomEmail(config, prefix=undefined) {
  * ```
  * @param {number} ms Number of milliseconds to wait.
  */
-async function wait(ms) {
+export async function wait(ms) {
     await new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function retry(func, waitTimes) {
+export async function retry(func, waitTimes) {
     for (const w of waitTimes) {
         const res = await func();
         if (res) return res;
@@ -43,7 +43,7 @@ async function retry(func, waitTimes) {
     return await func();
 }
 
-function randomHex() {
+export function randomHex() {
     return [
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 16)];
@@ -55,7 +55,7 @@ function randomHex() {
  * @param {number} len Length of the hex string.
  * @return string A random hex string, e.g. `A812F0D91`
  */
-function randomHexstring(len) {
+export function randomHexstring(len) {
     let res = '';
     while (len-- > 0) {
         res += randomHex();
@@ -63,7 +63,7 @@ function randomHexstring(len) {
     return res;
 }
 
-function regexEscape(s) {
+export function regexEscape(s) {
     // From https://stackoverflow.com/a/3561711/35070
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 }
@@ -72,7 +72,7 @@ function regexEscape(s) {
  * @param {string} s
  * @returns {boolean} 
  */
-function isValidRegex(s) {
+export function isValidRegex(s) {
     try {
         new RegExp(s);
         return true;
@@ -81,7 +81,7 @@ function isValidRegex(s) {
     }
 }
 
-function* range(count) {
+export function* range(count) {
     for (let i = 0;i < count;i++) {
         yield i;
     }
@@ -91,11 +91,11 @@ function* range(count) {
  * Range as array
  * @param {number} count
  */
-function arange(count) {
+export function arange(count) {
     return Array.from(range(count));
 }
 
-function count(ar, filter) {
+export function count(ar, filter) {
     let res = 0;
     for (var el of ar) {
         if (filter(el)) res++;
@@ -108,7 +108,7 @@ function count(ar, filter) {
  * @param {T} obj
  * @param {Array<keyof T>} keys
  */
-function pluck(obj, keys) {
+export function pluck(obj, keys) {
     const res = {};
     for (const k of keys) {
         if (Object.prototype.hasOwnProperty.call(obj, k)) {
@@ -119,7 +119,7 @@ function pluck(obj, keys) {
 }
 
 // Remove the element for which callback returns true from the array.
-function remove(array, callback) {
+export function remove(array, callback) {
     for (let i = 0;i < array.length;i++) {
         if (callback(array[i])) {
             array.splice(i, 1);
@@ -129,7 +129,7 @@ function remove(array, callback) {
     throw new Error('Did not remove anything');
 }
 
-function filterMap(ar, cb) {
+export function filterMap(ar, cb) {
     const res = [];
     for (let i = 0;i < ar.length;i++) {
         const mapped = cb(ar[i], i);
@@ -142,7 +142,7 @@ function filterMap(ar, cb) {
 
 const _pad = num => ('' + num).padStart(2, '0');
 
-function timezoneOffsetString(offset) {
+export function timezoneOffsetString(offset) {
     if (!offset) return 'Z';
 
     const sign = (offset < 0) ? '+' : '-';
@@ -152,7 +152,7 @@ function timezoneOffsetString(offset) {
     return sign + _pad(hours) + ':' + _pad(minutes);
 }
 
-function localIso8601(date) {
+export function localIso8601(date?: Date) {
     if (!date) date = new Date();
 
     // Adapted from: https://stackoverflow.com/a/8563517/35070
@@ -168,7 +168,7 @@ function localIso8601(date) {
     );
 }
 
-function assertEventually(...args) {
+export function assertEventually(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');
     if (process.env.PENTF_FUTURE_DEPRECATIONS) {
@@ -180,7 +180,7 @@ function assertEventually(...args) {
     return assert_utils.assertEventually(...args);
 }
 
-function assertAsyncEventually(...args) {
+export function assertAsyncEventually(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');
     if (process.env.PENTF_FUTURE_DEPRECATIONS) {
@@ -192,7 +192,7 @@ function assertAsyncEventually(...args) {
     return assert_utils.assertAsyncEventually(...args);
 }
 
-function assertAlways(...args) {
+export function assertAlways(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');
     if (process.env.PENTF_FUTURE_DEPRECATIONS) {
@@ -204,7 +204,7 @@ function assertAlways(...args) {
     return assert_utils.assertAlways(...args);
 }
 
-function cmp(a, b) {
+export function cmp(a, b) {
     if (a < b) {
         return -1;
     } else if (a > b) {
@@ -214,7 +214,7 @@ function cmp(a, b) {
     }
 }
 
-function cmpKey(key) {
+export function cmpKey(key) {
     return function(x, y) {
         return cmp(x[key], y[key]);
     };
@@ -226,33 +226,9 @@ function cmpKey(key) {
  * @param {number} idx
  * @param {number} count
  */
-function removeAt(input, idx, count) {
+export function removeAt(input, idx, count) {
     if (idx >= 0 && input.length <= 1) return '';
     if (idx < 0) return input;
     if (idx > input.length - 1) return input.substr(0, idx);
     return input.substr(0, idx) + input.substr(idx + count);
 }
-
-module.exports = {
-    arange,
-    assertAlways,
-    assertAsyncEventually,
-    assertEventually,
-    cmp,
-    cmpKey,
-    count,
-    filterMap,
-    isValidRegex,
-    localIso8601,
-    makeRandomEmail,
-    pluck,
-    randomHex,
-    randomHexstring,
-    range,
-    regexEscape,
-    remove,
-    removeAt,
-    retry,
-    timezoneOffsetString,
-    wait,
-};

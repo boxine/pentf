@@ -1,13 +1,14 @@
-const assert = require('assert').strict;
-const http = require('http');
-const https = require('https');
-const node_fetch = require('node-fetch');
-const tough = require('tough-cookie');
-const {URL} = require('url');
-const fs = require('fs');
+import { strict as assert } from 'assert';
+import * as http from 'http';
+import * as https from 'https';
+import * as node_fetch from 'node-fetch';
+import * as tough from 'tough-cookie';
+import {URL} from 'url';
+import * as fs from 'fs';
 
-const {makeCurlCommand} = require('./curl_command');
-const output = require('./output');
+import {makeCurlCommand} from './curl_command';
+import * as output from './output';
+import { Config } from './config';
 
 /**
  * fetch a URL.
@@ -39,7 +40,7 @@ const output = require('./output');
  *               Pass in the string `'create'` to create a new one (returned as `response.cookieJar`).
  *               The response will have a utility function `async getCookieValue(name)` to quickly retrieve a cookie value from the jar.
  */
-async function fetch(config, url, init) {
+export async function fetch(config: Config, url: string, init: any) {
     if (!init) init = {};
     if (!init._redirectChain && init.agent) {
         init._agentIsForced = true;
@@ -54,7 +55,7 @@ async function fetch(config, url, init) {
         (!init.agent || (url.startsWith('http://') !== (init.agent instanceof http.Agent)))
     );
     if (needAgent) {
-        const agentinit = {
+        const agentinit: https.AgentOptions = {
             keepAlive: true,
             timeout: 60000, // 60s
         };
@@ -153,9 +154,9 @@ async function fetch(config, url, init) {
 * @param {string} certFilename Name of the certificate file in PEM format (beginning with `-----BEGIN CERTIFICATE-----`)
 * @param {boolean} rejectUnauthorized to validate the server's certificate, false (=default) to accept invalid certificates as well.
 */
-async function setupTLSClientAuth(fetchOptions, keyFilename, certFilename, rejectUnauthorized=false) {
+export async function setupTLSClientAuth(fetchOptions, keyFilename: string, certFilename: string, rejectUnauthorized=false) {
     assert.equal(typeof fetchOptions, 'object');
-    const agentOptions = {
+    const agentOptions: https.AgentOptions = {
         rejectUnauthorized,
         keepAlive: true,
     };
@@ -170,8 +171,3 @@ async function setupTLSClientAuth(fetchOptions, keyFilename, certFilename, rejec
         '--cert', certFilename,
     ]);
 }
-
-module.exports = {
-    fetch,
-    setupTLSClientAuth,
-};

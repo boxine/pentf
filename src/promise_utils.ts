@@ -1,6 +1,6 @@
-const assert = require('assert').strict;
-
-const output = require('./output');
+import { strict as assert } from 'assert';
+import { Config } from './config';
+import * as output from './output';
 
 /**
  * Avoid `UnhandledPromiseRejectionWarning` if a promise fails before we `await` it.
@@ -12,7 +12,7 @@ const output = require('./output');
  * ```
  * @param {Promise<any>} promise A promise to ignore for now (will be caught later)
  */
-function catchLater(promise) {
+export function catchLater(promise) {
     promise.catch(() => undefined);
     return promise;
 }
@@ -32,7 +32,7 @@ function catchLater(promise) {
  * @param {Promise<any>} promise The promise to wait for.
  * @param {string} message Custom message to attach to the error;
  */
-async function customErrorMessage(promise, message) {
+export async function customErrorMessage(promise, message) {
     try {
         return await promise;
     } catch (e) {
@@ -67,7 +67,7 @@ async function customErrorMessage(promise, message) {
  * @param {{expectNothing?: boolean}} __namedParameters Options (currently not visible in output due to typedoc bug)
  * @param {boolean} expectNothing Do nothing – this is convenient if the code is expected to work on some environments. (default: false)
  */
-async function expectedToFail(config, message, asyncFunc, {expectNothing=false} = {}) {
+export async function expectedToFail(config: Config, message: string, asyncFunc: () => any, {expectNothing=false} = {}) {
     assert(message);
     assert(asyncFunc);
 
@@ -87,7 +87,7 @@ async function expectedToFail(config, message, asyncFunc, {expectNothing=false} 
         const err = new Error(
             `Section marked as expectedToFail (${message}), but succeeded.` +
             ' Pass in --expect-nothing/-E to ignore this message');
-        err.pentf_expectedToSucceed = message;
+        (err as any).pentf_expectedToSucceed = message;
         throw err;
     }
 }
@@ -104,7 +104,7 @@ async function expectedToFail(config, message, asyncFunc, {expectNothing=false} 
  * @param {boolean} warning Only print an error message, do not throw.
  * @returns {*} Whatever the promise returned, if it is successful
  */
-async function timeoutPromise(config, promise, {timeout=10000, message=undefined, warning=false} = {}) {
+export async function timeoutPromise(config, promise, {timeout=10000, message=undefined, warning=false} = {}) {
     const stacktraceAr = (new Error()).stack.split('\n', 3);
     const stacktrace = stacktraceAr[stacktraceAr.length - 1];
 
@@ -112,7 +112,7 @@ async function timeoutPromise(config, promise, {timeout=10000, message=undefined
     try {
         return await Promise.race([
             promise,
-            new Promise((resolve, reject) => setTimeout(() => {
+            new Promise<void>((resolve, reject) => setTimeout(() => {
                 let wholeMessage = (
                     `Promise did not finish within ${timeout}ms` + (message ? '. ' + message : ''));
                 if (warning) {
@@ -131,10 +131,3 @@ async function timeoutPromise(config, promise, {timeout=10000, message=undefined
         resolved = true;
     }
 }
-
-module.exports = {
-    catchLater,
-    customErrorMessage,
-    expectedToFail,
-    timeoutPromise,
-};

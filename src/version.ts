@@ -1,14 +1,14 @@
-const child_process = require('child_process');
-const {promisify} = require('util');
-const {EOL} = require('os');
-const fs = require('fs');
-const path = require('path');
+import * as child_process from 'child_process';
+import {promisify} from 'util';
+import {EOL} from 'os';
+import * as fs from 'fs';
+import * as path from 'path';
 
 async function _cmd(cmd, args, options) {
-    return (await (promisify(child_process.execFile)(cmd, args, options))).stdout.trim();
+    return ((await (promisify(child_process.execFile)(cmd, args, options))).stdout as any).trim();
 }
 
-async function testsVersion(config) {
+export async function testsVersion(config) {
     try {
         const tagsOutput = await _cmd(
             'git', ['tag', '--points-at', 'HEAD'], {cwd: config.rootDir});
@@ -40,7 +40,7 @@ async function testsVersion(config) {
     return 'unknown';
 }
 
-function pentfVersion() {
+export function pentfVersion() {
     // Don't use inline synchronous `require()` here, because
     // that cannot be translated to ES Modules. For ES Modules
     // any inline `import()` call is asynchronous.
@@ -50,8 +50,3 @@ function pentfVersion() {
     // It will be replaced with a polyfill by our babel plugin.
     return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8')).version;
 }
-
-module.exports = {
-    testsVersion,
-    pentfVersion,
-};

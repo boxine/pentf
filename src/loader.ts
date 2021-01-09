@@ -1,17 +1,19 @@
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
-const {promisify} = require('util');
-const {pathToFileURL} = require('url');
-const assert = require('assert').strict;
-const output = require('./output');
+import * as fs from 'fs';
+import * as path from 'path';
+import * as glob from 'glob';
+import {promisify} from 'util';
+import {pathToFileURL} from 'url';
+import { strict as assert } from 'assert';
+import * as output from './output';
+import { TaskConfig, TestCase } from './runner';
+import { Config } from './config';
 
 /**
  * Find nearest `package.json` file
  * @param {string} dir
  * @returns {string | null} Path to package.json or null if not found
  */
-async function findPackageJson(dir) {
+export async function findPackageJson(dir) {
     let fileName = path.join(dir, 'package.json');
     try {
         await fs.promises.readFile(fileName);
@@ -30,14 +32,14 @@ async function findPackageJson(dir) {
  * Will be set during compilation. Prevents ESM modules trying to use
  * `require` for loading modules
  */
-const BUILD_TYPE = 'commonjs';
+let BUILD_TYPE: 'commonjs' | 'module' = 'commonjs';
 
 /**
  * Load module via CommonJS or ES Modules depending on the environment
  * @param {string} file
  * @param {"commonjs" | "module"} moduleType
  */
-async function importFile(file, moduleType) {
+export async function importFile(file, moduleType) {
     assert(moduleType, 'Module type argument was undefined. Expected "commonjs" or "esm"');
     // Only use import() for JavaScript files. Patching module
     // resolution of import() calls is still very experimental, so
@@ -67,21 +69,21 @@ async function importFile(file, moduleType) {
     }
 }
 
-/**
- * @typedef {Omit<import('./runner').TestCase, 'name' | 'run'>} TestOptions
- */
+export type TestOptions = Partial<Omit<TestCase, 'name' | 'run' | 'fileName'>>;
 
-/**
- * @typedef {{(name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void, only: (name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void} TestFn
- */
+export interface TestFn {
+    (name: string, test: (config: TaskConfig) => Promise<void> | void, options?: TestOptions): void,
+    only: (name: string, test: (config: TaskConfig) => Promise<void> | void, options?: TestOptions) => void,
+    skip: (name: string, test: (config: TaskConfig) => Promise<void> | void, options?: TestOptions) => void,
+}
 
-/**
- * @typedef {{(name: string, callback: () => void): void, only: (name: string, callback: () => void): void} DescribeFn
- */
+export type DescribeFn = {
+    (name: string, callback: () => void): void;
+    only: (name: string, callback: () => void) => void;
+    skip: (name: string, callback: () => void) => void;
+}
 
-/**
- * @typedef {(test: TestFn, suite: DescribeFn) => void} SuiteBuilder
- */
+ export type SuiteBuilder = (test: TestFn, suite: DescribeFn) => void;
 
 /**
  * @param {string} fileName
@@ -99,13 +101,7 @@ function loadSuite(fileName, suiteName, builder) {
 
     const skipFn = () => true;
 
-    /**
-     * Create a test case
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
-    function test(description, run, options = {}) {
+    const test: TestFn = (description, run, options = {}) => {
         const arr = onlyInScope ? only : tests;
         arr.push({
             description,
@@ -117,12 +113,6 @@ function loadSuite(fileName, suiteName, builder) {
         });
     }
 
-    /**
-     * Only run this test case in the current file
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
     test.only = (description, run, options = {}) => {
         only.push({
             description,
@@ -134,12 +124,6 @@ function loadSuite(fileName, suiteName, builder) {
         });
     };
 
-    /**
-     * Skip this test case
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
     test.skip = (description, run, options = {}) => {
         const arr = onlyInScope ? only : tests;
         arr.push({
@@ -152,22 +136,12 @@ function loadSuite(fileName, suiteName, builder) {
         });
     };
 
-    /**
-     * Create a group for test cases
-     * @param {string} description
-     * @param {() => void} callback
-     */
-    function describe(description, callback) {
+    const describe: DescribeFn = (description, callback) => {
         groups.push(description);
         callback();
         groups.pop();
     }
 
-    /**
-     * Only run the test cases inside this group
-     * @param {string} description
-     * @param {() => void} callback
-     */
     describe.only = (description, callback) => {
         onlyInScope = true;
         groups.push(description);
@@ -178,11 +152,6 @@ function loadSuite(fileName, suiteName, builder) {
         groups.pop();
     };
 
-    /**
-     * Skip this group of test cases
-     * @param {string} description
-     * @param {() => void} callback
-     */
     describe.skip = (description, callback) => {
         skipInScope = true;
         groups.push(description);
@@ -197,11 +166,7 @@ function loadSuite(fileName, suiteName, builder) {
     return only.length > 0 ? only : tests;
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {Array<{name: string, fileName: string}>} tests
- */
-async function applyTestFilters(config, tests) {
+export async function applyTestFilters<T extends { name: string, fileName: string }>(config: Config, tests: T[]): Promise<T[]> {
     if (config.filter) {
         tests = tests.filter(n => new RegExp(config.filter).test(n.name));
     }
@@ -216,14 +181,8 @@ async function applyTestFilters(config, tests) {
     return tests;
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {string} globPattern
- * @returns {Promise<import('./runner').TestCase[]>}
- * @private
- */
-async function loadTests(config, globPattern) {
-    const testFiles = await promisify(glob.glob)(globPattern, {cwd: config.rootDir, absolute: true});
+export async function loadTests(config: Config, globPattern: string): Promise<TestCase[]> {
+    const testFiles = await promisify((glob as any).glob)(globPattern, {cwd: config.rootDir, absolute: true});
     let tests = testFiles.map(n => ({
         fileName: n,
         name: path.basename(n, path.extname(n)),
@@ -250,10 +209,3 @@ async function loadTests(config, globPattern) {
 
     return testCases;
 }
-
-module.exports = {
-    applyTestFilters,
-    findPackageJson,
-    importFile,
-    loadTests,
-};

@@ -1,23 +1,19 @@
 /*eslint no-console: "off"*/
 
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
 
-const {readConfig, parseArgs} = require('./config');
-const {localIso8601} = require('./utils');
-const runner = require('./runner');
-const render = require('./render');
-const {color, logVerbose, log} = require('./output');
-const {testsVersion, pentfVersion} = require('./version');
-const {loadTests} = require('./loader');
-const watcher = require('./watcher');
-const {timeoutPromise} = require('./promise_utils');
+import {readConfig, parseArgs, Config} from './config';
+import {localIso8601} from './utils';
+import * as runner from './runner';
+import * as render from './render';
+import {color, logVerbose, log} from './output';
+import {testsVersion, pentfVersion} from './version';
+import {loadTests} from './loader';
+import * as watcher from './watcher';
+import {timeoutPromise} from './promise_utils';
 
-/**
- * @param {import('./config').Config} config
- * @param {import('./runner').TestCase[]} test_cases
- */
-async function runTests(config, test_cases) {
+async function runTests(config: Config, test_cases: runner.TestCase[]) {
     let results;
     let test_info;
     if (config.load_json) {
@@ -44,21 +40,29 @@ async function runTests(config, test_cases) {
     return {results, test_info};
 }
 
-/**
- * @typedef {Object} PentfOptions
- * @property {(config: import('./config').Config) => import('./config').Config} [defaultConfig]
- * Function to call on the loaded configuration, to set/compute default values.
- * @property {string} [description] program description in the --help output
- * @property {string} [rootDir] Root directory (assume tests/ contains tests,
- * config/ if exists contains config)
- * @property {string} [configDir] Configuration directory. false disables
- * configuration.
- */
+export interface PentfOptions {
+    /**
+     * Function to call on the loaded configuration, to
+     * set/compute default values.
+     */
+    defaultConfig?: (config: Config) => Config
+    /** program description in the --help output */
+    description?: string;
+    /**
+     * Root directory (assume tests/ contains tests,
+     * config/ if exists contains config)
+     */
+    rootDir?: string;
+    /**
+     * Configuration directory. false disables
+     * configuration.
+     */
+    configDir?: string;
+    beforeAllTests?: any;
+    afterAllTests?: any;
+}
 
-/**
- * @param {PentfOptions} options
- */
-async function real_main(options={}) {
+async function real_main(options: PentfOptions={}) {
     if (options.rootDir) {
         if (! options.configDir) {
             const autoConfigDir = path.join(options.rootDir, 'config');
@@ -120,7 +124,7 @@ async function real_main(options={}) {
     if (config.watch) {
         let remaining_teardowns = [];
         await watcher.createWatcher(config, async test_cases => {
-            logVerbose(`[runner] Executing ${remaining_teardowns.length} teardown hooks`);
+            logVerbose(config, `[runner] Executing ${remaining_teardowns.length} teardown hooks`);
             try {
                 // Run teardown functions if there are any
                 const teardownPromise = Promise.all(remaining_teardowns.map(fn => fn()));
@@ -145,13 +149,13 @@ async function real_main(options={}) {
         if (!config.keep_open && results) {
             const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
             const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
-            logVerbose(`Terminating with exit code ${retCode}`);
+            logVerbose(config, `Terminating with exit code ${retCode}`);
             process.exit(retCode);
         }
     }
 }
 
-function main(options) {
+export function main(options) {
     (async () => {
         try {
             await real_main(options);
@@ -161,7 +165,3 @@ function main(options) {
         }
     })();
 }
-
-module.exports = {
-    main,
-};

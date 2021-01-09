@@ -1,23 +1,19 @@
 // Locking functions for communication with the lockserver
 
-const assert = require('assert').strict;
-const os = require('os');
+import { strict as assert } from 'assert';
+import * as  os from 'os';
+import { Config } from './config';
 
-const {fetch} = require('./net_utils');
-const output = require('./output');
-const {localIso8601} = require('./utils');
-const {pentfVersion} = require('./version');
+import {fetch}  from './net_utils';
+import * as output  from './output';
+import { RunnerState } from './runner';
+import {localIso8601}  from './utils';
+import {pentfVersion}  from './version';
 
 const REFRESH_INTERVAL = 30000;
 const REQUEST_EXPIRE_IN = 40000;
 
-/**
- * @param {import('./config').Config} config
- * @param {string[]} resources
- * @param {number} expireIn
- * @returns {Promise<boolean | any>}
- */
-async function externalAcquire(config, resources, expireIn) {
+export async function externalAcquire(config: Config, resources: string[], expireIn: number) {
     assert(config.external_locking_client);
     assert(config.external_locking_url);
     assert(Array.isArray(resources));
@@ -48,13 +44,7 @@ async function externalAcquire(config, resources, expireIn) {
     return true;
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {string[]} resources
- * @param {string} [overrideClient]
- * @returns {Promise<true | any>}
- */
-async function externalRelease(config, resources, overrideClient) {
+export async function externalRelease(config: Config, resources: string[], overrideClient?: string) {
     const client = overrideClient || config.external_locking_client;
     assert(client);
     assert.equal(typeof client, 'string');
@@ -91,7 +81,7 @@ async function externalRelease(config, resources, overrideClient) {
  * @param {import('./config').Config} config
  * @returns {Promise<Array<import('./locking').Lock>>}
  */
-async function externalList(config) {
+export async function externalList(config) {
     assert(config.external_locking_client);
     assert(config.external_locking_url);
 
@@ -112,7 +102,7 @@ async function externalList(config) {
  * @param {import('./config').Config} config
  * @private
  */
-async function listLocks(config) {
+export async function listLocks(config) {
     const locks = await externalList(config);
     console.table(locks); // eslint-disable-line no-console
 }
@@ -120,7 +110,7 @@ async function listLocks(config) {
 /**
  * @param {import('./config').Config} config
  */
-async function clearAllLocks(config) {
+export async function clearAllLocks(config) {
     const locks = await externalList(config);
     await Promise.all(locks.map(async l => {
         const res = await externalRelease(config, [l.resource], l.client);
@@ -151,12 +141,14 @@ function generateClientName({env=process.env, nowStr=localIso8601(new Date())} =
 
     return `${os.userInfo().username}@${os.hostname()} ${pentfVersion()} ${nowStr}`;
 }
+// Tests only
+export const _generateClientName = generateClientName;
 
 /**
  * @param {import('./config').Config} config
  * @private
  */
-function prepare(config) {
+export function prepare(config) {
     if (! config.external_locking_url) {
         config.no_external_locking = true;
     }
@@ -167,12 +159,7 @@ function prepare(config) {
     }
 }
 
-/**
- * @param {import('./confg').Config} config
- * @param {import('./runner').RunnerState} state
- * @private
- */
-async function refresh(config, state) {
+async function refresh(config: Config, state: RunnerState) {
     const {locks} = state;
     assert(locks);
     if (locks.size > 0) {
@@ -203,7 +190,7 @@ async function refresh(config, state) {
  * @param {import('./runner').RunnerState} state
  * @private
  */
-async function init(config, state) {
+export async function init(config, state) {
     if (config.no_external_locking) return;
     state.external_locking_refresh_timeout = setTimeout(() => refresh(config, state), REFRESH_INTERVAL);
 }
@@ -213,21 +200,8 @@ async function init(config, state) {
  * @param {import('./runner').RunnerState} state
  * @private
  */
-async function shutdown(config, state) {
+export async function shutdown(config, state) {
     if (config.no_external_locking) return;
     assert(state.external_locking_refresh_timeout);
     clearTimeout(state.external_locking_refresh_timeout);
 }
-
-module.exports = {
-    clearAllLocks,
-    externalAcquire,
-    externalList,
-    externalRelease,
-    init,
-    listLocks,
-    prepare,
-    shutdown,
-    // Tests only
-    _generateClientName: generateClientName,
-};

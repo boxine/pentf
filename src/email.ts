@@ -1,13 +1,14 @@
-const assert = require('assert').strict;
-const {TextDecoder} = require('util');
+import { strict as assert } from 'assert';
+import {TextDecoder} from 'util';
 
-const imap_client_module = require('emailjs-imap-client');
+import * as imap_client_module from 'emailjs-imap-client';
 const ImapClient = imap_client_module.default;
-const mime_parse = require('emailjs-mime-parser').default;
-const libmime = require('libmime');
+import mime_parse from 'emailjs-mime-parser';
+import * as libmime from 'libmime';
 
-const utils = require('./utils');
-const output = require('./output');
+import * as utils from './utils';
+import * as output from './output';
+import { Config } from './config';
 
 function parseDeep(mime_part) {
 
@@ -29,19 +30,19 @@ function parseDeep(mime_part) {
     return { text, html };
 }
 
-
-function parseBody(body) {
+export function parseBody(body) {
     assert(body instanceof Uint8Array);
     const parsed = mime_parse(body);
     const subject = parsed.headers.subject[0].value;
     assert(subject);
+    const parse_result = parseDeep(parsed);
     const res = {
         subject,
+        text: parse_result.text,
+        html: parse_result.html,
+        header: undefined
     };
 
-    const parse_result = parseDeep(parsed);
-    res.text = parse_result.text;
-    res.html = parse_result.html;
 
     const text_body = (new TextDecoder('utf-8')).decode(body);
     const header_end_m = /(?:\r?\n){2}/.exec(text_body);
@@ -52,7 +53,7 @@ function parseBody(body) {
     return res;
 }
 
-function parseHeader(name, value) {
+export function parseHeader(name, value) {
     assert(/^[a-zA-Z0-9]+$/.test(name));
     if (!value) return '';
     const expect = name.toLowerCase() + ':';
@@ -117,7 +118,7 @@ async function _find_message(config, client, since, to, subjectContains) {
     return undefined;
 }
 
-async function connect(config, user) {
+export async function connect(config, user) {
     const client = new ImapClient(config.imap.host, config.imap.port, {
         logLevel: config.email_verbose ? imap_client_module.LOG_LEVEL_DEBUG : imap_client_module.LOG_LEVEL_NONE,
         auth: {
@@ -151,7 +152,7 @@ async function connect(config, user) {
  * @param {number[]} wait_times How long to wait between checking email. By default, we wait about 3 minutes total.
  * @returns {Object} Email object with `html` and `text` properties.
  */
-async function getMail(
+export async function getMail(
     config, since, to, subjectContains,
     wait_times=[
         200, 500, 1000, 2000, // for local setups where the email arrives immediately
@@ -199,7 +200,7 @@ async function getMail(
     return msg;
 }
 
-async function shutdown(config) {
+export async function shutdown(config: Config) {
     if (! config.email_cached_clients) return;
 
     const client_list = Array.from(config.email_cached_clients.values());
@@ -209,11 +210,3 @@ async function shutdown(config) {
     await Promise.all(client_list.map(client => client.close()));
     config.email_cached_clients.clear();
 }
-
-module.exports = {
-    connect,
-    getMail,
-    parseBody,
-    parseHeader,
-    shutdown,
-};

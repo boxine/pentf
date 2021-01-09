@@ -1,26 +1,24 @@
 // Functions to output the current state.
 // For functions to render the state _after_ the tests have finished, look in render.js .
-const assert = require('assert').strict;
-const readline = require('readline');
-const diff = require('diff');
-const kolorist = require('kolorist');
-const errorstacks = require('errorstacks');
-const fs = require('fs');
-const {isAbsolute} = require('path');
-const {performance} = require('perf_hooks');
+import { strict as assert } from 'assert';
+import * as readline from 'readline';
+import * as diff from 'diff';
+import * as kolorist from 'kolorist';
+import * as errorstacks from 'errorstacks';
+import * as fs from 'fs';
+import {isAbsolute} from 'path';
+import {performance} from 'perf_hooks';
 
-const utils = require('./utils');
-const {getResults} = require('./results');
+import * as utils from './utils';
+import {getResults} from './results';
+import { Config } from './config';
+import { RunnerState } from './runner';
 
 const STATUS_STREAM = process.stderr;
 
 var last_state;
 
-/**
- * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
- */
-function proxyConsole(config, state) {
+export function proxyConsole(config: Config, state: RunnerState) {
     let org = {};
     Object.keys(console).forEach(key => {
         if (typeof console[key] === 'function') {
@@ -48,7 +46,7 @@ function proxyConsole(config, state) {
     };
 }
 
-function clean(config) {
+function clean(config: Config) {
     assert(config);
     if (!STATUS_STREAM.isTTY) return;
     if (config.ci) return;
@@ -56,12 +54,7 @@ function clean(config) {
     readline.clearLine(STATUS_STREAM, 0);
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
- * @private
- */
-function status(config, state) {
+export function status(config: Config, state: RunnerState) {
     if (config.quiet) return;
     assert(state.tasks);
     assert(state.resultByTaskGroup);
@@ -112,10 +105,8 @@ function status(config, state) {
 
 /**
  * Convert a time to a human readable string
- * @param {*} config
- * @param {number} duration Time in ms
  */
-function formatDuration(config, duration) {
+function formatDuration(config: Config, duration: number) {
     let seconds = Math.floor((duration / 1000) % 60);
     let minutes = Math.floor((duration / (1000 * 60)) % 60);
     let hours = Math.floor(duration / (1000 * 60 * 60));
@@ -137,12 +128,7 @@ function formatDuration(config, duration) {
     return color(config, timeColor, str);
 }
 
-/**
- * @param {*} config
- * @param {import('./runner').RunnerState} state
- * @private
- */
-function detailedStatus(config, state) {
+export function detailedStatus(config: Config, state: RunnerState) {
     const {tasks} = state;
     const testResults = Array.from(state.resultByTaskGroup.values());
     const {skipped} = getResults(config, testResults);
@@ -197,7 +183,7 @@ function detailedStatus(config, state) {
 * @param {ReturnType<typeof import('./results').getResults>} results
 * @returns {string} A string with counts of the results.
 **/
-function resultSummary(config, results) {
+function resultSummary(config: Config, results) {
     const {
         success,
         errored,
@@ -235,11 +221,7 @@ function resultSummary(config, results) {
     return res;
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
- */
-function finish(config, state) {
+export function finish(config: Config, state: RunnerState) {
     last_state = null;
     const {tasks} = state;
     assert(tasks);
@@ -280,12 +262,7 @@ function finish(config, state) {
     STATUS_STREAM.write(msg);
 }
 
-/**
- * @param {import("./config").Config} config
- * @param {string} message
- * @private
- */
-function reportLogFile(config, message) {
+function reportLogFile(config: Config, message: string) {
     const time = utils.localIso8601();
     message = `${time} ${kolorist.stripColors(message)}`;
     if (!message.endsWith('\n')) {
@@ -295,11 +272,7 @@ function reportLogFile(config, message) {
     config.log_file_stream.write(message);
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {*} message
- */
-function log(config, message) {
+export function log(config: Config, message: any) {
     if (config.logFunc) return config.logFunc(config, message);
 
     if (config.log_file) {
@@ -320,11 +293,7 @@ function log(config, message) {
     }
 }
 
-/**
- * @param {import("./config").Config} config
- * @param {string} message
- */
-function logVerbose(config, message) {
+export function logVerbose(config: Config, message: string) {
     if (!config.verbose) {
         if (config.log_file) {
             reportLogFile(config, message);
@@ -334,12 +303,7 @@ function logVerbose(config, message) {
     log(config, message);
 }
 
-/**
- * Indent string
- * @param {number} n Levels of indentation
- * @hidden
- */
-function indent(n) {
+function indent(n: number) {
     return '  '.repeat(n);
 }
 
@@ -352,7 +316,7 @@ function indent(n) {
  * @returns {string}
  * @hidden
  */
-function stringify(value, level = 0) {
+export function stringify(value, level = 0) {
     if (typeof value === 'string') return `"${value}"`;
     if (
         typeof value === 'number'
@@ -418,7 +382,7 @@ function shouldShowDiff(err) {
  * @returns {string}
  * @hidden
  */
-function generateDiff(config, err) {
+export function generateDiff(config, err) {
     assert(err);
 
     // The "diff" package works on strings only
@@ -447,7 +411,7 @@ function generateDiff(config, err) {
     return `\n${formatted}\n`;
 }
 
-function color(config, colorName, str) {
+export function color(config, colorName, str) {
     if (!config.colors) {
         return str;
     }
@@ -553,7 +517,7 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
  * @returns {Promise<string>}
  * @hidden
  */
-async function formatError(config, err) {
+export async function formatError(config, err) {
     let diff = '';
     if (shouldShowDiff(err)) {
         diff += generateDiff(config, err);
@@ -633,7 +597,7 @@ async function formatError(config, err) {
  * @param {import('./runner').Task} task
  * @private
  */
-function shouldShowError(config, task) {
+export function shouldShowError(config, task) {
     return (
         !(config.ignore_errors && (new RegExp(config.ignore_errors)).test(task.error.stack)) &&
         (config.expect_nothing || !task.expectedToFail || task.expectedToFail && task.status === 'success'));
@@ -644,7 +608,7 @@ function shouldShowError(config, task) {
  * @param {import('./runner').Task} task
  * @private
  */
-async function logTaskError(config, task) {
+export async function logTaskError(config, task) {
     const show_error = shouldShowError(config, task);
     const e = task.error;
     if (config.verbose) {
@@ -690,7 +654,7 @@ async function logTaskError(config, task) {
  * @param {*} value A random value.
  * @hidden
  */
-function valueRepr(value) {
+export function valueRepr(value) {
     if (typeof value === 'symbol') {
         return value.toString();
     }
@@ -714,7 +678,7 @@ function valueRepr(value) {
  * @param {import('./browser_utils).Result} violation
  * @private
  */
-function formatA11yError(config, violation) {
+export function formatA11yError(config, violation) {
     /** @type {Record<import('./browser_utils').A11yImpact, { sign: string, color: string }>} */
     const label = {
         minor: { sign: 'Minor', color: 'yellow' },
@@ -733,20 +697,3 @@ function formatA11yError(config, violation) {
 
     return out;
 }
-
-module.exports = {
-    color,
-    detailedStatus,
-    finish,
-    formatError,
-    formatA11yError,
-    valueRepr,
-    log,
-    logTaskError,
-    logVerbose,
-    generateDiff,
-    proxyConsole,
-    shouldShowError,
-    status,
-    stringify,
-};

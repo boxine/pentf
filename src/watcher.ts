@@ -1,11 +1,13 @@
-const path = require('path');
-const minimatch = require('minimatch');
-const chokidar = require('chokidar');
-const readline = require('readline');
+import * as path from 'path';
+import * as minimatch from 'minimatch';
+import * as chokidar from 'chokidar';
+import * as  readline from 'readline';
 
-const output = require('./output');
-const utils = require('./utils');
-const {loadTests, applyTestFilters} = require('./loader');
+import * as output from './output';
+import * as utils from './utils';
+import {loadTests, applyTestFilters} from './loader';
+import { Config } from './config';
+import { TestCase } from './runner';
 
 /**
  * Delete a file from node's module cache. Only CJS is supported for now.
@@ -120,25 +122,24 @@ function renderSearch(config, state, test_cases) {
     output.log(config, `${label} ${input}\n\n${results.join('\n')}\n\n${footer}`);
 }
 
-/**
- * @param {import('./config').Config} config
- */
-function renderDefault(config) {
+function renderDefault(config: Config) {
     if (!config.ci) console.clear();
     output.log(config, 'Waiting for file changes...');
     output.log(config, watchFooter(config));
 }
 
-/**
- * @typedef {{running: boolean, last_changed_file: string, current_view: 'default' | 'pattern', file_pattern: string, cursor_pos: number, selected_row: number, selection_active: boolean, selected_file: null | string }} WatchState
- */
+export interface WatchState {
+    running: boolean;
+    last_changed_file: string;
+    current_view: 'default' | 'pattern';
+    file_pattern: string;
+    cursor_pos: number;
+    selected_row: number;
+    selection_active: boolean;
+    selected_file: null | string;
+}
 
-/**
- * @param {import('./config').Config} config
- * @param {WatchState} state
- * @param {(test_cases: import('./runner').TestCase[]) => Promise<void>} onChange
- */
-async function scheduleRun(config, state, onChange) {
+async function scheduleRun(config: Config, state: WatchState, onChange: (test_cases: TestCase[]) => Promise<void>) {
     // Bail out if there is a run in progress.
     // TODO: Add proper cancellation for pending runs.
     if (state.running) {
@@ -151,8 +152,8 @@ async function scheduleRun(config, state, onChange) {
         removeFromModuleCache(absolute);
     }
 
-    let test_cases = await loadTests(config, config.testsGlob);
-    test_cases = await applyTestFilters(config, test_cases);
+    let test_files = await loadTests(config, config.testsGlob);
+    let test_cases = await applyTestFilters(config, test_files);
     if (minimatch(absolute, path.join(config.rootDir, config.testsGlob))) {
         test_cases = test_cases.filter(tc => tc.fileName === absolute);
     }
@@ -181,12 +182,7 @@ async function scheduleRun(config, state, onChange) {
     output.log(config, watchFooter(config));
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {string[]} patterns
- * @param {(test_cases: import('./runner').TestCase[]) => Promise<void>} onChange
- */
-async function createWatcher(config, onChange) {
+export async function createWatcher(config: Config, onChange: (test_cases: TestCase[]) => Promise<void>) {
     const patterns = [...config.watch_files, config.testsGlob].map(pattern =>
         path.join(config.rootDir, pattern)
     );
@@ -195,17 +191,16 @@ async function createWatcher(config, onChange) {
         cwd: config.rootDir,
         ignoreInitial: true,
         absolute: true,
-    });
+    } as any);
 
-    watcher.on('ready', () => renderDefault(config, watchState));
+    watcher.on('ready', () => renderDefault(config));
 
     watcher.on('unlink', fileOrDir => {
         const absolute = path.join(config.rootDir, fileOrDir);
         removeFromModuleCache(absolute);
     });
 
-    /** @type {WatchState} */
-    const watchState = {
+    const watchState: WatchState = {
         last_changed_file: '',
         current_view: 'default',
         cursor_pos: 0,
@@ -268,11 +263,11 @@ async function createWatcher(config, onChange) {
                     ? `^${utils.regexEscape(watchState.selected_file)}$`
                     : watchState.file_pattern;
 
-                renderDefault(config, watchState);
+                renderDefault(config);
                 await scheduleRun(config, watchState, onChange);
             } else if (key.name === 'escape' && !watchState.selection_active) {
                 watchState.current_view = 'default';
-                renderDefault(config, watchState);
+                renderDefault(config);
             } else {
                 let { cursor_pos, file_pattern, selected_row, selection_active, selected_file } = watchState;
                 if (key.name === 'up') {
@@ -360,7 +355,3 @@ async function createWatcher(config, onChange) {
         await scheduleRun(config, watchState, onChange);
     });
 }
-
-module.exports = {
-    createWatcher,
-};

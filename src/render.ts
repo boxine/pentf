@@ -1,16 +1,13 @@
-const fs = require('fs');
-const {html2pdf} = require('./browser_utils');
-const {timezoneOffsetString} = require('./utils');
-const {resultCountString} = require('./results');
+import * as fs from 'fs';
+import {A11yResult, html2pdf} from './browser_utils';
+import {timezoneOffsetString} from './utils';
+import {resultCountString} from './results';
 
-const output = require('./output');
+import * as output from './output';
+import { Config } from './config';
+import { RunnerResult, TaskStatus } from './runner';
 
-/**
- * @param {import('./config').Config} config
- * @param {TestResult} result
- * @returns {number}
- */
-function getTestOrder(config, result) {
+function getTestOrder(config: Config, result: TestResult) {
     const expectNothing = config.expect_nothing;
 
     if (result.status === 'error' && (!result.expectedToFail || expectNothing)) {
@@ -28,28 +25,39 @@ function getTestOrder(config, result) {
     return 99;
 }
 
-/**
- * @typedef {{status: import('./runner').TaskStatus, duration: number, error_screenshots: any, error_stack: string, axeResults: import('axe-core').AxeResults[]}} TaskResult
- */
+export interface TaskResult {
+    status: TaskStatus;
+    duration: number;
+    error_screenshots: Buffer[];
+    error_stack: string;
+    accessibilityErrors: A11yResult[]
+}
 
-/**
- * @typedef {import('./runner').TaskStatus | "flaky"} TestStatus
- */
+export type TestStatus = TaskStatus | 'flaky';
 
-/**
- * @typedef {{name: string, group: string, id: string, description: string, skipped: boolean; taskResults: TaskResult[], status: TestStatus, expectedToFail: any, skipReason: any}} TestResult
- */
+export interface TestResult {
+    name: string;
+    group: string;
+    id: string;
+    description: string;
+    skipped?: boolean;
+    taskResults: TaskResult[];
+    status: TestStatus;
+    expectedToFail: any;
+    skipReason: any;
+}
 
-/**
- * @typedef {{start: number, duration: number, config: import('./config').Config, tests: TestResult[], pentfVersion: string, testsVersion: string}} CraftedResults
- */
+export interface CraftedResults {
+    start: number;
+    duration: number;
+    config: Config;
+    tests: TestResult[];
+    pentfVersion: string;
+    testsVersion: string;
+    cpuCount: number;
+}
 
-/**
- * @param {import('./config').Config} config
- * @param {import('./runner').RunnerResult} test_info
- * @returns {CraftedResults}
- */
-function craftResults(config, test_info) {
+export function craftResults(config: Config, test_info: RunnerResult): CraftedResults {
     output.logVerbose(config, '[results] crafting results...');
     const {test_start, test_end, state, ...moreInfo} = test_info;
 
@@ -86,11 +94,7 @@ function craftResults(config, test_info) {
     };
 }
 
-/**
- * @param {import('./config').Config} config
- * @param {CraftedResults} results
- */
-async function doRender(config, results) {
+export async function doRender(config: Config, results: CraftedResults) {
     output.logVerbose(config, `[results] Render results JSON: ${config.json}, Markdown: ${config.markdown}, HTML: ${config.html}, PDF: ${config.pdf}`);
 
     if (config.json) {
@@ -164,6 +168,8 @@ function linkify(str) {
 
     return res;
 }
+// Tests only
+export const _linkify = linkify;
 
 function escape_html(str) {
     // From https://stackoverflow.com/a/6234804/35070
@@ -179,10 +185,7 @@ function heading(results) {
     return results.config.report_heading || 'End-To-End Test Report';
 }
 
-/**
- * @param {CraftedResults} results
- */
-function markdown(results) {
+function markdown(results: CraftedResults) {
     const table = results.tests.map((test_result, idx) => {
         return (
             '|' +
@@ -207,7 +210,7 @@ ${((results.config.repeat || 1) > 1) ?
 }Start: ${format_timestamp(results.start)}
 
 ### Results
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})
+Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests)})
 Total test duration: ${format_duration(results.duration)}
 
 | #     | Test              | Description       | Duration | Result  |
@@ -263,10 +266,7 @@ function _calcDuration(taskResults) {
     return format_duration(min) + ' - ' + format_duration(max);
 }
 
-/**
- * @param {CraftedResults} results
- */
-function html(results) {
+function html(results: CraftedResults) {
     const table = results.tests.map((testResult, idx) => {
         const {skipped, taskResults} = testResult;
 
@@ -522,7 +522,7 @@ Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>
 </p>
 
 <h2>Results</h2>
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})<br/>
+Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests)})<br/>
 Total test duration: ${escape_html(format_duration(results.duration))}<br/>
 
 <table>
@@ -536,15 +536,9 @@ ${table}
 `;
 
 }
+// Tests only
+export const _html = html;
 
-async function pdf(config, path, results) {
+async function pdf(config: Config, path: string, results) {
     return html2pdf(config, path, html(results));
 }
-
-module.exports = {
-    craftResults,
-    doRender,
-    // test only
-    _linkify: linkify,
-    _html: html,
-};

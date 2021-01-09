@@ -1,11 +1,13 @@
-const output = require('./output');
-const kolorist = require('kolorist');
+import * as output from './output';
+import * as kolorist from 'kolorist';
+import { Config } from './config';
+import { ConsoleMessage, Page } from 'puppeteer';
 
 /**
  * Reconstruct original types from serialized message
  * @param {*} value
  */
-function parseConsoleArg(value) {
+export function parseConsoleArg(value: any) {
     if (Array.isArray(value)) {
         return value.map(item => parseConsoleArg(item));
     } else if (typeof value === 'object' && value !== null) {
@@ -46,7 +48,7 @@ function parseConsoleArg(value) {
  * @param {*} value
  * @param {Set<any>} seen
  */
-function serialize(value, seen) {
+function serialize(value: any, seen: Set<any>) {
     if (seen.has(value)) {
         return '[[Circular]]';
     }
@@ -111,7 +113,7 @@ function serialize(value, seen) {
  * @param {import('puppeteer').ConsoleMessage} message
  * @private
  */
-function printRawMessage(config, type, message) {
+function printRawMessage(config: Config, type: string, message: ConsoleMessage) {
     const loc = message.location();
     let url = loc.url;
     if (loc.lineNumber) {
@@ -145,15 +147,12 @@ function printRawMessage(config, type, message) {
  *
  * The only way to keep the data intact is to use a custom serialization format
  * and pass it around as a string.
- *
- * @param {import('./config').Config} config
- * @param {import('puppeteer').Page} page
  */
-async function forwardBrowserConsole(config, page) {
+export async function forwardBrowserConsole(config: Config, page: Page) {
     // The stack is not present on the trace method, so we need to patch it in
     await page.evaluateOnNewDocument((fn) => {
         const serialize = new Function(`return ${fn}`)();
-        const native = {};
+        const native: any = {};
         native.trace = console.trace;
         console.trace = (...args) => {
             const stack = new Error().stack.split('\n').slice(2).join('\n');
@@ -162,7 +161,7 @@ async function forwardBrowserConsole(config, page) {
         };
     }, serialize.toString());
 
-    const browser = page.browser();
+    const browser = page.browser() as any;
     page.on('console', async message => {
         let resolve;
         browser._logs.push(new Promise(r => resolve = r));
@@ -213,7 +212,3 @@ async function forwardBrowserConsole(config, page) {
     });
 }
 
-module.exports = {
-    parseConsoleArg,
-    forwardBrowserConsole,
-};

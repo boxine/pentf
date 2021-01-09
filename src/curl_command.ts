@@ -1,9 +1,9 @@
-const assert = require('assert').strict;
-const streamBuffers = require('stream-buffers');
+import { strict as assert } from 'assert';
+import * as streamBuffers from 'stream-buffers';
 
-async function stream2buf(stream) {
+async function stream2buf(stream: any) {
     return new Promise((resolve, reject) => {
-        const write_stream = new streamBuffers.WritableStreamBuffer();
+        const write_stream = new streamBuffers.WritableStreamBuffer() as any;
         stream.pipe(write_stream);
         write_stream.on('finish', () => {
             resolve(write_stream.getContents());
@@ -26,7 +26,7 @@ function add_binary_data(curl_command, data_b64) {
     return 'echo ' + escape_shell(data_b64) + ' | base64 -d | ' + curl_command + ' -d @-';
 }
 
-async function makeCurlCommand(options, url) {
+export async function makeCurlCommand(options, url) {
     let curl_command = 'curl';
 
     if (options.agent && (options.agent.options.rejectUnauthorized === false)) {
@@ -80,7 +80,3 @@ async function makeCurlCommand(options, url) {
 
     return curl_command;
 }
-
-module.exports = {
-    makeCurlCommand,
-};

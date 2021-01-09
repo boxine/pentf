@@ -1,28 +1,33 @@
-'use strict';
+import * as argparse from 'argparse';
+import { strict as assert } from 'assert';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import {promisify} from 'util';
 
-const argparse = require('argparse');
-const assert = require('assert').strict;
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const {promisify} = require('util');
-
-const utils = require('./utils');
-const { importFile, findPackageJson } = require('./loader');
+import * as utils from './utils';
+import { importFile, findPackageJson } from './loader';
+import { Page } from 'puppeteer';
+import { TeardownHook } from './runner';
+import { PentfOptions } from './main';
 
 class AutoWidthArgumentParser extends argparse.ArgumentParser {
     _getFormatter() {
+        // @ts-ignore
         const options = {prog: this.prog};
         if (process.env.COLUMNS) {
+            // @ts-ignore
             options.width = parseInt(process.env.COLUMNS);
         } else if (process.stdout.getWindowSize) {
+            // @ts-ignore
             options.width = process.stdout.getWindowSize()[0];
         }
+        // @ts-ignore
         return new this.formatterClass(options);
     }
 }
 
-function listEnvs(configDir) {
+export function listEnvs(configDir: string) {
     const allFiles = fs.readdirSync(configDir);
     const res = utils.filterMap(allFiles, fn => {
         const m = /^(?![_.])([-_A-Za-z0-9.]+)\.(?:json|js)$/.exec(fn);
@@ -32,7 +37,7 @@ function listEnvs(configDir) {
     return res;
 }
 
-function getCPUCount() {
+export function getCPUCount() {
     return os.cpus().length;
     // TODO handle scenarios where our process is limited to less
 }
@@ -59,16 +64,19 @@ function computeConcurrency(spec, {cpuCount=undefined}={}) {
         ).reduce((x, y) => x * y, 1)
     ).reduce((x, y) => x + y, 0);
 }
+// Tests only
+export const _computeConcurrency = computeConcurrency;
 
-function parseArgs(options, raw_args) {
+export function parseArgs(options, raw_args) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
     const DEFAULT_PDF_NAME = 'results.pdf';
 
+    // @ts-ignore
     const parser = new AutoWidthArgumentParser({
         description: options.description,
-    });
+    }) as any;
 
     // General arguments
     const {configDir} = options;
@@ -492,17 +500,79 @@ async function readConfigFile(configDir, env, moduleType) {
     }
     return config;
 }
+// Tests only
+export const _readConfigFile = readConfigFile
 
-/**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm"}} Config
- */
+export interface Config {
+    afterAllTests?: any;
+    beforeAllTests?: any;
+    breadcrumbs?: boolean;
+    concurrency: number;
+    ci?: boolean;
+    config_file: string;
+    colors?: boolean;
+    clear_external_locks?: boolean;
+    debug?: boolean;
+    devtools?: boolean;
+    devtools_preserve?: boolean;
+    display_locking_client?: boolean;
+    email_cached_clients?: Map<string, any>;
+    env: string;
+    exit_zero?: boolean;
+    expect_nothing?: boolean;
+    extensions?: string[],
+    external_locking_client?: string;
+    external_locking_url?: string;
+    fail_fast?: boolean;
+    filter?: string;
+    filter_body?: string;
+    forward_console?: boolean
+    headless?: boolean;
+    html?: boolean;
+    html_file?: string;
+    json?: boolean;
+    json_file?: string;
+    keep_open?: boolean;
+    list_conflicts?: boolean;
+    list_locks?: boolean;
+    load_json?: string;
+    locking_verbose?: boolean;
+    log_file?: string;
+    log_file_stream?: fs.WriteStream;
+    logFunc?: (config: Config, message: any) => void;
+    no_external_locking?: boolean;
+    no_locking?: boolean;
+    manually_lock?: string;
+    markdown?: boolean;
+    markdown_file?: string;
+    moduleType: 'commonjs' | 'esm';
+    pdf?: boolean;
+    pdf_file?: string;
+    print_curl?: boolean;
+    print_tasks?: boolean;
+    puppeteer_firefox?: boolean;
+    quiet?: boolean;
+    rejectUnauthorized?: any;
+    repeat?: number;
+    repeatFlaky: number;
+    report_header_html?: string;
+    report_header_md?: string;
+    rootDir: string;
+    sentry?: boolean;
+    sentry_dsn?: string;
+    slow_mo?: number;
+    status_interval?: number;
+    take_screenshots?: boolean;
+    testsGlob: string;
+    timeout?: number;
+    verbose?: boolean;
+    watch: boolean;
+    watch_files?: string[];
+    _browser_pages?: Page[]
+    _teardown_hooks?: TeardownHook[]
+}
 
-/**
- * @param {import('./main').PentfOptions} options
- * @param {object} args
- * @returns {Config}
- */
-async function readConfig(options, args) {
+export async function readConfig(options: PentfOptions, args: any): Promise<Config> {
     const {configDir} = options;
 
     let config = args;
@@ -512,7 +582,7 @@ async function readConfig(options, args) {
     const pkgJsonPath = await findPackageJson(config.rootDir);
     let moduleType = 'commonjs';
     if (pkgJsonPath !== null) {
-        const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath));
+        const pkgJson = JSON.parse(await fs.promises.readFile(pkgJsonPath, 'utf-8'));
         config = pkgJson.pentf || config;
         if (pkgJson.type === 'module') moduleType = 'esm';
     }
@@ -550,13 +620,3 @@ async function readConfig(options, args) {
 
     return {...config, ...args};
 }
-
-module.exports = {
-    listEnvs,
-    parseArgs,
-    readConfig,
-    getCPUCount,
-    // tests only
-    _readConfigFile: readConfigFile,
-    _computeConcurrency: computeConcurrency,
-};

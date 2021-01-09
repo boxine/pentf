@@ -1,12 +1,11 @@
-const assert = require('assert').strict;
+import { strict as assert } from 'assert';
+import { Config } from './config';
+import { TestResult } from './render';
 
 /**
  * Get tests result summary data
- * @param {import('./config').Config} config
- * @param {import('./render').TestResult[]} results
- * @private
  */
-function getResults(config, results) {
+export function getResults(config: Config, results: TestResult[]) {
     const expectNothing = config.expect_nothing;
     assert(Array.isArray(results));
 
@@ -39,7 +38,7 @@ function getResults(config, results) {
 * @param {import('./render').TestResult[]} tests All finished tests.
 * @returns {string} A string with counts of the results.
 **/
-function resultCountString(config, tests) {
+export function resultCountString(config: Config, tests: TestResult[]) {
     const {
         success,
         errored,
@@ -64,8 +63,3 @@ function resultCountString(config, tests) {
     }
     return res;
 }
-
-module.exports = {
-    getResults,
-    resultCountString
-};

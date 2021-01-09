@@ -6,6 +6,7 @@
     "declaration": true,
     "declarationDir": "dist/types/",
     "emitDeclarationOnly": true,
+    "outDir": "dist/cjs/"
   },
-  "files": ["./src/index.js"]
+  "files": ["./src/index.ts"]
 }

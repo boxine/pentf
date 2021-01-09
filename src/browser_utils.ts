@@ -1,4 +1,4 @@
-import { ElementHandle, LaunchOptions, Page } from "puppeteer";
+import { Browser, ElementHandle, LaunchOptions, Page } from "puppeteer";
 import { Config } from "./config";
 
 /**
@@ -13,7 +13,7 @@ import * as path from 'path';
 import {promisify} from 'util';
 import * as tmp from 'tmp-promise';
 import {performance} from 'perf_hooks';
-import mkdirpCb from 'mkdirp';
+import * as mkdirpCb from 'mkdirp';
 
 import {assertAsyncEventually} from './assert_utils';
 import {forwardBrowserConsole} from './browser_console';
@@ -22,6 +22,27 @@ import {timeoutPromise} from './promise_utils';
 import { importFile } from './loader';
 import * as output from './output';
 import { TaskConfig } from "./runner";
+import { AxeResults } from "axe-core";
+
+declare global {
+    interface Window {
+        axe: any;
+        _pentf_real_setTimeout?: any;
+        _pentf_real_setInterval?: any;
+    }
+}
+
+export interface PentfBrowser extends Browser {
+    _connection: {
+        send: (messge: string, options?: Record<string, any>) => Promise<any>
+    };
+    _pentf_config: TaskConfig;
+    _logs: any[]
+}
+
+export interface PentfPage extends Page {
+    _pentf_intercept_handlers: any[]
+}
 
 const mkdirp = promisify(mkdirpCb);
 
@@ -132,7 +153,7 @@ export async function newPage(config: TaskConfig, chrome_args: string[]=[]) {
         params.defaultViewport = null;
     }
 
-    const browser = await puppeteer.launch(params);
+    const browser = await puppeteer.launch(params) as PentfBrowser;
     const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {
@@ -488,7 +509,7 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
  * @param {string} expected The value that is expected to be present.
  */
 async function assertValue(input: ElementHandle, expected: string) {
-    const page = input._page;
+    const page = (input as any)._page;
     assert(page);
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertValue(${expected})`);
@@ -721,7 +742,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
         try {
             found = await page.evaluate((xpath, visible) => {
                 const element = document.evaluate(
-                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext() as any;
                 if (!element) return false;
 
                 if (visible && element.offsetParent === null) return null; // invisible
@@ -1086,7 +1107,7 @@ async function getSelectOptions(page, select) {
  * @param {string} fileName
  * @param {string} [selector]
  */
-async function takeScreenshot(config, page, fileName, selector) {
+async function takeScreenshot(config: Config, page: Page, fileName: string, selector?: string) {
     await mkdirp(config.screenshot_directory);
     const fn = path.join(config.screenshot_directory, fileName);
 
@@ -1133,7 +1154,7 @@ export interface A11yResult {
     nodes: A11yNode[];
 }
 
-async function assertAccessibility(config: Config, page: Page) {
+async function assertAccessibility(config: TaskConfig, page: Page) {
     assert(config, 'Missing config argument');
     assert(page, 'Missing page argument');
 
@@ -1145,15 +1166,14 @@ async function assertAccessibility(config: Config, page: Page) {
         path: require.resolve('axe-core')
     });
 
-    /** @type {import('axe-core').AxeResults} */
-    const results = await page.evaluate(() => {
+    const results: AxeResults = await page.evaluate(() => {
         return new Promise((resolve, reject) => {
             window.axe.run(document, { ancestry: true }, (err, results) => {
                 if (err !== null) reject(err);
                 else resolve(results);
             });
         });
-    });
+    }) as any;
 
     const errors = config.accessibilityErrors;
 
@@ -1229,9 +1249,9 @@ async function assertAccessibility(config: Config, page: Page) {
 async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
     function applyTimeouts(factor) {
         window._pentf_real_setTimeout = window._pentf_real_setTimeout || window.setTimeout;
-        window.setTimeout = (func, delay, ...args) => {
+        window.setTimeout = ((func, delay, ...args) => {
             return window._pentf_real_setTimeout(func, delay && (delay / factor), ...args);
-        };
+        }) as any;
 
         window._pentf_real_setInterval = window._pentf_real_setInterval || window.setInterval;
         window.setInterval = (func, delay, ...args) => {
@@ -1281,7 +1301,7 @@ async function workaround_setContent(page: Page, html: string) {
  * @param {import('puppeteer').Page} page
  * @param {(request: import('puppeteer').Request) => Promise<void> | void} fn
  */
-async function interceptRequest(page: Page, fn) {
+async function interceptRequest(page: PentfPage, fn) {
     if (!page._pentf_intercept_handlers) {
         await page.setRequestInterception(true);
 
@@ -1290,13 +1310,13 @@ async function interceptRequest(page: Page, fn) {
             for (const handler of page._pentf_intercept_handlers) {
                 await handler(request);
 
-                if (request._interceptionHandled) {
+                if ((request as any)._interceptionHandled) {
                     break;
                 }
             }
 
             // Don't stall requests
-            if (!request._interceptionHandled) {
+            if (!(request as any)._interceptionHandled) {
                 request.continue();
             }
         });

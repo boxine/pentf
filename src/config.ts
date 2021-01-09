@@ -558,6 +558,7 @@ export interface Config {
     report_header_html?: string;
     report_header_md?: string;
     rootDir: string;
+    screenshot_directory: string;
     sentry?: boolean;
     sentry_dsn?: string;
     slow_mo?: number;

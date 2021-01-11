@@ -347,7 +347,7 @@ function html(results) {
                             out +=  '<p>HTML: <code>' + escape_html(node.html) + '</code><br />';
 
                             for (let i = 0; i < node.selectors.length; i++) {
-                                out += 'Selector: ' + node.selectors[i];
+                                out += 'Selector: ' + escape_html(node.selectors[i]);
 
                                 if (node.screenshots[i] !== null) {
                                     out += '<span class="axe-img">' + screenshots_html(node.screenshots[i]);

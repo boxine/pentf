@@ -120,7 +120,7 @@ async function real_main(options={}) {
     if (config.watch) {
         let remaining_teardowns = [];
         await watcher.createWatcher(config, async test_cases => {
-            logVerbose(`[runner] Executing ${remaining_teardowns.length} teardown hooks`);
+            logVerbose(config, `[runner] Executing ${remaining_teardowns.length} teardown hooks`);
             try {
                 // Run teardown functions if there are any
                 const teardownPromise = Promise.all(remaining_teardowns.map(fn => fn()));
@@ -145,7 +145,7 @@ async function real_main(options={}) {
         if (!config.keep_open && results) {
             const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);
             const retCode = (!anyErrors || config.exit_zero) ? 0 : 3;
-            logVerbose(`Terminating with exit code ${retCode}`);
+            logVerbose(config, `Terminating with exit code ${retCode}`);
             process.exit(retCode);
         }
     }

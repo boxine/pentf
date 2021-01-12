@@ -38,6 +38,7 @@ function onTeardown(config, callback) {
  * @property {string} _testName
  * @property {string} _taskName
  * @property {string} _taskGroup
+ * @property {Error | null} error
  * @property {import('./browser_utils').A11yResult[]} accessibilityErrors
  */
 
@@ -63,6 +64,7 @@ async function run_task(config, state, task) {
         _taskGroup: task.group,
         start: task.start,
         accessibilityErrors: [],
+        error: null,
     };
     let timeout;
     try {
@@ -110,6 +112,7 @@ async function run_task(config, state, task) {
 
         task.duration = performance.now() - task.start;
         task.error = e;
+        task_config.error = e;
         task.breadcrumb = task_config._breadcrumb;
         task.status = 'error';
         task.accessibilityErrors = task_config.accessibilityErrors;
@@ -197,7 +200,7 @@ async function run_task(config, state, task) {
             output.logVerbose(config, `[runner] Executing ${task_config._teardown_hooks.length} teardown hooks`);
             try {
                 // Run teardown functions if there are any
-                const teardownPromise = Promise.all(task_config._teardown_hooks.map(fn => fn(config)));
+                const teardownPromise = Promise.all(task_config._teardown_hooks.map(fn => fn(task_config)));
                 await timeoutPromise(
                     config,
                     teardownPromise,

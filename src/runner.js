@@ -15,8 +15,12 @@ const {timeoutPromise} = require('./promise_utils');
 const { getCPUCount } = require('./config');
 const { shouldShowError } = require('./output');
 
+// * @typedef {(config: import('./config') => Promise<void> | void)} TeardownHook
 /**
- * @typedef {(config: import('./config') => Promise<void> | void)} TeardownHook
+ * @name TeardownHook
+ * @function
+ * @param {import('./config').Config} config
+ * @returns {Promise<void> | void}
  */
 
 /**

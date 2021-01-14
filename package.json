@@ -127,8 +127,9 @@
     "puppeteer": "^5.4.1",
     "rimraf": "^3.0.2",
     "ts-node": "^9.0.0",
-    "typedoc": "^0.17.4",
-    "typescript": "^3.8.3"
+    "typedoc": "^0.20.14",
+    "typescript": "^4.1.3",
+    "wmr": "^1.1.0"
   },
   "peerDependencies": {
     "puppeteer": "*"
@@ -137,6 +138,8 @@
     "test": "./run",
     "lint": "eslint . run",
     "types": "tsc && cp dist/types/* .",
+    "types2": "tsc",
+    "doc2": "wmr start --cwd doc2",
     "build": "babel --out-dir dist/ --out-file-extension .mjs src/*.js",
     "clean": "rimraf doc dist *.d.ts",
     "prepublishOnly": "npm run clean && npm run types && npm run build"

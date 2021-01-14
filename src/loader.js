@@ -72,11 +72,11 @@ async function importFile(file, moduleType) {
  */
 
 /**
- * @typedef {{(name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void, only: (name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void} TestFn
+ * @typedef {{}} TestFn
  */
 
 /**
- * @typedef {{(name: string, callback: () => void): void, only: (name: string, callback: () => void): void} DescribeFn
+ * @typedef {{}} DescribeFn
  */
 
 /**

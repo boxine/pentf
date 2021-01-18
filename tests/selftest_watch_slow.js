@@ -25,7 +25,7 @@ async function run(config) {
     await assertEventually(() => out.find(msg => /Updated/.test(msg)));
     await fs.promises.writeFile(test, content);
 
-    await assertEventually(() => /1 tests passed/.test(out[out.length - 1]));
+    await assertEventually(() => out.find(line => /1 tests passed/.test(line)));
 }
 
 module.exports = {

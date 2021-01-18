@@ -315,9 +315,22 @@ async function closePage(page) {
         remove(config._pentf_browser_pages, p => p === page);
     }
 
-    // Only close page if it's not already closed. Sometimes this happens when
-    // puppeteer has an internal error.
-    await timeoutPromise(config, !page.isClosed() ? page.close() : true, {message: 'Closing the page took too long'});
+    const closeFn = async () => {
+        try {
+            // Only close page if it's not already closed. Sometimes this happens when
+            // puppeteer has an internal error.
+            if (!page.isClosed()) {
+                await page.close();
+            }
+        } catch (err) {
+            // Sometimes `page.isClosed()` is not up to date. Therefore
+            // we ignore typical connection closed erros.
+            if (!/(Target|Connection|Session) closed/.test(err.message)) {
+                throw err;
+            }
+        }
+    };
+    await timeoutPromise(config, closeFn(), {message: 'Closing the page took too long'});
     await timeoutPromise(config, browser.close(), {message: 'Closing the browser took too long'});
     addBreadcrumb(config, 'exit closePage()');
 }

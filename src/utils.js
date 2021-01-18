@@ -70,7 +70,7 @@ function regexEscape(s) {
 
 /**
  * @param {string} s
- * @returns {boolean} 
+ * @returns {boolean}
  */
 function isValidRegex(s) {
     try {
@@ -233,6 +233,14 @@ function removeAt(input, idx, count) {
     return input.substr(0, idx) + input.substr(idx + count);
 }
 
+/**
+ * Ignore these errors
+ * @param {Error} err
+ */
+function ignoreError(err) {
+    return /Execution context was destroyed/.test(err.message);
+}
+
 module.exports = {
     arange,
     assertAlways,
@@ -242,6 +250,7 @@ module.exports = {
     cmpKey,
     count,
     filterMap,
+    ignoreError,
     isValidRegex,
     localIso8601,
     makeRandomEmail,

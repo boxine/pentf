@@ -213,6 +213,10 @@ async function newPage(config, chrome_args=[]) {
 
     if (config._browser_pages) {
         config._browser_pages.push(page);
+
+        page.on('popup', popup => {
+            config._browser_pages.push(popup);
+        });
     }
 
     if (config.breadcrumbs) {

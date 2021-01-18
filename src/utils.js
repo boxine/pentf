@@ -3,7 +3,16 @@ const assert = require('assert').strict;
 function makeEmailAddress(config, suffix) {
     assert(config.email, 'Missing `email` key in pentf configuration');
     const [account, domain] = config.email.split('@');
-    return account + '+' + suffix + '@' + domain;
+    const localPath = `${account}+${suffix}`;
+
+    // See: https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
+    assert(
+        localPath.length <= 64,
+        `Error: invalid email address: ${localPath}.\n\n` +
+            'The local-part (= part before the @ sign) MUST not be longer than 64 characters.'
+    );
+
+    return localPath + '@' + domain;
 }
 
 /**

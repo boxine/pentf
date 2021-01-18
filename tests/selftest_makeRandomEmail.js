@@ -1,3 +1,4 @@
+const assert = require('assert').strict;
 const {assertIncludes} = require('../src/assert_utils');
 const {makeRandomEmail} = require('../src/utils');
 
@@ -12,6 +13,9 @@ async function run(config) {
 
     // Strips invalid characters
     assertIncludes(makeRandomEmail(testConfig, 'foo[0]'), 'john.smith+foo_0_');
+
+    // Throw on invalid local path length
+    assert.throws(() => makeRandomEmail(testConfig, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'));
 }
 
 module.exports = {

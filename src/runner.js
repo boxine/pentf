@@ -110,6 +110,8 @@ async function run_task(config, state, task) {
             e = new Error(`Non-error object thrown by ${task.name}: ${output.valueRepr(e)}`);
         }
 
+        output.logVerbose(config, `[task] (${task.name}) Failed with error ${e.message}`);
+
         task.duration = performance.now() - task.start;
         task.error = e;
         task_config.error = e;
@@ -133,12 +135,32 @@ async function run_task(config, state, task) {
             try {
                 const screenshotPromise = Promise.all(task_config._browser_pages.map(
                     async (page, i) => {
-                        return await browser_utils.takeScreenshot(config, page, `${task.id || task.name}-${i}.png`);
+                        try {
+                            return await browser_utils.takeScreenshot(config, page, `${task.id || task.name}-${i}.png`);
+                        } catch (err) {
+                            return err;
+                        }
                     })
                 );
-                task.error_screenshots = await timeoutPromise(
+                const screenshots = await timeoutPromise(
                     config, screenshotPromise,
                     {timeout: 10000, message: 'screenshots took too long'});
+
+                // Collect all screenshots first before throwing
+                // potential errors.
+                task.error_screenshots = [];
+                let error = null;
+                for (const imgOrErr of screenshots) {
+                    if (Buffer.isBuffer(imgOrErr)) {
+                        task.error_screenshots.push(imgOrErr);
+                    } else if (!error) {
+                        error = imgOrErr;
+                    }
+                }
+
+                if (error) {
+                    throw error;
+                }
             } catch(e) {
                 output.log(
                     config,

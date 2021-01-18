@@ -1002,16 +1002,47 @@ async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), m
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string} selector selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the element to type in.
- * @param {{message?: string, timeout?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{message?: string, timeout?: number, checkEvery?: number, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {string?} message Message shown if the element can not be found.
+ * @param {number?} checkEvery How long to wait retryUntil checks, in ms. (default: 200ms)
+ * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function typeSelector(page, selector, text, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
+async function typeSelector(page, selector, text, {message=undefined, timeout=getDefaultTimeout(page), retryUntil, checkEvery = 200}={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter typeSelector(${selector}, text: ${text})`);
-    const el = await waitForVisible(page, selector, {timeout, message});
-    await el.type(text);
-    addBreadcrumb(config, `exit typeSelector(${selector}, text: ${text})`);
+
+    let remainingTimeout = timeout;
+    let retryUntilError = null;
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        const el = await waitForVisible(page, selector, {timeout, message});
+        await el.type(text);
+        try {
+            if (await onSuccess(retryUntil)) {
+                addBreadcrumb(config, `exit typeSelector(${selector}, text: ${text})`);
+                return;
+            }
+        } catch (err) {
+            retryUntilError = err;
+        }
+
+        if (remainingTimeout <= 0) {
+            if (retryUntilError) {
+                throw retryUntilError;
+            }
+
+            if (!message) {
+                message = `Unable to type into ${selector} after ${timeout}ms`;
+            }
+            throw new Error(message);
+        }
+
+        await wait(Math.min(remainingTimeout, checkEvery));
+        remainingTimeout -= checkEvery;
+    }
 }
 
 /**

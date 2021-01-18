@@ -315,7 +315,9 @@ async function closePage(page) {
         remove(config._pentf_browser_pages, p => p === page);
     }
 
-    await timeoutPromise(config, page.close(), {message: 'Closing the page took too long'});
+    // Only close page if it's not already closed. Sometimes this happens when
+    // puppeteer has an internal error.
+    await timeoutPromise(config, !page.isClosed() ? page.close() : true, {message: 'Closing the page took too long'});
     await timeoutPromise(config, browser.close(), {message: 'Closing the browser took too long'});
     addBreadcrumb(config, 'exit closePage()');
 }

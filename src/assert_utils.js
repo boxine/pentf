@@ -148,8 +148,14 @@ async function assertEventually(testfunc,
 
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         if (crashOnError) {
-            const res = await testfunc();
-            if (res) return res;
+            try {
+                const res = await testfunc();
+                if (res) return res;
+            } catch (err) {
+                if (!ignoreError(err)) {
+                    throw err;
+                }
+            }
         } else {
             let crashed = false;
             let res;

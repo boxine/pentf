@@ -15,7 +15,7 @@ const mkdirpCb = require('mkdirp');
 
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
-const {wait, remove} = require('./utils');
+const {wait, remove, ignoreError} = require('./utils');
 const {timeoutPromise} = require('./promise_utils');
 const { importFile } = require('./loader');
 const output = require('./output');
@@ -23,14 +23,6 @@ const output = require('./output');
 const mkdirp = promisify(mkdirpCb);
 
 let tmp_home;
-
-/**
- * Ignore these errors
- * @param {Error} err
- */
-function ignorerError(err) {
-    return /Execution context was destroyed/.test(err.message);
-}
 
 /**
  * Launch a new browser with puppeteer, with a new page (=Tab). The browser is completely isolated from any other calls.
@@ -569,7 +561,7 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
                 return !!element;
             }, xpath);
         } catch(err) {
-            if (!ignorerError(err)) {
+            if (!ignoreError(err)) {
                 throw err;
             }
         }
@@ -595,9 +587,19 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
 async function onSuccess(fn) {
     if (!fn) return true;
 
-    const res = await fn();
-    if (!res) {
-        throw new Error('retryUntil/assertSuccess returned a falsy value');
+    try {
+        const res = await fn();
+        if (!res) {
+            throw new Error('retryUntil/assertSuccess returned a falsy value');
+        }
+    } catch (err) {
+        // The page may have navigated and therefore the execution
+        // context may have been destroyed. Ignore those errors.
+        if (ignoreError(err)) {
+            return false;
+        }
+
+        throw err;
     }
 
     return true;
@@ -642,7 +644,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
                 return true;
             }, selector, visible);
         } catch(err) {
-            if (!ignorerError(err)) {
+            if (!ignoreError(err)) {
                 throw err;
             }
         }
@@ -740,7 +742,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
                 return true;
             }, xpath, visible);
         } catch (err) {
-            if (!ignorerError(err)) {
+            if (!ignoreError(err)) {
                 throw err;
             }
         }
@@ -899,7 +901,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
                 return true;
             }, serializedMatcher, visible);
         } catch (err) {
-            if (!ignorerError(err)) {
+            if (!ignoreError(err)) {
                 throw err;
             }
         }

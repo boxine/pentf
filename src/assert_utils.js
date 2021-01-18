@@ -8,7 +8,7 @@
 
 const assert = require('assert').strict;
 
-const {wait} = require('./utils');
+const {wait, ignoreError} = require('./utils');
 
 /**
 * Assert that a value is a Number or BigInt.
@@ -156,7 +156,7 @@ async function assertEventually(testfunc,
             try {
                 res = await testfunc();
             } catch (e) {
-                crashed = true;
+                crashed = !ignoreError(e);
             }
             if (!crashed) return res;
         }

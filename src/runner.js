@@ -142,7 +142,7 @@ async function run_task(config, state, task) {
             } catch(e) {
                 output.log(
                     config,
-                    `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}`);
+                    `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}\n${e.stack}`);
             }
         }
         // Close all browser windows
@@ -154,7 +154,7 @@ async function run_task(config, state, task) {
             try {
                 await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
             } catch(e) {
-                output.log(config, `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}`);
+                output.log(config, `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}\n${e.stack}`);
             }
         }
 

@@ -9,6 +9,9 @@ async function run(config) {
 
     assertIncludes(makeRandomEmail(testConfig, 'foobar'), '+foobar');
     assertIncludes(makeRandomEmail(testConfig), '+selftest_makeRandomEmail');
+
+    // Strips invalid characters
+    assertIncludes(makeRandomEmail(testConfig, 'foo[0]'), 'john.smith+foo_0_');
 }
 
 module.exports = {

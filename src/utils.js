@@ -14,10 +14,15 @@ function makeEmailAddress(config, suffix) {
                            If no prefix is specified, the test name is used if available.
  * @returns {string} If `config.email` is `'foo@bar.com'`, something like `foo+prefix129ad12@bar.com`
  */
-function makeRandomEmail(config, prefix=undefined) {
+function makeRandomEmail(config, prefix) {
     if (prefix === undefined) {
         prefix = config._testName || '';
     }
+
+    // Some providers can't deal with "[" and "]", which we'll add if tests are repeated
+    // See: https://stackoverflow.com/a/2049510
+    prefix = prefix.replace(/[[\]]/g, '_');
+
     return makeEmailAddress(config, prefix + Math.random().toString(36).slice(2));
 }
 

@@ -648,7 +648,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
         }
 
         try {
-            if (found && (await onSuccess(retryUntil || assertSuccess))) {
+            if ((found || (!found && retryUntilError !== null)) && (await onSuccess(retryUntil || assertSuccess))) {
                 const config = getBrowser(page)._pentf_config;
                 addBreadcrumb(config, `exit clickSelector(${selector})`);
                 return;
@@ -746,7 +746,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
         }
 
         try {
-            if (found && await onSuccess(retryUntil || assertSuccess)) {
+            if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
                 addBreadcrumb(config, `exit clickXPath(${xpath})`);
                 return;
             }
@@ -905,7 +905,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         }
 
         try {
-            if (found && await onSuccess(retryUntil || assertSuccess)) {
+            if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
                 addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
                 return;
             }

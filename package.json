@@ -124,7 +124,7 @@
     "eslint": "^7.0.0",
     "nodemon": "^2.0.4",
     "prettier": "^2.0.5",
-    "puppeteer": "^5.4.1",
+    "puppeteer": "^5.5.0",
     "rimraf": "^3.0.2",
     "ts-node": "^9.0.0",
     "typedoc": "^0.17.4",

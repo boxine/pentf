@@ -184,7 +184,7 @@ async function getMail(
         }
     }
 
-    output.logVerbose(config, `[email] Waiting for message to arrive... (${config._taskName})`);
+    output.logVerbose(config, `[email] Waiting for message to arrive ${to}... (${config._taskName})`);
     const msg = await utils.retry(
         () => _find_message(config, client, since, to, subjectContains), wait_times);
     assert(msg, (

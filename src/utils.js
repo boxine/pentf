@@ -252,7 +252,7 @@ function removeAt(input, idx, count) {
  * @param {Error} err
  */
 function ignoreError(err) {
-    return /Execution context was destroyed/.test(err.message);
+    return /Execution context was destroyed|(Session|Connection|Target) closed/.test(err.message);
 }
 
 module.exports = {

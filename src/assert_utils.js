@@ -162,7 +162,10 @@ async function assertEventually(testfunc,
             try {
                 res = await testfunc();
             } catch (e) {
-                crashed = !ignoreError(e);
+                if (ignoreError(e)) {
+                    continue;
+                }
+                crashed = true;
             }
             if (!crashed) return res;
         }

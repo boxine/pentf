@@ -54,6 +54,8 @@ function watchFooter(config) {
     return out;
 }
 
+const MAX_ITEMS = 10;
+
 /**
  *
  * @param {import('./config').Config} config
@@ -82,8 +84,8 @@ function renderSearch(config, state, test_cases) {
             results.push(output.color(config, 'red', 'Pattern contains invalid characters'));
         } else {
             const len = test_cases.length;
-            if (len > 10) {
-                test_cases = test_cases.slice(0, 10);
+            if (len > MAX_ITEMS) {
+                test_cases = test_cases.slice(0, MAX_ITEMS);
             }
             results = test_cases.map((tc, i) => {
                 if (state.selection_active && state.selected_row === i) {
@@ -323,7 +325,7 @@ async function createWatcher(config, onChange) {
                 watchState.cursor_pos = Math.max(0, Math.min(file_pattern.length, cursor_pos));
                 watchState.file_pattern = file_pattern;
                 watchState.selection_active = selection_active;
-                watchState.selected_row = Math.max(0, Math.min(selected_row, test_cases.length - 1));
+                watchState.selected_row = Math.max(0, Math.min(selected_row, Math.min(test_cases.length -1, MAX_ITEMS - 1)));
                 watchState.selected_file = selected_file;
                 renderSearch(config, watchState, test_cases);
             }
@@ -343,6 +345,9 @@ async function createWatcher(config, onChange) {
                     break;
                 case '↓':
                     await onKeyPress({name: 'down'});
+                    break;
+                case '↑':
+                    await onKeyPress({name: 'up'});
                     break;
                 default:
                     await onKeyPress({name: e.toString(), sequence: e.toString()});

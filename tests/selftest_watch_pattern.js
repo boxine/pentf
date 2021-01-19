@@ -6,9 +6,9 @@ const {onTeardown} = require('../src/runner');
 const { wait } = require('../src/utils');
 
 /**
- * 
- * @param {() => string[]} getOutput 
- * @param {() => void} clearOutput 
+ *
+ * @param {() => string[]} getOutput
+ * @param {() => void} clearOutput
  * @returns {(child: child_process.ChildProcessWithoutNullStreams, input: string, retryUntil?: RegExp) => Promise<void>}
  */
 function createTyper(getOutput, clearOutput) {
@@ -29,7 +29,7 @@ function createTyper(getOutput, clearOutput) {
                 },
                 {
                     timeout: 2000,
-                    message: `Didn't match ${retryUntil.toString()}`
+                    message: `Didn't match ${retryUntil.toString()}\n${getOutput().join('\n')}`
                 }
             );
         }
@@ -72,6 +72,7 @@ async function run(config) {
     const ENTER = String.fromCharCode(13);
     const ESCAPE = String.fromCharCode(27);
     const ARROW_DOWN = '↓';
+    const ARROW_UP = '↑';
 
     await type(child, ENTER, /1 tests passed/);
 
@@ -94,8 +95,12 @@ async function run(config) {
     await type(child, 'p', /Start typing to filter/);
     await type(child, '.*', /bar\s+foo/);
     await type(child, ARROW_DOWN, /- bar/);
+    await type(child, ARROW_DOWN, /- foo/);
+    await type(child, ARROW_DOWN, /- foo/);
+    await type(child, ARROW_UP, /- bar/);
     await type(child, ENTER, /Active filter: \^bar\$/);
     await type(child, ENTER, /1 tests passed/);
+
 
     // Enter an invalid filter
     await type(child, 'c', /(?!Active filter)/i);
@@ -103,7 +108,7 @@ async function run(config) {
     await type(child, '*', /Pattern contains invalid characters/);
 
     await type(child, ESCAPE, /waiting for file changes/i);
-    
+
     // Toggle debug mode
     await type(child, 'd', /Debug mode:/i);
     await type(child, 'd', /(?!Debug mode:)/i);

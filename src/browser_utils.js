@@ -325,7 +325,7 @@ async function closePage(page) {
         } catch (err) {
             // Sometimes `page.isClosed()` is not up to date. Therefore
             // we ignore typical connection closed erros.
-            if (!/(Target|Connection|Session) closed/.test(err.message)) {
+            if (!ignoreError(err)) {
                 throw err;
             }
         }

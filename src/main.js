@@ -140,7 +140,10 @@ async function real_main(options={}) {
             remaining_teardowns = test_info.state.remaining_teardowns;
         });
     } else {
-        const { results } = await runTests(config, test_cases);
+        const runnerResult = await runTests(config, test_cases);
+        if (!runnerResult) return;
+
+        const { results } = runnerResult;
 
         if (!config.keep_open && results) {
             const anyErrors = results.tests.some(s => s.status === 'error' && !s.expectedToFail);

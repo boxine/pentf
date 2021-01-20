@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const pentf = require('../../src/index.js');
+
+pentf.main({
+    foo: 123,
+    rootDir: __dirname,
+});

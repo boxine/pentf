@@ -506,6 +506,13 @@ async function readConfig(options, args) {
     const {configDir} = options;
 
     let config = args;
+
+    Object.keys(options).forEach(key => {
+        if (!(key in config)) {
+            config[key] = options[key];
+        }
+    });
+
     config.rootDir = options.rootDir || process.cwd();
 
     // Add support for `pentf` configuration key in `package.json`.

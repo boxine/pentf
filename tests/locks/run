@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+const pentf = require('../../src/index.js');
+const lockserver = require('../../lockserver/lockserver');
+
+pentf.main({
+    rootDir: __dirname,
+    pentf_boot_lockserver: true,
+    beforeAllTests: lockserver.beforeAllTests,
+    afterAllTests: lockserver.afterAllTests,
+});

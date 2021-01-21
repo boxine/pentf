@@ -3,7 +3,7 @@
   "version": "1.8.6",
   "description": "parallel end-to-end test framework",
   "main": "src/index.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/types/__index.d.ts",
   "directories": {
     "test": "tests"
   },
@@ -137,7 +137,7 @@
   "scripts": {
     "test": "./run",
     "lint": "eslint . run",
-    "types": "tsc && cp dist/types/* .",
+    "types": "tsc && node patch-types.js",
     "build": "babel --out-dir dist/ --out-file-extension .mjs src/*.js",
     "clean": "rimraf doc dist *.d.ts",
     "prepublishOnly": "npm run clean && npm run types && npm run build"

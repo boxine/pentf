@@ -1002,6 +1002,7 @@ async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), m
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string} selector selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the element to type in.
+ * @param {string} text Text to type
  * @param {{message?: string, timeout?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {string?} message Message shown if the element can not be found.

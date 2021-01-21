@@ -18,7 +18,7 @@ var last_state;
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  */
 function proxyConsole(config, state) {
     let org = {};
@@ -58,7 +58,7 @@ function clean(config) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 function status(config, state) {
@@ -139,7 +139,7 @@ function formatDuration(config, duration) {
 
 /**
  * @param {*} config
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 function detailedStatus(config, state) {
@@ -237,7 +237,7 @@ function resultSummary(config, results) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  */
 function finish(config, state) {
     last_state = null;
@@ -630,7 +630,7 @@ async function formatError(config, err) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').Task} task
+ * @param {import('./internal').Task} task
  * @private
  */
 function shouldShowError(config, task) {
@@ -641,7 +641,7 @@ function shouldShowError(config, task) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').Task} task
+ * @param {import('./internal').Task} task
  * @private
  */
 async function logTaskError(config, task) {

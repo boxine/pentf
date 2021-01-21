@@ -6,7 +6,7 @@ const external_locking = require('./external_locking');
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').Task} task
+ * @param {import('./internal').Task} task
  * @private
  */
 function annotateTaskResources(config, task) {
@@ -21,7 +21,7 @@ function annotateTaskResources(config, task) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 async function init(config, state) {
@@ -33,7 +33,7 @@ async function init(config, state) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 async function shutdown(config, state) {
@@ -47,8 +47,8 @@ async function shutdown(config, state) {
 /**
  * Aquire locks on resources
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
- * @param {import('./runner').Task} task
+ * @param {import('./internal').RunnerState} state
+ * @param {import('./internal').Task} task
  */
 async function acquire(config, state, task) {
     if (config.no_locking) return true;
@@ -99,8 +99,8 @@ async function acquire(config, state, task) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
- * @param {import('./runner').Task} task
+ * @param {import('./internal').RunnerState} state
+ * @param {import('./internal').Task} task
  */
 async function acquireEventually(config, state, task) {
     if (config.no_locking) return true;
@@ -118,8 +118,8 @@ async function acquireEventually(config, state, task) {
 /**
  * Release locks on resources
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
- * @param {import('./runner').Task} task
+ * @param {import('./internal').RunnerState} state
+ * @param {import('./internal').Task} task
  */
 async function release(config, state, task) {
     if (config.no_locking) return true;
@@ -154,7 +154,7 @@ async function release(config, state, task) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').Task[]} tasks
+ * @param {import('./internal').Task[]} tasks
  * @private
  */
 function listConflicts(config, tasks) {

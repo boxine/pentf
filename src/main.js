@@ -15,7 +15,7 @@ const {timeoutPromise} = require('./promise_utils');
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').TestCase[]} test_cases
+ * @param {import('./internal').TestCase[]} test_cases
  */
 async function runTests(config, test_cases) {
     let results;

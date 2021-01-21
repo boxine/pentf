@@ -3,6 +3,7 @@
     "module": "CommonJS",
     "allowJs": true,
     "alwaysStrict": true,
+    "strict": true,
     "declaration": true,
     "declarationDir": "dist/types/",
     "emitDeclarationOnly": true,

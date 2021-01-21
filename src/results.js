@@ -3,7 +3,7 @@ const assert = require('assert').strict;
 /**
  * Get tests result summary data
  * @param {import('./config').Config} config
- * @param {import('./render').TestResult[]} results
+ * @param {import('./internal').TestResult[]} results
  * @private
  */
 function getResults(config, results) {
@@ -36,7 +36,7 @@ function getResults(config, results) {
 * Summarize test results for PDF.
 * @hidden
 * @param {*} config The pentf configuration object.
-* @param {import('./render').TestResult[]} tests All finished tests.
+* @param {import('./internal').TestResult[]} tests All finished tests.
 * @returns {string} A string with counts of the results.
 **/
 function resultCountString(config, tests) {

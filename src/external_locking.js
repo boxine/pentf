@@ -169,7 +169,7 @@ function prepare(config) {
 
 /**
  * @param {import('./confg').Config} config
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 async function refresh(config, state) {
@@ -200,7 +200,7 @@ async function refresh(config, state) {
 
 /**
  * @param {import('./config').Config} state
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 async function init(config, state) {
@@ -210,7 +210,7 @@ async function init(config, state) {
 
 /**
  * @param {import('./config').Config} config
- * @param {import('./runner').RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 async function shutdown(config, state) {

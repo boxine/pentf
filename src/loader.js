@@ -68,25 +68,9 @@ async function importFile(file, moduleType) {
 }
 
 /**
- * @typedef {Omit<import('./runner').TestCase, 'name' | 'run'>} TestOptions
- */
-
-/**
- * @typedef {{(name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void, only: (name: string, test: (config: import('./runner').TaskConfig) => Promise<void> | void, options?: TestOptions): void} TestFn
- */
-
-/**
- * @typedef {{(name: string, callback: () => void): void, only: (name: string, callback: () => void): void} DescribeFn
- */
-
-/**
- * @typedef {(test: TestFn, suite: DescribeFn) => void} SuiteBuilder
- */
-
-/**
  * @param {string} fileName
  * @param {string} suiteName
- * @param {SuiteBuilder} builder
+ * @param {import('./internal').SuiteBuilder} builder
  * @private
  */
 function loadSuite(fileName, suiteName, builder) {
@@ -99,13 +83,8 @@ function loadSuite(fileName, suiteName, builder) {
 
     const skipFn = () => true;
 
-    /**
-     * Create a test case
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
-    function test(description, run, options = {}) {
+    /** @type {import('./internal').TestFn} */
+    const test = (description, run, options = {}) => {
         const arr = onlyInScope ? only : tests;
         arr.push({
             description,
@@ -115,14 +94,8 @@ function loadSuite(fileName, suiteName, builder) {
             path: fileName,
             ...options,
         });
-    }
+    };
 
-    /**
-     * Only run this test case in the current file
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
     test.only = (description, run, options = {}) => {
         only.push({
             description,
@@ -134,12 +107,6 @@ function loadSuite(fileName, suiteName, builder) {
         });
     };
 
-    /**
-     * Skip this test case
-     * @param {string} description
-     * @param {(config: import('./config').Config) => Promise<void>} run
-     * @param {TestOptions} options
-     */
     test.skip = (description, run, options = {}) => {
         const arr = onlyInScope ? only : tests;
         arr.push({
@@ -152,22 +119,13 @@ function loadSuite(fileName, suiteName, builder) {
         });
     };
 
-    /**
-     * Create a group for test cases
-     * @param {string} description
-     * @param {() => void} callback
-     */
-    function describe(description, callback) {
+    /** @type {import('./internal').DescribeFn} */
+    const describe = (description, callback) => {
         groups.push(description);
         callback();
         groups.pop();
-    }
+    };
 
-    /**
-     * Only run the test cases inside this group
-     * @param {string} description
-     * @param {() => void} callback
-     */
     describe.only = (description, callback) => {
         onlyInScope = true;
         groups.push(description);
@@ -178,11 +136,6 @@ function loadSuite(fileName, suiteName, builder) {
         groups.pop();
     };
 
-    /**
-     * Skip this group of test cases
-     * @param {string} description
-     * @param {() => void} callback
-     */
     describe.skip = (description, callback) => {
         skipInScope = true;
         groups.push(description);
@@ -199,7 +152,7 @@ function loadSuite(fileName, suiteName, builder) {
 
 /**
  * @param {import('./config').Config} config
- * @param {Array<{name: string, fileName: string}>} tests
+ * @param {import('./internal').TestFile[]} tests
  */
 async function applyTestFilters(config, tests) {
     if (config.filter) {
@@ -219,7 +172,7 @@ async function applyTestFilters(config, tests) {
 /**
  * @param {import('./config').Config} config
  * @param {string} globPattern
- * @returns {Promise<import('./runner').TestCase[]>}
+ * @returns {Promise<import('./internal').TestCase[]>}
  * @private
  */
 async function loadTests(config, globPattern) {

@@ -1,5 +1,9 @@
 const assert = require('assert').strict;
 
+/**
+ * @param {{ email: string }} config
+ * @param {string} suffix
+ */
 function makeEmailAddress(config, suffix) {
     assert(config.email, 'Missing `email` key in pentf configuration');
     const [account, domain] = config.email.split('@');
@@ -18,7 +22,7 @@ function makeEmailAddress(config, suffix) {
 /**
  * Generate a random email address.
  *
- * @param {*} config The pentf configuration object. `config.email` needs to be set.
+ * @param {{ email: string, _testName?: string }} config The pentf configuration object. `config.email` needs to be set.
  * @param {string?} prefix Text to put before the random characters.
                            If no prefix is specified, the test name is used if available.
  * @returns {string} If `config.email` is `'foo@bar.com'`, something like `foo+prefix129ad12@bar.com`

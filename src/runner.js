@@ -16,44 +16,22 @@ const { getCPUCount } = require('./config');
 const { shouldShowError } = require('./output');
 
 /**
- * @typedef {(config: import('./config') => Promise<void> | void)} TeardownHook
- */
-
-/**
  * Add a callback to execute during the teardown phase of the test case.
- * @param {TaskConfig} config
- * @param {TeardownHook} callback
+ * @param {import('./internal').TaskConfig} config
+ * @param {import('./internal').TeardownHook} callback
  */
 function onTeardown(config, callback) {
     config._teardown_hooks.push(callback);
 }
 
-// Work around JSDoc limitation, which doesn't seem to support extending
-// interfaces on the fly.
-/**
- * @typedef {Object} RawTaskConfig
- * @property {TeardownHook[]} _teardown_hooks
- * @property {import('puppeteer').Page[]} _browser_pages
- * @property {Error | null} _breadcrumb
- * @property {string} _testName
- * @property {string} _taskName
- * @property {string} _taskGroup
- * @property {Error | null} error
- * @property {import('./browser_utils').A11yResult[]} accessibilityErrors
- */
-
-/**
- * @typedef {import('./config').Config & RawTaskConfig} TaskConfig
- */
-
 /**
  * @param {import('./config').Config} config
- * @param {RunnerState} state
- * @param {Task} task
+ * @param {import('./internal').RunnerState} state
+ * @param {import('./internal').Task} task
  * @private
  */
 async function run_task(config, state, task) {
-    /** @type {TaskConfig} */
+    /** @type {import('./internal').TaskConfig} */
     const task_config = {
         ...config,
         _teardown_hooks: [],
@@ -242,7 +220,7 @@ async function run_task(config, state, task) {
 
 /**
  * @param {import('./config').Config} config
- * @param {RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 async function sequential_run(config, state) {
@@ -268,8 +246,8 @@ async function sequential_run(config, state) {
 /**
  * Update test results
  * @param {import('./config').Config} config
- * @param {RunnerState} state
- * @param {Task} task
+ * @param {import('./internal').RunnerState} state
+ * @param {import('./internal').Task} task
  */
 function update_results(config, state, task) {
     const { resultByTaskGroup, flakyCounts } = state;
@@ -327,8 +305,8 @@ function update_results(config, state, task) {
 
 /**
  * @param {import('./config').Config} config
- * @param {RunnerState} state
- * @param {Task} task
+ * @param {import('./internal').RunnerState} state
+ * @param {import('./internal').Task} task
  * @private
  */
 async function run_one(config, state, task) {
@@ -367,7 +345,7 @@ async function run_one(config, state, task) {
 
 /**
  * @param {import('./config').Config} config
- * @param {RunnerState} state
+ * @param {import('./internal').RunnerState} state
  * @private
  */
 async function parallel_run(config, state) {
@@ -472,31 +450,8 @@ async function parallel_run(config, state) {
 }
 
 /**
- * @typedef {{ name: string, run: (config: import('./config').Config) => Promise<void> | void, skip?: (config: import('./config').Config) => Promise<boolean> | boolean, expectedToFail?: string | boolean}} TestCase
- */
-
-/**
- * @typedef {"success" | "running" | "error" | "todo" | "skipped"} TaskStatus
- */
-
-/**
- * @typedef {Object} Task
- * @property {string} id
- * @property {string} name Name of the task.
- * @property {string} group The name of the group this task belongs to. This is used for repeatFlaky
- * @property {TestCase} tc
- * @property {TaskStatus} status
- * @property {number} start
- * @property {Error | null} breadcrumb
- * @property {boolean} [skipReason]
- * @property {Buffer[]} error_screenshots
- * @property {boolean | ((config: import('./config').Config) => boolean)} [expectedToFail]
- * @property {import('./browser_utils').A11yResult[]} accessibilityErrors
- */
-
-/**
- * @param {RunnerState["resultByTaskGroup"]} resultByTaskGroup
- * @param {Task} task
+ * @param {import('./internal').RunnerState["resultByTaskGroup"]} resultByTaskGroup
+ * @param {import('./internal').Task} task
  */
 function initTaskResult(resultByTaskGroup, task) {
     resultByTaskGroup.set(task.group, {
@@ -514,9 +469,9 @@ function initTaskResult(resultByTaskGroup, task) {
 
 /**
  * @param {import('./config').Config} config
- * @param {TestCase[]} testCases
- * @param {RunnerState["resultByTaskGroup"]} resultByTaskGroup
- * @returns {Promise<Task[]>}
+ * @param {import('./internal').TestCase[]} testCases
+ * @param {import('./internal').RunnerState["resultByTaskGroup"]} resultByTaskGroup
+ * @returns {Promise<import('./internal').Task[]>}
  * @private
  */
 async function testCases2tasks(config, testCases, resultByTaskGroup) {
@@ -577,31 +532,9 @@ async function testCases2tasks(config, testCases, resultByTaskGroup) {
 }
 
 /**
- * @typedef {Object} RunnerState
- * @property {Task[]} tasks
- * @property {Set<string>} [locks]
- * @property {NodeJS.Timeout} [external_locking_refresh_timeout]
- * @property {string} last_logged_status The last status string that was logged
- * to the console.
- * @property {Map<string, number>} flakyCounts Track flakyness run count of a test
- * @property {Map<string, import('./render').TestResult>} resultByTaskGroup
- * @property {() => Promise<void>} remaining_teardowns Pending teardown hooks, most likely open
- * browser windows that were kept open when a test failed
- */
-
-/**
- * @typedef {Object} RunnerResult
- * @property {number} test_start
- * @property {number} test_end
- * @property {RunnerState} state
- * @property {string} pentfVersion
- * @property {string} testsVersion
- */
-
-/**
  * @param {import('./config').Config} config
- * @param {TestCase[]} testCases
- * @returns {RunnerResult}
+ * @param {import('./internal').TestCase[]} testCases
+ * @returns {import('./internal').RunnerResult}
  * @private
  */
 async function run(config, testCases) {
@@ -610,10 +543,10 @@ async function run(config, testCases) {
     external_locking.prepare(config);
     const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
 
-    /** @type {RunnerState["resultByTaskGroup"]} */
+    /** @type {import('./internal').RunnerState["resultByTaskGroup"]} */
     const resultByTaskGroup = new Map();
     const tasks = await testCases2tasks(config, testCases, resultByTaskGroup);
-    /** @type {RunnerState} */
+    /** @type {import('./internal').RunnerState} */
     const state = {
         flakyCounts: new Map(),
         tasks,

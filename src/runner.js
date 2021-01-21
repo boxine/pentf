@@ -3,6 +3,7 @@
 const assert = require('assert').strict;
 const {performance} = require('perf_hooks');
 const kolorist = require('kolorist');
+const path = require('path');
 
 const browser_utils = require('./browser_utils');
 const email = require('./email');
@@ -12,8 +13,9 @@ const output = require('./output');
 const utils = require('./utils');
 const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
-const { getCPUCount } = require('./config');
-const { shouldShowError } = require('./output');
+const {getCPUCount} = require('./config');
+const {shouldShowError} = require('./output');
+const {Worker} = require('worker_threads');
 
 /**
  * @typedef {(config: import('./config') => Promise<void> | void)} TeardownHook
@@ -43,8 +45,55 @@ function onTeardown(config, callback) {
  */
 
 /**
- * @typedef {import('./config').Config & RawTaskConfig} TaskConfig
+ * @typedef {Omit<import('./config').Config, "beforeAllTests" | "afterAllTests" | "defaultConfig"> & RawTaskConfig} TaskConfig
  */
+
+/**
+ *
+ * @param {import('./runner').TaskConfig} config
+ * @param {import('./runner').Task} task
+ */
+async function run_task_worker(config, task) {
+    console.log(task);
+
+    await new Promise((resolve, reject) => {
+        const worker = new Worker(path.join(__dirname, 'worker.js'), {
+            workerData: {
+                fileName: task.tc.fileName,
+                name: task.tc.name,
+                run_task: [],
+                task: {
+                    ...task,
+                    tc: {
+                        ...task.tc,
+                        run: undefined,
+                    },
+                },
+                config: {
+                    ...config,
+                    beforeAllTests: undefined,
+                    afterAllTests: undefined,
+                    defaultConfig: undefined,
+                },
+            },
+        });
+
+        worker.on('message', (/** @type {import('./internal').WorkerMessages} */ message) => {
+            switch (message.type) {
+            case 'done':
+                break;
+            }
+            if (message.type === 'done') {
+                if (message.error) reject(message.error);
+                else resolve();
+            } else if (message.type === 'log') {
+                output.log(config, message.message);
+            }
+        });
+    });
+
+    console.log('worker done');
+}
 
 /**
  * @param {import('./config').Config} config
@@ -75,8 +124,11 @@ async function run_task(config, state, task) {
         });
 
         let finished = false;
-        const testPromise = Promise.resolve(task.tc.run(task_config))
-            .finally(() => (finished = true));
+
+        await run_task_worker(task_config, task);
+        const testPromise = Promise.resolve(task.tc.run(task_config)).finally(
+            () => (finished = true)
+        );
 
         await Promise.race([
             testPromise,

@@ -1,10 +1,12 @@
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
+const {glob: globSync} = require('glob');
 const {promisify} = require('util');
 const {pathToFileURL} = require('url');
 const assert = require('assert').strict;
 const output = require('./output');
+
+const glob = promisify(globSync);
 
 /**
  * Find nearest `package.json` file
@@ -216,6 +218,21 @@ async function applyTestFilters(config, tests) {
     return tests;
 }
 
+/** @typedef {{ fileName: string, name: string }} TestFile */
+
+/**
+ * @param {import('./config').Config} config
+ * @param {string} globPattern
+ * @returns {Promise<TestFile[]>}
+ */
+async function loadTestFiles(config, globPattern) {
+    const testFiles = await glob(globPattern, {cwd: config.rootDir, absolute: true});
+    return testFiles.map(n => ({
+        fileName: n,
+        name: path.basename(n, path.extname(n)),
+    }));
+}
+
 /**
  * @param {import('./config').Config} config
  * @param {string} globPattern
@@ -223,11 +240,7 @@ async function applyTestFilters(config, tests) {
  * @private
  */
 async function loadTests(config, globPattern) {
-    const testFiles = await promisify(glob.glob)(globPattern, {cwd: config.rootDir, absolute: true});
-    let tests = testFiles.map(n => ({
-        fileName: n,
-        name: path.basename(n, path.extname(n)),
-    }));
+    let tests = await loadTestFiles(config, globPattern);
 
     tests = await applyTestFilters(config, tests);
 
@@ -256,4 +269,5 @@ module.exports = {
     findPackageJson,
     importFile,
     loadTests,
+    loadTestFiles,
 };

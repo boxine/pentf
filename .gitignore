@@ -11,4 +11,4 @@ dist/
 .vscode/
 
 # Generated types
-*.d.ts
+/*.d.ts

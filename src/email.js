@@ -144,7 +144,7 @@ async function connect(config, user) {
  * assert.strictEqual(welcomeMail.text.includes('Hello'));
  * assert.strictEqual(welcomeMail.html.includes('<p>Hello'));
  * ```
- * @param {import('./runner').TaskConfig} config The pentf configuration object.
+ * @param {import('./internal').TaskConfig} config The pentf configuration object.
  * @param {Date} since Earliest time the email can be sent. (To avoid finding the email of a prior test.)
  * @param {string} to receiveer email address (`config.email` if you have just one email address, often the result of `makeRandomEmail`)
  * @param {string} subjectContains Search string for the subject.

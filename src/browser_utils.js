@@ -36,7 +36,7 @@ let tmp_home;
  * await waitForText(page, 'More information');
  * await closePage(page);
  * ```
- * @param {import('./runner').TaskConfig} config The pentf configuration object.
+ * @param {import('./internal').TaskConfig} config The pentf configuration object.
  * @param {string[]} [chrome_args] Additional arguments for Chrome (optional).
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
@@ -270,7 +270,7 @@ function getDefaultTimeout(pageOrFrame) {
 /**
  * Mark progress in test. Useful for when the test times out and there is no
  * hint as to why.
- * @param {import('./runner').TaskConfig} config
+ * @param {import('./internal').TaskConfig} config
  * @param {string} name
  * @private
  */
@@ -1145,18 +1145,6 @@ async function takeScreenshot(config, page, fileName, selector) {
     return img;
 }
 
-/**
- * @typedef {"minor" | "moderate" | "serious" | "critical"} A11yImpact
- */
-
-/**
- * @typedef {{html: string, screenshots: Array<Buffer | null>, selectors: string[]}} A11yNode
- */
-
-/**
- *
- * @typedef {{impact: A11yImpact, helpUrl?: string, description: string, nodes: A11yNode[]}} A11yResult
- */
 
 /**
  *
@@ -1190,7 +1178,7 @@ async function assertAccessibility(config, page) {
     let i = errors.length;
     for (const v of results.violations) {
 
-        /** @type {A11yNode[]} */
+        /** @type {import('./internal').A11yNode[]} */
         const nodes = [];
 
         for (const node of v.nodes) {

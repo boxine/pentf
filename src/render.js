@@ -7,7 +7,7 @@ const output = require('./output');
 
 /**
  * @param {import('./config').Config} config
- * @param {TestResult} result
+ * @param {import('./internal').TestResult} result
  * @returns {number}
  */
 function getTestOrder(config, result) {
@@ -29,25 +29,9 @@ function getTestOrder(config, result) {
 }
 
 /**
- * @typedef {{status: import('./runner').TaskStatus, duration: number, error_screenshots: any, error_stack: string, axeResults: import('axe-core').AxeResults[]}} TaskResult
- */
-
-/**
- * @typedef {import('./runner').TaskStatus | "flaky"} TestStatus
- */
-
-/**
- * @typedef {{name: string, group: string, id: string, description: string, skipped: boolean; taskResults: TaskResult[], status: TestStatus, expectedToFail: any, skipReason: any}} TestResult
- */
-
-/**
- * @typedef {{start: number, duration: number, config: import('./config').Config, tests: TestResult[], pentfVersion: string, testsVersion: string}} CraftedResults
- */
-
-/**
  * @param {import('./config').Config} config
  * @param {import('./runner').RunnerResult} test_info
- * @returns {CraftedResults}
+ * @returns {import('./internal').CraftedResults}
  */
 function craftResults(config, test_info) {
     output.logVerbose(config, '[results] crafting results...');
@@ -88,7 +72,7 @@ function craftResults(config, test_info) {
 
 /**
  * @param {import('./config').Config} config
- * @param {CraftedResults} results
+ * @param {import('./internal').CraftedResults} results
  */
 async function doRender(config, results) {
     output.logVerbose(config, `[results] Render results JSON: ${config.json}, Markdown: ${config.markdown}, HTML: ${config.html}, PDF: ${config.pdf}`);
@@ -264,7 +248,7 @@ function _calcDuration(taskResults) {
 }
 
 /**
- * @param {CraftedResults} results
+ * @param {import('./internal').CraftedResults} results
  */
 function html(results) {
     const table = results.tests.map((testResult, idx) => {

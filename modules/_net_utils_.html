@@ -82,13 +82,13 @@
 					<a name="fetch" class="tsd-anchor"></a>
 					<h3>fetch</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">fetch<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, init<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">fetch<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, init<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/net_utils.js#L42">net_utils.js:42</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/net_utils.js#L42">net_utils.js:42</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -128,7 +128,7 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 									</div>
 								</li>
 								<li>
-									<h5>init: <span class="tsd-signature-type">any</span></h5>
+									<h5>init: <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>fetch options, see <a href="https://fetch.spec.whatwg.org/#requestinit"><code>RequestInit</code> in the Fetch Spec</a>.
 										On top of the standard Fetch parameters, we support the following nonstandard parameters:</p>
@@ -150,13 +150,13 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 					<a name="setuptlsclientauth" class="tsd-anchor"></a>
 					<h3>setupTLSClient<wbr>Auth</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">setupTLSClient<wbr>Auth<span class="tsd-signature-symbol">(</span>fetchOptions<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, keyFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, certFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, rejectUnauthorized<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">setupTLSClient<wbr>Auth<span class="tsd-signature-symbol">(</span>fetchOptions<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span>, keyFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, certFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, rejectUnauthorized<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/net_utils.js#L156">net_utils.js:156</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/net_utils.js#L156">net_utils.js:156</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -175,7 +175,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>); <span class
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>fetchOptions: <span class="tsd-signature-type">any</span></h5>
+									<h5>fetchOptions: <span class="tsd-signature-type">Object</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The fetch request option object to modify. (<code>init</code> parameter in <a href="_net_utils_.html#fetch">fetch</a> above)</p>
 									</div>

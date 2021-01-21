@@ -81,13 +81,13 @@
 					<a name="getmail" class="tsd-anchor"></a>
 					<h3>get<wbr>Mail</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Mail<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{}</span>, since<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Date</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, subjectContains<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, wait_times<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Mail<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TaskConfig</span>, since<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Date</span>, to<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, subjectContains<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, wait_times<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/email.js#L154">email.js:154</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/email.js#L154">email.js:154</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -108,7 +108,7 @@ assert.strictEqual(welcomeMail.html.includes(<span class="hljs-string">'&lt;p&gt
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>config: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{}</span></h5>
+									<h5>config: <span class="tsd-signature-type">TaskConfig</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The pentf configuration object.</p>
 									</div>
@@ -138,7 +138,7 @@ assert.strictEqual(welcomeMail.html.includes(<span class="hljs-string">'&lt;p&gt
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Object</span></h4>
 							<p>Email object with <code>html</code> and <code>text</code> properties.</p>
 						</li>
 					</ul>

@@ -72,6 +72,7 @@
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_utils_.html#arange" class="tsd-kind-icon">arange</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_utils_.html#ignoreerror" class="tsd-kind-icon">ignore<wbr>Error</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_utils_.html#isvalidregex" class="tsd-kind-icon">is<wbr>Valid<wbr>Regex</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_utils_.html#makeemailaddress" class="tsd-kind-icon">make<wbr>Email<wbr>Address</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_utils_.html#makerandomemail" class="tsd-kind-icon">make<wbr>Random<wbr>Email</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_utils_.html#pluck" class="tsd-kind-icon">pluck</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_utils_.html#randomhexstring" class="tsd-kind-icon">random<wbr>Hexstring</a></li>
@@ -94,7 +95,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/utils.js#L108">utils.js:108</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L112">utils.js:112</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -124,7 +125,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/utils.js#L254">utils.js:254</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L258">utils.js:258</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -154,7 +155,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/utils.js#L89">utils.js:89</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L93">utils.js:93</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -170,16 +171,48 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="makerandomemail" class="tsd-anchor"></a>
-					<h3>make<wbr>Random<wbr>Email</h3>
+					<a name="makeemailaddress" class="tsd-anchor"></a>
+					<h3>make<wbr>Email<wbr>Address</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">make<wbr>Random<wbr>Email<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, prefix<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">make<wbr>Email<wbr>Address<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, suffix<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/utils.js#L26">utils.js:26</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L7">utils.js:7</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>config: <span class="tsd-signature-symbol">{}</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+								<li>
+									<h5>suffix: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="makerandomemail" class="tsd-anchor"></a>
+					<h3>make<wbr>Random<wbr>Email</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">make<wbr>Random<wbr>Email<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, prefix<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L30">utils.js:30</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -190,13 +223,15 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>config: <span class="tsd-signature-type">any</span></h5>
+									<h5>config: <span class="tsd-signature-symbol">{}</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>The pentf configuration object. <code>config.email</code> needs to be set.</p>
 									</div>
+									<ul class="tsd-parameters">
+									</ul>
 								</li>
 								<li>
-									<h5>prefix: <span class="tsd-signature-type">string</span></h5>
+									<h5>prefix: <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>Text to put before the random characters.
 										If no prefix is specified, the test name is used if available.</p>
@@ -218,7 +253,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/utils.js#L125">utils.js:125</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L129">utils.js:129</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -252,7 +287,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/utils.js#L72">utils.js:72</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L76">utils.js:76</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -284,7 +319,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/utils.js#L243">utils.js:243</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L247">utils.js:247</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -320,7 +355,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/utils.js#L47">utils.js:47</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/utils.js#L51">utils.js:51</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -426,6 +461,9 @@
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_utils_.html#isvalidregex" class="tsd-kind-icon">is<wbr>Valid<wbr>Regex</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="_utils_.html#makeemailaddress" class="tsd-kind-icon">make<wbr>Email<wbr>Address</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="_utils_.html#makerandomemail" class="tsd-kind-icon">make<wbr>Random<wbr>Email</a>

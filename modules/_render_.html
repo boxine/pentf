@@ -86,13 +86,13 @@
 					<a name="craftresults" class="tsd-anchor"></a>
 					<h3>craft<wbr>Results</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">craft<wbr>Results<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, test_info<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></li>
+						<li class="tsd-signature tsd-kind-icon">craft<wbr>Results<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, test_info<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">CraftedResults</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/render.js#L52">render.js:52</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/render.js#L36">render.js:36</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -105,14 +105,10 @@
 									</ul>
 								</li>
 								<li>
-									<h5>test_info: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>test_info: <span class="tsd-signature-type">any</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{}</span></h4>
-							<ul class="tsd-parameters">
-							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">CraftedResults</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -120,13 +116,13 @@
 					<a name="dorender" class="tsd-anchor"></a>
 					<h3>do<wbr>Render</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">do<wbr>Render<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, results<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">do<wbr>Render<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, results<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">CraftedResults</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/render.js#L93">render.js:93</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/render.js#L77">render.js:77</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -139,11 +135,9 @@
 									</ul>
 								</li>
 								<li>
-									<h5>results: <span class="tsd-signature-symbol">{}</span></h5>
+									<h5>results: <span class="tsd-signature-type">CraftedResults</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
-									<ul class="tsd-parameters">
-									</ul>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -154,13 +148,13 @@
 					<a name="gettestorder" class="tsd-anchor"></a>
 					<h3>get<wbr>Test<wbr>Order</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Test<wbr>Order<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, result<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Test<wbr>Order<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, result<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TestResult</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/render.js#L13">render.js:13</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/render.js#L13">render.js:13</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -173,9 +167,7 @@
 									</ul>
 								</li>
 								<li>
-									<h5>result: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>result: <span class="tsd-signature-type">TestResult</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
@@ -186,13 +178,13 @@
 					<a name="html" class="tsd-anchor"></a>
 					<h3>html</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">html<span class="tsd-signature-symbol">(</span>results<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">html<span class="tsd-signature-symbol">(</span>results<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">CraftedResults</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/render.js#L269">render.js:269</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/render.js#L253">render.js:253</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -200,11 +192,9 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>results: <span class="tsd-signature-symbol">{}</span></h5>
+									<h5>results: <span class="tsd-signature-type">CraftedResults</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
-									<ul class="tsd-parameters">
-									</ul>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -215,13 +205,13 @@
 					<a name="markdown" class="tsd-anchor"></a>
 					<h3>markdown</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">markdown<span class="tsd-signature-symbol">(</span>results<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon">markdown<span class="tsd-signature-symbol">(</span>results<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/render.js#L185">render.js:185</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/render.js#L169">render.js:169</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -229,11 +219,9 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>results: <span class="tsd-signature-symbol">{}</span></h5>
+									<h5>results: <span class="tsd-signature-type">any</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
-									<ul class="tsd-parameters">
-									</ul>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
@@ -250,7 +238,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/render.js#L224">render.js:224</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/render.js#L208">render.js:208</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">

@@ -89,13 +89,13 @@
 					<a name="inittaskresult" class="tsd-anchor"></a>
 					<h3>init<wbr>Task<wbr>Result</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">init<wbr>Task<wbr>Result<span class="tsd-signature-symbol">(</span>resultByTaskGroup<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">&gt;</span>, task<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">init<wbr>Task<wbr>Result<span class="tsd-signature-symbol">(</span>resultByTaskGroup<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">TestResult</span><span class="tsd-signature-symbol">&gt;</span>, task<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Task</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L501">runner.js:501</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L456">runner.js:456</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -103,14 +103,12 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>resultByTaskGroup: <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<h5>resultByTaskGroup: <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">TestResult</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 								<li>
-									<h5>task: <span class="tsd-signature-symbol">{}</span></h5>
+									<h5>task: <span class="tsd-signature-type">Task</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
-									<ul class="tsd-parameters">
-									</ul>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -121,13 +119,13 @@
 					<a name="onteardown" class="tsd-anchor"></a>
 					<h3>on<wbr>Teardown</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">on<wbr>Teardown<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{}</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">on<wbr>Teardown<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TaskConfig</span>, callback<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TaskConfig</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L27">runner.js:27</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L23">runner.js:23</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -138,12 +136,30 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>config: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{}</span></h5>
+									<h5>config: <span class="tsd-signature-type">TaskConfig</span></h5>
 								</li>
 								<li>
-									<h5>callback: <span class="tsd-signature-type">any</span></h5>
+									<h5>callback: <span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TaskConfig</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-signature">
+											<ul class="tsd-signatures tsd-kind-type-literal">
+												<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TaskConfig</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></li>
+											</ul>
+											<ul class="tsd-descriptions">
+												<li class="tsd-description">
+													<h4 class="tsd-parameters-title">Parameters</h4>
+													<ul class="tsd-parameters">
+														<li>
+															<h5>config: <span class="tsd-signature-type">TaskConfig</span></h5>
+														</li>
+													</ul>
+													<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span></h4>
+												</li>
+											</ul>
+										</li>
+									</ul>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -154,13 +170,13 @@
 					<a name="parallel_run" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> parallel_<wbr>run</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">parallel_<wbr>run<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">parallel_<wbr>run<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RunnerState</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L373">runner.js:373</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L351">runner.js:351</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -173,9 +189,7 @@
 									</ul>
 								</li>
 								<li>
-									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>state: <span class="tsd-signature-type">RunnerState</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -186,13 +200,13 @@
 					<a name="run" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> run</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, testCases<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span></li>
+						<li class="tsd-signature tsd-kind-icon">run<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, testCases<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RunnerResult</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L607">runner.js:607</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L540">runner.js:540</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -208,9 +222,7 @@
 									<h5>testCases: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{}</span></h4>
-							<ul class="tsd-parameters">
-							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">RunnerResult</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -218,13 +230,13 @@
 					<a name="run_one" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> run_<wbr>one</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">run_<wbr>one<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, task<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">run_<wbr>one<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RunnerState</span>, task<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Task</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Task</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L334">runner.js:334</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L312">runner.js:312</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -237,17 +249,13 @@
 									</ul>
 								</li>
 								<li>
-									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>state: <span class="tsd-signature-type">RunnerState</span></h5>
 								</li>
 								<li>
-									<h5>task: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>task: <span class="tsd-signature-type">Task</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Task</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -255,13 +263,13 @@
 					<a name="run_task" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> run_<wbr>task</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">run_<wbr>task<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, task<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">run_<wbr>task<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RunnerState</span>, task<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Task</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L55">runner.js:55</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L33">runner.js:33</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -274,14 +282,10 @@
 									</ul>
 								</li>
 								<li>
-									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>state: <span class="tsd-signature-type">RunnerState</span></h5>
 								</li>
 								<li>
-									<h5>task: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>task: <span class="tsd-signature-type">Task</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -292,13 +296,13 @@
 					<a name="sequential_run" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> sequential_<wbr>run</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">sequential_<wbr>run<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">sequential_<wbr>run<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RunnerState</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L248">runner.js:248</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L226">runner.js:226</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -311,9 +315,7 @@
 									</ul>
 								</li>
 								<li>
-									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>state: <span class="tsd-signature-type">RunnerState</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -324,13 +326,13 @@
 					<a name="testcases2tasks" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> test<wbr>Cases2tasks</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module tsd-is-private">
-						<li class="tsd-signature tsd-kind-icon">test<wbr>Cases2tasks<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, testCases<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span>, resultByTaskGroup<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">test<wbr>Cases2tasks<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, testCases<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span>, resultByTaskGroup<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">TestResult</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Task</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L522">runner.js:522</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L477">runner.js:477</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -346,10 +348,10 @@
 									<h5>testCases: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span></h5>
 								</li>
 								<li>
-									<h5>resultByTaskGroup: <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<h5>resultByTaskGroup: <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">TestResult</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Task</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -357,13 +359,13 @@
 					<a name="update_results" class="tsd-anchor"></a>
 					<h3>update_<wbr>results</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">update_<wbr>results<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, task<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+						<li class="tsd-signature tsd-kind-icon">update_<wbr>results<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, state<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RunnerState</span>, task<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Task</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/de634a4/src/runner.js#L274">runner.js:274</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/cc1f5d9/src/runner.js#L252">runner.js:252</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -379,16 +381,12 @@
 									</ul>
 								</li>
 								<li>
-									<h5>state: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
+									<h5>state: <span class="tsd-signature-type">RunnerState</span></h5>
 								</li>
 								<li>
-									<h5>task: <span class="tsd-signature-symbol">{}</span></h5>
+									<h5>task: <span class="tsd-signature-type">Task</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
-									<ul class="tsd-parameters">
-									</ul>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>

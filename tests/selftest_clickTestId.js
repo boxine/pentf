@@ -5,39 +5,43 @@ const {assertEventually} = require('../src/assert_utils');
 
 async function run(config) {
     const page = await newPage(config);
-    const clicks = [];
 
     await page.setContent(`
+        <script>
+            window.clicks = [];
+            function pentfClick(id) {
+                window.clicks.push(id);
+            }
+        </script>
         <div data-testid="first" onclick="javascript:pentfClick('first')">first</div>
         <div data-testid="invisible" style="display:none;" onclick="pentfClick('invisible')">invisible</div>
     `);
-    await page.exposeFunction('pentfClick', clickId => {
-        clicks.push(clickId);
-    });
+    const getClicks = async () => page.evaluate(() => window.clicks);
+    const resetClicks = async () => page.evaluate(() => (window.clicks = []));
 
     await assert.rejects(clickTestId(page, 'not-present', {timeout: 1, extraMessage: 'blabla'}), {
         message: 'Failed to find visible element with data-testid "not-present" within 1ms. blabla',
     });
-    assert.deepStrictEqual(clicks, []);
+    assert.deepStrictEqual(await getClicks(), []);
 
     await assert.rejects(clickTestId(page, 'not-present', {timeout: 1, visible: false}), {
         message: 'Failed to find element with data-testid "not-present" within 1ms',
     });
-    assert.deepStrictEqual(clicks, []);
+    assert.deepStrictEqual(await getClicks(), []);
 
     await clickTestId(page, 'first');
     await assertEventually(
-        () => assert.deepStrictEqual(clicks, ['first']),
+        async () => assert.deepStrictEqual(await getClicks(), ['first']),
         {mesage: 'click should have been registered', crashOnError: false});
-    clicks.splice(0, clicks.length);
+    await resetClicks();
 
     await assert.rejects(clickTestId(page, 'invisible', {timeout: 43}), {
         message: 'Failed to find visible element with data-testid "invisible" within 43ms',
     });
-    assert.deepStrictEqual(clicks, []);
+    assert.deepStrictEqual(await getClicks(), []);
 
     await clickTestId(page, 'invisible', {visible: false, timeout: 1000});
-    assert.deepStrictEqual(clicks, ['invisible']);
+    assert.deepStrictEqual(await getClicks(), ['invisible']);
 
     // Option: assertSuccess
     let success = false;

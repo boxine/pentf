@@ -1,30 +1,34 @@
 const assert = require('assert').strict;
-const {assertEventually} = require('pentf/assert_utils');
 const {closePage, newPage, clickText} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
-    let clicks = [];
 
     await page.setContent(`
+        <script>
+            window.clicks = [];
+            function pentfClick(id) {
+                window.clicks.push(id);
+            }
+        </script>
         <div>
             <button onclick="pentfClick('first')">first</button>
             <div data-testid="invisible" style="display:none;" onclick="pentfClick('invisible')">invisible</div>
         </div>
     `);
-    await page.exposeFunction('pentfClick', clickId => {
-        clicks.push(clickId);
-    });
+
+    const getClicks = async () => page.evaluate(() => window.clicks);
+    const resetClicks = async () => page.evaluate(() => (window.clicks = []));
 
     // String variant
     await clickText(page, 'first');
-    assert.deepStrictEqual(clicks, ['first']);
+    assert.deepStrictEqual(await getClicks(), ['first']);
 
-    clicks = [];
+    await resetClicks();
     await assert.rejects(clickText(page, 'not-present', {timeout: 1, extraMessage: 'blabla'}), {
         message: 'Unable to find text "not-present" after 1ms (blabla)',
     });
-    assert.deepStrictEqual(clicks, []);
+    assert.deepStrictEqual(await getClicks(), []);
 
     // Option: assertSuccess
     let success = false;
@@ -39,10 +43,7 @@ async function run(config) {
     });
     assert(called, 'assertSuccess was not invoked');
 
-    await assertEventually(() => {
-        assert.deepStrictEqual(clicks, ['first', 'first']);
-        return true;
-    }, {crashOnError: false, timeout: 1000});
+    assert.deepStrictEqual(await getClicks(), ['first', 'first']);
 
     await closePage(page);
 }

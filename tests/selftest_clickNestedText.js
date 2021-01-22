@@ -4,9 +4,14 @@ const {closePage, newPage, clickNestedText} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
-    let clicks = [];
 
     await page.setContent(`
+        <script>
+            window.clicks = [];
+            function pentfClick(id) {
+                window.clicks.push(id);
+            }
+        </script>
         <div>
             <button onclick="pentfClick('first')">first</button>
             <button onclick="pentfClick('nested')">Some <span>nested <b>foo</b></span></button>
@@ -14,41 +19,41 @@ async function run(config) {
             <div data-testid="invisible" style="display:none;" onclick="pentfClick('invisible')">invisible</div>
         </div>
     `);
-    await page.exposeFunction('pentfClick', clickId => {
-        clicks.push(clickId);
-    });
+
+    const getClicks = async () => page.evaluate(() => window.clicks);
+    const resetClicks = async () => page.evaluate(() => (window.clicks = []));
 
     // String variant
     await clickNestedText(page, 'first');
-    assert.deepStrictEqual(clicks, ['first']);
+    assert.deepStrictEqual(await getClicks(), ['first']);
 
     await clickNestedText(page, 'Some nested foo');
-    assert.deepStrictEqual(clicks, ['first', 'nested']);
+    assert.deepStrictEqual(await getClicks(), ['first', 'nested']);
 
-    clicks = [];
+    await resetClicks();
     await assert.rejects(clickNestedText(page, 'not-present', {timeout: 1, extraMessage: 'blabla'}), {
         message: 'Unable to find visible text "not-present" after 1ms (blabla)',
     });
-    assert.deepStrictEqual(clicks, []);
+    assert.deepStrictEqual(await getClicks(), []);
 
     await assert.rejects(clickNestedText(page, 'invisible', {timeout: 43}), {
         message: 'Unable to find visible text "invisible" after 43ms',
     });
 
     // RegExp variant
-    clicks = [];
+    await resetClicks();
 
     await clickNestedText(page, /first/);
-    assert.deepStrictEqual(clicks, ['first']);
+    assert.deepStrictEqual(await getClicks(), ['first']);
 
     await clickNestedText(page, /Some.*foo/);
-    assert.deepStrictEqual(clicks, ['first', 'nested']);
+    assert.deepStrictEqual(await getClicks(), ['first', 'nested']);
 
     await clickNestedText(page, /span text/);
-    assert.deepStrictEqual(clicks, ['first', 'nested', 'span']);
+    assert.deepStrictEqual(await getClicks(), ['first', 'nested', 'span']);
 
     // Edge case
-    clicks = [];
+    await resetClicks();
     await page.setContent(`
         <html>
             <body>
@@ -57,9 +62,9 @@ async function run(config) {
         </html>
     `);
     await clickNestedText(page, 'clickme');
-    assert.deepStrictEqual(clicks, ['clickme']);
+    assert.deepStrictEqual(await getClicks(), ['clickme']);
 
-    clicks = [];
+    await resetClicks();
     await page.setContent(`
         <html>
             <body>
@@ -74,7 +79,7 @@ async function run(config) {
     `);
     await clickNestedText(page, /^clickme/);
     await clickNestedText(page, /foo$/);
-    assert.deepStrictEqual(clicks, ['clickme', 'clickme']);
+    assert.deepStrictEqual(await getClicks(), ['clickme', 'clickme']);
 
     // Option: assertSuccess
     let success = false;

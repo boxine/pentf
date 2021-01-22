@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-
+const {assertEventually} = require('pentf/assert_utils');
 const {closePage, newPage, clickText} = require('../src/browser_utils');
 
 async function run(config) {
@@ -38,7 +38,11 @@ async function run(config) {
         }
     });
     assert(called, 'assertSuccess was not invoked');
-    assert.deepStrictEqual(clicks, ['first', 'first']);
+
+    await assertEventually(() => {
+        assert.deepStrictEqual(clicks, ['first', 'first']);
+        return true;
+    }, {crashOnError: false, timeout: 1000});
 
     await closePage(page);
 }

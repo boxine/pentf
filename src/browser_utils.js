@@ -653,11 +653,29 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
                 const element = document.querySelector(selector);
                 if (!element) return false;
 
-                if (visible && element.offsetParent === null) return null; // invisible
+                if (visible) {
+                    if (element.offsetParent === null) return null; // invisible
 
+                    const rect = /** @type {Element} */ (element).getBoundingClientRect();
+                    return {
+                        x: rect.x + (rect.width  / 2),
+                        y: rect.y + (rect.height / 2)
+                    };
+                }
+
+                // We can't use the mouse to click on invisible elements.
+                // Therefore invoke the click handler on the DOM node directly.
                 element.click();
                 return true;
             }, selector, visible);
+
+            // Simulate a true mouse click. The following function scrolls
+            // the element into view, moves the mouse to its center and
+            // presses the left mouse button. This is important for when
+            // an element is above the one we want to click.
+            if (found !== null && typeof found === 'object') {
+                await page.mouse.click(found.x, found.y);
+            }
         } catch(err) {
             if (!ignoreError(err)) {
                 throw err;
@@ -747,15 +765,54 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
         let found = false;
         try {
             found = await page.evaluate((xpath, visible) => {
+                /** @type {Element | Text} */
                 const element = document.evaluate(
                     xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
                 if (!element) return false;
 
-                if (visible && element.offsetParent === null) return null; // invisible
+                if (visible) {
+                    if (element.offsetParent === null) return null; // invisible
 
+                    /**
+                     * Get the center coordinates of our element to click on.
+                     * @type {DOMRect}
+                     */
+                    let rect;
+
+                    // Text nodes don't have `getBoundingClientRect()`, but
+                    // we can use range objects for that.
+                    if (element.nodeType === Node.TEXT_NODE) {
+                        const range = document.createRange();
+                        range.selectNodeContents(element);
+
+                        const rects = range.getClientRects();
+                        if (!rects || rects.length < 1) {
+                            throw new Error(`Could not determine Text node coordinates of "${element.data}"`);
+                        }
+
+                        rect = rects[0];
+                    } else {
+                        rect = /** @type {Element} */ (element).getBoundingClientRect();
+                    }
+
+                    return {
+                        x: rect.x + (rect.width  / 2),
+                        y: rect.y + (rect.height / 2)
+                    };
+                }
+
+                // Click on invisible elements
                 element.click();
                 return true;
             }, xpath, visible);
+
+            // Simulate a true mouse click. The following function scrolls
+            // the element into view, moves the mouse to its center and
+            // presses the left mouse button. This is important for when
+            // an element is above the one we want to click.
+            if (found !== null && typeof found === 'object') {
+                await page.mouse.click(found.x, found.y);
+            }
         } catch (err) {
             if (!ignoreError(err)) {
                 throw err;
@@ -910,11 +967,27 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
 
                 if (!lastFound) return false;
 
-                if (visible && lastFound.offsetParent === null) return null; // invisible)
+                if (visible) {
+                    if (lastFound.offsetParent === null) return null; // invisible)
+
+                    const rect = lastFound.getBoundingClientRect();
+                    return {
+                        x: rect.x + (rect.width / 2),
+                        y: rect.y + (rect.height / 2)
+                    };
+                }
 
                 lastFound.click();
                 return true;
             }, serializedMatcher, visible);
+
+            // Simulate a true mouse click. The following function scrolls
+            // the element into view, moves the mouse to its center and
+            // presses the left mouse button. This is important for when
+            // an element is above the one we want to click.
+            if (found !== null && typeof found === 'object') {
+                await page.mouse.click(found.x, found.y);
+            }
         } catch (err) {
             if (!ignoreError(err)) {
                 throw err;

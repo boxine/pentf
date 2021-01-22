@@ -11,23 +11,25 @@ async function run(config) {
         <button id="first">click me</button>
         <div id="second"></div>
         <script>
+            window.clicks = [];
             ["first", "second"].forEach(id => {
                 const el = document.getElementById(id);
-                el.addEventListener("click", e => registerClick(e.target.id));
+                el.addEventListener("click", e => window.clicks.push(e.target.id));
             })
         </script>
     `);
 
+    const getClicks = async () => page.evaluate(() => window.clicks);
     assert.rejects(clickXPath(page, '//foo', { timeout: 1 }));
-    assert.deepStrictEqual(clicks, []);
+    assert.deepStrictEqual(await getClicks(), []);
 
     assert.rejects(clickXPath(page, '//foo', { timeout: 1, message: 'blabla' }), {
         message: 'blabla'
     });
-    assert.deepStrictEqual(clicks, []);
+    assert.deepStrictEqual(await getClicks(), []);
 
     await clickXPath(page, '//button');
-    assert.deepStrictEqual(clicks, ['first']);
+    assert.deepStrictEqual(await getClicks(), ['first']);
 
     // Option: assertSuccess
     let success = false;

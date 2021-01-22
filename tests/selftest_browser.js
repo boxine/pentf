@@ -57,7 +57,7 @@ async function run(config) {
         </html>
     `);
     await clickXPath(page, '//button[@id="clickme"]');
-    assert.strictEqual(clickCount, 1, 'expected 1 click');
+    await assertEventually(() => clickCount === 1, {message: 'expected 1 click, but got ' + clickCount});
     await assert.rejects(clickXPath(page, '//notfound', {timeout: 10}), {
         message: 'Unable to find XPath //notfound after 10ms',
     });

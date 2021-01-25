@@ -621,13 +621,21 @@ async function onSuccess(fn) {
 }
 
 /**
+ * Puppeteer's frame object doesn't expose the mouse itself
+ * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
+ */
+function getMouse(pageOrFrame) {
+    return pageOrFrame.mouse || pageOrFrame._frameManager._page.mouse;
+}
+
+/**
  * Clicks an element address    ed by a query selector atomically, e.g. within the same event loop run as finding it.
  *
  * @example
  * ```javascript
  * await clickSelector(page, 'div[data-id="foo"] a.view', {message: 'Could not click foo link'});
  * ```
- * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {import('puppeteer').Page | import('puppeteer').Frame} page puppeteer page object.
  * @param {string} selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
  * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the element is not visible in time.
@@ -649,18 +657,46 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
     while (true) {
         let found = false;
         try {
-            found = await page.evaluate((selector, visible) => {
+            found = await page.evaluate(async (selector, visible) => {
                 const element = document.querySelector(selector);
                 if (!element) return false;
 
                 if (visible) {
                     if (element.offsetParent === null) return null; // invisible
 
+                    // Element may be hidden in a scroll container
+                    element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                    const visibleRatio = await new Promise(resolve => {
+                        const observer = new IntersectionObserver(entries => {
+                            resolve(entries[0].intersectionRatio);
+                            observer.disconnect();
+                        });
+                        observer.observe(element);
+                    });
+                    if (visibleRatio !== 1.0) {
+                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                    }
+
                     const rect = /** @type {Element} */ (element).getBoundingClientRect();
-                    return {
-                        x: rect.x + (rect.width  / 2),
-                        y: rect.y + (rect.height / 2)
-                    };
+                    let x = rect.x + (rect.width / 2);
+                    let y = rect.y + (rect.height / 2);
+
+                    // Account for offset of the current frame if we are inside an iframe
+                    let win = window;
+                    let parentWin = null;
+                    while (win !== window.top) {
+                        parentWin = win.parent;
+
+                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
+                            .find(f => f.contentWindow === win);
+                        if (iframe) {
+                            const iframeRect = iframe.getBoundingClientRect();
+                            x += iframeRect.x;
+                            y += iframeRect.y;
+                            break;
+                        }
+                    }
+                    return { x, y };
                 }
 
                 // We can't use the mouse to click on invisible elements.
@@ -674,7 +710,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
             // presses the left mouse button. This is important for when
             // an element is above the one we want to click.
             if (found !== null && typeof found === 'object') {
-                await page.mouse.click(found.x, found.y);
+                await getMouse(page).click(found.x, found.y);
             }
         } catch(err) {
             if (!ignoreError(err)) {
@@ -764,7 +800,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     while (true) {
         let found = false;
         try {
-            found = await page.evaluate((xpath, visible) => {
+            found = await page.evaluate(async (xpath, visible) => {
                 /** @type {Element | Text} */
                 const element = document.evaluate(
                     xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
@@ -782,6 +818,20 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
                     // Text nodes don't have `getBoundingClientRect()`, but
                     // we can use range objects for that.
                     if (element.nodeType === Node.TEXT_NODE) {
+                        // Element may be hidden in a scroll container
+                        element.parentNode.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+
+                        const visibleRatio = await new Promise(resolve => {
+                            const observer = new IntersectionObserver(entries => {
+                                resolve(entries[0].intersectionRatio);
+                                observer.disconnect();
+                            });
+                            observer.observe(element.parentNode);
+                        });
+                        if (visibleRatio !== 1.0) {
+                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                        }
+
                         const range = document.createRange();
                         range.selectNodeContents(element);
 
@@ -792,13 +842,41 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
 
                         rect = rects[0];
                     } else {
+                        // Element may be hidden in a scroll container
+                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                        const visibleRatio = await new Promise(resolve => {
+                            const observer = new IntersectionObserver(entries => {
+                                resolve(entries[0].intersectionRatio);
+                                observer.disconnect();
+                            });
+                            observer.observe(element);
+                        });
+                        if (visibleRatio !== 1.0) {
+                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                        }
+
                         rect = /** @type {Element} */ (element).getBoundingClientRect();
                     }
 
-                    return {
-                        x: rect.x + (rect.width  / 2),
-                        y: rect.y + (rect.height / 2)
-                    };
+                    let x = rect.x + (rect.width / 2);
+                    let y = rect.y + (rect.height / 2);
+
+                    // Account for offset of the current frame if we are inside an iframe
+                    let win = window;
+                    let parentWin = null;
+                    while (win !== window.top) {
+                        parentWin = win.parent;
+
+                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
+                            .find(f => f.contentWindow === win);
+                        if (iframe) {
+                            const iframeRect = iframe.getBoundingClientRect();
+                            x += iframeRect.x;
+                            y += iframeRect.y;
+                            break;
+                        }
+                    }
+                    return { x, y };
                 }
 
                 // Click on invisible elements
@@ -811,7 +889,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
             // presses the left mouse button. This is important for when
             // an element is above the one we want to click.
             if (found !== null && typeof found === 'object') {
-                await page.mouse.click(found.x, found.y);
+                await getMouse(page).click(found.x, found.y);
             }
         } catch (err) {
             if (!ignoreError(err)) {
@@ -913,7 +991,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         let found = false;
 
         try {
-            found = await page.evaluate((matcher, visible) => {
+            found = await page.evaluate(async (matcher, visible) => {
                 // eslint-disable-next-line no-undef
                 /** @type {(text: string) => boolean} */
                 let matchFunc;
@@ -970,11 +1048,39 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
                 if (visible) {
                     if (lastFound.offsetParent === null) return null; // invisible)
 
+                    // Element may be hidden in a scroll container
+                    lastFound.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                    const visibleRatio = await new Promise(resolve => {
+                        const observer = new IntersectionObserver(entries => {
+                            resolve(entries[0].intersectionRatio);
+                            observer.disconnect();
+                        });
+                        observer.observe(lastFound);
+                    });
+                    if (visibleRatio !== 1.0) {
+                        lastFound.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                    }
+
                     const rect = lastFound.getBoundingClientRect();
-                    return {
-                        x: rect.x + (rect.width / 2),
-                        y: rect.y + (rect.height / 2)
-                    };
+                    let x = rect.x + (rect.width / 2);
+                    let y = rect.y + (rect.height / 2);
+
+                    // Account for offset of the current frame if we are inside an iframe
+                    let win = window;
+                    let parentWin = null;
+                    while (win !== window.top) {
+                        parentWin = win.parent;
+
+                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
+                            .find(f => f.contentWindow === win);
+                        if (iframe) {
+                            const iframeRect = iframe.getBoundingClientRect();
+                            x += iframeRect.x;
+                            y += iframeRect.y;
+                            break;
+                        }
+                    }
+                    return { x, y };
                 }
 
                 lastFound.click();
@@ -986,7 +1092,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
             // presses the left mouse button. This is important for when
             // an element is above the one we want to click.
             if (found !== null && typeof found === 'object') {
-                await page.mouse.click(found.x, found.y);
+                await getMouse(page).click(found.x, found.y);
             }
         } catch (err) {
             if (!ignoreError(err)) {

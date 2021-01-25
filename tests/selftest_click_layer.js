@@ -4,15 +4,21 @@ const {clickSelector, newPage, clickXPath, clickNestedText} = require('../src/br
 async function run(config) {
     const page = await newPage(config);
 
-    await page.setContent(`<!DOCTYPE html>
+    const content = `<!DOCTYPE html>
         <html>
         <head>
         <style>
-            body {
+            .wrapper {
+                height: 100px;
+                overflow: scroll;
+            }
+
+            .inner {
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                height: 100vh;
+                height: 400px;
+                position: relative;
             }
 
             .overlay {
@@ -27,8 +33,12 @@ async function run(config) {
         </style>
         </head>
         <body>
-            <div class="overlay"></div>
-            <button>click</button>
+            <div class="wrapper">
+                <div class="inner">
+                    <div class="overlay"></div>
+                    <button>click</button>
+                </div>
+            </div>
             <script>
                 window.overlayClicks = 0;
                 window.buttonClicks = 0;
@@ -46,7 +56,7 @@ async function run(config) {
             </script>
         </body>
         </html>
-    `);
+    `;
 
     const getClicks = async () => page.evaluate(() => {
         return { overlay: window.overlayClicks, button: window.buttonClicks };
@@ -55,29 +65,35 @@ async function run(config) {
     // All following assertions check that the overlay div that is positioned
     // above the button intercepts all click events, so that none are triggered
     // on the button.
-
+    await page.setContent(content);
     await clickSelector(page, 'button', {timeout: 1000});
     let clicks = await getClicks();
     assert.equal(clicks.button, 0);
     assert.equal(clicks.overlay, 1);
 
     // Click element
+    await page.reload();
+    await page.setContent(content);
     await clickXPath(page, '//button', {timeout: 1000});
     clicks = await getClicks();
     assert.equal(clicks.button, 0);
-    assert.equal(clicks.overlay, 2);
+    assert.equal(clicks.overlay, 1);
 
     // Click text node
+    await page.reload();
+    await page.setContent(content);
     await clickXPath(page, '//button/text()[2]', {timeout: 1000});
     clicks = await getClicks();
     assert.equal(clicks.button, 0);
-    assert.equal(clicks.overlay, 3);
+    assert.equal(clicks.overlay, 1);
 
     // Click text node
+    await page.reload();
+    await page.setContent(content);
     await clickNestedText(page, 'click me', {timeout: 1000});
     clicks = await getClicks();
     assert.equal(clicks.button, 0);
-    assert.equal(clicks.overlay, 4);
+    assert.equal(clicks.overlay, 1);
 }
 
 module.exports = {

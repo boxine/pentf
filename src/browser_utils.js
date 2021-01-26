@@ -13,7 +13,7 @@ const tmp = require('tmp-promise');
 const {performance} = require('perf_hooks');
 const mkdirpCb = require('mkdirp');
 
-const {assertAsyncEventually} = require('./assert_utils');
+const {assertAsyncEventually, assertEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove, ignoreError} = require('./utils');
 const {timeoutPromise} = require('./promise_utils');
@@ -206,8 +206,15 @@ async function newPage(config, chrome_args=[]) {
     if (config._browser_pages) {
         config._browser_pages.push(page);
 
-        page.on('popup', popup => {
+        page.on('popup', async popup => {
             config._browser_pages.push(popup);
+            popup.on('domcontentloaded', async () => {
+                await installInteractions(popup);
+            });
+
+            popup.on('framenavigated', async (frame) => {
+                await installInteractions(frame);
+            });
         });
     }
 
@@ -242,7 +249,109 @@ async function newPage(config, chrome_args=[]) {
         });
     }
 
+    if (config.show_interactions) {
+        withInteractions(page, 'setContent');
+        page.on('domcontentloaded', async () => {
+            await installInteractions(page);
+        });
+        page.on('framenavigated', async (frame) => {
+            await installInteractions(frame);
+        });
+    }
+
     return page;
+}
+
+/**
+ * @param {import('puppeteer').Page} page
+ * @param {K extends keyof import('puppeteer').Page} prop
+ */
+function withInteractions(page, prop) {
+    const original = page[prop];
+    page[prop] = async (...args) => {
+        const res = await original.apply(page, args);
+        await installInteractions(page);
+        return res;
+    };
+}
+
+/**
+ * Inject a box into the page that shows last user interaction like where the
+ * last click occured on the page.
+ * @param {import('puppeteer').Page | import('puppeteer').Frame} page
+ */
+async function installInteractions(page) {
+    await assertEventually(
+        async () => {
+            return await page.evaluate(() => {
+                /**
+                 * @param {MouseEvent} e
+                 */
+                function handleEvent(e) {
+                    let x = e.pageX;
+                    let y = e.pageY;
+
+                    // Account for offset of the current frame if we are inside an iframe
+                    let win = window;
+                    let parentWin = null;
+                    while (win !== window.top) {
+                        parentWin = win.parent;
+
+                        const iframe = Array.from(
+                            parentWin.document.querySelectorAll('iframe')
+                        ).find(f => f.contentWindow === win);
+                        if (iframe) {
+                            const iframeRect = iframe.getBoundingClientRect();
+                            x += iframeRect.x;
+                            y += iframeRect.y;
+                            break;
+                        }
+                    }
+
+                    // At this point we're dealing with an embedded iframe. Move
+                    // the parent cursor's pointer to the correct position
+                    let el = window.top.document.querySelector('#pentf-mouse-pointer');
+                    if (el === null) {
+                        el = window.top.document.createElement('div');
+                        el.id = 'pentf-mouse-pointer';
+                        el.innerHTML = `<svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="-4 -4 54 54"
+                        >
+                            <path
+                                d="M1 0v46.3l8.5-9 5 9.8L26.8 41l-5.2-10h12.7z"
+                                fill="#E149E6"
+                                stroke-width="5"
+                                stroke="#fff"
+                            />
+                        </svg>`;
+                        el.style.cssText = `
+                            pointer-events: none;
+                            position: absolute;
+                            top: 0;
+                            z-index: 10000;
+                            left: 0;
+                            width: 24px;
+                            height: 24px;
+                            margin: -2px 0 -2px 0;
+                            padding: 0;
+                        `;
+
+                        window.top.document.body.appendChild(el);
+                    }
+
+                    el.style.left = x + 'px';
+                    el.style.top = y + 'px';
+                }
+
+                document.addEventListener('mousedown', handleEvent, true);
+                document.addEventListener('click', handleEvent, true);
+                document.addEventListener('mouseup', handleEvent, true);
+                return true;
+            });
+        },
+        {crashOnError: false}
+    );
 }
 
 /**

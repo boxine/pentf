@@ -4,7 +4,7 @@ const {clickSelector, newPage} = require('../src/browser_utils');
 async function run(config) {
     const page = await newPage({...config, show_interactions: true});
 
-    await page.setContent(`<!DOCTYPE html>
+    const content = `<!DOCTYPE html>
         <html>
         <head>
         <style>
@@ -20,15 +20,34 @@ async function run(config) {
             <button>click</button>
         </body>
         </html>
-    `);
+    `;
+
+    await page.setContent(content);
 
     await clickSelector(page, 'button', {timeout: 1000});
 
-    const pos = await page.evaluate(() => {
+    let pos = await page.evaluate(() => {
         const el = document.querySelector('#pentf-mouse-pointer');
         return {
             left: +el.style.left.replace('px', ''),
-            top: +el.style.top.replace('px', '') };
+            top: +el.style.top.replace('px', '')
+        };
+    });
+
+    assert(pos.left > 100, 'Mouse left position was 0');
+    assert(pos.top > 100, 'Mouse top position was 0');
+
+    const tab = await page.browser().newPage();
+    await tab.setContent(content);
+
+    await clickSelector(tab, 'button', {timeout: 1000});
+
+    pos = await tab.evaluate(() => {
+        const el = document.querySelector('#pentf-mouse-pointer');
+        return {
+            left: +el.style.left.replace('px', ''),
+            top: +el.style.top.replace('px', '')
+        };
     });
 
     assert(pos.left > 100, 'Mouse left position was 0');

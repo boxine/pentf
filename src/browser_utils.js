@@ -13,7 +13,7 @@ const tmp = require('tmp-promise');
 const {performance} = require('perf_hooks');
 const mkdirpCb = require('mkdirp');
 
-const {assertAsyncEventually, assertEventually} = require('./assert_utils');
+const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove, ignoreError} = require('./utils');
 const {timeoutPromise} = require('./promise_utils');
@@ -122,6 +122,7 @@ async function newPage(config, chrome_args=[]) {
         params.defaultViewport = null;
     }
 
+    /** @type {import('puppeteer').Browser} */
     const browser = await puppeteer.launch(params);
     const page = (await browser.pages())[0];
 
@@ -251,11 +252,34 @@ async function newPage(config, chrome_args=[]) {
 
     if (config.show_interactions) {
         withInteractions(page, 'setContent');
+        withInteractions(page, 'newPage');
+
         page.on('domcontentloaded', async () => {
             await installInteractions(page);
         });
+
+        // Necessary for embedded iframes
         page.on('framenavigated', async (frame) => {
             await installInteractions(frame);
+        });
+
+        browser.on('targetcreated', async (target) => {
+            if (target.url() === 'about:blank' || /^https?:\/\//.test(target.url())) {
+                const tab = await target.page();
+                withInteractions(tab, 'setContent');
+                withInteractions(tab, 'newPage');
+                await installInteractions(tab);
+            }
+        });
+
+        browser.on('targetchanged', async target => {
+            const tab = await target.page();
+
+            // This should not happen according to the types, but
+            // sometimes we get no page object.
+            if (tab === null) return;
+
+            await installInteractions(tab);
         });
     }
 

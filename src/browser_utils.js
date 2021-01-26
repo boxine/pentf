@@ -352,7 +352,7 @@ async function installInteractions(page) {
                         pointer-events: none;
                         position: absolute;
                         top: 0;
-                        z-index: 10000;
+                        z-index: 10000000;
                         left: 0;
                         width: 24px;
                         height: 24px;

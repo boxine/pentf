@@ -411,6 +411,7 @@ The keys are up to you; for example you probably want to have a main entry point
 --extensions [EXTENSION_DIR [EXTENSION_DIR ...]]
                       Load unpacked browser extensions
 --forward-console     Forward browser console logs
+--show-interactions   Visually show on the page where a user interaction took place (clicks, taps,...)
 -d, --debug           Shorthand for "--keep-open --devtools-preserve --forward-console"
 --default-timeout MS  Default timeout value for various browser functions (default: 30s)
 ```

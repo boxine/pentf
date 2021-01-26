@@ -286,6 +286,10 @@ function parseArgs(options, raw_args) {
         help: 'Forward browser console logs',
         action: 'storeTrue',
     });
+    puppeteer_group.addArgument(['--show-interactions'], {
+        help: 'Visually show on the page where a user interaction took place (clicks, taps,...)',
+        action: 'storeTrue',
+    });
     puppeteer_group.addArgument(['-d', '--debug'], {
         help: 'Shorthand for "--keep-open --devtools-preserve --forward-console"',
         action: 'storeTrue',
@@ -447,6 +451,7 @@ function parseArgs(options, raw_args) {
         args.devtools_preserve = true;
         args.keep_open = true;
         args.forward_console = true;
+        args.show_interactions = true;
     }
     if (args.keep_open) {
         args.headless = false;
@@ -494,7 +499,7 @@ async function readConfigFile(configDir, env, moduleType) {
 }
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm"}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean}} Config
  */
 
 /**

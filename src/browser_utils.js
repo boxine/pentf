@@ -775,6 +775,54 @@ function getMouse(pageOrFrame) {
 }
 
 /**
+ * @param {import('puppeteer').Page} page
+ * @param {() => Promise<null | false | true | { x: number, y: number }>} fn
+ * @param {{timeout: number, checkEvery: number, message: string, retryUntil?: () => Promise<boolean>}} [options]
+ */
+async function runClickFn(page, fn, {timeout, checkEvery, message, retryUntil}) {
+    let remainingTimeout = timeout;
+    let retryUntilError = null;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        let found = false;
+        try {
+            await installHelpers(page);
+            found = await fn();
+
+            // Simulate a true mouse click. The following function scrolls
+            // the element into view, moves the mouse to its center and
+            // presses the left mouse button. This is important for when
+            // an element is above the one we want to click.
+            if (found !== null && typeof found === 'object') {
+                await getMouse(page).click(found.x, found.y);
+            }
+        } catch(err) {
+            if (!ignoreError(err)) {
+                throw err;
+            }
+        }
+
+        try {
+            if ((found || (!found && retryUntilError !== null)) && (await onSuccess(retryUntil))) {
+                return;
+            }
+        } catch (err) {
+            retryUntilError = err;
+        }
+
+        if (remainingTimeout <= 0) {
+            if (retryUntilError) {
+                throw retryUntilError;
+            }
+
+            throw new Error(message);
+        }
+        await wait(Math.min(remainingTimeout, checkEvery));
+        remainingTimeout -= checkEvery;
+    }
+}
+
+/**
  * Clicks an element address    ed by a query selector atomically, e.g. within the same event loop run as finding it.
  *
  * @example
@@ -797,56 +845,25 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
     addBreadcrumb(config, `enter clickSelector(${selector})`);
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
 
-    let remainingTimeout = timeout;
-    let retryUntilError = null;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        let found = false;
-        try {
-            await installHelpers(page);
-            found = await page.evaluate(async (selector, visible) => {
-                const element = document.querySelector(selector);
+    message = message || `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${timeout}ms`;
 
-                const { processResult } = window._pentf;
-                return processResult(element, { visible, click: true });
-            }, selector, visible);
+    await runClickFn(
+        page,
+        async () => {
+            return await page.evaluate(
+                async (selector, visible) => {
+                    const {processResult} = window._pentf;
+                    const element = document.querySelector(selector);
+                    return processResult(element, {visible, click: true});
+                },
+                selector,
+                visible
+            );
+        },
+        { checkEvery, timeout, message, retryUntil: assertSuccess || retryUntil }
+    );
 
-            // Simulate a true mouse click. The following function scrolls
-            // the element into view, moves the mouse to its center and
-            // presses the left mouse button. This is important for when
-            // an element is above the one we want to click.
-            if (found !== null && typeof found === 'object') {
-                await getMouse(page).click(found.x, found.y);
-            }
-        } catch(err) {
-            if (!ignoreError(err)) {
-                throw err;
-            }
-        }
-
-        try {
-            if ((found || (!found && retryUntilError !== null)) && (await onSuccess(retryUntil || assertSuccess))) {
-                const config = getBrowser(page)._pentf_config;
-                addBreadcrumb(config, `exit clickSelector(${selector})`);
-                return;
-            }
-        } catch (err) {
-            retryUntilError = err;
-        }
-
-        if (remainingTimeout <= 0) {
-            if (retryUntilError) {
-                throw retryUntilError;
-            }
-
-            if (!message) {
-                message = `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${timeout}ms`;
-            }
-            throw new Error(message);
-        }
-        await wait(Math.min(remainingTimeout, checkEvery));
-        remainingTimeout -= checkEvery;
-    }
+    addBreadcrumb(config, `exit clickSelector(${selector})`);
 }
 
 /**
@@ -900,56 +917,25 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     addBreadcrumb(config, `enter clickXPath(${xpath})`);
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
-    let remainingTimeout = timeout;
-    let retryUntilError = null;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        let found = false;
-        try {
-            await installHelpers(page);
-            found = await page.evaluate(async (xpath, visible) => {
-                const { findByXPath, processResult } = window._pentf;
+    message = message || `Unable to find XPath ${xpath} after ${timeout}ms`;
 
-                /** @type {Element | Text} */
-                const element = findByXPath(xpath);
-                return processResult(element, { visible, click: true });
-            }, xpath, visible);
+    await runClickFn(
+        page,
+        async () => {
+            return await page.evaluate(
+                async (xpath, visible) => {
+                    const {findByXPath, processResult} = window._pentf;
+                    const element = findByXPath(xpath);
+                    return processResult(element, {visible, click: true});
+                },
+                xpath,
+                visible
+            );
+        },
+        { timeout, checkEvery, message, retryUntil: assertSuccess || retryUntil }
+    );
 
-            // Simulate a true mouse click. The following function scrolls
-            // the element into view, moves the mouse to its center and
-            // presses the left mouse button. This is important for when
-            // an element is above the one we want to click.
-            if (found !== null && typeof found === 'object') {
-                await getMouse(page).click(found.x, found.y);
-            }
-        } catch (err) {
-            if (!ignoreError(err)) {
-                throw err;
-            }
-        }
-
-        try {
-            if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
-                addBreadcrumb(config, `exit clickXPath(${xpath})`);
-                return;
-            }
-        } catch (err) {
-            retryUntilError = err;
-        }
-
-        if (remainingTimeout <= 0) {
-            if (retryUntilError) {
-                throw retryUntilError;
-            }
-
-            if (!message) {
-                message = `Unable to find XPath ${xpath} after ${timeout}ms`;
-            }
-            throw new Error(message);
-        }
-        await wait(Math.min(remainingTimeout, checkEvery));
-        remainingTimeout -= checkEvery;
-    }
+    addBreadcrumb(config, `exit clickXPath(${xpath})`);
 }
 
 const DEFAULT_CLICKABLE_ELEMENTS = ['a', 'button', 'input', 'label'];
@@ -1015,15 +1001,13 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
         : textOrRegExp;
 
-    let remainingTimeout = timeout;
-    let retryUntilError = null;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        let found = false;
+    const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
+    const message = `Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`;
 
-        try {
-            await installHelpers(page);
-            found = await page.evaluate(async (matcher, visible) => {
+    await runClickFn(
+        page,
+        async () => {
+            return await page.evaluate(async (matcher, visible) => {
                 if (typeof matcher !== 'string') {
                     matcher = new RegExp(matcher.source, matcher.flags);
                 }
@@ -1032,40 +1016,11 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
                 const node = findByText(matcher);
                 return processResult(node, { visible, click: true });
             }, serializedMatcher, visible);
+        },
+        { checkEvery, message, timeout, retryUntil: assertSuccess || retryUntil }
+    );
 
-            // Simulate a true mouse click. The following function scrolls
-            // the element into view, moves the mouse to its center and
-            // presses the left mouse button. This is important for when
-            // an element is above the one we want to click.
-            if (found !== null && typeof found === 'object') {
-                await getMouse(page).click(found.x, found.y);
-            }
-        } catch (err) {
-            if (!ignoreError(err)) {
-                throw err;
-            }
-        }
-
-        try {
-            if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
-                addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
-                return;
-            }
-        } catch (err) {
-            retryUntilError = err;
-        }
-
-        if (remainingTimeout <= 0) {
-            if (retryUntilError) {
-                throw retryUntilError;
-            }
-
-            const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-            throw new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`);
-        }
-        await wait(Math.min(remainingTimeout, checkEvery));
-        remainingTimeout -= checkEvery;
-    }
+    addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
 }
 
 /**

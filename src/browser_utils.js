@@ -469,6 +469,20 @@ async function closePage(page) {
 }
 
 /**
+ *
+ * @param {import('puppeteer').Page} page
+ */
+async function installHelpers(page) {
+    const hasHelpers = await page.evaluate(() => document.querySelector('#pentf-helpers') !== null);
+    if (!hasHelpers) {
+        const script = await fs.promises.readFile(path.join(__dirname, 'browser_framework.js'), 'utf-8');
+        await page.addScriptTag({
+            content: `((window) => {${script}})(window)`,
+        });
+    }
+}
+
+/**
  * Wait for an element matched by a CSS query selector to become visible.
  * Visible means the element has neither `display:none` nor `visibility:hidden`.
  * Elements outside the current viewport (e.g. you'd need to scroll) and hidden with CSS trickery
@@ -703,10 +717,9 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
     while (true) {
         let found = false;
         try {
+            await installHelpers(page);
             found = await page.evaluate(xpath => {
-                const element = document.evaluate(
-                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-                return !!element;
+                return !!window._pentf.findByXPath(xpath);
             }, xpath);
         } catch(err) {
             if (!ignoreError(err)) {
@@ -790,52 +803,12 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
     while (true) {
         let found = false;
         try {
+            await installHelpers(page);
             found = await page.evaluate(async (selector, visible) => {
                 const element = document.querySelector(selector);
-                if (!element) return false;
 
-                if (visible) {
-                    if (element.offsetParent === null) return null; // invisible
-
-                    // Element may be hidden in a scroll container
-                    element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    const visibleRatio = await new Promise(resolve => {
-                        const observer = new IntersectionObserver(entries => {
-                            resolve(entries[0].intersectionRatio);
-                            observer.disconnect();
-                        });
-                        observer.observe(element);
-                    });
-                    if (visibleRatio !== 1.0) {
-                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    }
-
-                    const rect = /** @type {Element} */ (element).getBoundingClientRect();
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
-                        }
-                    }
-                    return { x, y };
-                }
-
-                // We can't use the mouse to click on invisible elements.
-                // Therefore invoke the click handler on the DOM node directly.
-                element.click();
-                return true;
+                const { processResult } = window._pentf;
+                return processResult(element, { visible, click: true });
             }, selector, visible);
 
             // Simulate a true mouse click. The following function scrolls
@@ -933,88 +906,13 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     while (true) {
         let found = false;
         try {
+            await installHelpers(page);
             found = await page.evaluate(async (xpath, visible) => {
+                const { findByXPath, processResult } = window._pentf;
+
                 /** @type {Element | Text} */
-                const element = document.evaluate(
-                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-                if (!element) return false;
-
-                if (visible) {
-                    if (element.offsetParent === null) return null; // invisible
-
-                    /**
-                     * Get the center coordinates of our element to click on.
-                     * @type {DOMRect}
-                     */
-                    let rect;
-
-                    // Text nodes don't have `getBoundingClientRect()`, but
-                    // we can use range objects for that.
-                    if (element.nodeType === Node.TEXT_NODE) {
-                        // Element may be hidden in a scroll container
-                        element.parentNode.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-
-                        const visibleRatio = await new Promise(resolve => {
-                            const observer = new IntersectionObserver(entries => {
-                                resolve(entries[0].intersectionRatio);
-                                observer.disconnect();
-                            });
-                            observer.observe(element.parentNode);
-                        });
-                        if (visibleRatio !== 1.0) {
-                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        }
-
-                        const range = document.createRange();
-                        range.selectNodeContents(element);
-
-                        const rects = range.getClientRects();
-                        if (!rects || rects.length < 1) {
-                            throw new Error(`Could not determine Text node coordinates of "${element.data}"`);
-                        }
-
-                        rect = rects[0];
-                    } else {
-                        // Element may be hidden in a scroll container
-                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        const visibleRatio = await new Promise(resolve => {
-                            const observer = new IntersectionObserver(entries => {
-                                resolve(entries[0].intersectionRatio);
-                                observer.disconnect();
-                            });
-                            observer.observe(element);
-                        });
-                        if (visibleRatio !== 1.0) {
-                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        }
-
-                        rect = /** @type {Element} */ (element).getBoundingClientRect();
-                    }
-
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
-                        }
-                    }
-                    return { x, y };
-                }
-
-                // Click on invisible elements
-                element.click();
-                return true;
+                const element = findByXPath(xpath);
+                return processResult(element, { visible, click: true });
             }, xpath, visible);
 
             // Simulate a true mouse click. The following function scrolls
@@ -1124,100 +1022,15 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         let found = false;
 
         try {
+            await installHelpers(page);
             found = await page.evaluate(async (matcher, visible) => {
-                // eslint-disable-next-line no-undef
-                /** @type {(text: string) => boolean} */
-                let matchFunc;
-                /** @type {null | (text: string) => boolean} */
-                let matchFuncExact = null;
-
-                if (typeof matcher == 'string') {
-                    matchFunc = text => text.includes(matcher);
-                } else {
-                    const regexExact = new RegExp(matcher.source, matcher.flags);
-                    matchFuncExact = text => {
-                        // Reset regex state in case global flag was used
-                        regexExact.lastIndex = 0;
-                        return regexExact.test(text);
-                    };
-
-                    // Remove leading ^ and ending $, otherwise the traversal
-                    // will fail at the first node.
-                    const source = matcher.source
-                        .replace(/^[^]/, '')
-                        .replace(/[$]$/, '');
-                    const regex = new RegExp(source, matcher.flags);
-                    matchFunc = text => {
-                        // Reset regex state in case global flag was used
-                        regex.lastIndex = 0;
-                        return regex.test(text);
-                    };
+                if (typeof matcher !== 'string') {
+                    matcher = new RegExp(matcher.source, matcher.flags);
                 }
 
-                const stack = [document.body];
-                let item = null;
-                let lastFound = null;
-                while ((item = stack.pop())) {
-                    for (let i = 0; i < item.childNodes.length; i++) {
-                        const child = item.childNodes[i];
-
-                        // Skip text nodes as they are not clickable
-                        if (child.nodeType === Node.TEXT_NODE) {
-                            continue;
-                        }
-
-                        const text = child.textContent || '';
-                        if (child.childNodes.length > 0 && matchFunc(text)) {
-                            if (matchFuncExact === null || matchFuncExact(text)) {
-                                lastFound = child;
-                            }
-                            stack.push(child);
-                        }
-                    }
-                }
-
-                if (!lastFound) return false;
-
-                if (visible) {
-                    if (lastFound.offsetParent === null) return null; // invisible)
-
-                    // Element may be hidden in a scroll container
-                    lastFound.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    const visibleRatio = await new Promise(resolve => {
-                        const observer = new IntersectionObserver(entries => {
-                            resolve(entries[0].intersectionRatio);
-                            observer.disconnect();
-                        });
-                        observer.observe(lastFound);
-                    });
-                    if (visibleRatio !== 1.0) {
-                        lastFound.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    }
-
-                    const rect = lastFound.getBoundingClientRect();
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
-                        }
-                    }
-                    return { x, y };
-                }
-
-                lastFound.click();
-                return true;
+                const { findByText, processResult } = window._pentf;
+                const node = findByText(matcher);
+                return processResult(node, { visible, click: true });
             }, serializedMatcher, visible);
 
             // Simulate a true mouse click. The following function scrolls
@@ -1309,6 +1122,7 @@ async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), m
         }
     }
 }
+
 /**
  * Type text into an element identified by a query selector.
  *

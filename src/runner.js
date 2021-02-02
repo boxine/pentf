@@ -40,6 +40,7 @@ async function run_task(config, state, task) {
         _testName: task.tc.name,
         _taskName: task.name,
         _taskGroup: task.group,
+        _snapshots: [],
         start: task.start,
         accessibilityErrors: [],
         error: null,
@@ -126,7 +127,7 @@ async function run_task(config, state, task) {
 
                 // Collect all screenshots first before throwing
                 // potential errors.
-                task.error_screenshots = [];
+                task.error_screenshots = [...task_config._snapshots];
                 let error = null;
                 for (const imgOrErr of screenshots) {
                     if (Buffer.isBuffer(imgOrErr)) {

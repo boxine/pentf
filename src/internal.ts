@@ -44,6 +44,7 @@ export interface TaskConfig extends Config {
     _taskName: string;
     _taskGroup: string;
     error: Error | null;
+    _snapshots: Buffer[];
     accessibilityErrors: A11yResult[];
 }
 

@@ -12,6 +12,8 @@ const {promisify} = require('util');
 const tmp = require('tmp-promise');
 const {performance} = require('perf_hooks');
 const mkdirpCb = require('mkdirp');
+const { PNG } = require('pngjs');
+const pixelmatch = require('pixelmatch');
 
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
@@ -1429,21 +1431,28 @@ async function getSelectOptions(page, select) {
  */
 async function takeScreenshot(config, page, fileName, selector) {
     await mkdirp(config.screenshot_directory);
-    const fn = path.join(config.screenshot_directory, fileName);
+    const file = path.join(config.screenshot_directory, fileName);
+    return await _takeScreenshot(page, { file, selector, fullPage: true });
+}
 
+/**
+ * @param {import('puppeteer').Page} page
+ * @param {{ file?: string, selector?: string, fullPage?: boolean }} [options]
+ */
+async function _takeScreenshot(page, { file, selector, fullPage } = {}) {
     const viewport = page.viewport();
     let img;
     if (selector) {
         const el = await page.waitForSelector(selector);
         img = await el.screenshot({
-            path: fn,
+            path: file,
             type: 'png',
         });
     } else {
         img = await page.screenshot({
-            path: fn,
+            path: file,
             type: 'png',
-            fullPage: true,
+            fullPage,
         });
     }
 
@@ -1533,6 +1542,88 @@ async function assertAccessibility(config, page) {
         const err = new Error(`There were ${errors.length} accessibility violations on ${url}`);
         err.accessibilityErrors = errors;
         throw err;
+    }
+}
+
+/**
+ * Take a screenshot and compare it against an existing one. Any differences between
+ * the two will be highlighted.
+ * @param {import('./internal').TaskConfig} config
+ * @param {import('puppeteer').Page} page
+ * @param {string} name
+ * @param {{ threshold?: number, selector?: string, fullPage?: boolean } & import('pixelmatch').PixelmatchOptions} [options]
+ */
+async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fullPage = true, ...pxl} = {}) {
+    await mkdirp(config.snapshot_directory);
+    const target = path.join(config.snapshot_directory, `${config._taskName}_${name}-expected.png`);
+
+    /** @type {import('pngjs').PNGWithMetadata | null} */
+    let expected = null;
+    /** @type {Buffer | null} */
+    let expectedBuf = null;
+    try {
+        expectedBuf = await fs.promises.readFile(target);
+        expected = PNG.sync.read(expectedBuf);
+    } catch (e) {
+        if (!e.message.includes('ENOENT')) {
+            throw e;
+        }
+    }
+
+    // We have never seen this snapshot before, take a new one
+    // or we want to update existing snapshots
+    if (expected === null || config.update_snapshots) {
+        await _takeScreenshot(page, {file: target, selector, fullPage});
+    } else {
+        const actualBuf = await _takeScreenshot(page, {selector, fullPage});
+        const actual = await PNG.sync.read(actualBuf);
+
+        // We don't need to look further if the dimensions don't even match
+        if (actual.width !== expected.width || actual.height !== expected.height) {
+            const expectedSize = `${expected.height}x${expected.width}px`;
+            const actualSize = `${actual.height}x${actual.width}px`;
+            throw new Error(
+                `Snapshot size differs. Expected ${expectedSize} but got ${actualSize}`
+            );
+        }
+
+        const diff = new PNG({width: expected.width, height: expected.height});
+        const differenceCount = pixelmatch(
+            expected.data,
+            actual.data,
+            diff.data,
+            expected.width,
+            expected.height,
+            {threshold, diffColor: [255, 70, 230], ...pxl}
+        );
+
+        if (differenceCount > 0) {
+            // Write image with highlighted differences to disk
+            const buf = PNG.sync.write(diff);
+            const diffFile = path.join(
+                config.screenshot_directory,
+                `${config._taskName}_${name}-diff.png`
+            );
+            await fs.promises.writeFile(diffFile, buf);
+
+            // Attach diff image to task so that it shows up in PDFs
+            config._snapshots.push(buf);
+
+            // Write actual image to disk too (for visual reference)
+            const actualFile = path.join(
+                config.screenshot_directory,
+                `${config._taskName}_${name}-actual.png`
+            );
+            await fs.promises.writeFile(actualFile, actualBuf);
+            // Write expected image to disk too (for visual reference)
+            const expectedFile = path.join(
+                config.screenshot_directory,
+                `${config._taskName}_${name}-expected.png`
+            );
+            await fs.promises.writeFile(expectedFile, expectedBuf);
+
+            throw new Error(`Snapshot failed, there were ${differenceCount} differences, see ${diffFile}`);
+        }
     }
 }
 
@@ -1675,6 +1766,7 @@ module.exports = {
     assertNotSelector,
     assertNotTestId,
     assertNotXPath,
+    assertSnapshot,
     assertValue,
     clickNestedText,
     clickSelector,

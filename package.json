@@ -112,6 +112,8 @@
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",
     "node-fetch": "^2.3.0",
+    "pixelmatch": "^5.2.1",
+    "pngjs": "^6.0.0",
     "stream-buffers": "^3.0.2",
     "tmp-promise": "^2.0.2",
     "tough-cookie": "^4.0.0"
@@ -120,6 +122,8 @@
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.1",
     "@types/diff": "^4.0.2",
+    "@types/pixelmatch": "^5.2.2",
+    "@types/pngjs": "^3.4.2",
     "@types/tmp": "^0.2.0",
     "deep-equal": "^1.0.1",
     "eslint": "^7.0.0",

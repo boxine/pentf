@@ -4,6 +4,7 @@ results*.html
 results*.md
 results*.json
 screenshots
+snapshots
 doc/
 dist/
 

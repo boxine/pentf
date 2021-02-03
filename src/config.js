@@ -258,6 +258,17 @@ function parseArgs(options, raw_args) {
         defaultValue: defaultScreenshotDir,
         help: `Directory to write screenshots to (default: ${process.env.PENTF_GENERIC_HELP ? './screenshots' : '%(defaultValue)s'})`,
     });
+    const defaultSnapshotDir = path.join(
+        options.rootDir ? options.rootDir : process.cwd(), 'snapshots');
+    puppeteer_group.addArgument(['--snapshot-directory'], {
+        metavar: 'DIR',
+        defaultValue: defaultSnapshotDir,
+        help: `Directory to write snapshots to (default: ${process.env.PENTF_GENERIC_HELP ? './snapshots' : '%(defaultValue)s'})`,
+    });
+    puppeteer_group.addArgument(['-u', '--update-snapshots'], {
+        help: 'Update existing snapshots on mismatch',
+        action: 'storeTrue',
+    });
     puppeteer_group.addArgument(['-s', '--slow-mo'], {
         metavar: 'MS',
         type: 'int',
@@ -499,7 +510,7 @@ async function readConfigFile(configDir, env, moduleType) {
 }
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean, snapshot_directory: string, update_snapshots?: boolean}} Config
  */
 
 /**

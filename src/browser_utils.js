@@ -1432,14 +1432,14 @@ async function getSelectOptions(page, select) {
 async function takeScreenshot(config, page, fileName, selector) {
     await mkdirp(config.screenshot_directory);
     const file = path.join(config.screenshot_directory, fileName);
-    return await _takeScreenshot(page, { file, selector });
+    return await _takeScreenshot(page, { file, selector, fullPage: true });
 }
 
 /**
  * @param {import('puppeteer').Page} page
- * @param {{ file?: string, selector?: string }} [options]
+ * @param {{ file?: string, selector?: string, fullPage?: boolean }} [options]
  */
-async function _takeScreenshot(page, { file, selector } = {}) {
+async function _takeScreenshot(page, { file, selector, fullPage } = {}) {
     const viewport = page.viewport();
     let img;
     if (selector) {
@@ -1452,7 +1452,7 @@ async function _takeScreenshot(page, { file, selector } = {}) {
         img = await page.screenshot({
             path: file,
             type: 'png',
-            fullPage: true,
+            fullPage,
         });
     }
 
@@ -1551,9 +1551,9 @@ async function assertAccessibility(config, page) {
  * @param {import('./internal').TaskConfig} config
  * @param {import('puppeteer').Page} page
  * @param {string} name
- * @param {{ threshold?: number, selector?: string, ...pxl: import('pixelmatch').PixelmatchOptions }} [options]
+ * @param {{ threshold?: number, selector?: string, fullPage?: boolean } & import('pixelmatch').PixelmatchOptions} [options]
  */
-async function assertSnapshot(config, page, name, {threshold = 0.2, selector, ...pxl} = {}) {
+async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fullPage = true, ...pxl} = {}) {
     await mkdirp(config.snapshot_directory);
     const target = path.join(config.snapshot_directory, `${config._taskName}_${name}-expected.png`);
 
@@ -1573,9 +1573,9 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, ..
     // We have never seen this snapshot before, take a new one
     // or we want to update existing snapshots
     if (expected === null || config.update_snapshots) {
-        await _takeScreenshot(page, {file: target, selector});
+        await _takeScreenshot(page, {file: target, selector, fullPage});
     } else {
-        const actualBuf = await _takeScreenshot(page, {selector});
+        const actualBuf = await _takeScreenshot(page, {selector, fullPage});
         const actual = await PNG.sync.read(actualBuf);
 
         // We don't need to look further if the dimensions don't even match

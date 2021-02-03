@@ -403,6 +403,10 @@ The keys are up to you; for example you probably want to have a main entry point
 --no-screenshots      Do not take screenshots of browser failures
 --screenshot-directory DIR
                       Directory to write screenshots to (default: ./screenshots)
+--snapshot-directory DIR
+                      Directory to write snapshots to (default: ./snapshots)
+-u, --update-snapshots
+                      Update existing snapshots on mismatch
 -s MS, --slow-mo MS   Wait this many milliseconds after every call to the virtual browser
 -k, --keep-open       Keep browser sessions open in case of failures. Implies -V.
 --devtools            Start browser with devtools open. Implies -V

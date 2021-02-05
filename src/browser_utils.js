@@ -14,6 +14,7 @@ const {performance} = require('perf_hooks');
 const mkdirpCb = require('mkdirp');
 const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch');
+const sharp = require('sharp');
 
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
@@ -1594,16 +1595,46 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
     if (expected === null || config.update_snapshots) {
         await _takeScreenshot(page, {file: target, selector, fullPage, hideInteraction: true });
     } else {
-        const actualBuf = await _takeScreenshot(page, {selector, fullPage, hideInteraction: true });
-        const actual = await PNG.sync.read(actualBuf);
+        let actualBuf = await _takeScreenshot(page, {selector, fullPage, hideInteraction: true });
+        let actual = PNG.sync.read(actualBuf);
 
-        // We don't need to look further if the dimensions don't even match
-        if (actual.width !== expected.width || actual.height !== expected.height) {
-            const expectedSize = `${expected.height}x${expected.width}px`;
-            const actualSize = `${actual.height}x${actual.width}px`;
-            throw new Error(
-                `Snapshot size differs. Expected ${expectedSize} but got ${actualSize}`
-            );
+        let width = expected.width;
+        let height = expected.height;
+        // To do an actual visual comparison we need to ensure that both images
+        // have the same dimension. We'll resize to the longest edge of either image
+        if (actual.width !== width || actual.height !== height) {
+            const expectedSize = `${width}x${height}px`;
+            const actualSize = `${actual.width}x${actual.height}px`;
+            output.logVerbose(config, `[snapshot] Image dimensions don't match. Expected ${expectedSize}, but got ${actualSize} for ${name}. Resizing...`);
+
+            width = Math.max(expected.width, actual.width);
+            height = Math.max(expected.height, actual.height);
+
+            // Extend actual image if needed
+            if (actual.width !== width || actual.height !== height) {
+                output.logVerbose(config, `[snapshot] Resizing actual from ${actual.width}x${actual.height} -> ${width}x${height}`);
+                actualBuf = await sharp(actualBuf).extend({
+                    top: 0,
+                    left: 0,
+                    bottom: height - actual.height,
+                    right: width - actual.width,
+                    background: { r: 0, g: 0, b: 0, alpha: 0 }
+                }).toBuffer();
+                actual = PNG.sync.read(actualBuf);
+            }
+
+            // Extend expected image if needed
+            if (expected.width !== width || expected.height !== height) {
+                output.logVerbose(config, `[snapshot] Resizing expected from ${expected.width}x${expected.height} -> ${width}x${height}`);
+                expectedBuf = await sharp(expectedBuf).extend({
+                    top: 0,
+                    left: 0,
+                    bottom: height - expected.height,
+                    right: width - expected.width,
+                    background: { r: 0, g: 0, b: 0, alpha: 0 }
+                }).toBuffer();
+                expected = PNG.sync.read(expectedBuf);
+            }
         }
 
         const diff = new PNG({width: expected.width, height: expected.height});

@@ -1437,10 +1437,20 @@ async function takeScreenshot(config, page, fileName, selector) {
 
 /**
  * @param {import('puppeteer').Page} page
- * @param {{ file?: string, selector?: string, fullPage?: boolean }} [options]
+ * @param {{ file?: string, selector?: string, fullPage?: boolean, hideInteraction?: boolean }} [options]
  */
-async function _takeScreenshot(page, { file, selector, fullPage } = {}) {
+async function _takeScreenshot(page, { file, selector, fullPage, hideInteraction } = {}) {
     const viewport = page.viewport();
+
+    if (hideInteraction) {
+        await page.evaluate(() => {
+            const el = document.querySelector('#pentf-mouse-pointer');
+            if (el) {
+                el.style.display = 'none';
+            }
+        });
+    }
+
     let img;
     if (selector) {
         const el = await page.waitForSelector(selector);
@@ -1453,6 +1463,15 @@ async function _takeScreenshot(page, { file, selector, fullPage } = {}) {
             path: file,
             type: 'png',
             fullPage,
+        });
+    }
+
+    if (hideInteraction) {
+        await page.evaluate(() => {
+            const el = document.querySelector('#pentf-mouse-pointer');
+            if (el) {
+                el.style.display = 'block';
+            }
         });
     }
 
@@ -1573,9 +1592,9 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
     // We have never seen this snapshot before, take a new one
     // or we want to update existing snapshots
     if (expected === null || config.update_snapshots) {
-        await _takeScreenshot(page, {file: target, selector, fullPage});
+        await _takeScreenshot(page, {file: target, selector, fullPage, hideInteraction: true });
     } else {
-        const actualBuf = await _takeScreenshot(page, {selector, fullPage});
+        const actualBuf = await _takeScreenshot(page, {selector, fullPage, hideInteraction: true });
         const actual = await PNG.sync.read(actualBuf);
 
         // We don't need to look further if the dimensions don't even match

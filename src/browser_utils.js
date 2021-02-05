@@ -60,7 +60,15 @@ async function newPage(config, chrome_args=[]) {
         }
     }
 
-    const args = ['--no-sandbox'];
+    const args = [
+        '--no-sandbox',
+        // Fix inconsistent font rendering between headless and headful
+        // mode. This doesn't happen all the time, but frequent enough.
+        // When it does, words may be wrapped differently, leading to
+        // drastic layout mismatch between headless and headful. See:
+        // https://github.com/puppeteer/puppeteer/issues/2410
+        '--font-render-hinting=none'
+    ];
     args.push(...chrome_args);
 
     const params = {

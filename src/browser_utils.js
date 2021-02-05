@@ -15,6 +15,7 @@ const mkdirpCb = require('mkdirp');
 const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch');
 const sharp = require('sharp');
+const ssim = require('ssim.js').default;
 
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
@@ -61,7 +62,14 @@ async function newPage(config, chrome_args=[]) {
         }
     }
 
-    const args = ['--no-sandbox'];
+    const args = [
+        '--no-sandbox',
+        // Fixes inconsistent font rendering between headless and headful
+        // mode. This doesn't happen all the time, but frequent enough.
+        // When it does, words may be wrapped differently. See:
+        // https://github.com/puppeteer/puppeteer/issues/2410
+        '--font-render-hinting=none'
+    ];
     args.push(...chrome_args);
 
     const params = {
@@ -1424,6 +1432,14 @@ async function getSelectOptions(page, select) {
 }
 
 /**
+ * Reset device emulation. Allows the user to resize the page again.
+ * @param {import('puppeteer').Page} page
+ */
+async function resetEmulation(page) {
+    await page._client.send('Emulation.clearDeviceMetricsOverride');
+}
+
+/**
  *
  * @param {import('./config').Config} config
  * @param {import('puppeteer').Page} page
@@ -1436,6 +1452,7 @@ async function takeScreenshot(config, page, fileName, selector) {
     return await _takeScreenshot(page, { file, selector, fullPage: true });
 }
 
+let i = 0;
 /**
  * @param {import('puppeteer').Page} page
  * @param {{ file?: string, selector?: string, fullPage?: boolean, hideInteraction?: boolean }} [options]
@@ -1460,6 +1477,31 @@ async function _takeScreenshot(page, { file, selector, fullPage, hideInteraction
             type: 'png',
         });
     } else {
+        // Browser might not have finished painting.
+        // See: https://github.com/puppeteer/puppeteer/issues/1751
+        await page.evaluate(() => {
+            return new Promise((resolve) => {
+                window.requestAnimationFrame(resolve);
+            });
+        });
+
+        const sizes = await page.evaluate(() => {
+            return { height: document.documentElement.scrollHeight, width: document.documentElement.scrollWidth};
+        });
+        const sizes2 = await page.evaluate(() => {
+            return { height: document.body.scrollHeight, width: document.body.scrollWidth};
+        });
+        console.log(i++, sizes, sizes2, path.relative(process.cwd(), file ||'.'));
+
+        /** @type {import('./config').Config} */
+        const config = getBrowser(page)._pentf_config;
+        // Chrome's resizing UI (the dimensions at the top right) are
+        // visible when devtools are open in headful mode. See
+        // https://github.com/puppeteer/puppeteer/issues/6819
+        if (!config.headless) {
+            await wait(1000);
+        }
+
         img = await page.screenshot({
             path: file,
             type: 'png',
@@ -1477,7 +1519,7 @@ async function _takeScreenshot(page, { file, selector, fullPage, hideInteraction
     }
 
     // Restore emulation, fixes unable to resize window after taking a screenshot.
-    await page._client.send('Emulation.clearDeviceMetricsOverride');
+    await resetEmulation(page);
 
     // Restore potential emulation settings that were active before
     // we took the screenshot.
@@ -1573,7 +1615,7 @@ async function assertAccessibility(config, page) {
  * @param {string} name
  * @param {{ threshold?: number, selector?: string, fullPage?: boolean } & import('pixelmatch').PixelmatchOptions} [options]
  */
-async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fullPage = true, ...pxl} = {}) {
+async function assertSnapshot(config, page, name, {threshold = 0.4, selector, fullPage = true, ...pxl} = {}) {
     await mkdirp(config.snapshot_directory);
     const target = path.join(config.snapshot_directory, `${config._taskName}_${name}-expected.png`);
 
@@ -1597,14 +1639,14 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
     } else {
         let actualBuf = await _takeScreenshot(page, {selector, fullPage, hideInteraction: true });
         let actual = PNG.sync.read(actualBuf);
+        const expectedSize = `${width}x${height}px`;
+        const actualSize = `${actual.width}x${actual.height}px`;
 
         let width = expected.width;
         let height = expected.height;
         // To do an actual visual comparison we need to ensure that both images
         // have the same dimension. We'll resize to the longest edge of either image
         if (actual.width !== width || actual.height !== height) {
-            const expectedSize = `${width}x${height}px`;
-            const actualSize = `${actual.width}x${actual.height}px`;
             output.logVerbose(config, `[snapshot] Image dimensions don't match. Expected ${expectedSize}, but got ${actualSize} for ${name}. Resizing...`);
 
             width = Math.max(expected.width, actual.width);
@@ -1637,15 +1679,48 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
             }
         }
 
-        const diff = new PNG({width: expected.width, height: expected.height});
-        const differenceCount = pixelmatch(
-            expected.data,
-            actual.data,
-            diff.data,
-            expected.width,
-            expected.height,
-            {threshold, diffColor: [255, 70, 230], ...pxl}
+        const diff = new PNG({width, height});
+        const differenceCount = pixelmatch(expected.data, actual.data, diff.data, width, height, {
+            threshold,
+            diffColor: [255, 70, 230],
+            ...pxl,
+        });
+
+        const {mssim,performance,ssim_map} = ssim(
+            {
+                width,
+                height,
+                data: expected.data,
+            },
+            {
+                width,
+                height,
+                data: actual.data,
+            },
+            { ssim: 'weber' }
         );
+
+        const diff2 = new PNG({width, height});
+        const diffPixels = (1 - mssim) * width * height;
+        const diffRgbaPixels = new DataView(diff2.data.buffer, diff2.data.byteOffset);
+        for (let ln = 0; ln !== height; ++ln) {
+            for (let pos = 0; pos !== width; ++pos) {
+                const rpos = (ln * width) + pos;
+                // initial value is transparent.  We'll add in the SSIM offset.
+                // red (ff) green (00) blue (00) alpha (00)
+                const diffValue = 0xff000000 + Math.floor(0xff *
+                    (1 - ssim_map.data[
+                    // eslint-disable-next-line no-mixed-operators
+                    (ssim_map.width * Math.round(ssim_map.height * ln / height)) +
+                    // eslint-disable-next-line no-mixed-operators
+                    Math.round(ssim_map.width * pos / width)]));
+                diffRgbaPixels.setUint32(rpos * 4, diffValue);
+            }
+        }
+
+        console.log(`SSIM: ${mssim} (${performance}ms)`)
+        console.log(diffPixels);
+
 
         if (differenceCount > 0) {
             // Write image with highlighted differences to disk
@@ -1655,6 +1730,12 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
                 `${config._taskName}_${name}-diff.png`
             );
             await fs.promises.writeFile(diffFile, buf);
+            const buf2 = PNG.sync.write(diff2);
+            const diffFile2 = path.join(
+                config.screenshot_directory,
+                `${config._taskName}_${name}-diff-2.png`
+            );
+            await fs.promises.writeFile(diffFile2, buf2);
 
             // Attach diff image to task so that it shows up in PDFs
             config._snapshots.push(buf);
@@ -1831,6 +1912,7 @@ module.exports = {
     html2pdf,
     interceptRequest,
     newPage,
+    resetEmulation,
     restoreTimeouts,
     setLanguage,
     speedupTimeouts,

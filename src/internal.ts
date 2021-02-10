@@ -11,6 +11,7 @@ export type TestCase = {
     fileName: string;
     name: string;
     group: string;
+    resources?: string[]
     run: (config: TaskConfig) => Promise<void> | void;
     skip?: (config: TaskConfig) => Promise<boolean> | boolean;
     expectedToFail?: string | boolean;
@@ -30,6 +31,7 @@ export interface Task {
     breadcrumb: Error | null;
     skipReason?: boolean;
     error_screenshots: Buffer[];
+    resources: string[];
     expectedToFail?: boolean | string | ((config: import('./config').Config) => boolean);
     accessibilityErrors: A11yResult[];
 }
@@ -44,6 +46,7 @@ export interface TaskConfig extends Config {
     _taskName: string;
     _taskGroup: string;
     error: Error | null;
+    resources: string[];
     _snapshots: Buffer[];
     accessibilityErrors: A11yResult[];
 }

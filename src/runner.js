@@ -34,6 +34,7 @@ async function run_task(config, state, task) {
     /** @type {import('./internal').TaskConfig} */
     const task_config = {
         ...config,
+        resources: Object.freeze(task.resources),
         _teardown_hooks: [],
         _browser_pages: [],
         _breadcrumb: null,

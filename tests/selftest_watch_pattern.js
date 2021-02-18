@@ -38,7 +38,7 @@ function createTyper(getOutput, clearOutput) {
 
 async function run(config) {
     const sub_run = path.join(__dirname, 'watch_tests_no_writes', 'run');
-    const child = child_process.spawn(sub_run, ['--watch', '--ci', '--no-colors', '--no-pdf']);
+    const child = child_process.spawn('node', [sub_run, '--watch', '--ci', '--no-colors', '--no-pdf']);
     onTeardown(config, () => child.kill());
 
     let out = [];

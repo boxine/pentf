@@ -6,8 +6,8 @@ async function run() {
     const sub_run = path.join(__dirname, '..', 'bin', 'cli.js');
     const {stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            sub_run,
-            ['--exit-zero', '--no-screenshots', '--tests-glob', 'tests/skip_tests/*.js', '--no-pdf'],
+            'node',
+            [sub_run, '--exit-zero', '--no-screenshots', '--tests-glob', 'tests/skip_tests/*.js', '--no-pdf'],
             (err, stdout, stderr) => {
                 if (err) reject(err);
                 else resolve({stdout, stderr});

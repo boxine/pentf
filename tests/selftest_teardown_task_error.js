@@ -6,8 +6,8 @@ async function run() {
     const sub_run = path.join(__dirname, 'teardown_task_error', 'run');
     const {stdout} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            sub_run,
-            ['--exit-zero', '--no-screenshots', '-v'],
+            'node',
+            [sub_run, '--exit-zero', '--no-screenshots', '-v'],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {
                 if (err) reject(err);

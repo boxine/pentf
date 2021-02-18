@@ -7,8 +7,8 @@ async function run() {
     const sub_run = path.join(__dirname, 'glob_tests', 'run');
     const {stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            sub_run,
-            ['--exit-zero', '--no-screenshots', '--tests-glob', '*.spec.js'],
+            'node',
+            [sub_run, '--exit-zero', '--no-screenshots', '--tests-glob', '*.spec.js'],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {
                 if (err) reject(err);

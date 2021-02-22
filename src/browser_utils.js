@@ -290,6 +290,15 @@ async function newPage(config, chrome_args=[]) {
 }
 
 /**
+ * Add a callback to execute during the teardown phase of the test case.
+ * @param {import('./internal').TaskConfig} config
+ * @param {import('./internal').TeardownHook} callback
+ */
+function onTeardown(config, callback) {
+    config._teardown_hooks.push(callback);
+}
+
+/**
  * @param {import('puppeteer').Page} page
  * @param {K extends keyof import('puppeteer').Page} prop
  */
@@ -1832,6 +1841,7 @@ module.exports = {
     html2pdf,
     interceptRequest,
     newPage,
+    onTeardown,
     restoreTimeouts,
     setLanguage,
     speedupTimeouts,

@@ -313,7 +313,7 @@ function parseArgs(options, raw_args) {
     });
 
     const runner_group = parser.addArgumentGroup({title: 'Test runner'});
-    const concurrency_default = '4+cpus';
+    const concurrency_default = 'cpus';
     runner_group.addArgument(['-C', '--concurrency'], {
         metavar: 'COUNT',
         help: (

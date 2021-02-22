@@ -15,6 +15,7 @@ const mkdirpCb = require('mkdirp');
 const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch');
 const sharp = require('sharp');
+const rimraf = require('rimraf');
 
 const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
@@ -296,6 +297,24 @@ async function newPage(config, chrome_args=[]) {
  */
 function onTeardown(config, callback) {
     config._teardown_hooks.push(callback);
+}
+
+/**
+ * Create a unique temporary user data directory. Will be automatically
+ * deleted when the test completes
+ * @param {import('./internal').TaskConfig} config
+ * @returns {Promise<string>} Path to temporary user data dir
+ */
+async function createUserProfileDir(config) {
+    // Ensure that we can create multiple user dirs in the same test
+    const hash = Math.random().toString(36).substring(7);
+    const dir = (await tmp.dir({prefix: `pentf-profile-${config._taskName}-${hash}`})).path;
+
+    onTeardown(config, async () => {
+        await promisify(rimraf)(dir);
+    });
+
+    return dir;
 }
 
 /**
@@ -1834,6 +1853,7 @@ module.exports = {
     clickText,
     clickXPath,
     closePage,
+    createUserProfileDir,
     escapeXPathText,
     getAttribute,
     getSelectOptions,

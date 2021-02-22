@@ -5,6 +5,8 @@ const {performance} = require('perf_hooks');
 const kolorist = require('kolorist');
 
 const browser_utils = require('./browser_utils');
+// Makes the babel commonjs to esm much easier
+const { onTeardown } = require('./browser_utils');
 const email = require('./email');
 const external_locking = require('./external_locking');
 const locking = require('./locking');
@@ -677,6 +679,6 @@ async function run(config, testCases) {
 }
 
 module.exports = {
-    onTeardown: browser_utils.onTeardown,
+    onTeardown,
     run,
 };

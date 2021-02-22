@@ -5,6 +5,8 @@ const {performance} = require('perf_hooks');
 const kolorist = require('kolorist');
 
 const browser_utils = require('./browser_utils');
+// Makes the babel commonjs to esm much easier
+const { onTeardown } = require('./browser_utils');
 const email = require('./email');
 const external_locking = require('./external_locking');
 const locking = require('./locking');
@@ -14,15 +16,6 @@ const version = require('./version');
 const {timeoutPromise} = require('./promise_utils');
 const { getCPUCount } = require('./config');
 const { shouldShowError } = require('./output');
-
-/**
- * Add a callback to execute during the teardown phase of the test case.
- * @param {import('./internal').TaskConfig} config
- * @param {import('./internal').TeardownHook} callback
- */
-function onTeardown(config, callback) {
-    config._teardown_hooks.push(callback);
-}
 
 /**
  * @param {import('./config').Config} config

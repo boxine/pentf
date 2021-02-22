@@ -440,6 +440,7 @@ function withBreadcrumb(config, page, prop, getName) {
  */
 async function closePage(page) {
     const browser = getBrowser(page);
+    /** @type {import('./config').Config} */
     const config = browser._pentf_config;
     addBreadcrumb(config, 'enter closePage()');
 
@@ -447,8 +448,8 @@ async function closePage(page) {
     await timeoutPromise(
         config, Promise.all(browser._logs), {message: 'Aborting waiting on page logs'});
 
-    if (config._pentf_browser_pages) {
-        remove(config._pentf_browser_pages, p => p === page);
+    if (config._browser_pages) {
+        remove(config._browser_pages, p => p === page);
     }
 
     const closeFn = async () => {

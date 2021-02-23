@@ -501,6 +501,54 @@ async function closePage(page) {
 }
 
 /**
+ * Wait for an element matched by a CSS query selector to become present on the page.
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} selector Query selector, e.g. `div > a[href="/"]:visited`
+ * @param {{timeout?: number, message?: string, visible?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} [message] Error message shown if the element is not visible in time.
+ * @param {number?} [timeout] How long to wait, in milliseconds.
+ * @param {visible?} [visible] Whether the element must be visible within the timeout. (default: `true`)
+ * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
+ */
+async function waitForSelector(page, selector, {message=undefined, timeout=getDefaultTimeout(page), visible=true}={}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForSelector(${selector})`);
+
+    // Precompute errors for nice stack trace
+    const notFoundErr = new Error(
+        `Failed to find element matching  ${selector}  within ${timeout}ms` +
+        (message ? `. ${message}` : ''));
+    const visibleErr = new Error(
+        `Element matching  ${selector}  did not become visible within ${timeout}ms` +
+        (message ? `. ${message}` : ''));
+
+    let el;
+    try {
+        el = await page.waitForFunction((qs, visible) => {
+            const all = document.querySelectorAll(qs);
+            if (all.length !== 1) return null;
+            const el = all[0];
+            if (visible && (el.offsetParent === null || el.style.visibility === 'hidden')) {
+                return null;
+            }
+            return el;
+        }, {timeout}, selector, visible);
+    } catch(e) {
+        const found = await page.evaluate(
+            qs => document.querySelectorAll(qs).length === 1, selector);
+        if (found) {
+            throw visibleErr;
+        } else {
+            throw notFoundErr;
+        }
+    }
+    assert(el !== null);
+    addBreadcrumb(config, `exit waitForSelector(${selector})`);
+    return el;
+}
+
+/**
  * Wait for an element matched by a CSS query selector to become visible.
  * Visible means the element has neither `display:none` nor `visibility:hidden`.
  * Elements outside the current viewport (e.g. you'd need to scroll) and hidden with CSS trickery
@@ -513,38 +561,10 @@ async function closePage(page) {
  * @param {number?} [timeout] How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
  */
-async function waitForVisible(page, selector, {message=undefined, timeout=getDefaultTimeout(page)}={}) {
+async function waitForVisible(page, selector, {timeout, message} = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForVisible(${selector})`);
-
-    // Precompute errors for nice stack trace
-    const notFoundErr = new Error(
-        `Failed to find element matching  ${selector}  within ${timeout}ms` +
-        (message ? `. ${message}` : ''));
-    const visibleErr = new Error(
-        `Element matching  ${selector}  did not become visible within ${timeout}ms` +
-        (message ? `. ${message}` : ''));
-
-    let el;
-    try {
-        el = await page.waitForFunction(qs => {
-            const all = document.querySelectorAll(qs);
-            if (all.length !== 1) return null;
-            const el = all[0];
-            if (el.offsetParent === null) return null;
-            if (el.style.visibility === 'hidden') return null;
-            return el;
-        }, {timeout}, selector);
-    } catch(e) {
-        const found = await page.evaluate(
-            qs => document.querySelectorAll(qs).length === 1, selector);
-        if (found) {
-            throw visibleErr;
-        } else {
-            throw notFoundErr;
-        }
-    }
-    assert(el !== null);
+    const el = await waitForSelector(page, selector, { timeout, message, visible: true });
     addBreadcrumb(config, `exit waitForVisible(${selector})`);
     return el;
 }
@@ -1867,6 +1887,7 @@ module.exports = {
     speedupTimeouts,
     takeScreenshot,
     typeSelector,
+    waitForSelector,
     waitForTestId,
     waitForText,
     waitForVisible,

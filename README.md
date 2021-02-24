@@ -56,8 +56,34 @@ to execute all tests. You may also want to have a look at the [options](#options
 
 ## Writing tests
 
-Plop a new `.js` file into `tests/`. Its name will be the test''s name, and it should have an async `run` function, like this:
+Plop a new `example.js` file into `tests/`. Its name will be the test''s name, and it should have an async `run` function, like this:
 
+```javascript
+const assert = require("assert").strict;
+const { newPage, clickSelector, waitForText } = require("pentf/browser_utils");
+
+async function run(config) {
+    const page = await newPage(config);
+    await page.goto("https://example.com");
+
+    await waitForText(page, "Example Domain");
+    await clickSelector(page, "a");
+
+    await waitForText(page, "IANA-managed Reserved Domains");
+    // During development, you can make the test fail.
+    // Run with --debug to see the browser's state at this time!
+    // Any test failure is fine, but in a pinch, try uncommenting:
+
+    // assert(false);
+}
+
+module.exports = {
+    run,
+    description: "pentf test example",
+};
+```
+
+You can also use pentf to test APIs, check for emails, configure tests per environment and use locking for shared resources:
 ```javascript
 const assert = require('assert').strict;
 const {getMail} = require('pentf/email');

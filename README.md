@@ -33,7 +33,7 @@ Add the following script to your `package.json` with the `--tests-glob` paramete
 }
 ```
 
-Run `npm run test` or `yarn test` to launch pentf.
+Run `npm test` or `yarn test` to launch pentf. While working on a test, use `npm test -- --debug --watch` to see the Chromium instance and rerun tests when files change.
 
 ## Node API
 

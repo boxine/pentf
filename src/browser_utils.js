@@ -527,7 +527,7 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
     try {
         el = await page.waitForFunction((qs, visible) => {
             const all = document.querySelectorAll(qs);
-            if (all.length !== 1) return null;
+            if (all.length < 1) return null;
             const el = all[0];
             if (visible && (el.offsetParent === null || el.style.visibility === 'hidden')) {
                 return null;

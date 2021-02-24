@@ -7,8 +7,9 @@ async function run(config) {
     await page.setContent(`
         <div style="display:none;" id="a"></div>
         <div style="visibility: hidden;" id="b">This is b</div>
-        <div id="c">this is c</div>
+        <div id="c" class="foo">this is c</div>
         <div style="display:none;" id="d"></div>
+        <div id="e" class="foo">this is e</div>
     `);
 
     await assert.rejects(waitForSelector(page, '#a', {timeout: 100, message: 'display is none'}), {
@@ -25,6 +26,9 @@ async function run(config) {
     });
     const c = await waitForSelector(page, '#c', {timeout: 1000});
     assert.strictEqual(await page.evaluate(c => c.innerText, c), 'this is c');
+
+    const c2 = await waitForSelector(page, '.foo', {timeout: 1000});
+    assert.strictEqual(await page.evaluate(c2 => c2.innerText, c2), 'this is c');
 
     await closePage(page);
 }

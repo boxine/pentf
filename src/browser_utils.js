@@ -168,39 +168,7 @@ async function newPage(config, chrome_args=[]) {
     // Make sure that the browser window matches the viewport size
     if (!config.headless) {
         // Default puppeteer viewport size
-        // TODO: Make this configurable for users
-        const expected = { width: 800, height: 600 };
-        const actual = await page.evaluate(() => {
-            return { width: window.innerWidth, height: window.innerHeight };
-        });
-
-        if (actual.width !== expected.width || actual.height !== expected.height) {
-            // Get browser tab and resize window via devtools protocol
-            const targets = await browser._connection.send(
-                'Target.getTargets'
-            );
-            const target = targets.targetInfos.find(t => t.attached === true && t.type === 'page');
-            if (!target) {
-                throw new Error('INTERNAL ERROR: Missing page in window');
-            }
-            const {windowId} = await browser._connection.send(
-                'Browser.getWindowForTarget',
-                {targetId: target.targetId}
-            );
-            const {bounds} = await browser._connection.send(
-                'Browser.getWindowBounds',
-                {windowId}
-            );
-
-            // Resize to correct dimensions
-            await browser._connection.send('Browser.setWindowBounds', {
-                bounds: {
-                    width: bounds.width + expected.width - actual.width,
-                    height: bounds.height + expected.height - actual.height
-                },
-                windowId
-            });
-        }
+        await resizePage(config, page, { width: 800, height: 600 });
     }
 
     browser._logs = [];
@@ -288,6 +256,49 @@ async function newPage(config, chrome_args=[]) {
     }
 
     return page;
+}
+
+/**
+ * Resizes the browser window so that the page matches the specified dimensions.
+ * @param {import('./config').Config} config
+ * @param {import('puppeteer').Page} page
+ * @param {{ width: number, height: number }} dimensions
+ */
+async function resizePage(config, page, { width, height }) {
+    if (config.headless) {
+        // If we're running headless there is no point in trying to keep
+        // the browser resizeable. Just use the existing `page.setViewport()`
+        // API instead.
+        await page.setViewport({ width, height });
+    } else {
+        const actual = await page.evaluate(() => {
+            return { width: window.innerWidth, height: window.innerHeight };
+        });
+
+        const browser = getBrowser(page);
+
+        if (actual.width !== width || actual.height !== height) {
+            // Get browser tab and resize window via devtools protocol
+            const targetId = page._target._targetInfo.targetId;
+            const {windowId} = await browser._connection.send(
+                'Browser.getWindowForTarget',
+                {targetId}
+            );
+            const {bounds} = await browser._connection.send(
+                'Browser.getWindowBounds',
+                {windowId}
+            );
+
+            // Resize to correct dimensions
+            await browser._connection.send('Browser.setWindowBounds', {
+                bounds: {
+                    width: bounds.width + width - actual.width,
+                    height: bounds.height + height - actual.height
+                },
+                windowId
+            });
+        }
+    }
 }
 
 /**
@@ -1882,6 +1893,7 @@ module.exports = {
     interceptRequest,
     newPage,
     onTeardown,
+    resizePage,
     restoreTimeouts,
     setLanguage,
     speedupTimeouts,

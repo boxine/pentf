@@ -102,7 +102,30 @@
 				<a href="#writing-tests" id="writing-tests" style="color: inherit; text-decoration: none;">
 					<h2>Writing tests</h2>
 				</a>
-				<p>Plop a new <code>.js</code> file into <code>tests/</code>. Its name will be the test&#39;&#39;s name, and it should have an async <code>run</code> function, like this:</p>
+				<p>Plop a new <code>example.js</code> file into <code>tests/</code>. Its name will be the test&#39;&#39;s name, and it should have an async <code>run</code> function, like this:</p>
+				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">"assert"</span>).strict;
+<span class="hljs-keyword">const</span> { newPage, clickSelector, waitForText } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"pentf/browser_utils"</span>);
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params">config</span>) </span>{
+    <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> newPage(config);
+    <span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">"https://example.com"</span>);
+
+    <span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">"Example Domain"</span>);
+    <span class="hljs-keyword">await</span> clickSelector(page, <span class="hljs-string">"a"</span>);
+
+    <span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">"IANA-managed Reserved Domains"</span>);
+    <span class="hljs-comment">// During development, you can make the test fail.</span>
+    <span class="hljs-comment">// Run with --debug to see the browser's state at this time!</span>
+    <span class="hljs-comment">// Any test failure is fine, but in a pinch, try uncommenting:</span>
+
+    <span class="hljs-comment">// assert(false);</span>
+}
+
+<span class="hljs-built_in">module</span>.exports = {
+    run,
+    <span class="hljs-attr">description</span>: <span class="hljs-string">"pentf test example"</span>,
+};</code></pre>
+				<p>You can also use pentf to test APIs, check for emails, configure tests per environment and use locking for shared resources:</p>
 				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>).strict;
 <span class="hljs-keyword">const</span> {getMail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/email'</span>);
 <span class="hljs-keyword">const</span> {newPage} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/browser_utils'</span>);

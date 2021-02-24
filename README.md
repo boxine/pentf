@@ -28,7 +28,7 @@ Add the following script to your `package.json` with the `--tests-glob` paramete
 {
     "name": "my-package",
     "scripts": {
-        "test": "pentf --tests-glob test/**/*.test.js",
+        "test": "pentf --tests-glob tests/**/*.js",
     }
 }
 ```

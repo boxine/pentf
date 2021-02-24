@@ -425,7 +425,7 @@ The keys are up to you; for example you probably want to have a main entry point
 ```
 -C COUNT, --concurrency COUNT
                       Maximum number of tests to run in parallel. 0 to run without a pool, sequentially. 
-                      Can include *, +, and cpus for the number of CPUs. Defaults to 4+cpus.
+                      Can include *, +, and cpus for the number of CPUs. Defaults to cpus.
 -S, --sequential      Do not run tests in parallel (same as -C 0)
 --fail-fast           Abort once a test fails
 --print-tasks         Output all tasks that the runner would perform, and exit

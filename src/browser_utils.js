@@ -382,7 +382,18 @@ function withInteractions(page, prop) {
  * @param {import('puppeteer').Page | import('puppeteer').Frame} page
  */
 async function installInteractions(page) {
+    const config = getBrowser(page)._pentf_config;
     try {
+        // Skip injecting into html when trusted page is enabled to prevent
+        // noisy console output, that confused users.
+        const isTrustedPage = await page.evaluate(() => {
+            return document.head && document.head.querySelector('meta[content*="trusted-types"   ]') !==  null;
+        });
+        if (isTrustedPage) {
+            output.logVerbose(config, 'Cannot install pentf interaction ui overlays into page with trusted types. Skipping...');
+            return;
+        }
+
         await page.evaluate(() => {
             /**
              * @param {MouseEvent} e

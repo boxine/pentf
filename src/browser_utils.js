@@ -329,6 +329,41 @@ async function createUserProfileDir(config) {
 }
 
 /**
+ * Get the text content of an error or warning page inserted by the browser.
+ * The most common one is a page for an HTTPS-Error or lack of HTTPS.
+ * @param {import('puppeteer').Page} page
+ * @param {Error} error
+ * @param {Promise<Error>}
+ */
+async function enhanceError(config, page, error) {
+    if (!page.isClosed()) {
+        // Check if the page is injected by the browser like for an insecure
+        // form submission in Chrome.
+        const content = await page.evaluate(() => {
+            const s = '.interstitial-wrapper #main-content #main-message';
+            const node = document.querySelector(s);
+
+            if (node === null) {
+                return null;
+            }
+
+            return {
+                heading: document.querySelector('h1').textContent,
+                text: Array.from(document.querySelectorAll('p')).map(d => d.textContent.trim()).filter(Boolean).join('\n\n'),
+            };
+        });
+
+        if (content) {
+            const heading = output.color(config, 'bold', content.heading);
+            const message = output.color(config, 'red', `${heading}\n${content.text}`);
+            error.message += `\n\nThis error message was displayed by the browser:\n\n${message}`;
+        }
+    }
+
+    return error;
+}
+
+/**
  * @param {import('puppeteer').Page} page
  * @param {K extends keyof import('puppeteer').Page} prop
  */
@@ -502,7 +537,7 @@ async function closePage(page) {
             // Sometimes `page.isClosed()` is not up to date. Therefore
             // we ignore typical connection closed erros.
             if (!ignoreError(err)) {
-                throw err;
+                throw await enhanceError(config, page, err);
             }
         }
     };
@@ -549,9 +584,9 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
         const found = await page.evaluate(
             qs => document.querySelectorAll(qs).length === 1, selector);
         if (found) {
-            throw visibleErr;
+            throw await enhanceError(config, page, visibleErr);
         } else {
-            throw notFoundErr;
+            throw await enhanceError(config, page, notFoundErr);
         }
     }
     assert(el !== null);
@@ -642,7 +677,7 @@ async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMe
         addBreadcrumb(config, `exit waitForText(${text})`);
         return res;
     } catch (e) {
-        throw err;
+        throw await enhanceError(config, page, err);
     }
 }
 
@@ -685,7 +720,7 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
             return el;
         }, {timeout}, qs, visible);
     } catch (e) {
-        throw err; // Do not construct error here lest stack trace gets lost
+        throw await enhanceError(config, page, err); // Do not construct error here lest stack trace gets lost
     }
     assert(el !== null);
     addBreadcrumb(config, `exit waitForTestId(${testId})`);
@@ -773,7 +808,7 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
             }, xpath);
         } catch(err) {
             if (!ignoreError(err)) {
-                throw err;
+                throw await enhanceError(config, page, err);
             }
         }
         assert(!found,
@@ -910,7 +945,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
             }
         } catch(err) {
             if (!ignoreError(err)) {
-                throw err;
+                throw await enhanceError(config, page, err);
             }
         }
 
@@ -932,7 +967,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
             if (!message) {
                 message = `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${timeout}ms`;
             }
-            throw new Error(message);
+            throw await enhanceError(config, page, new Error(message));
         }
         await wait(Math.min(remainingTimeout, checkEvery));
         remainingTimeout -= checkEvery;
@@ -1089,7 +1124,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
             }
         } catch (err) {
             if (!ignoreError(err)) {
-                throw err;
+                throw await enhanceError(config, page, err);
             }
         }
 
@@ -1110,7 +1145,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
             if (!message) {
                 message = `Unable to find XPath ${xpath} after ${timeout}ms`;
             }
-            throw new Error(message);
+            throw await enhanceError(config, page, new Error(message));
         }
         await wait(Math.min(remainingTimeout, checkEvery));
         remainingTimeout -= checkEvery;
@@ -1292,7 +1327,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
             }
         } catch (err) {
             if (!ignoreError(err)) {
-                throw err;
+                throw await enhanceError(config, page, err);
             }
         }
 
@@ -1311,7 +1346,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
             }
 
             const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-            throw new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`);
+            throw await enhanceError(config, page, new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`));
         }
         await wait(Math.min(remainingTimeout, checkEvery));
         remainingTimeout -= checkEvery;

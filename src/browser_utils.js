@@ -572,14 +572,6 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForSelector(${selector})`);
 
-    // Precompute errors for nice stack trace
-    const notFoundErr = new Error(
-        `Failed to find element matching  ${selector}  within ${timeout}ms` +
-        (message ? `. ${message}` : ''));
-    const visibleErr = new Error(
-        `Element matching  ${selector}  did not become visible within ${timeout}ms` +
-        (message ? `. ${message}` : ''));
-
     let el;
     try {
         el = await page.waitForFunction((qs, visible) => {
@@ -592,12 +584,20 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
             return el;
         }, {timeout}, selector, visible);
     } catch(e) {
-        const found = await page.evaluate(
-            qs => document.querySelectorAll(qs).length === 1, selector);
-        if (found) {
-            throw await enhanceError(config, page, visibleErr);
+        const foundCount = await page.evaluate(qs => document.querySelectorAll(qs).length, selector);
+        if (foundCount > 0) {
+            const suffix = foundCount > 1 ? `. There are ${foundCount - 1} more elements matching the same selector on the page. Maybe the selector needs to be more specific?`:'';
+            const err = new Error(
+                `Element matching  ${selector}  did not become visible within ${timeout}ms${suffix}` +
+                    (message ? `. ${message}` : '')
+            );
+            throw await enhanceError(config, page, err);
         } else {
-            throw await enhanceError(config, page, notFoundErr);
+            const err = new Error(
+                `Failed to find element matching  ${selector}  within ${timeout}ms` +
+                    (message ? `. ${message}` : '')
+            );
+            throw await enhanceError(config, page, err);
         }
     }
     assert(el !== null);

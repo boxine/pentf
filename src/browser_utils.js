@@ -1107,6 +1107,50 @@ function getMouse(pageOrFrame) {
 }
 
 /**
+ *
+ * @param {import('puppeteer').Page} page
+ * @param {string | RegExp | Array<string | RegExp>} selector
+ * @param {{timeout?: number, checkEvery?: number, visible?: boolean, retryUntil?: () => any, message?: string}} options
+ */
+async function click(page, selector, { timeout = getDefaultTimeout(page), checkEvery = 200, message, visible = true, retryUntil}) {
+    const selectors = Array.isArray(selector) ? selector : [selector];
+
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter click(${selectors.join(', ')})`);
+    assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
+
+    let remainingTimeout = timeout;
+    let retryUntilError = null;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        const found = await queryOrClick(config, page, [selector], { click: true, visible });
+
+        try {
+            if ((found || (!found && retryUntilError !== null)) && (await onSuccess(retryUntil))) {
+                const config = getBrowser(page)._pentf_config;
+                addBreadcrumb(config, `exit click(${selectors.join(', ')})`);
+                return;
+            }
+        } catch (err) {
+            retryUntilError = err;
+        }
+
+        if (remainingTimeout <= 0) {
+            if (retryUntilError) {
+                throw retryUntilError;
+            }
+
+            if (!message) {
+                message = `Unable to find ${visible ? 'visible ' : ''}element ${selectors.join(', ')} after ${timeout}ms`;
+            }
+            throw await enhanceError(config, page, new Error(message));
+        }
+        await wait(Math.min(remainingTimeout, checkEvery));
+        remainingTimeout -= checkEvery;
+    }
+}
+
+/**
  * Clicks an element address    ed by a query selector atomically, e.g. within the same event loop run as finding it.
  *
  * @example
@@ -1124,39 +1168,16 @@ function getMouse(pageOrFrame) {
  * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
+async function clickSelector(page, selector, {message, timeout, checkEvery, visible, assertSuccess, retryUntil} = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickSelector(${selector})`);
     assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
 
-    let remainingTimeout = timeout;
-    let retryUntilError = null;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        const found = await queryOrClick(config, page, [selector], { click: true, visible });
-
-        try {
-            if ((found || (!found && retryUntilError !== null)) && (await onSuccess(retryUntil || assertSuccess))) {
-                const config = getBrowser(page)._pentf_config;
-                addBreadcrumb(config, `exit clickSelector(${selector})`);
-                return;
-            }
-        } catch (err) {
-            retryUntilError = err;
-        }
-
-        if (remainingTimeout <= 0) {
-            if (retryUntilError) {
-                throw retryUntilError;
-            }
-
-            if (!message) {
-                message = `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${timeout}ms`;
-            }
-            throw await enhanceError(config, page, new Error(message));
-        }
-        await wait(Math.min(remainingTimeout, checkEvery));
-        remainingTimeout -= checkEvery;
+    try {
+        await click(page, selector, {message, timeout, checkEvery, visible, retryUntil: retryUntil || assertSuccess});
+    } catch (err) {
+        addBreadcrumb(config, `exit clickSelector(${selector})`);
+        throw err;
     }
 }
 
@@ -1211,32 +1232,11 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     addBreadcrumb(config, `enter clickXPath(${xpath})`);
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
-    let remainingTimeout = timeout;
-    let retryUntilError = null;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        const found = await queryOrClick(config, page, [xpath], {click: true, visible});
-        try {
-            if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
-                addBreadcrumb(config, `exit clickXPath(${xpath})`);
-                return;
-            }
-        } catch (err) {
-            retryUntilError = err;
-        }
-
-        if (remainingTimeout <= 0) {
-            if (retryUntilError) {
-                throw retryUntilError;
-            }
-
-            if (!message) {
-                message = `Unable to find XPath ${xpath} after ${timeout}ms`;
-            }
-            throw await enhanceError(config, page, new Error(message));
-        }
-        await wait(Math.min(remainingTimeout, checkEvery));
-        remainingTimeout -= checkEvery;
+    try {
+        await click(page, xpath, {message, timeout, checkEvery, visible, retryUntil: retryUntil || assertSuccess});
+    } catch (err) {
+        addBreadcrumb(config, `exit clickXPath(${xpath})`);
+        throw err;
     }
 }
 
@@ -1301,31 +1301,11 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         selector = 'text=' + textOrRegExp;
     }
 
-    let remainingTimeout = timeout;
-    let retryUntilError = null;
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-        const found = await queryOrClick(config, page, [selector], { click: true, visible });
-
-        try {
-            if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
-                addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
-                return;
-            }
-        } catch (err) {
-            retryUntilError = err;
-        }
-
-        if (remainingTimeout <= 0) {
-            if (retryUntilError) {
-                throw retryUntilError;
-            }
-
-            const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-            throw await enhanceError(config, page, new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`));
-        }
-        await wait(Math.min(remainingTimeout, checkEvery));
-        remainingTimeout -= checkEvery;
+    try {
+        await click(page, selector, {message: extraMessage, timeout, checkEvery, visible, retryUntil: retryUntil || assertSuccess});
+    } catch (err) {
+        addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
+        throw err;
     }
 }
 
@@ -1347,10 +1327,9 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
     addBreadcrumb(config, `enter clickTestId(${testId})`);
     _checkTestId(testId);
 
-    const xpath = `//*[@data-testid="${testId}"]`;
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
     const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
-    const res = await clickXPath(page, xpath, {timeout, message, visible, retryUntil: retryUntil || assertSuccess});
+    const res = await click(page, `testid=${testId}`, {timeout, message, visible, retryUntil: retryUntil || assertSuccess});
     addBreadcrumb(config, `exit clickTestId(${testId})`);
     return res;
 }
@@ -1889,6 +1868,7 @@ module.exports = {
     assertNotXPath,
     assertSnapshot,
     assertValue,
+    click,
     clickNestedText,
     clickSelector,
     clickTestId,

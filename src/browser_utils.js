@@ -558,6 +558,242 @@ async function closePage(page) {
 }
 
 /**
+ * Query the DOM with multiple chained selector types
+ * @param {import('./config').Config} config
+ * @param {import('puppeteer').Page} page
+ * @param {Array<RegExp | string>} selectors
+ * @param {{click?: boolean, visible?: boolean}} options
+ */
+async function queryOrClick(config, page, selectors, { click, visible } = {}) {
+    const newSelectors = selectors.map(selector => {
+        return typeof selector !== 'string'
+            ? {source: selector.source, flags: selector.flags}
+            : selector;
+    });
+
+    let found = false;
+    try {
+        found = await page.evaluate(async (/** @type {Array<string | {source: string, flags:string}>} */ selectors, visible, click) => {
+            /** @type {Array<Element | Text>} */
+            let elements = [document];
+            for (let i = 0; i < selectors.length; i++) {
+                let selector = selectors[i];
+
+                let j = elements.length;
+                while (j--) {
+                    let element = elements[j];
+
+                    // Skip current node if it is a text node and we don't match text next
+                    if (element.nodeType === Node.TEXT_NODE) {
+                        if (typeof selector === 'string' && !selector.startsWith('text=')) {
+                            elements.splice(j, 1);
+                            continue;
+                        }
+                    }
+
+                    let node = /** @type {Element} */ (element);
+
+                    if (typeof selector === 'object' || selector.startsWith('text=')) {
+                        // eslint-disable-next-line no-undef
+                        /** @type {(text: string) => boolean} */
+                        let matchFunc;
+                        /** @type {null | (text: string) => boolean} */
+                        let matchFuncExact = null;
+
+                        if (typeof selector === 'string') {
+                            matchFunc = text => text.includes(selector.slice('tetxt='.length));
+                        } else {
+                            const regexExact = new RegExp(selector.source, selector.flags);
+                            matchFuncExact = text => {
+                                // Reset regex state in case global flag was used
+                                regexExact.lastIndex = 0;
+                                return regexExact.test(text);
+                            };
+
+                            // Remove leading ^ and ending $, otherwise the traversal
+                            // will fail at the first node.
+                            const source = selector.source
+                                .replace(/^[^]/, '')
+                                .replace(/[$]$/, '');
+                            const regex = new RegExp(source, selector.flags);
+                            matchFunc = text => {
+                                // Reset regex state in case global flag was used
+                                regex.lastIndex = 0;
+                                return regex.test(text);
+                            };
+                        }
+
+                        // `document.textContent` always returns `null`, so we need
+                        // to ensure that we're starting with `document.body` instead
+                        node = node === document ? document.body : node;
+                        const stack = [node];
+                        let item = null;
+                        let lastFound = null;
+                        while ((item = stack.pop())) {
+                            for (let k = 0; k < item.childNodes.length; k++) {
+                                const child = item.childNodes[k];
+
+                                // Skip text nodes as they are not clickable
+                                if (child.nodeType === Node.TEXT_NODE) {
+                                    continue;
+                                }
+
+                                const text = child.textContent || '';
+                                if (child.childNodes.length > 0 && matchFunc(text)) {
+                                    if (matchFuncExact === null || matchFuncExact(text)) {
+                                        lastFound = child;
+                                    }
+                                    stack.push(child);
+                                }
+                            }
+                        }
+
+                        if (!lastFound) {
+                            elements.splice(j, 1);
+                        } else {
+                            elements[j] = lastFound;
+                        }
+                    } else if (selector.startsWith('//')) {
+                        // The double slashes at the start signal that the XPath will always
+                        // resolve against the document root. That is not what we want so we
+                        // need to make it relative.
+                        selector = '.' + selector;
+                        const lastFound = document.evaluate(
+                            selector, node, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+
+                        if (!lastFound) {
+                            elements.splice(j, 1);
+                        } else {
+                            elements[j] = lastFound;
+                        }
+                    } else {
+                        if (selector.startsWith('testid=')) {
+                            const testid = selector.slice('testid='.length);
+                            selector = `[data-testid="${testid}"]`;
+                        }
+
+                        const result = node.querySelectorAll(selector);
+
+                        if (result.length > 0) {
+                            node.querySelectorAll(selector).forEach((child, i) => {
+                                if (i > 0) {
+                                    elements.push(child);
+                                } else {
+                                    elements[j] = child;
+                                }
+                            });
+                        } else {
+                            elements.splice(j, 1);
+                        }
+                    }
+                }
+            }
+
+            // TODO: Support multiple elements
+            const element = elements.length > 0 ? elements[0] : null;
+
+            if (!element) return false;
+
+            if (visible) {
+                if (element.offsetParent === null) return null; // invisible
+
+                if (click) {
+                    /**
+                     * Get the center coordinates of our element to click on.
+                     * @type {DOMRect}
+                     */
+                    let rect;
+
+                    // Text nodes don't have `getBoundingClientRect()`, but
+                    // we can use range objects for that.
+                    if (element.nodeType === Node.TEXT_NODE) {
+                        // Element may be hidden in a scroll container
+                        element.parentNode.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+
+                        const visibleRatio = await new Promise(resolve => {
+                            const observer = new IntersectionObserver(entries => {
+                                resolve(entries[0].intersectionRatio);
+                                observer.disconnect();
+                            });
+                            observer.observe(element.parentNode);
+                        });
+                        if (visibleRatio !== 1.0) {
+                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                        }
+
+                        const range = document.createRange();
+                        range.selectNodeContents(element);
+
+                        const rects = range.getClientRects();
+                        if (!rects || rects.length < 1) {
+                            throw new Error(`Could not determine Text node coordinates of "${element.data}"`);
+                        }
+
+                        rect = rects[0];
+                    } else {
+                        // Element may be hidden in a scroll container
+                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                        const visibleRatio = await new Promise(resolve => {
+                            const observer = new IntersectionObserver(entries => {
+                                resolve(entries[0].intersectionRatio);
+                                observer.disconnect();
+                            });
+                            observer.observe(element);
+                        });
+                        if (visibleRatio !== 1.0) {
+                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                        }
+
+                        rect = /** @type {Element} */ (element).getBoundingClientRect();
+                    }
+
+                    let x = rect.x + (rect.width / 2);
+                    let y = rect.y + (rect.height / 2);
+
+                    // Account for offset of the current frame if we are inside an iframe
+                    let win = window;
+                    let parentWin = null;
+                    while (win !== window.top) {
+                        parentWin = win.parent;
+
+                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
+                            .find(f => f.contentWindow === win);
+                        if (iframe) {
+                            const iframeRect = iframe.getBoundingClientRect();
+                            x += iframeRect.x;
+                            y += iframeRect.y;
+                            break;
+                        }
+                    }
+                    return { x, y };
+                }
+            }
+
+            if (click) {
+                // Click on invisible elements
+                element.click();
+            }
+
+            return true;
+        }, newSelectors, visible, click);
+
+        // Simulate a true mouse click. The following function scrolls
+        // the element into view, moves the mouse to its center and
+        // presses the left mouse button. This is important for when
+        // an element is above the one we want to click.
+        if (found !== null && typeof found === 'object') {
+            await getMouse(page).click(found.x, found.y);
+        }
+    } catch (err) {
+        if (!ignoreError(err)) {
+            throw await enhanceError(config, page, err);
+        }
+    }
+
+    return found;
+}
+
+/**
  * Wait for an element matched by a CSS query selector to become present on the page.
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
@@ -897,68 +1133,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
     let retryUntilError = null;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        let found = false;
-        try {
-            found = await page.evaluate(async (selector, visible) => {
-                const element = document.querySelector(selector);
-                if (!element) return false;
-
-                if (visible) {
-                    if (element.offsetParent === null) return null; // invisible
-
-                    // Element may be hidden in a scroll container
-                    element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    const visibleRatio = await new Promise(resolve => {
-                        const observer = new IntersectionObserver(entries => {
-                            resolve(entries[0].intersectionRatio);
-                            observer.disconnect();
-                        });
-                        observer.observe(element);
-                    });
-                    if (visibleRatio !== 1.0) {
-                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    }
-
-                    const rect = /** @type {Element} */ (element).getBoundingClientRect();
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
-                        }
-                    }
-                    return { x, y };
-                }
-
-                // We can't use the mouse to click on invisible elements.
-                // Therefore invoke the click handler on the DOM node directly.
-                element.click();
-                return true;
-            }, selector, visible);
-
-            // Simulate a true mouse click. The following function scrolls
-            // the element into view, moves the mouse to its center and
-            // presses the left mouse button. This is important for when
-            // an element is above the one we want to click.
-            if (found !== null && typeof found === 'object') {
-                await getMouse(page).click(found.x, found.y);
-            }
-        } catch(err) {
-            if (!ignoreError(err)) {
-                throw await enhanceError(config, page, err);
-            }
-        }
+        const found = await queryOrClick(config, page, [selector], { click: true, visible });
 
         try {
             if ((found || (!found && retryUntilError !== null)) && (await onSuccess(retryUntil || assertSuccess))) {
@@ -1040,105 +1215,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     let retryUntilError = null;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        let found = false;
-        try {
-            found = await page.evaluate(async (xpath, visible) => {
-                /** @type {Element | Text} */
-                const element = document.evaluate(
-                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-                if (!element) return false;
-
-                if (visible) {
-                    if (element.offsetParent === null) return null; // invisible
-
-                    /**
-                     * Get the center coordinates of our element to click on.
-                     * @type {DOMRect}
-                     */
-                    let rect;
-
-                    // Text nodes don't have `getBoundingClientRect()`, but
-                    // we can use range objects for that.
-                    if (element.nodeType === Node.TEXT_NODE) {
-                        // Element may be hidden in a scroll container
-                        element.parentNode.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-
-                        const visibleRatio = await new Promise(resolve => {
-                            const observer = new IntersectionObserver(entries => {
-                                resolve(entries[0].intersectionRatio);
-                                observer.disconnect();
-                            });
-                            observer.observe(element.parentNode);
-                        });
-                        if (visibleRatio !== 1.0) {
-                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        }
-
-                        const range = document.createRange();
-                        range.selectNodeContents(element);
-
-                        const rects = range.getClientRects();
-                        if (!rects || rects.length < 1) {
-                            throw new Error(`Could not determine Text node coordinates of "${element.data}"`);
-                        }
-
-                        rect = rects[0];
-                    } else {
-                        // Element may be hidden in a scroll container
-                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        const visibleRatio = await new Promise(resolve => {
-                            const observer = new IntersectionObserver(entries => {
-                                resolve(entries[0].intersectionRatio);
-                                observer.disconnect();
-                            });
-                            observer.observe(element);
-                        });
-                        if (visibleRatio !== 1.0) {
-                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        }
-
-                        rect = /** @type {Element} */ (element).getBoundingClientRect();
-                    }
-
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
-                        }
-                    }
-                    return { x, y };
-                }
-
-                // Click on invisible elements
-                element.click();
-                return true;
-            }, xpath, visible);
-
-            // Simulate a true mouse click. The following function scrolls
-            // the element into view, moves the mouse to its center and
-            // presses the left mouse button. This is important for when
-            // an element is above the one we want to click.
-            if (found !== null && typeof found === 'object') {
-                await getMouse(page).click(found.x, found.y);
-            }
-        } catch (err) {
-            if (!ignoreError(err)) {
-                throw await enhanceError(config, page, err);
-            }
-        }
-
+        const found = await queryOrClick(config, page, [xpath], {click: true, visible});
         try {
             if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
                 addBreadcrumb(config, `exit clickXPath(${xpath})`);
@@ -1218,129 +1295,17 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
 async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage=undefined, visible=true, assertSuccess, retryUntil}={}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickNestedText(${textOrRegExp})`);
+    let selector = textOrRegExp;
     if (typeof textOrRegExp === 'string') {
         checkText(textOrRegExp);
+        selector = 'text=' + textOrRegExp;
     }
-
-    const serializedMatcher = typeof textOrRegExp !== 'string'
-        ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
-        : textOrRegExp;
 
     let remainingTimeout = timeout;
     let retryUntilError = null;
     // eslint-disable-next-line no-constant-condition
     while (true) {
-        let found = false;
-
-        try {
-            found = await page.evaluate(async (matcher, visible) => {
-                // eslint-disable-next-line no-undef
-                /** @type {(text: string) => boolean} */
-                let matchFunc;
-                /** @type {null | (text: string) => boolean} */
-                let matchFuncExact = null;
-
-                if (typeof matcher == 'string') {
-                    matchFunc = text => text.includes(matcher);
-                } else {
-                    const regexExact = new RegExp(matcher.source, matcher.flags);
-                    matchFuncExact = text => {
-                        // Reset regex state in case global flag was used
-                        regexExact.lastIndex = 0;
-                        return regexExact.test(text);
-                    };
-
-                    // Remove leading ^ and ending $, otherwise the traversal
-                    // will fail at the first node.
-                    const source = matcher.source
-                        .replace(/^[^]/, '')
-                        .replace(/[$]$/, '');
-                    const regex = new RegExp(source, matcher.flags);
-                    matchFunc = text => {
-                        // Reset regex state in case global flag was used
-                        regex.lastIndex = 0;
-                        return regex.test(text);
-                    };
-                }
-
-                const stack = [document.body];
-                let item = null;
-                let lastFound = null;
-                while ((item = stack.pop())) {
-                    for (let i = 0; i < item.childNodes.length; i++) {
-                        const child = item.childNodes[i];
-
-                        // Skip text nodes as they are not clickable
-                        if (child.nodeType === Node.TEXT_NODE) {
-                            continue;
-                        }
-
-                        const text = child.textContent || '';
-                        if (child.childNodes.length > 0 && matchFunc(text)) {
-                            if (matchFuncExact === null || matchFuncExact(text)) {
-                                lastFound = child;
-                            }
-                            stack.push(child);
-                        }
-                    }
-                }
-
-                if (!lastFound) return false;
-
-                if (visible) {
-                    if (lastFound.offsetParent === null) return null; // invisible)
-
-                    // Element may be hidden in a scroll container
-                    lastFound.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    const visibleRatio = await new Promise(resolve => {
-                        const observer = new IntersectionObserver(entries => {
-                            resolve(entries[0].intersectionRatio);
-                            observer.disconnect();
-                        });
-                        observer.observe(lastFound);
-                    });
-                    if (visibleRatio !== 1.0) {
-                        lastFound.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    }
-
-                    const rect = lastFound.getBoundingClientRect();
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
-                        }
-                    }
-                    return { x, y };
-                }
-
-                lastFound.click();
-                return true;
-            }, serializedMatcher, visible);
-
-            // Simulate a true mouse click. The following function scrolls
-            // the element into view, moves the mouse to its center and
-            // presses the left mouse button. This is important for when
-            // an element is above the one we want to click.
-            if (found !== null && typeof found === 'object') {
-                await getMouse(page).click(found.x, found.y);
-            }
-        } catch (err) {
-            if (!ignoreError(err)) {
-                throw await enhanceError(config, page, err);
-            }
-        }
+        const found = await queryOrClick(config, page, [selector], { click: true, visible });
 
         try {
             if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {

@@ -1151,7 +1151,7 @@ async function click(page, selector, { timeout = getDefaultTimeout(page), checkE
 }
 
 /**
- * Clicks an element address    ed by a query selector atomically, e.g. within the same event loop run as finding it.
+ * Clicks an element addressed by a query selector atomically, e.g. within the same event loop run as finding it.
  *
  * @example
  * ```javascript

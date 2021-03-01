@@ -557,233 +557,266 @@ async function closePage(page) {
     addBreadcrumb(config, 'exit closePage()');
 }
 
+
 /**
- * Query the DOM with multiple chained selector types
- * @param {import('./config').Config} config
  * @param {import('puppeteer').Page} page
- * @param {Array<RegExp | string>} selectors
- * @param {{click?: boolean, visible?: boolean}} options
+ * @param {Array<string | RegExp>} selectors
+ * @returns {Element | null}
  */
-async function queryOrClick(config, page, selectors, { click, visible } = {}) {
+async function queryElement(page, selectors) {
     const newSelectors = selectors.map(selector => {
         return typeof selector !== 'string'
             ? {source: selector.source, flags: selector.flags}
             : selector;
     });
 
-    let found = false;
-    try {
-        found = await page.evaluate(async (/** @type {Array<string | {source: string, flags:string}>} */ selectors, visible, click) => {
-            /** @type {Array<Element | Text>} */
-            let elements = [document];
-            for (let i = 0; i < selectors.length; i++) {
-                let selector = selectors[i];
+    return await page.evaluate(selectors => {
+        /** @type {Array<Element | Text>} */
+        let elements = [document];
+        for (let i = 0; i < selectors.length; i++) {
+            let selector = selectors[i];
 
-                let j = elements.length;
-                while (j--) {
-                    let element = elements[j];
+            let j = elements.length;
+            while (j--) {
+                let element = elements[j];
 
-                    // Skip current node if it is a text node and we don't match text next
-                    if (element.nodeType === Node.TEXT_NODE) {
-                        if (typeof selector === 'string' && !selector.startsWith('text=')) {
-                            elements.splice(j, 1);
-                            continue;
-                        }
+                // Skip current node if it is a text node and we don't match text next
+                if (element.nodeType === Node.TEXT_NODE) {
+                    if (typeof selector === 'string' && !selector.startsWith('text=')) {
+                        elements.splice(j, 1);
+                        continue;
+                    }
+                }
+
+                let node = /** @type {Element} */ (element);
+
+                if (typeof selector === 'object' || selector.startsWith('text=')) {
+                    // eslint-disable-next-line no-undef
+                    /** @type {(text: string) => boolean} */
+                    let matchFunc;
+                    /** @type {null | (text: string) => boolean} */
+                    let matchFuncExact = null;
+
+                    if (typeof selector === 'string') {
+                        matchFunc = text => text.includes(selector.slice('tetxt='.length));
+                    } else {
+                        const regexExact = new RegExp(selector.source, selector.flags);
+                        matchFuncExact = text => {
+                            // Reset regex state in case global flag was used
+                            regexExact.lastIndex = 0;
+                            return regexExact.test(text);
+                        };
+
+                        // Remove leading ^ and ending $, otherwise the traversal
+                        // will fail at the first node.
+                        const source = selector.source.replace(/^[^]/, '').replace(/[$]$/, '');
+                        const regex = new RegExp(source, selector.flags);
+                        matchFunc = text => {
+                            // Reset regex state in case global flag was used
+                            regex.lastIndex = 0;
+                            return regex.test(text);
+                        };
                     }
 
-                    let node = /** @type {Element} */ (element);
+                    // `document.textContent` always returns `null`, so we need
+                    // to ensure that we're starting with `document.body` instead
+                    node = node === document ? document.body : node;
+                    const stack = [node];
+                    let item = null;
+                    let lastFound = null;
+                    while ((item = stack.pop())) {
+                        for (let k = 0; k < item.childNodes.length; k++) {
+                            const child = item.childNodes[k];
 
-                    if (typeof selector === 'object' || selector.startsWith('text=')) {
-                        // eslint-disable-next-line no-undef
-                        /** @type {(text: string) => boolean} */
-                        let matchFunc;
-                        /** @type {null | (text: string) => boolean} */
-                        let matchFuncExact = null;
+                            // Skip text nodes as they are not clickable
+                            if (child.nodeType === Node.TEXT_NODE) {
+                                continue;
+                            }
 
-                        if (typeof selector === 'string') {
-                            matchFunc = text => text.includes(selector.slice('tetxt='.length));
-                        } else {
-                            const regexExact = new RegExp(selector.source, selector.flags);
-                            matchFuncExact = text => {
-                                // Reset regex state in case global flag was used
-                                regexExact.lastIndex = 0;
-                                return regexExact.test(text);
-                            };
-
-                            // Remove leading ^ and ending $, otherwise the traversal
-                            // will fail at the first node.
-                            const source = selector.source
-                                .replace(/^[^]/, '')
-                                .replace(/[$]$/, '');
-                            const regex = new RegExp(source, selector.flags);
-                            matchFunc = text => {
-                                // Reset regex state in case global flag was used
-                                regex.lastIndex = 0;
-                                return regex.test(text);
-                            };
-                        }
-
-                        // `document.textContent` always returns `null`, so we need
-                        // to ensure that we're starting with `document.body` instead
-                        node = node === document ? document.body : node;
-                        const stack = [node];
-                        let item = null;
-                        let lastFound = null;
-                        while ((item = stack.pop())) {
-                            for (let k = 0; k < item.childNodes.length; k++) {
-                                const child = item.childNodes[k];
-
-                                // Skip text nodes as they are not clickable
-                                if (child.nodeType === Node.TEXT_NODE) {
-                                    continue;
+                            const text = child.textContent || '';
+                            if (child.childNodes.length > 0 && matchFunc(text)) {
+                                if (matchFuncExact === null || matchFuncExact(text)) {
+                                    lastFound = child;
                                 }
-
-                                const text = child.textContent || '';
-                                if (child.childNodes.length > 0 && matchFunc(text)) {
-                                    if (matchFuncExact === null || matchFuncExact(text)) {
-                                        lastFound = child;
-                                    }
-                                    stack.push(child);
-                                }
+                                stack.push(child);
                             }
                         }
+                    }
 
-                        if (!lastFound) {
-                            elements.splice(j, 1);
-                        } else {
-                            elements[j] = lastFound;
-                        }
-                    } else if (selector.startsWith('//')) {
-                        // The double slashes at the start signal that the XPath will always
-                        // resolve against the document root. That is not what we want so we
-                        // need to make it relative.
-                        selector = '.' + selector;
-                        const lastFound = document.evaluate(
-                            selector, node, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-
-                        if (!lastFound) {
-                            elements.splice(j, 1);
-                        } else {
-                            elements[j] = lastFound;
-                        }
+                    if (!lastFound) {
+                        elements.splice(j, 1);
                     } else {
-                        if (selector.startsWith('testid=')) {
-                            const testid = selector.slice('testid='.length);
-                            selector = `[data-testid="${testid}"]`;
-                        }
+                        elements[j] = lastFound;
+                    }
+                } else if (/^\.?\/\/[a-zA-z]/.test(selector) || selector.startsWith('xpath=')) {
+                    // The double slashes at the start signal that the XPath will always
+                    // resolve against the document root. That is not what we want so we
+                    // need to make it relative.
+                    selector = '.' + selector;
+                    const lastFound = document
+                        .evaluate(selector, node, null, window.XPathResult.ANY_TYPE, null)
+                        .iterateNext();
 
-                        const result = node.querySelectorAll(selector);
+                    if (!lastFound) {
+                        elements.splice(j, 1);
+                    } else {
+                        elements[j] = lastFound;
+                    }
+                } else {
+                    if (selector.startsWith('testid=')) {
+                        const testid = selector.slice('testid='.length);
+                        selector = `[data-testid="${testid}"]`;
+                    }
 
-                        if (result.length > 0) {
-                            node.querySelectorAll(selector).forEach((child, i) => {
-                                if (i > 0) {
-                                    elements.push(child);
-                                } else {
-                                    elements[j] = child;
-                                }
-                            });
-                        } else {
-                            elements.splice(j, 1);
-                        }
+                    const result = node.querySelectorAll(selector);
+
+                    if (result.length > 0) {
+                        node.querySelectorAll(selector).forEach((child, i) => {
+                            if (i > 0) {
+                                elements.push(child);
+                            } else {
+                                elements[j] = child;
+                            }
+                        });
+                    } else {
+                        elements.splice(j, 1);
                     }
                 }
             }
+        }
 
-            // TODO: Support multiple elements
-            const element = elements.length > 0 ? elements[0] : null;
+        // TODO: Support multiple elements
+        return elements.length > 0 ? elements[0] : null;
+    }, newSelectors);
+}
 
-            if (!element) return false;
+/**
+ *
+ * @param {import('puppeteer').Page} page
+ * @param {import('puppeteer').ElementHandle} element
+ * @returns {Promise<null | {x: number, y: number, visible: boolean }>}
+ */
+async function getElementCoordinates(page, element) {
+    /** @type {null, | {world: { x: number, y: number }, local: { x: number, y: number }}} */
+    return await page.evaluateHandle(async (element) => {
+        if (element.offsetParent === null) return null; // invisible
 
-            if (visible) {
-                if (element.offsetParent === null) return null; // invisible
+        /**
+         * Get the center coordinates of our element to click on.
+         * @type {DOMRect}
+         */
+        let rect;
 
-                if (click) {
-                    /**
-                     * Get the center coordinates of our element to click on.
-                     * @type {DOMRect}
-                     */
-                    let rect;
+        // Text nodes don't have `getBoundingClientRect()`, but
+        // we can use range objects for that.
+        if (element.nodeType === Node.TEXT_NODE) {
+            // Element may be hidden in a scroll container
+            element.parentNode.scrollIntoView({
+                block: 'center',
+                inline: 'center',
+                behavior: 'instant',
+            });
 
-                    // Text nodes don't have `getBoundingClientRect()`, but
-                    // we can use range objects for that.
-                    if (element.nodeType === Node.TEXT_NODE) {
-                        // Element may be hidden in a scroll container
-                        element.parentNode.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-
-                        const visibleRatio = await new Promise(resolve => {
-                            const observer = new IntersectionObserver(entries => {
-                                resolve(entries[0].intersectionRatio);
-                                observer.disconnect();
-                            });
-                            observer.observe(element.parentNode);
-                        });
-                        if (visibleRatio !== 1.0) {
-                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        }
-
-                        const range = document.createRange();
-                        range.selectNodeContents(element);
-
-                        const rects = range.getClientRects();
-                        if (!rects || rects.length < 1) {
-                            throw new Error(`Could not determine Text node coordinates of "${element.data}"`);
-                        }
-
-                        rect = rects[0];
-                    } else {
-                        // Element may be hidden in a scroll container
-                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        const visibleRatio = await new Promise(resolve => {
-                            const observer = new IntersectionObserver(entries => {
-                                resolve(entries[0].intersectionRatio);
-                                observer.disconnect();
-                            });
-                            observer.observe(element);
-                        });
-                        if (visibleRatio !== 1.0) {
-                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        }
-
-                        rect = /** @type {Element} */ (element).getBoundingClientRect();
-                    }
-
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
-                        }
-                    }
-                    return { x, y };
-                }
+            const visibleRatio = await new Promise(resolve => {
+                const observer = new IntersectionObserver(entries => {
+                    resolve(entries[0].intersectionRatio);
+                    observer.disconnect();
+                });
+                observer.observe(element.parentNode);
+            });
+            if (visibleRatio !== 1.0) {
+                element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
             }
 
-            if (click) {
-                // Click on invisible elements
-                element.click();
+            const range = document.createRange();
+            range.selectNodeContents(element);
+
+            const rects = range.getClientRects();
+            if (!rects || rects.length < 1) {
+                throw new Error(`Could not determine Text node coordinates of "${element.data}"`);
             }
 
-            return true;
-        }, newSelectors, visible, click);
+            rect = rects[0];
+        } else {
+            // Element may be hidden in a scroll container
+            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+            const visibleRatio = await new Promise(resolve => {
+                const observer = new IntersectionObserver(entries => {
+                    resolve(entries[0].intersectionRatio);
+                    observer.disconnect();
+                });
+                observer.observe(element);
+            });
+            if (visibleRatio !== 1.0) {
+                element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+            }
+
+            rect = /** @type {Element} */ (element).getBoundingClientRect();
+        }
+
+        const localX = rect.x + rect.width / 2;
+        const localY = rect.y + rect.height / 2;
+
+        let x = localX;
+        let y = localY;
+
+        // Account for offset of the current frame if we are inside an iframe
+        let win = window;
+        let parentWin = null;
+        while (win !== window.top) {
+            parentWin = win.parent;
+
+            const iframe = Array.from(parentWin.document.querySelectorAll('iframe')).find(
+                f => f.contentWindow === win
+            );
+            if (iframe) {
+                const iframeRect = iframe.getBoundingClientRect();
+                x += iframeRect.x;
+                y += iframeRect.y;
+                break;
+            }
+        }
+
+        return {
+            world: { x, y },
+            local: { x: localX, y: localY }
+        };
+    }, element);
+}
+
+/**
+ * Query the DOM with multiple chained selector types
+ * @param {import('./config').Config} config
+ * @param {import('puppeteer').Page} page
+ * @param {Array<RegExp | string>} selectors
+ * @param {{visible?: boolean}} options
+ */
+async function queryOrClick(config, page, selectors, { visible } = {}) {
+    let found = false;
+    try {
+        const element = await queryElement(page, selectors);
+        if (!element) found = false;
+
+        if (visible) {
+            const coordinates = await getElementCoordinates();
+            if (coordinates !== null) {
+                found = coordinates;
+            }
+        } else {
+            // Click on invisible elements
+            await element.click();
+            found = true;
+        }
 
         // Simulate a true mouse click. The following function scrolls
         // the element into view, moves the mouse to its center and
         // presses the left mouse button. This is important for when
         // an element is above the one we want to click.
         if (found !== null && typeof found === 'object') {
-            await getMouse(page).click(found.x, found.y);
+            await getMouse(page).click(found.world.x, found.world.y);
         }
+
+        return found;
     } catch (err) {
         if (!ignoreError(err)) {
             throw await enhanceError(config, page, err);
@@ -791,6 +824,41 @@ async function queryOrClick(config, page, selectors, { click, visible } = {}) {
     }
 
     return found;
+}
+
+/**
+ * Query the DOM with multiple chained selector types
+ * @param {import('./config').Config} config
+ * @param {import('puppeteer').Page} page
+ * @param {Array<RegExp | string>} selectors
+ * @param {{ visible?: boolean }} options
+ * @returns {Promise<null | import('puppeteer').ElementHandle>}
+ */
+async function waitForElement(config, page, selectors, { visible } = {}) {
+    try {
+        const element = await queryElement(page, selectors);
+
+        if (element && visible) {
+            const coordinates = await getElementCoordinates();
+            if (coordinates !== null) {
+                // Check if the element is on top and not overlapped by another
+                const isTopmostElement = await page.evaluateHandle((element, coordinates) => {
+                    const expected = document.elementFromPoint(coordinates.local.x, coordinates.local.y);
+                    return expected === element;
+                }, coordinates);
+
+                if (!isTopmostElement) {
+                    return null;
+                }
+            }
+        }
+
+        return element;
+    } catch (err) {
+        if (!ignoreError(err)) {
+            throw await enhanceError(config, page, err);
+        }
+    }
 }
 
 /**
@@ -810,6 +878,7 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
 
     let el;
     try {
+        el = await waitForElement(config, page, [selector], { visible });
         el = await page.waitForFunction((qs, visible) => {
             const all = document.querySelectorAll(qs);
             if (all.length < 1) return null;

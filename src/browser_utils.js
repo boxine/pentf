@@ -46,6 +46,7 @@ let tmp_home;
  */
 async function newPage(config, chrome_args=[]) {
     addBreadcrumb(config, 'enter newPage()');
+    /** @type {import('puppeteer')} */
     let puppeteer;
     try {
         if(config.puppeteer_firefox) {
@@ -127,7 +128,12 @@ async function newPage(config, chrome_args=[]) {
     }
 
     /** @type {import('puppeteer').Browser} */
-    const browser = await puppeteer.launch(params);
+    const browser = await puppeteer.launch({
+        ...params,
+        // Workaround until official support for Apple's M1 chip lands in puppeteer:
+        // Puppeteer for some reason ignores the environment variable on arm64 systems
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH
+    });
     const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {

@@ -191,10 +191,13 @@ async function forwardBrowserConsole(config, page) {
                 })
             );
 
-            const parsed = args.map(arg => parseConsoleArg(arg));
+            let parsed = args.map(arg => parseConsoleArg(arg));
             if (type === 'trace') {
                 console.log(`Trace: ${parsed[1] || ''}${parsed[0]}`);
             } else {
+                if (type === 'warn') {
+                    parsed = parsed.map(str => output.color(config, 'yellow', str));
+                }
                 console[type].apply(console, parsed);
             }
         } catch (err) {

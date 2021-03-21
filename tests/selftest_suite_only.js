@@ -7,7 +7,7 @@ async function run() {
     const sub_run = path.join(__dirname, 'suite', 'run');
     const {stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             [sub_run, '--exit-zero', '--no-screenshots', '-f', '^only'],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {

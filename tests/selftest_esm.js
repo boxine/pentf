@@ -7,7 +7,7 @@ async function run() {
     const sub_run = path.join(__dirname, 'esm_tests', 'run');
     const {stdout, stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             [sub_run, '--exit-zero', '--no-screenshots'],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {

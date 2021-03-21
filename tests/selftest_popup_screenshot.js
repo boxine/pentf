@@ -19,7 +19,7 @@ async function run() {
     const sub_run = path.join(fixture, 'run');
     await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             [sub_run, '--exit-zero', '--json', '-v'],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {

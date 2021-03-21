@@ -6,7 +6,7 @@ async function run() {
     const script = path.join(__dirname, '..', 'bin', 'cli.js');
     const {stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             ['-r', 'ts-node/register', script, '--exit-zero', '--no-screenshots', '--tests-glob', 'tests/ts_node/*.ts', '--no-pdf'],
             (err, stdout, stderr) => {
                 if (err) reject(err);

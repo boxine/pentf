@@ -6,7 +6,7 @@ async function run() {
     const sub_run = path.join(__dirname, 'version_ci_tests', 'run');
     const {stdout, stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             [sub_run],
             { cwd: path.dirname(sub_run), env: { ...process.env, CI: 'true' } },
             (err, stdout, stderr) => {

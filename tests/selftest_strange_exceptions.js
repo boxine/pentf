@@ -72,7 +72,7 @@ async function run() {
     assert(output.some(line => line.includes('Non-error object thrown by throw_promise: [object Promise]')));
     assert(output.some(line => line.includes('Non-error object thrown by throw_array: ["test"]')));
     assert(output.some(line => line.includes('Non-error object thrown by throw_object: [object Object]')));
-    assert(output.some(line => line.includes('Non-error object thrown by throw_class: class Strange { }')));
+    assert(output.some(line => line.includes('Non-error object thrown by throw_class: class Strange {')));
 
     // Not crashing is sufficient for us
     const results = render.craftResults(runnerConfig, testInfo);

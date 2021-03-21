@@ -7,7 +7,7 @@ async function run() {
 
     const {stdout} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             [sub_run, '--exit-zero', '--no-screenshots', '--ci', '--print-config', '--quiet'],
             {cwd: path.dirname(sub_run)},
             (err, stdout, stderr) => {

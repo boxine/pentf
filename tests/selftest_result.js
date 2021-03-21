@@ -22,7 +22,7 @@ async function run() {
 
     await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             [path.join(fixture, 'run'), '--exit-zero', '--html', '--json', '--markdown', '--pdf'],
             { cwd: fixture },
             (err, stdout, stderr) => {

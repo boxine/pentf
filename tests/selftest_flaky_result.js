@@ -7,7 +7,7 @@ async function run() {
     const sub_run = path.join(__dirname, 'flaky_tests', 'run');
     const {stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             [sub_run, '--exit-zero', '--no-colors', '--no-screenshots', '--repeat-flaky', '3', '--ci'],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {

@@ -6,7 +6,7 @@ async function run() {
     const sub_run = path.join(__dirname, 'version_pentf', 'run');
     const {stdout} = await new Promise((resolve, reject) => {
         child_process.execFile(
-            'node',
+            process.execPath,
             [sub_run, '--version'],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {

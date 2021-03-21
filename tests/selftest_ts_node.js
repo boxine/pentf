@@ -3,7 +3,7 @@ const path = require('path');
 const child_process = require('child_process');
 
 async function run() {
-    const script = path.join(__dirname, '..', 'bin', 'cli.js');
+    const script = path.join(__dirname, 'ts_node', 'run');
     const {stderr} = await new Promise((resolve, reject) => {
         child_process.execFile(
             process.execPath,

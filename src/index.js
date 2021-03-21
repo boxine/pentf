@@ -1,6 +1,8 @@
-const { register } = require('esbuild-register/dist/node');
+const {register} = require('esbuild-register/dist/node');
 register({
-    sourcemap:true
+    sourcemap: true,
+    minify: false,
+    keepNames: false,
 });
 
 const {main} = require('./main');

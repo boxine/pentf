@@ -145,3 +145,14 @@ export type A11yResult = {
     description: string;
     nodes: A11yNode[];
 }
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface Coordinates {
+  world: Point;
+  local: Point;
+  isTopmostElement: boolean;
+}

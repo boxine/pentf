@@ -694,7 +694,7 @@ async function queryElement(page, selectors) {
  *
  * @param {import('puppeteer').Page} page
  * @param {import('puppeteer').ElementHandle} element
- * @returns {Promise<null | {x: number, y: number, visible: boolean }>}
+ * @returns {Promise<null | import('./internal').Coordinates>}
  */
 async function getElementCoordinates(page, element) {
     /** @type {null, | {world: { x: number, y: number }, local: { x: number, y: number }}} */
@@ -777,9 +777,13 @@ async function getElementCoordinates(page, element) {
             }
         }
 
+        // Check if the element is obscured by another
+        const isTopmostElement = document.elementFromPoint(localX, localY) === element;
+
         return {
             world: { x, y },
-            local: { x: localX, y: localY }
+            local: { x: localX, y: localY },
+            isTopmostElement,
         };
     }, element);
 }
@@ -795,10 +799,10 @@ async function queryOrClick(config, page, selectors, { visible } = {}) {
     let found = false;
     try {
         const element = await queryElement(page, selectors);
-        if (!element) found = false;
-
-        if (visible) {
-            const coordinates = await getElementCoordinates();
+        if (!element) {
+            found = false;
+        } else if (visible) {
+            const coordinates = await getElementCoordinates(page, element);
             if (coordinates !== null) {
                 found = coordinates;
             }
@@ -831,33 +835,44 @@ async function queryOrClick(config, page, selectors, { visible } = {}) {
  * @param {import('./config').Config} config
  * @param {import('puppeteer').Page} page
  * @param {Array<RegExp | string>} selectors
- * @param {{ visible?: boolean }} options
+ * @param {{ visible?: boolean, timeout?: number, checkEvery?: number }} options
  * @returns {Promise<null | import('puppeteer').ElementHandle>}
  */
-async function waitForElement(config, page, selectors, { visible } = {}) {
-    try {
-        const element = await queryElement(page, selectors);
+async function waitForElement(config, page, selectors, { visible, timeout = getDefaultTimeout(page), checkEvery = 200 } = {}) {
+    let remainingTimeout = timeout;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        try {
+            const element = await queryElement(page, selectors);
 
-        if (element && visible) {
-            const coordinates = await getElementCoordinates();
-            if (coordinates !== null) {
-                // Check if the element is on top and not overlapped by another
-                const isTopmostElement = await page.evaluateHandle((element, coordinates) => {
-                    const expected = document.elementFromPoint(coordinates.local.x, coordinates.local.y);
-                    return expected === element;
-                }, coordinates);
+            if (element && visible) {
+                const coordinates = await getElementCoordinates(page, element);
+                if (coordinates !== null && coordinates.isTopmostElement) {
+                    // Check if the element is on top and not overlapped by another
+                    const isTopmostElement = await page.evaluateHandle((element, coordinates) => {
+                        const expected = document.elementFromPoint(coordinates.local.x, coordinates.local.y);
+                        return expected === element;
+                    }, coordinates);
 
-                if (!isTopmostElement) {
-                    return null;
+                    if (!isTopmostElement) {
+                        return null;
+                    }
                 }
+            }
+
+            return element;
+        } catch (err) {
+            if (!ignoreError(err)) {
+                throw await enhanceError(config, page, err);
             }
         }
 
-        return element;
-    } catch (err) {
-        if (!ignoreError(err)) {
-            throw await enhanceError(config, page, err);
+        if (remainingTimeout <= 0) {
+            break;
         }
+
+        await wait(Math.min(checkEvery, remainingTimeout));
+        remainingTimeout -= checkEvery;
     }
 }
 
@@ -879,6 +894,7 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
     let el;
     try {
         el = await waitForElement(config, page, [selector], { visible });
+
         el = await page.waitForFunction((qs, visible) => {
             const all = document.querySelectorAll(qs);
             if (all.length < 1) return null;

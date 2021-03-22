@@ -334,14 +334,21 @@ async function createUserProfileDir(config) {
     return dir;
 }
 
+/** @type {(x: any) => x is import('puppeteer').Page} */
+const isPage = x => x !== null && typeof x === 'object' && typeof x.isClosed === 'function';
+
+/** @type {(pageOrFrame: import('puppeteer').Page | import('puppeteer').Frame) => import('puppeteer').Page} */
+const getPage = pageOrFrame => isPage(pageOrFrame) ? pageOrFrame : pageOrFrame._frameManager._page;
+
 /**
  * Get the text content of an error or warning page inserted by the browser.
  * The most common one is a page for an HTTPS-Error or lack of HTTPS.
- * @param {import('puppeteer').Page} page
+ * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
  * @param {Error} error
  * @param {Promise<Error>}
  */
-async function enhanceError(config, page, error) {
+async function enhanceError(config, pageOrFrame, error) {
+    const page = getPage(pageOrFrame);
     if (!page.isClosed()) {
         // Check if the page is injected by the browser like for an insecure
         // form submission in Chrome.

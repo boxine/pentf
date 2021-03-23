@@ -3,7 +3,7 @@
   "version": "2.4.4",
   "description": "parallel end-to-end test framework",
   "main": "src/index.js",
-  "types": "dist/types/__index.d.ts",
+  "types": "dist/types/index.d.ts",
   "directories": {
     "test": "tests"
   },
@@ -123,6 +123,7 @@
     "@babel/cli": "^7.10.5",
     "@babel/core": "^7.11.1",
     "@types/diff": "^4.0.2",
+    "@types/node": "^14.14.35",
     "@types/pixelmatch": "^5.2.2",
     "@types/pngjs": "^3.4.2",
     "@types/sharp": "^0.27.1",

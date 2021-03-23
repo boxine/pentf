@@ -5,6 +5,10 @@ const {wait} = require('./utils');
 const external_locking = require('./external_locking');
 
 /**
+ * @typedef {{resource: string, expireIn: number, client?: string}} Lock
+ */
+
+/**
  * @param {import('./config').Config} config
  * @param {import('./internal').Task} task
  * @private

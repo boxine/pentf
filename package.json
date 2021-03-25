@@ -103,7 +103,7 @@
     "emailjs-imap-client": "^3.0.7",
     "emailjs-mime-parser": "^2.0.5",
     "errorstacks": "^1.1.5",
-    "esbuild": "^0.9.6",
+    "esbuild": "^0.10.0",
     "esbuild-register": "^2.3.0",
     "form-data": "^2.3.3",
     "glob": "^7.1.6",

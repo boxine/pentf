@@ -28,6 +28,25 @@ async function run() {
         }
     }, {checkEvery: 1, crashOnError: false});
     assert.strictEqual(counter, 3);
+
+    // Throws original error
+    try {
+        await assertEventually(() => {
+            throw new Error('Custom error');
+        }, {crashOnError: false, timeout: 1000 });
+        throw new Error('fail');
+    } catch (err) {
+        assert.match(err.message, /Custom error/);
+    }
+
+    let counter2 = 0;
+    await assertEventually(() => {
+        counter2++;
+        if (counter2 < 3) {
+            throw new Error('Custom error');
+        }
+    }, {crashOnError: false, timeout: 1000 });
+    assert.equal(counter2, 3);
 }
 
 module.exports = {

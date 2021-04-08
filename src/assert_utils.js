@@ -146,6 +146,9 @@ function assertNotIncludes(haystack, needle, message = undefined) {
 async function assertEventually(testfunc,
     {message='assertEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
 
+    /** @type {null | Error} */
+    let caughtError = null;
+
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         if (crashOnError) {
             try {
@@ -157,7 +160,7 @@ async function assertEventually(testfunc,
                 }
             }
         } else {
-            let crashed = false;
+            caughtError = null;
             let res;
             try {
                 res = await testfunc();
@@ -165,13 +168,19 @@ async function assertEventually(testfunc,
                 if (ignoreError(e)) {
                     continue;
                 }
-                crashed = true;
+                caughtError = e;
             }
-            if (!crashed) return res;
+            if (caughtError === null) return res;
         }
 
         await wait(checkEvery);
     }
+
+    if (caughtError !== null) {
+        caughtError.message += ` (waited ${timeout}ms)`;
+        throw caughtError;
+    }
+
     throw new Error(`${message} (waited ${timeout}ms)`);
 }
 

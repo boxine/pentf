@@ -185,6 +185,24 @@ async function assertEventually(testfunc,
 }
 
 /**
+ * Wait until a function returns a result that is truthy
+ * @param {() => any} testfunc
+ * @param {{timeout?: number, checkEvery?: number}} options
+ */
+async function waitFor(testfunc, options) {
+    await assertEventually(testfunc, { crashOnError: true, ...options });
+}
+
+/**
+ * Wait until a function doesn't throw anymore.
+ * @param {() => any} testfunc
+ * @param {{timeout?: number, checkEvery?: number}} options
+ */
+async function waitForPass(testfunc, options) {
+    await assertEventually(testfunc, { crashOnError: false, ...options });
+}
+
+/**
  * Assert that an asynchronously evaluated condition is eventually true.
  *
  * @param {() => Promise<any>} testfunc The async test function. Must return `true` to signal success.
@@ -304,4 +322,6 @@ module.exports = {
     assertNotIncludes,
     assertNumeric,
     lazyAssert,
+    waitFor,
+    waitForPass,
 };

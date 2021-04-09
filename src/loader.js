@@ -74,7 +74,9 @@ async function importFile(file, moduleType) {
  * @private
  */
 function loadSuite(fileName, suiteName, builder) {
+    /** @type {import('./internal').TestCase[]} */
     const tests = [];
+    /** @type {import('./internal').TestCase[]} */
     const only = [];
     let onlyInScope = false;
     let skipInScope = false;
@@ -91,7 +93,7 @@ function loadSuite(fileName, suiteName, builder) {
             name: `${groups.join('>')}_${i++}`,
             run,
             skip: skipInScope ? skipFn : options.skip,
-            path: fileName,
+            fileName,
             ...options,
         });
     };
@@ -102,7 +104,7 @@ function loadSuite(fileName, suiteName, builder) {
             name: `${groups.join('>')}_${i++}`,
             run,
             skip: skipInScope ? skipFn : options.skip,
-            path: fileName,
+            fileName,
             ...options,
         });
     };
@@ -114,7 +116,7 @@ function loadSuite(fileName, suiteName, builder) {
             name: `${groups.join('>')}_${i++}`,
             run,
             skip: skipFn,
-            path: fileName,
+            fileName,
             ...options,
         });
     };

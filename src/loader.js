@@ -158,7 +158,10 @@ function loadSuite(fileName, suiteName, builder) {
  */
 async function applyTestFilters(config, tests) {
     if (config.filter) {
-        tests = tests.filter(n => new RegExp(config.filter).test(n.name));
+        tests = tests.filter(n => {
+            const name = path.basename(n.fileName, path.extname(n.fileName));
+            return new RegExp(config.filter).test(name);
+        });
     }
     if (config.filter_body) {
         const bodyFilterRe = new RegExp(config.filter_body);

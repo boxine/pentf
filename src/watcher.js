@@ -60,7 +60,7 @@ const MAX_ITEMS = 10;
  *
  * @param {import('./config').Config} config
  * @param {WatchState} state
- * @param {import('./runner').TestCase[]} test_cases
+ * @param {import('./internal').TestCase[]} test_cases
  */
 function renderSearch(config, state, test_cases) {
     if (!config.ci) console.clear();
@@ -83,25 +83,36 @@ function renderSearch(config, state, test_cases) {
         if (!utils.isValidRegex(file_pattern)) {
             results.push(output.color(config, 'red', 'Pattern contains invalid characters'));
         } else {
-            const len = test_cases.length;
-            if (len > MAX_ITEMS) {
-                test_cases = test_cases.slice(0, MAX_ITEMS);
+            const seen_files = new Set();
+            /** @type {import('./internal').TestCase[]} */
+            let test_files = [];
+            for (const tc of test_cases) {
+                if (!seen_files.has(tc.fileName)) {
+                    seen_files.add(tc.fileName);
+                    test_files.push(tc);
+                }
             }
-            results = test_cases.map((tc, i) => {
+
+            const len = test_files.length;
+            if (len > MAX_ITEMS) {
+                test_files = test_files.slice(0, MAX_ITEMS);
+            }
+            results = test_files.map((tc, i) => {
+                const name = path.basename(tc.fileName, path.extname(tc.fileName));
                 if (state.selection_active && state.selected_row === i) {
                     return output.color(config, 'dim', '- ') +
-                        output.color(config, 'inverse', output.color(config, 'yellow', tc.name));
+                        output.color(config, 'inverse', output.color(config, 'yellow', name));
                 }
 
-                let name = output.color(config, 'dim', tc.name);
+                let tcName = output.color(config, 'dim', name);
                 const match = tc.name.match(new RegExp(file_pattern));
                 if (match) {
-                    name = output.color(config, 'dim', tc.name.slice(0, match.index)) +
+                    tcName = output.color(config, 'dim', name.slice(0, match.index)) +
                         tc.name.slice(match.index, match.index + match[0].length) +
-                        output.color(config, 'dim', tc.name.slice(match.index + match[0].length));
+                        output.color(config, 'dim', name.slice(match.index + match[0].length));
                 }
 
-                return `  ${name}`;
+                return `  ${tcName}`;
             });
 
             if (len > 10) {
@@ -317,7 +328,8 @@ async function createWatcher(config, onChange) {
                     if (selection_active) {
                         const selected = test_cases[selected_row];
                         if (selected) {
-                            selected_file = selected.name;
+                            const name = path.basename(selected.fileName, path.extname(selected.fileName));
+                            selected_file = name;
                         }
                     }
                 }

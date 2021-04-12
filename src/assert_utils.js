@@ -187,18 +187,18 @@ async function assertEventually(testfunc,
 /**
  * Wait until a function returns a result that is truthy
  * @param {() => any} testfunc
- * @param {{timeout?: number, checkEvery?: number}} options
+ * @param {{timeout?: number, checkEvery?: number, message?: string}} [options]
  */
-async function waitFor(testfunc, options) {
+async function waitFor(testfunc, options = {}) {
     await assertEventually(testfunc, { crashOnError: true, ...options });
 }
 
 /**
  * Wait until a function doesn't throw anymore.
  * @param {() => any} testfunc
- * @param {{timeout?: number, checkEvery?: number}} options
+ * @param {{timeout?: number, checkEvery?: number, message?: string}} [options]
  */
-async function waitForPass(testfunc, options) {
+async function waitForPass(testfunc, options = {}) {
     await assertEventually(testfunc, { crashOnError: false, ...options });
 }
 

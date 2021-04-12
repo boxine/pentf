@@ -15,6 +15,9 @@ async function run() {
         message: 'crash',
     });
 
+    // Should pass
+    await waitFor(() => true);
+
     // waitForPass
     await assert.doesNotReject(waitForPass(() => false, {timeout: 10, checkEvery: 1, message: 'Never changed'}), {
         message: 'Never changed (waited 10ms)',
@@ -28,6 +31,9 @@ async function run() {
         }
     }, {checkEvery: 1});
     assert.strictEqual(counter, 3);
+
+    // Should pass
+    await waitForPass(() => true);
 }
 
 module.exports = {

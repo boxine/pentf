@@ -34,7 +34,6 @@ async function execRunner(config, expected, fn) {
     /** @type {import('../src/config').Config} */
     const runnerConfig = {
         ...config,
-        breadcrumbs: true,
         quiet: true,
         logFunc(config, message) {
             output.push(kolorist.stripColors(message));

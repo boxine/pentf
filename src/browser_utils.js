@@ -197,19 +197,17 @@ async function newPage(config, chrome_args=[]) {
         });
     }
 
-    if (config.breadcrumbs) {
-        withBreadcrumb(config, page, '$', (selector) => `page.$(${selector})`);
-        withBreadcrumb(config, page, '$$', (selector) => `page.$$(${selector})`);
-        withBreadcrumb(config, page, '$eval', () => 'page.$eval()');
-        withBreadcrumb(config, page, '$$eval', () => 'page.$$eval()');
-        withBreadcrumb(config, page, 'click', (selector) => `page.click(${selector})`);
-        withBreadcrumb(config, page, 'evaluate', () => 'page.evaluate()');
-        withBreadcrumb(config, page, 'goto', (url) => `page.goto(${url})`);
-        withBreadcrumb(config, page, 'type', (selector, text) => `page.type(${selector}, ${text})`);
-        withBreadcrumb(config, page, 'waitForSelector', (selector) => `page.waitForSelector(${selector})`);
-        withBreadcrumb(config, page, 'waitForFunction', () => 'page.waitForFunction()');
-        withBreadcrumb(config, page, 'waitForXPath', (xpath) => `page.waitForXPath(${xpath})`);
-    }
+    withBreadcrumb(config, page, '$', (selector) => `page.$(${selector})`);
+    withBreadcrumb(config, page, '$$', (selector) => `page.$$(${selector})`);
+    withBreadcrumb(config, page, '$eval', () => 'page.$eval()');
+    withBreadcrumb(config, page, '$$eval', () => 'page.$$eval()');
+    withBreadcrumb(config, page, 'click', (selector) => `page.click(${selector})`);
+    withBreadcrumb(config, page, 'evaluate', () => 'page.evaluate()');
+    withBreadcrumb(config, page, 'goto', (url) => `page.goto(${url})`);
+    withBreadcrumb(config, page, 'type', (selector, text) => `page.type(${selector}, ${text})`);
+    withBreadcrumb(config, page, 'waitForSelector', (selector) => `page.waitForSelector(${selector})`);
+    withBreadcrumb(config, page, 'waitForFunction', () => 'page.waitForFunction()');
+    withBreadcrumb(config, page, 'waitForXPath', (xpath) => `page.waitForXPath(${xpath})`);
 
     // The Browser instance is the nearest shared ancestor across pages
     // and frames.
@@ -509,10 +507,8 @@ function getDefaultTimeout(pageOrFrame) {
  * @private
  */
 function addBreadcrumb(config, name) {
-    if (config.breadcrumbs) {
-        const time = Math.round(performance.now() - config.start);
-        config._breadcrumb = new Error(`Last breadcrumb "${name}" at ${time}ms after test started.`);
-    }
+    const time = Math.round(performance.now() - config.start);
+    config._breadcrumb = new Error(`Last breadcrumb "${name}" at ${time}ms after test started.`);
 }
 
 /**

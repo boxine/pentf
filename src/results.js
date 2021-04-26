@@ -20,6 +20,7 @@ function getResults(config, results) {
     const expectedToFailButPassed = !expectNothing && results.filter(
         t => t.expectedToFail && t.status === 'success');
     const todo = results.filter(t => t.status === 'todo');
+    const running = results.filter(t => t.status === 'running');
 
     return {
         success,
@@ -29,6 +30,7 @@ function getResults(config, results) {
         expectedToFail,
         expectedToFailButPassed,
         todo,
+        running,
     };
 }
 

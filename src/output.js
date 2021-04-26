@@ -83,13 +83,17 @@ function status(config, state) {
     const terminal_width = STATUS_STREAM.getWindowSize ? STATUS_STREAM.getWindowSize()[0] : Infinity;
     let status_str;
     for (let running_show = running.length;running_show >= 0;running_show--) {
-        const running_str = (
+        let running_str = (
             running.slice(0, running_show).map(task => task.name).join(' ')
             + (running_show < running.length ? '  +' + (running.length - running_show) : '')
         );
+        if (running_str.length > 0) {
+            running_str = ` (${running_str})`;
+        }
+
         status_str = (
             `${done.length}/${tasks.length - skipped.length} done, ` +
-            `${success_str}${failed_str}${expected_fail_str}${running.length} running (${running_str})`);
+            `${success_str}${failed_str}${expected_fail_str}${running.length} running${running_str}`);
 
         if (status_str.length < terminal_width) {
             break; // Fits!

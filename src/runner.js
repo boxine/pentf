@@ -414,6 +414,12 @@ async function parallel_run(config, state) {
                 if (config.verbose || config.locking_verbose) {
                     const waitingTasksStr = state.tasks.filter(t => t.status === 'todo').map(t => t.id).join(',');
                     output.log(config, `[runner] Still waiting for locks on tasks ${waitingTasksStr}`);
+                } else if (state.running.length < config.concurrency) {
+                    const waitingTasksStr = state.tasks
+                        .filter(t => t.status === 'todo')
+                        .map(t => output.color(config, 'cyan', t.id))
+                        .join(',');
+                    output.log(config, `Waiting for locks on ${waitingTasksStr}`);
                 }
                 continue;
             }

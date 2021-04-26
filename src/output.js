@@ -69,11 +69,10 @@ function status(config, state) {
     last_state = state;
 
     const testResults = Array.from(state.resultByTaskGroup.values());
-    const {errored, expectedToFail, skipped, success} = getResults(config, testResults);
+    const {errored, expectedToFail, skipped, success, running} = getResults(config, testResults);
     const {tasks} = state;
 
     const done = tasks.filter(t => t.status === 'error' || t.status === 'success');
-    const running = tasks.filter(t => t.status === 'running');
 
     const failed_str = errored.length > 0 ? color(config, 'red', `${errored.length} failed, `) : '';
     const expected_fail_str = expectedToFail.length > 0 ? `${expectedToFail.length} failed as expected, ` : '';
@@ -84,13 +83,17 @@ function status(config, state) {
     const terminal_width = STATUS_STREAM.getWindowSize ? STATUS_STREAM.getWindowSize()[0] : Infinity;
     let status_str;
     for (let running_show = running.length;running_show >= 0;running_show--) {
-        const running_str = (
+        let running_str = (
             running.slice(0, running_show).map(task => task.name).join(' ')
             + (running_show < running.length ? '  +' + (running.length - running_show) : '')
         );
+        if (running_str.length > 0) {
+            running_str = ` (${running_str})`;
+        }
+
         status_str = (
             `${done.length}/${tasks.length - skipped.length} done, ` +
-            `${success_str}${failed_str}${expected_fail_str}${running.length} running (${running_str})`);
+            `${success_str}${failed_str}${expected_fail_str}${running.length} running${running_str}`);
 
         if (status_str.length < terminal_width) {
             break; // Fits!

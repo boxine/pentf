@@ -69,7 +69,7 @@ function status(config, state) {
     last_state = state;
 
     const testResults = Array.from(state.resultByTaskGroup.values());
-    const {errored, expectedToFail, skipped} = getResults(config, testResults);
+    const {errored, expectedToFail, skipped, success} = getResults(config, testResults);
     const {tasks} = state;
 
     const done = tasks.filter(t => t.status === 'error' || t.status === 'success');
@@ -77,6 +77,7 @@ function status(config, state) {
 
     const failed_str = errored.length > 0 ? color(config, 'red', `${errored.length} failed, `) : '';
     const expected_fail_str = expectedToFail.length > 0 ? `${expectedToFail.length} failed as expected, ` : '';
+    const success_str = success.length > 0 ? color(config, 'green', `${success.length} passed, `) : '';
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
@@ -89,7 +90,7 @@ function status(config, state) {
         );
         status_str = (
             `${done.length}/${tasks.length - skipped.length} done, ` +
-            `${failed_str}${expected_fail_str}${running.length} running (${running_str})`);
+            `${success_str}${failed_str}${expected_fail_str}${running.length} running (${running_str})`);
 
         if (status_str.length < terminal_width) {
             break; // Fits!

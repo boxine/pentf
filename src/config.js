@@ -367,10 +367,6 @@ function parseArgs(options, raw_args) {
         dest: 'status_interval',
         help: 'Interval in MS to print a detailed list of the current runner state.',
     });
-    runner_group.addArgument(['--breadcrumbs'], {
-        help: 'Keep track of the last successful browser operation (breadcrumbs). This helps with debugging test cases that timed out.',
-        action: 'storeTrue',
-    });
     runner_group.addArgument(['-w', '--watch'], {
         help: 'Re-run tests if a test file changes.',
         action: 'storeTrue',
@@ -510,7 +506,7 @@ async function readConfigFile(configDir, env, moduleType) {
 }
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, breadcrumbs?: boolean, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean, snapshot_directory: string, update_snapshots?: boolean}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean, snapshot_directory: string, update_snapshots?: boolean}} Config
  */
 
 /**

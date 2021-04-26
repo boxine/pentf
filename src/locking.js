@@ -85,9 +85,8 @@ async function acquire(config, state, task) {
                 return false;
             }
         } catch(e) {
-            if (config.locking_verbose || config.log_file) {
-                output.logVerbose(config, `[exlocking] Failed to acquire locks for ${task.id}: ${e.stack}`);
-            }
+            // Something is wrong with the locking server
+            output.color(config, 'red', `[exlocking] Failed to acquire locks for ${task.id}. Is the lockserver up and running?\n\n${e.stack}`);
             return false;
         }
     }

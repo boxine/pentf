@@ -69,10 +69,11 @@ function status(config, state) {
     last_state = state;
 
     const testResults = Array.from(state.resultByTaskGroup.values());
-    const {errored, expectedToFail, skipped, success, running} = getResults(config, testResults);
+    const {errored, expectedToFail, skipped, success} = getResults(config, testResults);
     const {tasks} = state;
 
     const done = tasks.filter(t => t.status === 'error' || t.status === 'success');
+    const running = tasks.filter(t => t.status === 'running');
 
     const failed_str = errored.length > 0 ? color(config, 'red', `${errored.length} failed, `) : '';
     const expected_fail_str = expectedToFail.length > 0 ? `${expectedToFail.length} failed as expected, ` : '';

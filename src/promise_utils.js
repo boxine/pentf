@@ -114,7 +114,7 @@ async function timeoutPromise(config, promise, {timeout=10000, message=undefined
             promise,
             new Promise((resolve, reject) => setTimeout(() => {
                 let wholeMessage = (
-                    `Promise did not finish within ${timeout}ms` + (message ? '. ' + message : ''));
+                    `Promise did not finish within ${output.formatTime(timeout)}` + (message ? '. ' + message : ''));
                 if (warning) {
                     if (resolved) {
                         return; // Main promise done already

@@ -9,6 +9,7 @@
 const assert = require('assert').strict;
 
 const {wait, ignoreError} = require('./utils');
+const output = require('./output');
 
 /**
 * Assert that a value is a Number or BigInt.
@@ -177,11 +178,11 @@ async function assertEventually(testfunc,
     }
 
     if (caughtError !== null) {
-        caughtError.message += ` (waited ${timeout}ms)`;
+        caughtError.message += ` (waited ${output.formatTime(timeout)}ms)`;
         throw caughtError;
     }
 
-    throw new Error(`${message} (waited ${timeout}ms)`);
+    throw new Error(`${message} (waited ${output.formatTime(timeout)})`);
 }
 
 /**
@@ -233,7 +234,7 @@ async function assertAsyncEventually(testfunc,
 
         await wait(checkEvery);
     }
-    throw new Error(`${message} (waited ${timeout}ms)`);
+    throw new Error(`${message} (waited ${output.formatTime(timeout)})`);
 }
 
 /**
@@ -249,7 +250,7 @@ async function assertAlways(testfunc, {message='assertAlways failed', timeout=10
     for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
         const res = testfunc();
         if (!res) {
-            throw new Error(`${message} (after ${timeout - remaining}ms)`);
+            throw new Error(`${message} (after ${output.formatTime(timeout - remaining)})`);
         }
 
         await wait(checkEvery);

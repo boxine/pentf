@@ -117,10 +117,10 @@ function status(config, state) {
 
 /**
  * Convert a time to a human readable string
- * @param {*} config
  * @param {number} duration Time in ms
  */
-function formatDuration(config, duration) {
+function formatTime(duration) {
+    let milliseconds = Math.floor(duration % 1000);
     let seconds = Math.floor((duration / 1000) % 60);
     let minutes = Math.floor((duration / (1000 * 60)) % 60);
     let hours = Math.floor(duration / (1000 * 60 * 60));
@@ -133,7 +133,24 @@ function formatDuration(config, duration) {
         str += `${minutes}min `;
     }
 
-    str += `${seconds}s`;
+    if (seconds > 0) {
+        str += `${seconds}s `;
+    }
+
+    if ((milliseconds > 0 || str === '')) {
+        str += `${milliseconds}ms`;
+    }
+
+    return str.trim();
+}
+
+/**
+ * Convert a time to a human readable string with colors
+ * @param {*} config
+ * @param {number} duration Time in ms
+ */
+function formatDuration(config, duration) {
+    const str = formatTime(duration);
 
     let timeColor = 'dim';
     if (duration > 60000) timeColor = 'red';
@@ -744,7 +761,9 @@ module.exports = {
     detailedStatus,
     finish,
     formatError,
+    formatDuration,
     formatA11yError,
+    formatTime,
     valueRepr,
     log,
     logTaskError,

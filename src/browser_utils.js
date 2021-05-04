@@ -597,13 +597,13 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
         if (foundCount > 0) {
             const suffix = foundCount > 1 ? `. There are ${foundCount - 1} more elements matching the same selector on the page. Maybe the selector needs to be more specific?`:'';
             const err = new Error(
-                `Element matching  ${selector}  did not become visible within ${timeout}ms${suffix}` +
+                `Element matching  ${selector}  did not become visible within ${output.formatTime(timeout)}${suffix}` +
                     (message ? `. ${message}` : '')
             );
             throw await enhanceError(config, page, err);
         } else {
             const err = new Error(
-                `Failed to find element matching  ${selector}  within ${timeout}ms` +
+                `Failed to find element matching  ${selector}  within ${output.formatTime(timeout)}` +
                     (message ? `. ${message}` : '')
             );
             throw await enhanceError(config, page, err);
@@ -689,7 +689,7 @@ async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMe
     addBreadcrumb(config, `enter waitForText(${text})`);
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-    const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`);
+    const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${output.formatTime(timeout)}${extraMessageRepr}`);
 
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
@@ -726,7 +726,7 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
     addBreadcrumb(config, `enter waitForTestId(${testId})`);
 
     const err = new Error(
-        `Failed to find ${visible ? 'visible ' : ''}element with data-testid "${testId}" within ${timeout}ms` +
+        `Failed to find ${visible ? 'visible ' : ''}element with data-testid "${testId}" within ${output.formatTime(timeout)}` +
         (extraMessage ? `. ${extraMessage}` : ''));
 
     const qs = `*[data-testid="${testId}"]`;
@@ -985,7 +985,7 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
             }
 
             if (!message) {
-                message = `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${timeout}ms`;
+                message = `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${output.formatTime(timeout)}`;
             }
             throw await enhanceError(config, page, new Error(message));
         }
@@ -1163,7 +1163,7 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
             }
 
             if (!message) {
-                message = `Unable to find XPath ${xpath} after ${timeout}ms`;
+                message = `Unable to find XPath ${xpath} after ${output.formatTime(timeout)}`;
             }
             throw await enhanceError(config, page, new Error(message));
         }
@@ -1202,7 +1202,7 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
         timeout,
         checkEvery,
         retryUntil: retryUntil || assertSuccess,
-        message: `Unable to find text ${JSON.stringify(text)} after ${timeout}ms${extraMessageRepr}`,
+        message: `Unable to find text ${JSON.stringify(text)} after ${output.formatTime(timeout)}${extraMessageRepr}`,
     });
     addBreadcrumb(config, `exit clickText(${text})`);
     return res;
@@ -1366,7 +1366,7 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
             }
 
             const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-            throw await enhanceError(config, page, new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${timeout}ms${extraMessageRepr}`));
+            throw await enhanceError(config, page, new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${output.formatTime(timeout)}${extraMessageRepr}`));
         }
         await wait(Math.min(remainingTimeout, checkEvery));
         remainingTimeout -= checkEvery;
@@ -1393,7 +1393,7 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
 
     const xpath = `//*[@data-testid="${testId}"]`;
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
-    const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${timeout}ms${extraMessageRepr}`;
+    const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${output.formatTime(timeout)}${extraMessageRepr}`;
     const res = await clickXPath(page, xpath, {timeout, message, visible, retryUntil: retryUntil || assertSuccess});
     addBreadcrumb(config, `exit clickTestId(${testId})`);
     return res;

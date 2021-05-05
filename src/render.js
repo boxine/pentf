@@ -310,7 +310,7 @@ function html(results) {
                 if (first) first = false;
 
                 res += (
-                    '<div class="error_stack"' + (first ? '' : ' style="margin-top:2em;"') + '>' +
+                    '<div class="error_stack"' + (first ? '' : ' style="margin-top:2em; overflow-wrap: break-word;word-break: break-all;"') + '>' +
                     escape_html(tr.error_stack || 'INTERNAL ERROR: no error stack') +
                     '</div>'
                 );
@@ -386,6 +386,9 @@ function html(results) {
 <meta charset="utf-8" />
 <title>${escape_html(heading(results))}</title>
 <style>
+* {
+    box-sizing: border-box;
+}
 html, body {
     margin-top: 0;
     font-size: 26px;
@@ -509,7 +512,7 @@ Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>
 Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})<br/>
 Total test duration: ${escape_html(format_duration(results.duration))}<br/>
 
-<table>
+<table style="width: 100%">
 <tbody>
 ${table}
 </tbody>

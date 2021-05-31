@@ -204,7 +204,7 @@ async function run_task(config, state, task) {
             } catch(e) {
                 output.log(
                     config,
-                    `INTERNAL ERROR: failed to run teardown for #${task.id} (${task.name}): ${e}`
+                    `INTERNAL ERROR: failed to run teardown for #${task.id} (${task.name}): ${e.stack}`
                 );
             }
         } else if (config.watch) {

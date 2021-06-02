@@ -144,7 +144,6 @@ function remove(array, callback) {
             return;
         }
     }
-    throw new Error('Did not remove anything');
 }
 
 function filterMap(ar, cb) {

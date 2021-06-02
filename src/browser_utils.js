@@ -865,6 +865,59 @@ async function assertValue(input, expected) {
  * @param {number?} timeout How long to wait, in milliseconds. (Default: 2s)
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
+async function waitForXPathGone(page, xpath, {timeout=getDefaultTimeout(page), message, checkEvery = 200} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForXPathGone(${xpath})`);
+
+    assert.equal(
+        typeof xpath, 'string',
+        `XPath ${xpath} should be a string, but is of type ${typeof xpath}`);
+
+    let remainingTimeout = timeout;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        let found = false;
+        let errored = false;
+        try {
+            found = await page.evaluate(xpath => {
+                const element = document.evaluate(
+                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                return !!element;
+            }, xpath);
+        } catch(err) {
+            errored = true;
+            if (!ignoreError(err)) {
+                throw await enhanceError(config, page, err);
+            }
+        }
+
+        if (!errored && !found) {
+            break;
+        }
+
+        if (remainingTimeout <= 0) {
+            assert(!found,
+                'Element matching ' + xpath + ' is present, but should not be there.' +
+                (message ? ' ' + message : ''));
+            break;
+        }
+
+        await wait(Math.min(checkEvery, remainingTimeout));
+        remainingTimeout -= checkEvery;
+    }
+    addBreadcrumb(config, `exit waitForXPathGone(${xpath})`);
+}
+
+/**
+ * Assert that there is currently no element matching the XPath on the page.
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} xpath XPath to search for.
+ * @param {{timeout?: number, message?: string, checkEvery?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds. (Default: 2s)
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
+ */
 async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=200) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotXPath(${xpath})`);
@@ -2028,5 +2081,6 @@ module.exports = {
     waitForTestIdGone,
     waitForText,
     waitForVisible,
+    waitForXPathGone,
     workaround_setContent
 };

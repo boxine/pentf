@@ -178,7 +178,7 @@ async function assertEventually(testfunc,
     }
 
     if (caughtError !== null) {
-        caughtError.message += ` (waited ${output.formatTime(timeout)}ms)`;
+        caughtError.message += ` (waited ${output.formatTime(timeout)})`;
         throw caughtError;
     }
 

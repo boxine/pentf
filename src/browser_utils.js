@@ -794,6 +794,28 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
 }
 
 /**
+ * Wait until a test-id is gone from the page
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} testid the testid to check for
+ * @param {{timeout?: number, message?: string, checkEvery?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
+ */
+async function waitForTestIdGone(page, testid, {timeout=getDefaultTimeout(page), message, checkEvery = 200} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForTestIdGone(${testid})`);
+
+    await waitForSelectorGone(page, `[data-testid="${testid}"]`, {
+        timeout,
+        message,
+        checkEvery,
+    });
+
+    addBreadcrumb(config, `exit waitForTestIdGone(${testid})`);
+}
+
+/**
  * Assert an `<input>` element having a certain value (after a wait if necessary).
  *
  * @param {import('puppeteer').ElementHandle} input A puppeteer handle to an input element.
@@ -2003,6 +2025,7 @@ module.exports = {
     waitForSelector,
     waitForSelectorGone,
     waitForTestId,
+    waitForTestIdGone,
     waitForText,
     waitForVisible,
     workaround_setContent

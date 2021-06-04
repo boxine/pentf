@@ -615,6 +615,52 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
 }
 
 /**
+ * Wait until a selector is gone from the page
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
+ * @param {{timeout?: number, message?: string, checkEvery?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
+ */
+async function waitForSelectorGone(page, selector, {timeout=getDefaultTimeout(page), message, checkEvery = 200} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForSelectorGone(${selector})`);
+
+    let remainingTimeout = timeout;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        let found = false;
+        let errored = false;
+        try {
+            found = await page.evaluate(selector => {
+                return !!document.querySelector(selector);
+            }, selector);
+        } catch(err) {
+            errored = true;
+            if (!ignoreError(err)) {
+                throw await enhanceError(config, page, err);
+            }
+        }
+
+        if (!errored && !found) {
+            break;
+        }
+
+        if (remainingTimeout <= 0) {
+            assert(!found,
+                'Element matching ' + selector + ' is present, but should not be there.' +
+                (message ? ' ' + message : ''));
+            break;
+        }
+
+        await wait(Math.min(checkEvery, remainingTimeout));
+        remainingTimeout -= checkEvery;
+    }
+    addBreadcrumb(config, `exit waitForSelectorGone(${selector})`);
+}
+
+/**
  * Wait for an element matched by a CSS query selector to become visible.
  * Visible means the element has neither `display:none` nor `visibility:hidden`.
  * Elements outside the current viewport (e.g. you'd need to scroll) and hidden with CSS trickery
@@ -748,6 +794,28 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
 }
 
 /**
+ * Wait until a test-id is gone from the page
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} testid the testid to check for
+ * @param {{timeout?: number, message?: string, checkEvery?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds.
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
+ */
+async function waitForTestIdGone(page, testid, {timeout=getDefaultTimeout(page), message, checkEvery = 200} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForTestIdGone(${testid})`);
+
+    await waitForSelectorGone(page, `[data-testid="${testid}"]`, {
+        timeout,
+        message,
+        checkEvery,
+    });
+
+    addBreadcrumb(config, `exit waitForTestIdGone(${testid})`);
+}
+
+/**
  * Assert an `<input>` element having a certain value (after a wait if necessary).
  *
  * @param {import('puppeteer').ElementHandle} input A puppeteer handle to an input element.
@@ -785,6 +853,59 @@ async function assertValue(input, expected) {
         throw new Error(
             `Expected ${input_str} value to be ${JSON.stringify(expected)}, but is ${JSON.stringify(value)}`);
     }
+}
+
+/**
+ * Assert that there is currently no element matching the XPath on the page.
+ *
+ * @param {import('puppeteer').Page} page puppeteer page object.
+ * @param {string} xpath XPath to search for.
+ * @param {{timeout?: number, message?: string, checkEvery?: number}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {string?} message Error message shown if the element is not visible in time.
+ * @param {number?} timeout How long to wait, in milliseconds. (Default: 2s)
+ * @param {number?} checkEvery Intervals between checks, in milliseconds.
+ */
+async function waitForXPathGone(page, xpath, {timeout=getDefaultTimeout(page), message, checkEvery = 200} = {}) {
+    const config = getBrowser(page)._pentf_config;
+    addBreadcrumb(config, `enter waitForXPathGone(${xpath})`);
+
+    assert.equal(
+        typeof xpath, 'string',
+        `XPath ${xpath} should be a string, but is of type ${typeof xpath}`);
+
+    let remainingTimeout = timeout;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        let found = false;
+        let errored = false;
+        try {
+            found = await page.evaluate(xpath => {
+                const element = document.evaluate(
+                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                return !!element;
+            }, xpath);
+        } catch(err) {
+            errored = true;
+            if (!ignoreError(err)) {
+                throw await enhanceError(config, page, err);
+            }
+        }
+
+        if (!errored && !found) {
+            break;
+        }
+
+        if (remainingTimeout <= 0) {
+            assert(!found,
+                'Element matching ' + xpath + ' is present, but should not be there.' +
+                (message ? ' ' + message : ''));
+            break;
+        }
+
+        await wait(Math.min(checkEvery, remainingTimeout));
+        remainingTimeout -= checkEvery;
+    }
+    addBreadcrumb(config, `exit waitForXPathGone(${xpath})`);
 }
 
 /**
@@ -1955,8 +2076,11 @@ module.exports = {
     takeScreenshot,
     typeSelector,
     waitForSelector,
+    waitForSelectorGone,
     waitForTestId,
+    waitForTestIdGone,
     waitForText,
     waitForVisible,
+    waitForXPathGone,
     workaround_setContent
 };

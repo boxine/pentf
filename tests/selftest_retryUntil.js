@@ -35,6 +35,27 @@ async function testFn(fn) {
     } catch (err) {
         assert.match(err.message, /fail/);
     }
+
+    // With failing assertion
+    try {
+        await fn({
+            retryUntil: () => {
+                assert.equal(0, 1);
+            },
+            timeout: 1,
+        });
+        assert(0);
+    } catch (err) {
+        assert.match(err.message, /Expected values to be strictly equal:\n\n0 !== 1\n/);
+    }
+
+    // With passing assertion
+    await fn({
+        retryUntil: () => {
+            assert.equal(1, 1);
+        },
+        timeout: 1,
+    });
 }
 
 async function run(config) {

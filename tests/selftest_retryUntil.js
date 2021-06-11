@@ -1,15 +1,22 @@
 const assert = require('assert').strict;
-const {closePage, newPage, clickNestedText, clickText, clickSelector, clickXPath} = require('../src/browser_utils');
+const {
+    closePage,
+    newPage,
+    clickNestedText,
+    clickText,
+    clickSelector,
+    clickXPath,
+} = require('../src/browser_utils');
 
 /**
- * @param {(options: {assertSuccess: () => boolean, timeout: number})=> Promise<void>} fn
+ * @param {(options: {retryUntil: () => boolean, timeout: number})=> Promise<void>} fn
  */
 async function testFn(fn) {
-    // Option: assertSuccess, should not pass
+    // Option: retryUntil, should not pass
     try {
         await fn({
-            assertSuccess: () => false,
-            timeout: 1
+            retryUntil: () => false,
+            timeout: 1,
         });
         assert(0);
     } catch (err) {
@@ -19,15 +26,36 @@ async function testFn(fn) {
     // Custom message
     try {
         await fn({
-            assertSuccess: () => {
+            retryUntil: () => {
                 throw new Error('fail');
             },
-            timeout: 1
+            timeout: 1,
         });
         assert(0);
     } catch (err) {
         assert.match(err.message, /fail/);
     }
+
+    // With failing assertion
+    try {
+        await fn({
+            retryUntil: () => {
+                assert.equal(0, 1);
+            },
+            timeout: 1,
+        });
+        assert(0);
+    } catch (err) {
+        assert.match(err.message, /Expected values to be strictly equal:\n\n0 !== 1\n/);
+    }
+
+    // With passing assertion
+    await fn({
+        retryUntil: () => {
+            assert.equal(1, 1);
+        },
+        timeout: 1,
+    });
 }
 
 async function run(config) {
@@ -40,10 +68,10 @@ async function run(config) {
     `;
     await page.setContent(content);
 
-    await testFn((options) => clickSelector(page, 'button', options));
-    await testFn((options) => clickXPath(page, '//button', options));
-    await testFn((options) => clickText(page, 'first', options));
-    await testFn((options) => clickNestedText(page, 'first', options));
+    await testFn(options => clickSelector(page, 'button', options));
+    await testFn(options => clickXPath(page, '//button', options));
+    await testFn(options => clickText(page, 'first', options));
+    await testFn(options => clickNestedText(page, 'first', options));
 
     // Should succeed when original elements are removed, but the
     // callback function passes.
@@ -75,6 +103,6 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'Test return value of assertSuccess',
+    description: 'Test return value of retryUntil',
     run,
 };

@@ -968,7 +968,7 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
 
 /**
  * Optionally run post-assertion check
- * @param {() => Promise<boolean>} fn
+ * @param {() => Promise<boolean | void>} fn
  * @returns {Promise<boolean>}
  */
 async function onSuccess(fn) {
@@ -976,6 +976,10 @@ async function onSuccess(fn) {
 
     try {
         const res = await fn();
+        // Allow assertions (returns void) inside handler
+        if (res === undefined) {
+            return true;
+        }
         if (!res) {
             throw new Error('retryUntil/assertSuccess returned a falsy value');
         }
@@ -1009,13 +1013,13 @@ function getMouse(pageOrFrame) {
  * ```
  * @param {import('puppeteer').Page | import('puppeteer').Frame} page puppeteer page object.
  * @param {string} selector [CSS selector](https://www.w3.org/TR/2018/REC-selectors-3-20181106/#selectors) (aka query selector) of the targeted element.
- * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{timeout?: number, checkEvery?: number, message?: string, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean | void>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the element is not visible in time.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean | void>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
 async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
@@ -1157,8 +1161,8 @@ async function assertNotSelector(page, selector, {timeout=getDefaultTimeout(page
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery How long to wait _between_ checks, in ms. (default: 200ms)
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean | void>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
 async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
@@ -1307,8 +1311,8 @@ const DEFAULT_CLICKABLE = (
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean | void>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
 async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined, assertSuccess, retryUntil}={}) {
@@ -1341,8 +1345,8 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
  * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
  * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
  * @param {boolean?} visible Optional check if element is visible (default: true)
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean | void>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
 async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage=undefined, visible=true, assertSuccess, retryUntil}={}) {
@@ -1503,8 +1507,8 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
  * @param {{extraMessage?: string, timeout?: number, visible?: boolean, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} extraMessage Optional error message shown if the element is not present in time.
  * @param {number?} timeout How long to wait, in milliseconds. (default: true)
- * @param {() => Promise<boolean>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean>?} retryUntil Additional check to verify that the operation was successful. This is needed in cases where a DOM node is present
+ * @param {() => Promise<boolean | void>?} assertSuccess Deprecated: Alias of retryUntil
+ * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
 async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true, assertSuccess, retryUntil} = {}) {

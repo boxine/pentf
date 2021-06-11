@@ -2,13 +2,13 @@ const assert = require('assert').strict;
 const {closePage, newPage, clickNestedText, clickText, clickSelector, clickXPath} = require('../src/browser_utils');
 
 /**
- * @param {(options: {assertSuccess: () => boolean, timeout: number})=> Promise<void>} fn
+ * @param {(options: {retryUntil: () => boolean, timeout: number})=> Promise<void>} fn
  */
 async function testFn(fn) {
-    // Option: assertSuccess, should not pass
+    // Option: retryUntil, should not pass
     try {
         await fn({
-            assertSuccess: () => false,
+            retryUntil: () => false,
             timeout: 1
         });
         assert(0);
@@ -19,7 +19,7 @@ async function testFn(fn) {
     // Custom message
     try {
         await fn({
-            assertSuccess: () => {
+            retryUntil: () => {
                 throw new Error('fail');
             },
             timeout: 1
@@ -75,6 +75,6 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'Test return value of assertSuccess',
+    description: 'Test return value of retryUntil',
     run,
 };

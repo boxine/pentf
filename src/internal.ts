@@ -29,6 +29,7 @@ export interface Task {
     status: TaskStatus;
     start: number;
     breadcrumb: Error | null;
+    pageUrls: string[];
     skipReason?: boolean;
     error_screenshots: Buffer[];
     resources: string[];
@@ -52,6 +53,7 @@ export interface TaskConfig extends Config {
 }
 
 export interface TaskResult {
+    pageUrls: string[];
     status: TaskStatus;
     duration: number; error_screenshots: Buffer[];
     error_stack?: string;

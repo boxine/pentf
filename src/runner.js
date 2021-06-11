@@ -140,6 +140,9 @@ async function run_task(config, state, task) {
                     `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}\n${e.stack}`);
             }
         }
+
+        task.pageUrls = task_config._browser_pages.map(page => page.url());
+
         // Close all browser windows
         if (! config.keep_open && task_config._browser_pages.length > 0) {
             output.logVerbose(
@@ -277,6 +280,7 @@ function update_results(config, state, task) {
     // Append the task result if the task finished
     if (task.status === 'error' || task.status === 'success' || task.status === 'skipped') {
         result.taskResults.push({
+            pageUrls: task.pageUrls,
             status: task.status,
             duration: task.duration, // TODO,
             error_stack: task.error ?
@@ -481,7 +485,7 @@ async function testCases2tasks(config, testCases, resultByTaskGroup) {
 
     const tasks = new Array(testCases.length * repeat);
     await Promise.all(testCases.map(async (tc, position) => {
-        /** @type {Task} */
+        /** @type {import('./internal').Task} */
         const task = {
             tc,
             resources: tc.resources || [],
@@ -490,7 +494,8 @@ async function testCases2tasks(config, testCases, resultByTaskGroup) {
             group: tc.name,
             id: tc.name,
             start: 0,
-            accessibilityErrors: []
+            accessibilityErrors: [],
+            pageUrls: [],
         };
 
         const skipReason = tc.skip && await tc.skip(config);

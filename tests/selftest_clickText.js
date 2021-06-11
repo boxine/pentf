@@ -26,7 +26,7 @@ async function run(config) {
 
     await resetClicks();
     await assert.rejects(clickText(page, 'not-present', {timeout: 1, extraMessage: 'blabla'}), {
-        message: 'Unable to find text "not-present" after 1ms (blabla)',
+        message: 'Unable to find visible text "not-present" after 1ms (blabla)',
     });
     assert.deepStrictEqual(await getClicks(), []);
 
@@ -39,7 +39,7 @@ async function run(config) {
             const old = success;
             success = !success;
             return old;
-        }
+        },
     });
     assert(called, 'assertSuccess was not invoked');
 
@@ -49,7 +49,8 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'The clickText browser_utils function clicks elements by matching direct text content',
+    description:
+        'The clickText browser_utils function clicks elements by matching direct text content',
     resources: [],
     run,
 };

@@ -1477,57 +1477,10 @@ async function clickXPath(
     }
 }
 
-const DEFAULT_CLICKABLE_ELEMENTS = ['a', 'button', 'input', 'label'];
-const DEFAULT_CLICKABLE =
-    '//*[' + DEFAULT_CLICKABLE_ELEMENTS.map(e => `local-name()="${e}"`).join(' or ') + ']';
-
-/**
- * Click a link, button, label, or input by its text content.
- *
- * @param {import('puppeteer').Page} page  puppeteer page object.
- * @param {string} text Text that the element must contain.
- * @param {{timeout?: number, checkEvery?: number, elementXPath?: string, extraMessage?: string, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
- * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
- * @param {() => Promise<boolean | void>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
- * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
- */
-async function clickText(
-    page,
-    text,
-    {
-        timeout = getDefaultTimeout(page),
-        checkEvery = 200,
-        elementXPath = DEFAULT_CLICKABLE,
-        extraMessage = undefined,
-        assertSuccess,
-        retryUntil,
-    } = {}
-) {
-    const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter clickText(${text})`);
-    checkText(text);
-    const xpath = elementXPath + `[contains(text(), ${escapeXPathText(text)})]`;
-    const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-    const res = await clickXPath(page, xpath, {
-        timeout,
-        checkEvery,
-        retryUntil: retryUntil || assertSuccess,
-        message: `Unable to find text ${JSON.stringify(text)} after ${output.formatTime(
-            timeout
-        )}${extraMessageRepr}`,
-    });
-    addBreadcrumb(config, `exit clickText(${text})`);
-    return res;
-}
-
 /**
  * Click any element by its text content.
  *
- * The text can span multiple nodes compared to `clickText` which matches direct descended text nodes only.
+ * The text can span multiple nodes.
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string | RegExp} textOrRegExp Text or regex to match the text that the element must contain.
@@ -1540,7 +1493,7 @@ async function clickText(
  * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickNestedText(
+async function clickText(
     page,
     textOrRegExp,
     {
@@ -1553,7 +1506,7 @@ async function clickNestedText(
     } = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter clickNestedText(${textOrRegExp})`);
+    addBreadcrumb(config, `enter clickText(${textOrRegExp})`);
     if (typeof textOrRegExp === 'string') {
         checkText(textOrRegExp);
     }
@@ -1695,7 +1648,7 @@ async function clickNestedText(
                 (found || (!found && retryUntilError !== null)) &&
                 (await onSuccess(retryUntil || assertSuccess))
             ) {
-                addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
+                addBreadcrumb(config, `exit clickText(${textOrRegExp})`);
                 return;
             }
         } catch (err) {
@@ -2330,7 +2283,7 @@ module.exports = {
     assertNotXPath,
     assertSnapshot,
     assertValue,
-    clickNestedText,
+    clickNestedText: clickText,
     clickSelector,
     clickTestId,
     clickText,

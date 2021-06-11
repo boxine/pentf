@@ -12,7 +12,7 @@ const {promisify} = require('util');
 const tmp = require('tmp-promise');
 const {performance} = require('perf_hooks');
 const mkdirpCb = require('mkdirp');
-const { PNG } = require('pngjs');
+const {PNG} = require('pngjs');
 const pixelmatch = require('pixelmatch');
 const sharp = require('sharp');
 const rimraf = require('rimraf');
@@ -21,7 +21,7 @@ const {assertAsyncEventually} = require('./assert_utils');
 const {forwardBrowserConsole} = require('./browser_console');
 const {wait, remove, ignoreError} = require('./utils');
 const {timeoutPromise} = require('./promise_utils');
-const { importFile } = require('./loader');
+const {importFile} = require('./loader');
 const output = require('./output');
 
 const mkdirp = promisify(mkdirpCb);
@@ -44,19 +44,19 @@ let tmp_home;
  * @param {string[]} [chrome_args] Additional arguments for Chrome (optional).
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
-async function newPage(config, chrome_args=[]) {
+async function newPage(config, chrome_args = []) {
     addBreadcrumb(config, 'enter newPage()');
     /** @type {import('puppeteer')} */
     let puppeteer;
     try {
-        if(config.puppeteer_firefox) {
+        if (config.puppeteer_firefox) {
             puppeteer = await importFile('puppeteer-firefox', config.moduleType);
         } else {
             puppeteer = await importFile('puppeteer', config.moduleType);
         }
-    } catch(e) {
+    } catch (e) {
         // puppeteer/puppeteer-firefox is a peer dependency. Show a helpful error message when it's missing.
-        if(config.puppeteer_firefox) {
+        if (config.puppeteer_firefox) {
             console.error('Please install "puppeteer-firefox" package with \'npm i puppeteer\'.');
         } else {
             console.error('Please install "puppeteer" package with \'npm i puppeteer\'.');
@@ -68,7 +68,7 @@ async function newPage(config, chrome_args=[]) {
 
     const params = {
         args,
-        ignoreHTTPSErrors: (config.env === 'local'),
+        ignoreHTTPSErrors: config.env === 'local',
     };
     if (!config.headless) {
         params.headless = false;
@@ -111,7 +111,9 @@ async function newPage(config, chrome_args=[]) {
 
                 if (!exists) return;
                 await promisify(fs.copyFile)(
-                    source_file, path.join(future_tmp_home, '.pki', 'nssdb', basename));
+                    source_file,
+                    path.join(future_tmp_home, '.pki', 'nssdb', basename)
+                );
             };
             await copyNssFile('cert9.db');
             tmp_home = future_tmp_home;
@@ -132,21 +134,23 @@ async function newPage(config, chrome_args=[]) {
         ...params,
         // Workaround until official support for Apple's M1 chip lands in puppeteer:
         // Puppeteer for some reason ignores the environment variable on arm64 systems
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     });
     const page = (await browser.pages())[0];
 
     if (config.devtools_preserve) {
-        const configureDevtools = async (target) => {
-            if (! /^(?:chrome-)?devtools:\/\//.test(await target.url())) {
+        const configureDevtools = async target => {
+            if (!/^(?:chrome-)?devtools:\/\//.test(await target.url())) {
                 return;
             }
 
             // new devtools created, configure it
             const session = await target.createCDPSession();
-            await assertAsyncEventually(async() => {
-                return (await session.send('Runtime.evaluate', {
-                    expression: `(() => {
+            await assertAsyncEventually(
+                async () => {
+                    return (
+                        await session.send('Runtime.evaluate', {
+                            expression: `(() => {
                         try {
                             Common.moduleSetting("network_log.preserve-log").set(true);
                             Common.moduleSetting("preserveConsoleLog").set(true);
@@ -156,13 +160,16 @@ async function newPage(config, chrome_args=[]) {
 
                         return Common.moduleSetting("preserveConsoleLog").get() === true;
                         })()
-                    `
-                })).result.value;
-            }, {
-                message: 'could not toggle preserve options in devtools',
-                timeout: 10000,
-                checkEvery: 100,
-            });
+                    `,
+                        })
+                    ).result.value;
+                },
+                {
+                    message: 'could not toggle preserve options in devtools',
+                    timeout: 10000,
+                    checkEvery: 100,
+                }
+            );
             await session.detach();
         };
 
@@ -174,7 +181,7 @@ async function newPage(config, chrome_args=[]) {
     // Make sure that the browser window matches the viewport size
     if (!config.headless) {
         // Default puppeteer viewport size
-        await resizePage(config, page, { width: 800, height: 600 });
+        await resizePage(config, page, {width: 800, height: 600});
     }
 
     browser._logs = [];
@@ -191,23 +198,28 @@ async function newPage(config, chrome_args=[]) {
                 await installInteractions(popup);
             });
 
-            popup.on('framenavigated', async (frame) => {
+            popup.on('framenavigated', async frame => {
                 await installInteractions(frame);
             });
         });
     }
 
-    withBreadcrumb(config, page, '$', (selector) => `page.$(${selector})`);
-    withBreadcrumb(config, page, '$$', (selector) => `page.$$(${selector})`);
+    withBreadcrumb(config, page, '$', selector => `page.$(${selector})`);
+    withBreadcrumb(config, page, '$$', selector => `page.$$(${selector})`);
     withBreadcrumb(config, page, '$eval', () => 'page.$eval()');
     withBreadcrumb(config, page, '$$eval', () => 'page.$$eval()');
-    withBreadcrumb(config, page, 'click', (selector) => `page.click(${selector})`);
+    withBreadcrumb(config, page, 'click', selector => `page.click(${selector})`);
     withBreadcrumb(config, page, 'evaluate', () => 'page.evaluate()');
-    withBreadcrumb(config, page, 'goto', (url) => `page.goto(${url})`);
+    withBreadcrumb(config, page, 'goto', url => `page.goto(${url})`);
     withBreadcrumb(config, page, 'type', (selector, text) => `page.type(${selector}, ${text})`);
-    withBreadcrumb(config, page, 'waitForSelector', (selector) => `page.waitForSelector(${selector})`);
+    withBreadcrumb(
+        config,
+        page,
+        'waitForSelector',
+        selector => `page.waitForSelector(${selector})`
+    );
     withBreadcrumb(config, page, 'waitForFunction', () => 'page.waitForFunction()');
-    withBreadcrumb(config, page, 'waitForXPath', (xpath) => `page.waitForXPath(${xpath})`);
+    withBreadcrumb(config, page, 'waitForXPath', xpath => `page.waitForXPath(${xpath})`);
 
     // The Browser instance is the nearest shared ancestor across pages
     // and frames.
@@ -235,11 +247,11 @@ async function newPage(config, chrome_args=[]) {
         });
 
         // Necessary for embedded iframes
-        page.on('framenavigated', async (frame) => {
+        page.on('framenavigated', async frame => {
             await installInteractions(frame);
         });
 
-        browser.on('targetcreated', async (target) => {
+        browser.on('targetcreated', async target => {
             if (target.url() === 'about:blank' || /^https?:\/\//.test(target.url())) {
                 const tab = await target.page();
                 withInteractions(tab, 'setContent');
@@ -268,15 +280,15 @@ async function newPage(config, chrome_args=[]) {
  * @param {import('puppeteer').Page} page
  * @param {{ width: number, height: number }} dimensions
  */
-async function resizePage(config, page, { width, height }) {
+async function resizePage(config, page, {width, height}) {
     if (config.headless) {
         // If we're running headless there is no point in trying to keep
         // the browser resizeable. Just use the existing `page.setViewport()`
         // API instead.
-        await page.setViewport({ width, height });
+        await page.setViewport({width, height});
     } else {
         const actual = await page.evaluate(() => {
-            return { width: window.innerWidth, height: window.innerHeight };
+            return {width: window.innerWidth, height: window.innerHeight};
         });
 
         const browser = getBrowser(page);
@@ -284,22 +296,18 @@ async function resizePage(config, page, { width, height }) {
         if (actual.width !== width || actual.height !== height) {
             // Get browser tab and resize window via devtools protocol
             const targetId = page._target._targetInfo.targetId;
-            const {windowId} = await browser._connection.send(
-                'Browser.getWindowForTarget',
-                {targetId}
-            );
-            const {bounds} = await browser._connection.send(
-                'Browser.getWindowBounds',
-                {windowId}
-            );
+            const {windowId} = await browser._connection.send('Browser.getWindowForTarget', {
+                targetId,
+            });
+            const {bounds} = await browser._connection.send('Browser.getWindowBounds', {windowId});
 
             // Resize to correct dimensions
             await browser._connection.send('Browser.setWindowBounds', {
                 bounds: {
                     width: bounds.width + width - actual.width,
-                    height: bounds.height + height - actual.height
+                    height: bounds.height + height - actual.height,
                 },
-                windowId
+                windowId,
             });
         }
     }
@@ -336,7 +344,8 @@ async function createUserProfileDir(config) {
 const isPage = x => x !== null && typeof x === 'object' && typeof x.isClosed === 'function';
 
 /** @type {(pageOrFrame: import('puppeteer').Page | import('puppeteer').Frame) => import('puppeteer').Page} */
-const getPage = pageOrFrame => isPage(pageOrFrame) ? pageOrFrame : pageOrFrame._frameManager._page;
+const getPage = pageOrFrame =>
+    isPage(pageOrFrame) ? pageOrFrame : pageOrFrame._frameManager._page;
 
 /**
  * Get the text content of an error or warning page inserted by the browser.
@@ -360,7 +369,10 @@ async function enhanceError(config, pageOrFrame, error) {
 
             return {
                 heading: document.querySelector('h1').textContent,
-                text: Array.from(document.querySelectorAll('p')).map(d => d.textContent.trim()).filter(Boolean).join('\n\n'),
+                text: Array.from(document.querySelectorAll('p'))
+                    .map(d => d.textContent.trim())
+                    .filter(Boolean)
+                    .join('\n\n'),
             };
         });
 
@@ -398,10 +410,16 @@ async function installInteractions(page) {
         // Skip injecting into html when trusted page is enabled to prevent
         // noisy console output, that confused users.
         const isTrustedPage = await page.evaluate(() => {
-            return document.head && document.head.querySelector('meta[content*="trusted-types"   ]') !==  null;
+            return (
+                document.head &&
+                document.head.querySelector('meta[content*="trusted-types"   ]') !== null
+            );
         });
         if (isTrustedPage) {
-            output.logVerbose(config, 'Cannot install pentf interaction ui overlays into page with trusted types. Skipping...');
+            output.logVerbose(
+                config,
+                'Cannot install pentf interaction ui overlays into page with trusted types. Skipping...'
+            );
             return;
         }
 
@@ -419,9 +437,9 @@ async function installInteractions(page) {
                 while (win !== window.top) {
                     parentWin = win.parent;
 
-                    const iframe = Array.from(
-                        parentWin.document.querySelectorAll('iframe')
-                    ).find(f => f.contentWindow === win);
+                    const iframe = Array.from(parentWin.document.querySelectorAll('iframe')).find(
+                        f => f.contentWindow === win
+                    );
                     if (iframe) {
                         const iframeRect = iframe.getBoundingClientRect();
                         x += iframeRect.x;
@@ -539,8 +557,9 @@ async function closePage(page) {
     addBreadcrumb(config, 'enter closePage()');
 
     // Wait for all pending logging tasks to finish before closing browser
-    await timeoutPromise(
-        config, Promise.all(browser._logs), {message: 'Aborting waiting on page logs'});
+    await timeoutPromise(config, Promise.all(browser._logs), {
+        message: 'Aborting waiting on page logs',
+    });
 
     if (config._browser_pages) {
         remove(config._browser_pages, p => p === page);
@@ -577,34 +596,53 @@ async function closePage(page) {
  * @param {visible?} [visible] Whether the element must be visible within the timeout. (default: `true`)
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the found element.
  */
-async function waitForSelector(page, selector, {message=undefined, timeout=getDefaultTimeout(page), visible=true}={}) {
+async function waitForSelector(
+    page,
+    selector,
+    {message = undefined, timeout = getDefaultTimeout(page), visible = true} = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForSelector(${selector})`);
 
     let el;
     try {
-        el = await page.waitForFunction((qs, visible) => {
-            const all = document.querySelectorAll(qs);
-            if (all.length < 1) return null;
-            const el = all[0];
-            if (visible && (el.offsetParent === null || el.style.visibility === 'hidden')) {
-                return null;
-            }
-            return el;
-        }, {timeout}, selector, visible);
-    } catch(e) {
-        const foundCount = await page.evaluate(qs => document.querySelectorAll(qs).length, selector);
+        el = await page.waitForFunction(
+            (qs, visible) => {
+                const all = document.querySelectorAll(qs);
+                if (all.length < 1) return null;
+                const el = all[0];
+                if (visible && (el.offsetParent === null || el.style.visibility === 'hidden')) {
+                    return null;
+                }
+                return el;
+            },
+            {timeout},
+            selector,
+            visible
+        );
+    } catch (e) {
+        const foundCount = await page.evaluate(
+            qs => document.querySelectorAll(qs).length,
+            selector
+        );
         if (foundCount > 0) {
-            const suffix = foundCount > 1 ? `. There are ${foundCount - 1} more elements matching the same selector on the page. Maybe the selector needs to be more specific?`:'';
+            const suffix =
+                foundCount > 1
+                    ? `. There are ${
+                          foundCount - 1
+                      } more elements matching the same selector on the page. Maybe the selector needs to be more specific?`
+                    : '';
             const err = new Error(
-                `Element matching  ${selector}  did not become visible within ${output.formatTime(timeout)}${suffix}` +
-                    (message ? `. ${message}` : '')
+                `Element matching  ${selector}  did not become visible within ${output.formatTime(
+                    timeout
+                )}${suffix}` + (message ? `. ${message}` : '')
             );
             throw await enhanceError(config, page, err);
         } else {
             const err = new Error(
-                `Failed to find element matching  ${selector}  within ${output.formatTime(timeout)}` +
-                    (message ? `. ${message}` : '')
+                `Failed to find element matching  ${selector}  within ${output.formatTime(
+                    timeout
+                )}` + (message ? `. ${message}` : '')
             );
             throw await enhanceError(config, page, err);
         }
@@ -623,7 +661,11 @@ async function waitForSelector(page, selector, {message=undefined, timeout=getDe
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
-async function waitForSelectorGone(page, selector, {timeout=getDefaultTimeout(page), message, checkEvery = 200} = {}) {
+async function waitForSelectorGone(
+    page,
+    selector,
+    {timeout = getDefaultTimeout(page), message, checkEvery = 200} = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForSelectorGone(${selector})`);
 
@@ -636,7 +678,7 @@ async function waitForSelectorGone(page, selector, {timeout=getDefaultTimeout(pa
             found = await page.evaluate(selector => {
                 return !!document.querySelector(selector);
             }, selector);
-        } catch(err) {
+        } catch (err) {
             errored = true;
             if (!ignoreError(err)) {
                 throw await enhanceError(config, page, err);
@@ -648,9 +690,13 @@ async function waitForSelectorGone(page, selector, {timeout=getDefaultTimeout(pa
         }
 
         if (remainingTimeout <= 0) {
-            assert(!found,
-                'Element matching ' + selector + ' is present, but should not be there.' +
-                (message ? ' ' + message : ''));
+            assert(
+                !found,
+                'Element matching ' +
+                    selector +
+                    ' is present, but should not be there.' +
+                    (message ? ' ' + message : '')
+            );
             break;
         }
 
@@ -676,7 +722,7 @@ async function waitForSelectorGone(page, selector, {timeout=getDefaultTimeout(pa
 async function waitForVisible(page, selector, {timeout, message} = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForVisible(${selector})`);
-    const el = await waitForSelector(page, selector, { timeout, message, visible: true });
+    const el = await waitForSelector(page, selector, {timeout, message, visible: true});
     addBreadcrumb(config, `exit waitForVisible(${selector})`);
     return el;
 }
@@ -699,7 +745,14 @@ function escapeXPathText(text) {
         // No doubles quotes ("), simple case
         return `"${text}"`;
     }
-    return 'concat(' + text.split('"').map(part => `"${part}"`).join(', \'"\', ') + ')';
+    return (
+        'concat(' +
+        text
+            .split('"')
+            .map(part => `"${part}"`)
+            .join(", '\"', ") +
+        ')'
+    );
 }
 
 /**
@@ -710,7 +763,7 @@ function checkText(text) {
         let repr;
         try {
             repr = JSON.stringify(text);
-        } catch(e) {
+        } catch (e) {
             repr = '' + text;
         }
         throw new Error(`Invalid text argument: ${repr}`);
@@ -730,12 +783,20 @@ function checkText(text) {
  * @param {number?} timeout How long to wait, in milliseconds.
  * @returns {Promise<import('puppeteer').ElementHandle>} A handle to the text node.
  */
-async function waitForText(page, text, {timeout=getDefaultTimeout(page), extraMessage=undefined}={}) {
+async function waitForText(
+    page,
+    text,
+    {timeout = getDefaultTimeout(page), extraMessage = undefined} = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForText(${text})`);
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-    const err = new Error(`Unable to find text ${JSON.stringify(text)} after ${output.formatTime(timeout)}${extraMessageRepr}`);
+    const err = new Error(
+        `Unable to find text ${JSON.stringify(text)} after ${output.formatTime(
+            timeout
+        )}${extraMessageRepr}`
+    );
 
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
@@ -766,25 +827,37 @@ function _checkTestId(testId) {
  * @param {boolean?} visible Whether the element must be visible within the timeout. (default: `true`)
  * @returns {Promise<import('puppeteer').ElementHandle>} Handle to the element with the given test ID.
  */
-async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true} = {}) {
+async function waitForTestId(
+    page,
+    testId,
+    {extraMessage = undefined, timeout = getDefaultTimeout(page), visible = true} = {}
+) {
     _checkTestId(testId);
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForTestId(${testId})`);
 
     const err = new Error(
-        `Failed to find ${visible ? 'visible ' : ''}element with data-testid "${testId}" within ${output.formatTime(timeout)}` +
-        (extraMessage ? `. ${extraMessage}` : ''));
+        `Failed to find ${
+            visible ? 'visible ' : ''
+        }element with data-testid "${testId}" within ${output.formatTime(timeout)}` +
+            (extraMessage ? `. ${extraMessage}` : '')
+    );
 
     const qs = `*[data-testid="${testId}"]`;
     let el;
     try {
-        el = await page.waitForFunction((qs, visible) => {
-            const all = document.querySelectorAll(qs);
-            if (all.length < 1) return null;
-            const [el] = all;
-            if (visible && (el.offsetParent === null)) return null;
-            return el;
-        }, {timeout}, qs, visible);
+        el = await page.waitForFunction(
+            (qs, visible) => {
+                const all = document.querySelectorAll(qs);
+                if (all.length < 1) return null;
+                const [el] = all;
+                if (visible && el.offsetParent === null) return null;
+                return el;
+            },
+            {timeout},
+            qs,
+            visible
+        );
     } catch (e) {
         throw await enhanceError(config, page, err); // Do not construct error here lest stack trace gets lost
     }
@@ -802,7 +875,11 @@ async function waitForTestId(page, testId, {extraMessage=undefined, timeout=getD
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
-async function waitForTestIdGone(page, testid, {timeout=getDefaultTimeout(page), message, checkEvery = 200} = {}) {
+async function waitForTestIdGone(
+    page,
+    testid,
+    {timeout = getDefaultTimeout(page), message, checkEvery = 200} = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForTestIdGone(${testid})`);
 
@@ -827,9 +904,14 @@ async function assertValue(input, expected) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertValue(${expected})`);
     try {
-        await page.waitForFunction((inp, expected) => {
-            return inp.value === expected;
-        }, {timeout: 2000}, input, expected);
+        await page.waitForFunction(
+            (inp, expected) => {
+                return inp.value === expected;
+            },
+            {timeout: 2000},
+            input,
+            expected
+        );
         addBreadcrumb(config, `exit assertValue(${expected})`);
     } catch (e) {
         if (e.name !== 'TimeoutError') throw e;
@@ -844,14 +926,16 @@ async function assertValue(input, expected) {
 
         if (value === expected) return; // Successful just at the last second
 
-        const input_str = (
+        const input_str =
             'input' +
             (name ? `[name=${JSON.stringify(name)}]` : '') +
-            (id ? `[id=${JSON.stringify(id)}]` : '')
-        );
+            (id ? `[id=${JSON.stringify(id)}]` : '');
 
         throw new Error(
-            `Expected ${input_str} value to be ${JSON.stringify(expected)}, but is ${JSON.stringify(value)}`);
+            `Expected ${input_str} value to be ${JSON.stringify(expected)}, but is ${JSON.stringify(
+                value
+            )}`
+        );
     }
 }
 
@@ -865,13 +949,19 @@ async function assertValue(input, expected) {
  * @param {number?} timeout How long to wait, in milliseconds. (Default: 2s)
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
-async function waitForXPathGone(page, xpath, {timeout=getDefaultTimeout(page), message, checkEvery = 200} = {}) {
+async function waitForXPathGone(
+    page,
+    xpath,
+    {timeout = getDefaultTimeout(page), message, checkEvery = 200} = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter waitForXPathGone(${xpath})`);
 
     assert.equal(
-        typeof xpath, 'string',
-        `XPath ${xpath} should be a string, but is of type ${typeof xpath}`);
+        typeof xpath,
+        'string',
+        `XPath ${xpath} should be a string, but is of type ${typeof xpath}`
+    );
 
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
@@ -880,11 +970,12 @@ async function waitForXPathGone(page, xpath, {timeout=getDefaultTimeout(page), m
         let errored = false;
         try {
             found = await page.evaluate(xpath => {
-                const element = document.evaluate(
-                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                const element = document
+                    .evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null)
+                    .iterateNext();
                 return !!element;
             }, xpath);
-        } catch(err) {
+        } catch (err) {
             errored = true;
             if (!ignoreError(err)) {
                 throw await enhanceError(config, page, err);
@@ -896,9 +987,13 @@ async function waitForXPathGone(page, xpath, {timeout=getDefaultTimeout(page), m
         }
 
         if (remainingTimeout <= 0) {
-            assert(!found,
-                'Element matching ' + xpath + ' is present, but should not be there.' +
-                (message ? ' ' + message : ''));
+            assert(
+                !found,
+                'Element matching ' +
+                    xpath +
+                    ' is present, but should not be there.' +
+                    (message ? ' ' + message : '')
+            );
             break;
         }
 
@@ -918,12 +1013,14 @@ async function waitForXPathGone(page, xpath, {timeout=getDefaultTimeout(page), m
  * @param {number?} timeout How long to wait, in milliseconds. (Default: 2s)
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  */
-async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=200) {
+async function assertNotXPath(page, xpath, options, _timeout = 2000, _checkEvery = 200) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotXPath(${xpath})`);
     assert.equal(
-        typeof xpath, 'string',
-        `XPath ${xpath} should be a string, but is of type ${typeof xpath}`);
+        typeof xpath,
+        'string',
+        `XPath ${xpath} should be a string, but is of type ${typeof xpath}`
+    );
 
     // Legacy way of calling this function; will be deprecated and later removed
     if (typeof options === 'string') {
@@ -943,18 +1040,23 @@ async function assertNotXPath(page, xpath, options, _timeout=2000, _checkEvery=2
         let found = false;
         try {
             found = await page.evaluate(xpath => {
-                const element = document.evaluate(
-                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
+                const element = document
+                    .evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null)
+                    .iterateNext();
                 return !!element;
             }, xpath);
-        } catch(err) {
+        } catch (err) {
             if (!ignoreError(err)) {
                 throw await enhanceError(config, page, err);
             }
         }
-        assert(!found,
-            'Element matching ' + xpath + ' is present, but should not be there.' +
-            (message ? ' ' + message : ''));
+        assert(
+            !found,
+            'Element matching ' +
+                xpath +
+                ' is present, but should not be there.' +
+                (message ? ' ' + message : '')
+        );
 
         if (remainingTimeout <= 0) {
             break;
@@ -1022,10 +1124,25 @@ function getMouse(pageOrFrame) {
  * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
+async function clickSelector(
+    page,
+    selector,
+    {
+        timeout = getDefaultTimeout(page),
+        checkEvery = 200,
+        message = undefined,
+        visible = true,
+        assertSuccess,
+        retryUntil,
+    } = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickSelector(${selector})`);
-    assert.equal(typeof selector, 'string', 'CSS selector should be string (forgot page argument?)');
+    assert.equal(
+        typeof selector,
+        'string',
+        'CSS selector should be string (forgot page argument?)'
+    );
 
     let remainingTimeout = timeout;
     let retryUntilError = null;
@@ -1033,53 +1150,66 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
     while (true) {
         let found = false;
         try {
-            found = await page.evaluate(async (selector, visible) => {
-                const element = document.querySelector(selector);
-                if (!element) return false;
+            found = await page.evaluate(
+                async (selector, visible) => {
+                    const element = document.querySelector(selector);
+                    if (!element) return false;
 
-                if (visible) {
-                    if (element.offsetParent === null) return null; // invisible
+                    if (visible) {
+                        if (element.offsetParent === null) return null; // invisible
 
-                    // Element may be hidden in a scroll container
-                    element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    const visibleRatio = await new Promise(resolve => {
-                        const observer = new IntersectionObserver(entries => {
-                            resolve(entries[0].intersectionRatio);
-                            observer.disconnect();
+                        // Element may be hidden in a scroll container
+                        element.scrollIntoView({
+                            block: 'center',
+                            inline: 'center',
+                            behavior: 'instant',
                         });
-                        observer.observe(element);
-                    });
-                    if (visibleRatio !== 1.0) {
-                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    }
-
-                    const rect = /** @type {Element} */ (element).getBoundingClientRect();
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
+                        const visibleRatio = await new Promise(resolve => {
+                            const observer = new IntersectionObserver(entries => {
+                                resolve(entries[0].intersectionRatio);
+                                observer.disconnect();
+                            });
+                            observer.observe(element);
+                        });
+                        if (visibleRatio !== 1.0) {
+                            element.scrollIntoView({
+                                block: 'center',
+                                inline: 'center',
+                                behavior: 'instant',
+                            });
                         }
-                    }
-                    return { x, y };
-                }
 
-                // We can't use the mouse to click on invisible elements.
-                // Therefore invoke the click handler on the DOM node directly.
-                element.click();
-                return true;
-            }, selector, visible);
+                        const rect = /** @type {Element} */ (element).getBoundingClientRect();
+                        let x = rect.x + rect.width / 2;
+                        let y = rect.y + rect.height / 2;
+
+                        // Account for offset of the current frame if we are inside an iframe
+                        let win = window;
+                        let parentWin = null;
+                        while (win !== window.top) {
+                            parentWin = win.parent;
+
+                            const iframe = Array.from(
+                                parentWin.document.querySelectorAll('iframe')
+                            ).find(f => f.contentWindow === win);
+                            if (iframe) {
+                                const iframeRect = iframe.getBoundingClientRect();
+                                x += iframeRect.x;
+                                y += iframeRect.y;
+                                break;
+                            }
+                        }
+                        return {x, y};
+                    }
+
+                    // We can't use the mouse to click on invisible elements.
+                    // Therefore invoke the click handler on the DOM node directly.
+                    element.click();
+                    return true;
+                },
+                selector,
+                visible
+            );
 
             // Simulate a true mouse click. The following function scrolls
             // the element into view, moves the mouse to its center and
@@ -1088,14 +1218,17 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
             if (found !== null && typeof found === 'object') {
                 await getMouse(page).click(found.x, found.y);
             }
-        } catch(err) {
+        } catch (err) {
             if (!ignoreError(err)) {
                 throw await enhanceError(config, page, err);
             }
         }
 
         try {
-            if ((found || (!found && retryUntilError !== null)) && (await onSuccess(retryUntil || assertSuccess))) {
+            if (
+                (found || (!found && retryUntilError !== null)) &&
+                (await onSuccess(retryUntil || assertSuccess))
+            ) {
                 const config = getBrowser(page)._pentf_config;
                 addBreadcrumb(config, `exit clickSelector(${selector})`);
                 return;
@@ -1110,7 +1243,9 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
             }
 
             if (!message) {
-                message = `Unable to find ${visible ? 'visible ' : ''}element ${selector} after ${output.formatTime(timeout)}`;
+                message = `Unable to find ${
+                    visible ? 'visible ' : ''
+                }element ${selector} after ${output.formatTime(timeout)}`;
             }
             throw await enhanceError(config, page, new Error(message));
         }
@@ -1132,17 +1267,25 @@ async function clickSelector(page, selector, {timeout=getDefaultTimeout(page), c
  * @param {string?} message Error message shown if the element is not visible in time.
  * @param {number?} timeout How long to wait, in milliseconds.
  */
-async function assertNotSelector(page, selector, {timeout=getDefaultTimeout(page), message} = {}) {
+async function assertNotSelector(
+    page,
+    selector,
+    {timeout = getDefaultTimeout(page), message} = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotSelector(${selector})`);
     try {
         await page.waitForSelector(selector, {timeout});
-    } catch(err) {
+    } catch (err) {
         addBreadcrumb(config, `exit assertNotSelector(${selector})`);
         return;
     }
 
-    throw new Error(`Element matching ${selector} is present, but should not be there. ${message ? ' ' + message : ''}`);
+    throw new Error(
+        `Element matching ${selector} is present, but should not be there. ${
+            message ? ' ' + message : ''
+        }`
+    );
 }
 
 /**
@@ -1165,7 +1308,18 @@ async function assertNotSelector(page, selector, {timeout=getDefaultTimeout(page
  * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEvery=200, message=undefined, visible=true, assertSuccess, retryUntil} = {}) {
+async function clickXPath(
+    page,
+    xpath,
+    {
+        timeout = getDefaultTimeout(page),
+        checkEvery = 200,
+        message = undefined,
+        visible = true,
+        assertSuccess,
+        retryUntil,
+    } = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickXPath(${xpath})`);
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
@@ -1176,89 +1330,113 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     while (true) {
         let found = false;
         try {
-            found = await page.evaluate(async (xpath, visible) => {
-                /** @type {Element | Text} */
-                const element = document.evaluate(
-                    xpath, document, null, window.XPathResult.ANY_TYPE, null).iterateNext();
-                if (!element) return false;
+            found = await page.evaluate(
+                async (xpath, visible) => {
+                    /** @type {Element | Text} */
+                    const element = document
+                        .evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null)
+                        .iterateNext();
+                    if (!element) return false;
 
-                if (visible) {
-                    if (element.offsetParent === null) return null; // invisible
+                    if (visible) {
+                        if (element.offsetParent === null) return null; // invisible
 
-                    /**
-                     * Get the center coordinates of our element to click on.
-                     * @type {DOMRect}
-                     */
-                    let rect;
+                        /**
+                         * Get the center coordinates of our element to click on.
+                         * @type {DOMRect}
+                         */
+                        let rect;
 
-                    // Text nodes don't have `getBoundingClientRect()`, but
-                    // we can use range objects for that.
-                    if (element.nodeType === Node.TEXT_NODE) {
-                        // Element may be hidden in a scroll container
-                        element.parentNode.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-
-                        const visibleRatio = await new Promise(resolve => {
-                            const observer = new IntersectionObserver(entries => {
-                                resolve(entries[0].intersectionRatio);
-                                observer.disconnect();
+                        // Text nodes don't have `getBoundingClientRect()`, but
+                        // we can use range objects for that.
+                        if (element.nodeType === Node.TEXT_NODE) {
+                            // Element may be hidden in a scroll container
+                            element.parentNode.scrollIntoView({
+                                block: 'center',
+                                inline: 'center',
+                                behavior: 'instant',
                             });
-                            observer.observe(element.parentNode);
-                        });
-                        if (visibleRatio !== 1.0) {
-                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        }
 
-                        const range = document.createRange();
-                        range.selectNodeContents(element);
-
-                        const rects = range.getClientRects();
-                        if (!rects || rects.length < 1) {
-                            throw new Error(`Could not determine Text node coordinates of "${element.data}"`);
-                        }
-
-                        rect = rects[0];
-                    } else {
-                        // Element may be hidden in a scroll container
-                        element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                        const visibleRatio = await new Promise(resolve => {
-                            const observer = new IntersectionObserver(entries => {
-                                resolve(entries[0].intersectionRatio);
-                                observer.disconnect();
+                            const visibleRatio = await new Promise(resolve => {
+                                const observer = new IntersectionObserver(entries => {
+                                    resolve(entries[0].intersectionRatio);
+                                    observer.disconnect();
+                                });
+                                observer.observe(element.parentNode);
                             });
-                            observer.observe(element);
-                        });
-                        if (visibleRatio !== 1.0) {
-                            element.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
+                            if (visibleRatio !== 1.0) {
+                                element.scrollIntoView({
+                                    block: 'center',
+                                    inline: 'center',
+                                    behavior: 'instant',
+                                });
+                            }
+
+                            const range = document.createRange();
+                            range.selectNodeContents(element);
+
+                            const rects = range.getClientRects();
+                            if (!rects || rects.length < 1) {
+                                throw new Error(
+                                    `Could not determine Text node coordinates of "${element.data}"`
+                                );
+                            }
+
+                            rect = rects[0];
+                        } else {
+                            // Element may be hidden in a scroll container
+                            element.scrollIntoView({
+                                block: 'center',
+                                inline: 'center',
+                                behavior: 'instant',
+                            });
+                            const visibleRatio = await new Promise(resolve => {
+                                const observer = new IntersectionObserver(entries => {
+                                    resolve(entries[0].intersectionRatio);
+                                    observer.disconnect();
+                                });
+                                observer.observe(element);
+                            });
+                            if (visibleRatio !== 1.0) {
+                                element.scrollIntoView({
+                                    block: 'center',
+                                    inline: 'center',
+                                    behavior: 'instant',
+                                });
+                            }
+
+                            rect = /** @type {Element} */ (element).getBoundingClientRect();
                         }
 
-                        rect = /** @type {Element} */ (element).getBoundingClientRect();
+                        let x = rect.x + rect.width / 2;
+                        let y = rect.y + rect.height / 2;
+
+                        // Account for offset of the current frame if we are inside an iframe
+                        let win = window;
+                        let parentWin = null;
+                        while (win !== window.top) {
+                            parentWin = win.parent;
+
+                            const iframe = Array.from(
+                                parentWin.document.querySelectorAll('iframe')
+                            ).find(f => f.contentWindow === win);
+                            if (iframe) {
+                                const iframeRect = iframe.getBoundingClientRect();
+                                x += iframeRect.x;
+                                y += iframeRect.y;
+                                break;
+                            }
+                        }
+                        return {x, y};
                     }
 
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
-                        }
-                    }
-                    return { x, y };
-                }
-
-                // Click on invisible elements
-                element.click();
-                return true;
-            }, xpath, visible);
+                    // Click on invisible elements
+                    element.click();
+                    return true;
+                },
+                xpath,
+                visible
+            );
 
             // Simulate a true mouse click. The following function scrolls
             // the element into view, moves the mouse to its center and
@@ -1274,7 +1452,10 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
         }
 
         try {
-            if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
+            if (
+                (found || (!found && retryUntilError !== null)) &&
+                (await onSuccess(retryUntil || assertSuccess))
+            ) {
                 addBreadcrumb(config, `exit clickXPath(${xpath})`);
                 return;
             }
@@ -1297,46 +1478,10 @@ async function clickXPath(page, xpath, {timeout=getDefaultTimeout(page), checkEv
     }
 }
 
-const DEFAULT_CLICKABLE_ELEMENTS = ['a', 'button', 'input', 'label'];
-const DEFAULT_CLICKABLE = (
-    '//*[' + DEFAULT_CLICKABLE_ELEMENTS.map(e => `local-name()="${e}"`).join(' or ') + ']');
-
-/**
- * Click a link, button, label, or input by its text content.
- *
- * @param {import('puppeteer').Page} page  puppeteer page object.
- * @param {string} text Text that the element must contain.
- * @param {{timeout?: number, checkEvery?: number, elementXPath?: string, extraMessage?: string, assertSuccess?: () => Promise<boolean>, retryUntil?: () => Promise<boolean>}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
- * @param {string?} extraMessage Optional error message shown if the element is not visible in time.
- * @param {number?} timeout How long to wait, in milliseconds.
- * @param {number?} checkEvery Intervals between checks, in milliseconds. (default: 200ms)
- * @param {string} elementXPath XPath selector for the elements to match. By default matching `a`, `button`, `input`, `label`. `'//*'` to match any element.
- * @param {() => Promise<boolean | void>?} assertSuccess Deprecated: Alias of retryUntil
- * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
- * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
- */
-async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEvery=200, elementXPath=DEFAULT_CLICKABLE, extraMessage=undefined, assertSuccess, retryUntil}={}) {
-    const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter clickText(${text})`);
-    checkText(text);
-    const xpath = (
-        elementXPath +
-        `[contains(text(), ${escapeXPathText(text)})]`);
-    const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-    const res = await clickXPath(page, xpath, {
-        timeout,
-        checkEvery,
-        retryUntil: retryUntil || assertSuccess,
-        message: `Unable to find text ${JSON.stringify(text)} after ${output.formatTime(timeout)}${extraMessageRepr}`,
-    });
-    addBreadcrumb(config, `exit clickText(${text})`);
-    return res;
-}
-
 /**
  * Click any element by its text content.
  *
- * The text can span multiple nodes compared to `clickText` which matches direct descended text nodes only.
+ * The text can span multiple nodes.
  *
  * @param {import('puppeteer').Page} page puppeteer page object.
  * @param {string | RegExp} textOrRegExp Text or regex to match the text that the element must contain.
@@ -1349,16 +1494,28 @@ async function clickText(page, text, {timeout=getDefaultTimeout(page), checkEver
  * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(page), checkEvery=200, extraMessage=undefined, visible=true, assertSuccess, retryUntil}={}) {
+async function clickText(
+    page,
+    textOrRegExp,
+    {
+        timeout = getDefaultTimeout(page),
+        checkEvery = 200,
+        extraMessage = undefined,
+        visible = true,
+        assertSuccess,
+        retryUntil,
+    } = {}
+) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter clickNestedText(${textOrRegExp})`);
+    addBreadcrumb(config, `enter clickText(${textOrRegExp})`);
     if (typeof textOrRegExp === 'string') {
         checkText(textOrRegExp);
     }
 
-    const serializedMatcher = typeof textOrRegExp !== 'string'
-        ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
-        : textOrRegExp;
+    const serializedMatcher =
+        typeof textOrRegExp !== 'string'
+            ? {source: textOrRegExp.source, flags: textOrRegExp.flags}
+            : textOrRegExp;
 
     let remainingTimeout = timeout;
     let retryUntilError = null;
@@ -1367,101 +1524,112 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         let found = false;
 
         try {
-            found = await page.evaluate(async (matcher, visible) => {
-                // eslint-disable-next-line no-undef
-                /** @type {(text: string) => boolean} */
-                let matchFunc;
-                /** @type {null | (text: string) => boolean} */
-                let matchFuncExact = null;
+            found = await page.evaluate(
+                async (matcher, visible) => {
+                    // eslint-disable-next-line no-undef
+                    /** @type {(text: string) => boolean} */
+                    let matchFunc;
+                    /** @type {null | (text: string) => boolean} */
+                    let matchFuncExact = null;
 
-                if (typeof matcher == 'string') {
-                    matchFunc = text => text.includes(matcher);
-                } else {
-                    const regexExact = new RegExp(matcher.source, matcher.flags);
-                    matchFuncExact = text => {
-                        // Reset regex state in case global flag was used
-                        regexExact.lastIndex = 0;
-                        return regexExact.test(text);
-                    };
+                    if (typeof matcher == 'string') {
+                        matchFunc = text => text.includes(matcher);
+                    } else {
+                        const regexExact = new RegExp(matcher.source, matcher.flags);
+                        matchFuncExact = text => {
+                            // Reset regex state in case global flag was used
+                            regexExact.lastIndex = 0;
+                            return regexExact.test(text);
+                        };
 
-                    // Remove leading ^ and ending $, otherwise the traversal
-                    // will fail at the first node.
-                    const source = matcher.source
-                        .replace(/^[^]/, '')
-                        .replace(/[$]$/, '');
-                    const regex = new RegExp(source, matcher.flags);
-                    matchFunc = text => {
-                        // Reset regex state in case global flag was used
-                        regex.lastIndex = 0;
-                        return regex.test(text);
-                    };
-                }
+                        // Remove leading ^ and ending $, otherwise the traversal
+                        // will fail at the first node.
+                        const source = matcher.source.replace(/^[^]/, '').replace(/[$]$/, '');
+                        const regex = new RegExp(source, matcher.flags);
+                        matchFunc = text => {
+                            // Reset regex state in case global flag was used
+                            regex.lastIndex = 0;
+                            return regex.test(text);
+                        };
+                    }
 
-                const stack = [document.body];
-                let item = null;
-                let lastFound = null;
-                while ((item = stack.pop())) {
-                    for (let i = 0; i < item.childNodes.length; i++) {
-                        const child = item.childNodes[i];
+                    const stack = [document.body];
+                    let item = null;
+                    let lastFound = null;
+                    while ((item = stack.pop())) {
+                        for (let i = 0; i < item.childNodes.length; i++) {
+                            const child = item.childNodes[i];
 
-                        // Skip text nodes as they are not clickable
-                        if (child.nodeType === Node.TEXT_NODE) {
-                            continue;
-                        }
-
-                        const text = child.textContent || '';
-                        if (child.childNodes.length > 0 && matchFunc(text)) {
-                            if (matchFuncExact === null || matchFuncExact(text)) {
-                                lastFound = child;
+                            // Skip text nodes as they are not clickable
+                            if (child.nodeType === Node.TEXT_NODE) {
+                                continue;
                             }
-                            stack.push(child);
+
+                            const text = child.textContent || '';
+                            if (child.childNodes.length > 0 && matchFunc(text)) {
+                                if (matchFuncExact === null || matchFuncExact(text)) {
+                                    lastFound = child;
+                                }
+                                stack.push(child);
+                            }
                         }
                     }
-                }
 
-                if (!lastFound) return false;
+                    if (!lastFound) return false;
 
-                if (visible) {
-                    if (lastFound.offsetParent === null) return null; // invisible)
+                    if (visible) {
+                        if (lastFound.offsetParent === null) return null; // invisible)
 
-                    // Element may be hidden in a scroll container
-                    lastFound.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    const visibleRatio = await new Promise(resolve => {
-                        const observer = new IntersectionObserver(entries => {
-                            resolve(entries[0].intersectionRatio);
-                            observer.disconnect();
+                        // Element may be hidden in a scroll container
+                        lastFound.scrollIntoView({
+                            block: 'center',
+                            inline: 'center',
+                            behavior: 'instant',
                         });
-                        observer.observe(lastFound);
-                    });
-                    if (visibleRatio !== 1.0) {
-                        lastFound.scrollIntoView({block: 'center', inline: 'center', behavior: 'instant'});
-                    }
-
-                    const rect = lastFound.getBoundingClientRect();
-                    let x = rect.x + (rect.width / 2);
-                    let y = rect.y + (rect.height / 2);
-
-                    // Account for offset of the current frame if we are inside an iframe
-                    let win = window;
-                    let parentWin = null;
-                    while (win !== window.top) {
-                        parentWin = win.parent;
-
-                        const iframe = Array.from(parentWin.document.querySelectorAll('iframe'))
-                            .find(f => f.contentWindow === win);
-                        if (iframe) {
-                            const iframeRect = iframe.getBoundingClientRect();
-                            x += iframeRect.x;
-                            y += iframeRect.y;
-                            break;
+                        const visibleRatio = await new Promise(resolve => {
+                            const observer = new IntersectionObserver(entries => {
+                                resolve(entries[0].intersectionRatio);
+                                observer.disconnect();
+                            });
+                            observer.observe(lastFound);
+                        });
+                        if (visibleRatio !== 1.0) {
+                            lastFound.scrollIntoView({
+                                block: 'center',
+                                inline: 'center',
+                                behavior: 'instant',
+                            });
                         }
-                    }
-                    return { x, y };
-                }
 
-                lastFound.click();
-                return true;
-            }, serializedMatcher, visible);
+                        const rect = lastFound.getBoundingClientRect();
+                        let x = rect.x + rect.width / 2;
+                        let y = rect.y + rect.height / 2;
+
+                        // Account for offset of the current frame if we are inside an iframe
+                        let win = window;
+                        let parentWin = null;
+                        while (win !== window.top) {
+                            parentWin = win.parent;
+
+                            const iframe = Array.from(
+                                parentWin.document.querySelectorAll('iframe')
+                            ).find(f => f.contentWindow === win);
+                            if (iframe) {
+                                const iframeRect = iframe.getBoundingClientRect();
+                                x += iframeRect.x;
+                                y += iframeRect.y;
+                                break;
+                            }
+                        }
+                        return {x, y};
+                    }
+
+                    lastFound.click();
+                    return true;
+                },
+                serializedMatcher,
+                visible
+            );
 
             // Simulate a true mouse click. The following function scrolls
             // the element into view, moves the mouse to its center and
@@ -1477,8 +1645,11 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
         }
 
         try {
-            if ((found || (!found && retryUntilError !== null)) && await onSuccess(retryUntil || assertSuccess)) {
-                addBreadcrumb(config, `exit clickNestedText(${textOrRegExp})`);
+            if (
+                (found || (!found && retryUntilError !== null)) &&
+                (await onSuccess(retryUntil || assertSuccess))
+            ) {
+                addBreadcrumb(config, `exit clickText(${textOrRegExp})`);
                 return;
             }
         } catch (err) {
@@ -1491,7 +1662,15 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
             }
 
             const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
-            throw await enhanceError(config, page, new Error(`Unable to find${visible ? ' visible' : ''} text "${textOrRegExp}" after ${output.formatTime(timeout)}${extraMessageRepr}`));
+            throw await enhanceError(
+                config,
+                page,
+                new Error(
+                    `Unable to find${
+                        visible ? ' visible' : ''
+                    } text "${textOrRegExp}" after ${output.formatTime(timeout)}${extraMessageRepr}`
+                )
+            );
         }
         await wait(Math.min(remainingTimeout, checkEvery));
         remainingTimeout -= checkEvery;
@@ -1511,15 +1690,32 @@ async function clickNestedText(page, textOrRegExp, {timeout=getDefaultTimeout(pa
  * @param {() => Promise<boolean | void>?} retryUntil Additional check or assertion to verify that the operation was successful. This is needed in cases where a DOM node is present
  * and we clicked on it, but the framework that rendered the node didn't set up any event listeners yet.
  */
-async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDefaultTimeout(page), visible=true, assertSuccess, retryUntil} = {}) {
+async function clickTestId(
+    page,
+    testId,
+    {
+        extraMessage = undefined,
+        timeout = getDefaultTimeout(page),
+        visible = true,
+        assertSuccess,
+        retryUntil,
+    } = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter clickTestId(${testId})`);
     _checkTestId(testId);
 
     const xpath = `//*[@data-testid="${testId}"]`;
     const extraMessageRepr = extraMessage ? `. ${extraMessage}` : '';
-    const message = `Failed to find${visible ? ' visible' : ''} element with data-testid "${testId}" within ${output.formatTime(timeout)}${extraMessageRepr}`;
-    const res = await clickXPath(page, xpath, {timeout, message, visible, retryUntil: retryUntil || assertSuccess});
+    const message = `Failed to find${
+        visible ? ' visible' : ''
+    } element with data-testid "${testId}" within ${output.formatTime(timeout)}${extraMessageRepr}`;
+    const res = await clickXPath(page, xpath, {
+        timeout,
+        message,
+        visible,
+        retryUntil: retryUntil || assertSuccess,
+    });
     addBreadcrumb(config, `exit clickTestId(${testId})`);
     return res;
 }
@@ -1537,7 +1733,7 @@ async function clickTestId(page, testId, {extraMessage=undefined, timeout=getDef
  * @param {string?} message Error message shown if the element is not visible in time.
  * @param {number?} timeout How long to wait, in milliseconds.
  */
-async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), message} = {}) {
+async function assertNotTestId(page, testId, {timeout = getDefaultTimeout(page), message} = {}) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertNotTestId(${testId})`);
     _checkTestId(testId);
@@ -1548,7 +1744,11 @@ async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), m
         addBreadcrumb(config, `exit assertNotTestId(${testId})`);
     } catch (err) {
         if (/Element\smatching/.test(err.message)) {
-            throw new Error(`Element matching test id "${testId}" is present, but should not be there. ${message ? ' ' + message : ''}`);
+            throw new Error(
+                `Element matching test id "${testId}" is present, but should not be there. ${
+                    message ? ' ' + message : ''
+                }`
+            );
         }
     }
 }
@@ -1563,11 +1763,16 @@ async function assertNotTestId(page, testId, {timeout=getDefaultTimeout(page), m
  * @param {string?} message Message shown if the element can not be found.
  * @param {number?} delay Delay in ms between each keystroke (Default: 0)
  */
-async function typeSelector(page, selector, text, {message=undefined, timeout=getDefaultTimeout(page), delay}={}) {
+async function typeSelector(
+    page,
+    selector,
+    text,
+    {message = undefined, timeout = getDefaultTimeout(page), delay} = {}
+) {
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter typeSelector(${selector}, text: ${text})`);
     const el = await waitForVisible(page, selector, {timeout, message});
-    await el.type(text, { delay });
+    await el.type(text, {delay});
     addBreadcrumb(config, `exit typeSelector(${selector}, text: ${text})`);
 }
 
@@ -1587,20 +1792,21 @@ async function setLanguage(page, lang) {
 
     // From https://stackoverflow.com/a/47292022/35070
     await page.setExtraHTTPHeaders({'Accept-Language': lang.join(',')}); // For HTTP requests
-    await page.evaluateOnNewDocument(lang => { // For JavaScript code
+    await page.evaluateOnNewDocument(lang => {
+        // For JavaScript code
         Object.defineProperty(navigator, 'language', {
             // Allow future setLanguage() calls to overwrite this property
             configurable: true,
-            get: function() {
+            get: function () {
                 return lang[0];
-            }
+            },
         });
         Object.defineProperty(navigator, 'languages', {
             // Allow future setLanguage() calls to overwrite this property
             configurable: true,
-            get: function() {
+            get: function () {
                 return lang;
-            }
+            },
         });
     }, lang);
     addBreadcrumb(config, `exit setLanguage(${lang.join(', ')})`);
@@ -1627,7 +1833,7 @@ async function getAttribute(page, selector, name) {
             }
             return el.getAttribute(propName);
         },
-        name,
+        name
     );
     addBreadcrumb(config, `exit getAttribute(${selector}, attr: ${name})`);
     return res;
@@ -1673,14 +1879,14 @@ async function getSelectOptions(page, select) {
 async function takeScreenshot(config, page, fileName, selector) {
     await mkdirp(config.screenshot_directory);
     const file = path.join(config.screenshot_directory, fileName);
-    return await _takeScreenshot(page, { file, selector, fullPage: true });
+    return await _takeScreenshot(page, {file, selector, fullPage: true});
 }
 
 /**
  * @param {import('puppeteer').Page} page
  * @param {{ file?: string, selector?: string, fullPage?: boolean, hideInteraction?: boolean }} [options]
  */
-async function _takeScreenshot(page, { file, selector, fullPage, hideInteraction } = {}) {
+async function _takeScreenshot(page, {file, selector, fullPage, hideInteraction} = {}) {
     const viewport = page.viewport();
 
     if (hideInteraction) {
@@ -1728,7 +1934,6 @@ async function _takeScreenshot(page, { file, selector, fullPage, hideInteraction
     return img;
 }
 
-
 /**
  *
  * @param {import('./config').Config}
@@ -1743,13 +1948,13 @@ async function assertAccessibility(config, page) {
     const url = page.url();
 
     await page.addScriptTag({
-        path: require.resolve('axe-core')
+        path: require.resolve('axe-core'),
     });
 
     /** @type {import('axe-core').AxeResults} */
     const results = await page.evaluate(() => {
         return new Promise((resolve, reject) => {
-            window.axe.run(document, { ancestry: true }, (err, results) => {
+            window.axe.run(document, {ancestry: true}, (err, results) => {
                 if (err !== null) reject(err);
                 else resolve(results);
             });
@@ -1760,7 +1965,6 @@ async function assertAccessibility(config, page) {
 
     let i = errors.length;
     for (const v of results.violations) {
-
         /** @type {import('./internal').A11yNode[]} */
         const nodes = [];
 
@@ -1775,7 +1979,10 @@ async function assertAccessibility(config, page) {
                         const img = await takeScreenshot(config, page, name, selector);
                         imgs.push(img);
                     } catch (err) {
-                        output.logVerbose(config, '[runner] Could not take screenshot ' + err.message);
+                        output.logVerbose(
+                            config,
+                            '[runner] Could not take screenshot ' + err.message
+                        );
                         return null;
                     }
                 }
@@ -1784,7 +1991,7 @@ async function assertAccessibility(config, page) {
             nodes.push({
                 html: node.html,
                 selectors: node.ancestry || [],
-                screenshots: imgs
+                screenshots: imgs,
             });
         }
 
@@ -1792,7 +1999,7 @@ async function assertAccessibility(config, page) {
             impact: v.impact || 'minor',
             helpUrl: v.helpUrl,
             description: v.help,
-            nodes
+            nodes,
         });
     }
 
@@ -1813,7 +2020,12 @@ async function assertAccessibility(config, page) {
  * @param {string} name
  * @param {{ threshold?: number, selector?: string, fullPage?: boolean } & import('pixelmatch').PixelmatchOptions} [options]
  */
-async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fullPage = true, ...pxl} = {}) {
+async function assertSnapshot(
+    config,
+    page,
+    name,
+    {threshold = 0.2, selector, fullPage = true, ...pxl} = {}
+) {
     await mkdirp(config.snapshot_directory);
     const target = path.join(config.snapshot_directory, `${config._taskName}_${name}-expected.png`);
 
@@ -1833,9 +2045,9 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
     // We have never seen this snapshot before, take a new one
     // or we want to update existing snapshots
     if (expected === null || config.update_snapshots) {
-        await _takeScreenshot(page, {file: target, selector, fullPage, hideInteraction: true });
+        await _takeScreenshot(page, {file: target, selector, fullPage, hideInteraction: true});
     } else {
-        let actualBuf = await _takeScreenshot(page, {selector, fullPage, hideInteraction: true });
+        let actualBuf = await _takeScreenshot(page, {selector, fullPage, hideInteraction: true});
         let actual = PNG.sync.read(actualBuf);
 
         let width = expected.width;
@@ -1845,34 +2057,47 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
         if (actual.width !== width || actual.height !== height) {
             const expectedSize = `${width}x${height}px`;
             const actualSize = `${actual.width}x${actual.height}px`;
-            output.logVerbose(config, `[snapshot] Image dimensions don't match. Expected ${expectedSize}, but got ${actualSize} for ${name}. Resizing...`);
+            output.logVerbose(
+                config,
+                `[snapshot] Image dimensions don't match. Expected ${expectedSize}, but got ${actualSize} for ${name}. Resizing...`
+            );
 
             width = Math.max(expected.width, actual.width);
             height = Math.max(expected.height, actual.height);
 
             // Extend actual image if needed
             if (actual.width !== width || actual.height !== height) {
-                output.logVerbose(config, `[snapshot] Resizing actual from ${actual.width}x${actual.height} -> ${width}x${height}`);
-                actualBuf = await sharp(actualBuf).extend({
-                    top: 0,
-                    left: 0,
-                    bottom: height - actual.height,
-                    right: width - actual.width,
-                    background: { r: 0, g: 0, b: 0, alpha: 0 }
-                }).toBuffer();
+                output.logVerbose(
+                    config,
+                    `[snapshot] Resizing actual from ${actual.width}x${actual.height} -> ${width}x${height}`
+                );
+                actualBuf = await sharp(actualBuf)
+                    .extend({
+                        top: 0,
+                        left: 0,
+                        bottom: height - actual.height,
+                        right: width - actual.width,
+                        background: {r: 0, g: 0, b: 0, alpha: 0},
+                    })
+                    .toBuffer();
                 actual = PNG.sync.read(actualBuf);
             }
 
             // Extend expected image if needed
             if (expected.width !== width || expected.height !== height) {
-                output.logVerbose(config, `[snapshot] Resizing expected from ${expected.width}x${expected.height} -> ${width}x${height}`);
-                expectedBuf = await sharp(expectedBuf).extend({
-                    top: 0,
-                    left: 0,
-                    bottom: height - expected.height,
-                    right: width - expected.width,
-                    background: { r: 0, g: 0, b: 0, alpha: 0 }
-                }).toBuffer();
+                output.logVerbose(
+                    config,
+                    `[snapshot] Resizing expected from ${expected.width}x${expected.height} -> ${width}x${height}`
+                );
+                expectedBuf = await sharp(expectedBuf)
+                    .extend({
+                        top: 0,
+                        left: 0,
+                        bottom: height - expected.height,
+                        right: width - expected.width,
+                        background: {r: 0, g: 0, b: 0, alpha: 0},
+                    })
+                    .toBuffer();
                 expected = PNG.sync.read(expectedBuf);
             }
         }
@@ -1912,7 +2137,9 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
             );
             await fs.promises.writeFile(expectedFile, expectedBuf);
 
-            throw new Error(`Snapshot failed, there were ${differenceCount} differences, see ${diffFile}`);
+            throw new Error(
+                `Snapshot failed, there were ${differenceCount} differences, see ${diffFile}`
+            );
         }
     }
 }
@@ -1939,16 +2166,16 @@ async function assertSnapshot(config, page, name, {threshold = 0.2, selector, fu
  * @param number? factor Speedup factor (e.g. a timeout of 20 seconds with a speedup of 100 will fire after 200ms). (default: 100)
  * @param boolean? persistent Whether this change should persist in case of page navigation. Set this if the next line is `await page.goto(..)` or similar. (default: false)
  */
-async function speedupTimeouts(page, {factor=100, persistent=false}={}) {
+async function speedupTimeouts(page, {factor = 100, persistent = false} = {}) {
     function applyTimeouts(factor) {
         window._pentf_real_setTimeout = window._pentf_real_setTimeout || window.setTimeout;
         window.setTimeout = (func, delay, ...args) => {
-            return window._pentf_real_setTimeout(func, delay && (delay / factor), ...args);
+            return window._pentf_real_setTimeout(func, delay && delay / factor, ...args);
         };
 
         window._pentf_real_setInterval = window._pentf_real_setInterval || window.setInterval;
         window.setInterval = (func, delay, ...args) => {
-            return window._pentf_real_setInterval(func, delay && (delay / factor), ...args);
+            return window._pentf_real_setInterval(func, delay && delay / factor, ...args);
         };
     }
 
@@ -2018,7 +2245,6 @@ async function interceptRequest(page, fn) {
     page._pentf_intercept_handlers.push(fn);
 }
 
-
 // Render HTML code as a PDF file.
 // modifyPage can be an async function to change the page in the browser.
 
@@ -2030,7 +2256,7 @@ async function interceptRequest(page, fn) {
  * @param {string} html Full HTML document to render.
  * @param {*} modifyPage An optional async function to modify the `page` object.
  */
-async function html2pdf(config, path, html, modifyPage=null) {
+async function html2pdf(config, path, html, modifyPage = null) {
     const pdfConfig = {...config};
     pdfConfig.headless = true;
     // The headless option will be overwritten if devtools=true, leading to a
@@ -2058,7 +2284,7 @@ module.exports = {
     assertNotXPath,
     assertSnapshot,
     assertValue,
-    clickNestedText,
+    clickNestedText: clickText,
     clickSelector,
     clickTestId,
     clickText,
@@ -2086,5 +2312,5 @@ module.exports = {
     waitForText,
     waitForVisible,
     waitForXPathGone,
-    workaround_setContent
+    workaround_setContent,
 };

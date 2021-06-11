@@ -1,15 +1,21 @@
 const assert = require('assert').strict;
 
 const {assertEventually} = require('../src/assert_utils');
-const {assertNotXPath, clickXPath, clickText, waitForText, closePage, newPage} = require('../src/browser_utils');
+const {
+    assertNotXPath,
+    clickXPath,
+    clickText,
+    waitForText,
+    closePage,
+    newPage,
+} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
     await page.setContent('<div id="d1"><div id="d2">test" text \\ " a</div></div>');
 
     await assert.rejects(
-        assertNotXPath(
-            page, '//div[@id="d2"]', {message: 'extra', timeout: 10, checkEvery: 1}),
+        assertNotXPath(page, '//div[@id="d2"]', {message: 'extra', timeout: 10, checkEvery: 1}),
         {message: 'Element matching //div[@id="d2"] is present, but should not be there. extra'}
     );
     await assertNotXPath(page, '//div[@id="d3"]');
@@ -57,7 +63,9 @@ async function run(config) {
         </html>
     `);
     await clickXPath(page, '//button[@id="clickme"]');
-    await assertEventually(() => clickCount === 1, {message: 'expected 1 click, but got ' + clickCount});
+    await assertEventually(() => clickCount === 1, {
+        message: 'expected 1 click, but got ' + clickCount,
+    });
     await assert.rejects(clickXPath(page, '//notfound', {timeout: 10}), {
         message: 'Unable to find XPath //notfound after 10ms',
     });
@@ -69,16 +77,10 @@ async function run(config) {
     await clickText(page, 'click "this" button');
     await assertEventually(() => clickCount === 2, {message: 'Expect 2 clicks'});
     await assert.rejects(clickText(page, '404', {timeout: 10}), {
-        message: 'Unable to find text "404" after 10ms',
+        message: 'Unable to find visible text "404" after 10ms',
     });
     await assert.rejects(clickText(page, 'invisible button', {timeout: 10, extraMessage: '12'}), {
-        message: 'Unable to find text "invisible button" after 10ms (12)',
-    });
-    await assert.rejects(clickText(page, {error: 'not-a-string'}), {
-        message: 'Invalid text argument: {"error":"not-a-string"}',
-    });
-    await assert.rejects(clickText(page, 'button', {elementXPath: '//notfound', timeout: 100}), {
-        message: 'Unable to find text "button" after 100ms',
+        message: 'Unable to find visible text "invisible button" after 10ms (12)',
     });
     assert.strictEqual(clickCount, 2);
 

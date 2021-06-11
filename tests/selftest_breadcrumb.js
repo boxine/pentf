@@ -12,7 +12,6 @@ const {
     clickSelector,
     clickXPath,
     clickText,
-    clickNestedText,
     clickTestId,
     typeSelector,
     setLanguage,
@@ -129,12 +128,6 @@ async function run(config) {
         const page = await newPage(config);
         await workaround_setContent(page, '<button>foo</button>');
         await clickText(page, 'foo');
-    });
-
-    await execRunner(config, 'clickNestedText(foo)', async config => {
-        const page = await newPage(config);
-        await workaround_setContent(page, '<button>foo</button>');
-        await clickNestedText(page, 'foo');
     });
 
     await execRunner(config, 'clickTestId(foo)', async config => {

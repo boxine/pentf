@@ -1,5 +1,12 @@
 const assert = require('assert').strict;
-const {closePage, newPage, clickNestedText, clickText, clickSelector, clickXPath} = require('../src/browser_utils');
+const {
+    closePage,
+    newPage,
+    clickNestedText,
+    clickText,
+    clickSelector,
+    clickXPath,
+} = require('../src/browser_utils');
 
 /**
  * @param {(options: {retryUntil: () => boolean, timeout: number})=> Promise<void>} fn
@@ -9,7 +16,7 @@ async function testFn(fn) {
     try {
         await fn({
             retryUntil: () => false,
-            timeout: 1
+            timeout: 1,
         });
         assert(0);
     } catch (err) {
@@ -22,7 +29,7 @@ async function testFn(fn) {
             retryUntil: () => {
                 throw new Error('fail');
             },
-            timeout: 1
+            timeout: 1,
         });
         assert(0);
     } catch (err) {
@@ -40,10 +47,10 @@ async function run(config) {
     `;
     await page.setContent(content);
 
-    await testFn((options) => clickSelector(page, 'button', options));
-    await testFn((options) => clickXPath(page, '//button', options));
-    await testFn((options) => clickText(page, 'first', options));
-    await testFn((options) => clickNestedText(page, 'first', options));
+    await testFn(options => clickSelector(page, 'button', options));
+    await testFn(options => clickXPath(page, '//button', options));
+    await testFn(options => clickText(page, 'first', options));
+    await testFn(options => clickNestedText(page, 'first', options));
 
     // Should succeed when original elements are removed, but the
     // callback function passes.

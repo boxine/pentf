@@ -684,10 +684,15 @@ async function logTaskError(config, task) {
                 config, `${label} test case ${name} at ${utils.localIso8601()} but section was expected to fail:\n${e.stack}\n`);
         } else {
             const label = color(config, 'inverse-red', 'FAILED');
+            const pageUrlString = task.pageUrls.length
+                ? `  Open pages: ${task.pageUrls.join(', ')}\n`
+                : '';
             log(
                 config,
                 `${label} test case ${name} at ${utils.localIso8601()}:\n` +
-                `${await formatError(config, e)}\n`);
+                pageUrlString
+                + `${await formatError(config, e)}\n`
+            );
 
             // There won't be a useful stack trace if the test timed out.
             // Display collected breadcrumb additionally if there is one.

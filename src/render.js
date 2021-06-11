@@ -309,6 +309,13 @@ function html(results) {
 
                 if (first) first = false;
 
+                if (tr.pageUrls.length) {
+                    const pageUrls = tr.pageUrls
+                        .map(url => `<a href="${escape_html(url)}">${escape_html(url)}</a>`)
+                        .join(', ');
+                    res += `<p class="open_pages">Open pages: <span class="open_pages_list">${pageUrls}</span></p>`;
+                }
+
                 res += (
                     '<div class="error_stack"' + (first ? '' : ' style="margin-top:2em; overflow-wrap: break-word;word-break: break-all;"') + '>' +
                     escape_html(tr.error_stack || 'INTERNAL ERROR: no error stack') +
@@ -428,6 +435,13 @@ td.test_footer {
     height: 7px;
 }
 
+.open_pages {
+    margin-top: 0.5rem;
+    font-size: 70%;
+}
+.open_pages_list {
+    color: #0088ff;
+}
 .description {
     font-size: 80%;
     color: #333;

@@ -14,6 +14,8 @@ function moveComments(node, target) {
 /**
  * This babel plugin doesn't aim to support every edge case for CommonJS
  * modules and instead only focuses on the subset we use in this repo.
+ * @param {object} options
+ * @param {import('@babel/core').types} options.types
  */
 module.exports = function cjs2esm({types: t}) {
     return {
@@ -182,6 +184,12 @@ module.exports = function cjs2esm({types: t}) {
                                 moveComments(decl.node, exportNode);
                                 path.node.body[decl.i] = exportNode;
                             }
+                        } else {
+                            path.node.body.push(
+                                t.exportNamedDeclaration(null, [
+                                    t.exportSpecifier(prop.value, prop.key),
+                                ])
+                            );
                         }
                     });
 

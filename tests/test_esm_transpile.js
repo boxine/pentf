@@ -80,6 +80,19 @@ export { foo };`
 export { foo };`
     );
 
+    await assertTranspile(
+        `
+        function foo() {}
+
+        module.exports = {
+            foo,
+            bar: foo,
+        };
+    `,
+        `export function foo() {}
+export { foo as bar };`
+    );
+
     // Append extension to relative imports
     await assertTranspile(
         `

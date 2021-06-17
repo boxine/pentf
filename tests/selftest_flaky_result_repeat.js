@@ -36,12 +36,13 @@ async function run() {
         }
     }
 
-    const summary = lines.slice(-3).map(s => s.trim());
+    const summary = lines.slice(0, 3).map(s => s.trim());
     assert.deepEqual(summary, [
         '3 tests passed',
         '3 failed (error[0], error[1], error[2])',
-        '3 flaky (flaky[0], flaky[1], flaky[2])'
+        '3 flaky (flaky[0], flaky[1], flaky[2])',
     ]);
+    assert.match(lines[3], /3 slowest tests: (.+), (.+), (.+)/);
 }
 
 module.exports = {

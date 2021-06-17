@@ -3,21 +3,21 @@ import {AxeResults} from 'axe-core';
 import {Config} from './config';
 
 export interface TestFile {
-  fileName: string;
-  name: string;
+    fileName: string;
+    name: string;
 }
 
 export type TestCase = {
     fileName: string;
     name: string;
     group: string;
-    resources?: string[]
+    resources?: string[];
     run: (config: TaskConfig) => Promise<void> | void;
     skip?: (config: TaskConfig) => Promise<boolean> | boolean;
     expectedToFail?: string | boolean;
 };
 
-export type TaskStatus = "success" | "running" | "error" | "todo" | "skipped";
+export type TaskStatus = 'success' | 'running' | 'error' | 'todo' | 'skipped';
 
 export interface Task {
     id: string;
@@ -55,7 +55,9 @@ export interface TaskConfig extends Config {
 export interface TaskResult {
     pageUrls: string[];
     status: TaskStatus;
-    duration: number; error_screenshots: Buffer[];
+    /** in milliseconds */
+    duration: number;
+    error_screenshots: Buffer[];
     error_stack?: string;
     axeResults: AxeResults[];
 }
@@ -115,9 +117,17 @@ export type TestOptions = Omit<TestCase, 'name' | 'run'>;
 export interface TestFn {
     (name: string, test: (config: TaskConfig) => Promise<void> | void, options?: TestOptions): void;
     /** Only run this test case in the current file */
-    only: (name: string, test: (config: TaskConfig) => Promise<void> | void, options?: TestOptions) => void;
+    only: (
+        name: string,
+        test: (config: TaskConfig) => Promise<void> | void,
+        options?: TestOptions
+    ) => void;
     /** Skip this test case */
-    skip: (name: string, test: (config: TaskConfig) => Promise<void> | void, options?: TestOptions) => void;
+    skip: (
+        name: string,
+        test: (config: TaskConfig) => Promise<void> | void,
+        options?: TestOptions
+    ) => void;
 }
 
 export interface DescribeFn {
@@ -133,7 +143,7 @@ export type SuiteBuilder = (test: TestFn, suite: DescribeFn) => void;
 //
 // Accessibility
 //
-export type A11yImpact = "minor" | "moderate" | "serious" | "critical";
+export type A11yImpact = 'minor' | 'moderate' | 'serious' | 'critical';
 
 export type A11yNode = {
     html: string;
@@ -146,4 +156,4 @@ export type A11yResult = {
     helpUrl?: string;
     description: string;
     nodes: A11yNode[];
-}
+};

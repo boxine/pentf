@@ -55,6 +55,7 @@ export interface TaskConfig extends Config {
 export interface TaskResult {
     pageUrls: string[];
     status: TaskStatus;
+    /** in milliseconds */
     duration: number;
     error_screenshots: Buffer[];
     error_stack?: string;

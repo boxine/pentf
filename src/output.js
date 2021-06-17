@@ -231,7 +231,15 @@ function detailedStatus(config, state) {
  * @returns {string} A string with counts of the results.
  **/
 function resultSummary(config, results) {
-    const {success, errored, flaky, skipped, expectedToFail, expectedToFailButPassed} = results;
+    const {
+        success,
+        errored,
+        flaky,
+        skipped,
+        expectedToFail,
+        expectedToFailButPassed,
+        all,
+    } = results;
 
     const maxChars = Math.max(
         ...[
@@ -285,6 +293,25 @@ function resultSummary(config, results) {
                 .map(s => s.name)
                 .join(', ')})\n`
         );
+    }
+
+    const slowTestsToList = 3;
+    if (all.length > slowTestsToList) {
+        const slowish = all.map(result => {
+            return {
+                name: result.name,
+                duration: result.taskResults.reduce((sum, item) => sum + item.duration, 0),
+            };
+        });
+        slowish.sort((a, b) => {
+            return a.duration < b.duration ? 1 : -1;
+        });
+        const formatted = slowish.slice(0, slowTestsToList).map(item => {
+            return `${item.name} (${formatDuration(config, item.duration)})`;
+        });
+        res +=
+            color(config, 'yellow', `  ${pad(slowTestsToList)} slowest tests: `) +
+            `${formatted.join(', ')}\n`;
     }
     return res;
 }

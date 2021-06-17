@@ -34,6 +34,7 @@ function getResults(config, results) {
         expectedToFailButPassed,
         todo,
         running,
+        all: results,
     };
 }
 

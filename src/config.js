@@ -460,6 +460,7 @@ function parseArgs(options, raw_args) {
         args.forward_console = true;
         args.show_interactions = true;
     }
+    args.showBreadcrumbTrace = true;
     if (args.keep_open) {
         args.headless = false;
     }
@@ -506,7 +507,7 @@ async function readConfigFile(configDir, env, moduleType) {
 }
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean, snapshot_directory: string, update_snapshots?: boolean}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean, snapshot_directory: string, update_snapshots?: boolean, showBreadcrumbTrace?: boolean}} Config
  */
 
 /**

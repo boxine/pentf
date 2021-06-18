@@ -45,7 +45,7 @@ let tmp_home;
  * @returns {import('puppeteer').Page} The puppeteer page handle.
  */
 async function newPage(config, chrome_args = []) {
-    addBreadcrumb(config, 'enter newPage()');
+    const endBreadcrumb = addBreadcrumb(config, 'newPage()');
     /** @type {import('puppeteer')} */
     let puppeteer;
     try {
@@ -224,7 +224,7 @@ async function newPage(config, chrome_args = []) {
     // The Browser instance is the nearest shared ancestor across pages
     // and frames.
     browser._pentf_config = config;
-    addBreadcrumb(config, 'exit newPage()');
+    endBreadcrumb();
 
     // PDF renderer invokes newPage with a raw config object which doesn't
     // have runner sepcific properties
@@ -517,16 +517,58 @@ function getDefaultTimeout(pageOrFrame) {
     return getBrowser(pageOrFrame)._pentf_config.default_timeout;
 }
 
+let _breadCrumbId = 0;
+
 /**
  * Mark progress in test. Useful for when the test times out and there is no
  * hint as to why.
  * @param {import('./internal').TaskConfig} config
- * @param {string} name
+ * @param {string} text
+ * @returns {() => void} stop function
  * @private
  */
-function addBreadcrumb(config, name) {
+function addBreadcrumb(config, text) {
+    const id = _breadCrumbId++;
+
     const time = Math.round(performance.now() - config.start);
-    config._breadcrumb = new Error(`Last breadcrumb "${name}" at ${time}ms after test started.`);
+    config._breadcrumb.push({
+        id,
+        error: new Error(`Last breadcrumb "${text}" at ${time}ms after test started.`),
+        type: 'enter',
+        text,
+        time,
+    });
+
+    return () => {
+        if (config.showBreadcrumbTrace) {
+            const now = performance.now();
+            const time = Math.round(now - config.start);
+
+            // Find corresponding enter call to get duration.
+            // Optimization: Search backwards because it's more likely
+            // that the match is at the end.
+            let duration = 0;
+            for (let i = config._breadcrumb.length - 1; i >= 0; i--) {
+                const prev = config._breadcrumb[i];
+                if (prev.id === id) {
+                    duration = time - prev.time;
+                }
+            }
+
+            config._breadcrumb.push({
+                id,
+                error: new Error(`Last breadcrumb "${text}" at ${time}ms after test started.`),
+                type: 'exit',
+                text,
+                time,
+            });
+
+            const prettyDuration = output.color(config, 'magenta', `+${output.formatTime(duration)}`);
+            const check = output.color(config, 'green', '✓');
+            output.log(config, `  ${check} ${text} ${prettyDuration}`);
+            // output.log(config, output.color(config, 'dim', `  … ${text}`));
+        }
+    };
 }
 
 /**
@@ -538,10 +580,30 @@ function addBreadcrumb(config, name) {
 function withBreadcrumb(config, page, prop, getName) {
     const original = page[prop];
     page[prop] = (...args) => {
+        if (page._no_trace) {
+            return original.apply(page, args);
+        }
+
         const name = getName.apply(null, args);
-        addBreadcrumb(config, `enter ${name}`);
-        const res = original.apply(page, args);
-        addBreadcrumb(config, `exit ${name}`);
+        const stopMeasure = addBreadcrumb(config, name);
+
+        let res;
+        try {
+            res = original.apply(page, args);
+        } catch (err) {
+            stopMeasure();
+            throw err;
+        }
+
+        // If the return value is a Promise we need to await it
+        // before we can add the final breadcrumb log
+        if (res !== null && typeof res === 'object' && typeof res.then === 'function') {
+            return res.finally(() => {
+                stopMeasure();
+            });
+        }
+
+        stopMeasure();
         return res;
     };
 }
@@ -554,7 +616,7 @@ async function closePage(page) {
     const browser = getBrowser(page);
     /** @type {import('./config').Config} */
     const config = browser._pentf_config;
-    addBreadcrumb(config, 'enter closePage()');
+    const endBreadcrumb = addBreadcrumb(config, 'closePage()');
 
     // Wait for all pending logging tasks to finish before closing browser
     await timeoutPromise(config, Promise.all(browser._logs), {
@@ -582,7 +644,7 @@ async function closePage(page) {
     };
     await timeoutPromise(config, closeFn(), {message: 'Closing the page took too long'});
     await timeoutPromise(config, browser.close(), {message: 'Closing the browser took too long'});
-    addBreadcrumb(config, 'exit closePage()');
+    endBreadcrumb();
 }
 
 /**
@@ -602,10 +664,11 @@ async function waitForSelector(
     {message = undefined, timeout = getDefaultTimeout(page), visible = true} = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter waitForSelector(${selector})`);
+    const endBreadcrumb = addBreadcrumb(config, `waitForSelector(${selector})`);
 
     let el;
     try {
+        page._no_trace = true;
         el = await page.waitForFunction(
             (qs, visible) => {
                 const all = document.querySelectorAll(qs);
@@ -620,7 +683,9 @@ async function waitForSelector(
             selector,
             visible
         );
+        page._no_trace = false;
     } catch (e) {
+        page._no_trace = false;
         const foundCount = await page.evaluate(
             qs => document.querySelectorAll(qs).length,
             selector
@@ -647,7 +712,7 @@ async function waitForSelector(
         }
     }
     assert(el !== null);
-    addBreadcrumb(config, `exit waitForSelector(${selector})`);
+    endBreadcrumb();
     return el;
 }
 
@@ -666,7 +731,7 @@ async function waitForSelectorGone(
     {timeout = getDefaultTimeout(page), message, checkEvery = 200} = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter waitForSelectorGone(${selector})`);
+    const endBreadcrumb = addBreadcrumb(config, `waitForSelectorGone(${selector})`);
 
     let remainingTimeout = timeout;
     // eslint-disable-next-line no-constant-condition
@@ -674,10 +739,13 @@ async function waitForSelectorGone(
         let found = false;
         let errored = false;
         try {
+            page._no_trace = true;
             found = await page.evaluate(selector => {
                 return !!document.querySelector(selector);
             }, selector);
+            page._no_trace = false;
         } catch (err) {
+            page._no_trace = false;
             errored = true;
             if (!ignoreError(err)) {
                 throw await enhanceError(config, page, err);
@@ -702,7 +770,7 @@ async function waitForSelectorGone(
         await wait(Math.min(checkEvery, remainingTimeout));
         remainingTimeout -= checkEvery;
     }
-    addBreadcrumb(config, `exit waitForSelectorGone(${selector})`);
+    endBreadcrumb();
 }
 
 /**
@@ -720,9 +788,9 @@ async function waitForSelectorGone(
  */
 async function waitForVisible(page, selector, {timeout, message} = {}) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter waitForVisible(${selector})`);
+    const endBreadcrumb = addBreadcrumb(config, `waitForVisible(${selector})`);
     const el = await waitForSelector(page, selector, {timeout, message, visible: true});
-    addBreadcrumb(config, `exit waitForVisible(${selector})`);
+    endBreadcrumb();
     return el;
 }
 
@@ -788,7 +856,7 @@ async function waitForText(
     {timeout = getDefaultTimeout(page), extraMessage = undefined} = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter waitForText(${text})`);
+    const endBreadcrumb = addBreadcrumb(config,`waitForText(${text})`);
     checkText(text);
     const extraMessageRepr = extraMessage ? ` (${extraMessage})` : '';
     const err = new Error(
@@ -799,10 +867,13 @@ async function waitForText(
 
     const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
+        page._no_trace = true;
         const res = await page.waitForXPath(xpath, {timeout});
-        addBreadcrumb(config, `exit waitForText(${text})`);
+        page._no_trace = false;
+        endBreadcrumb();
         return res;
     } catch (e) {
+        page._no_trace = false;
         throw await enhanceError(config, page, err);
     }
 }
@@ -833,7 +904,7 @@ async function waitForTestId(
 ) {
     _checkTestId(testId);
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter waitForTestId(${testId})`);
+    const endBreadcrumb = addBreadcrumb(config, `waitForTestId(${testId})`);
 
     const err = new Error(
         `Failed to find ${
@@ -845,6 +916,7 @@ async function waitForTestId(
     const qs = `*[data-testid="${testId}"]`;
     let el;
     try {
+        page._no_trace = true;
         el = await page.waitForFunction(
             (qs, visible) => {
                 const all = document.querySelectorAll(qs);
@@ -857,11 +929,13 @@ async function waitForTestId(
             qs,
             visible
         );
+        page._no_trace = false;
     } catch (e) {
+        page._no_trace = false;
         throw await enhanceError(config, page, err); // Do not construct error here lest stack trace gets lost
     }
     assert(el !== null);
-    addBreadcrumb(config, `exit waitForTestId(${testId})`);
+    endBreadcrumb(config);
     return el;
 }
 
@@ -880,7 +954,7 @@ async function waitForTestIdGone(
     {timeout = getDefaultTimeout(page), message, checkEvery = 200} = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter waitForTestIdGone(${testid})`);
+    const endBreadcrumb = addBreadcrumb(config, `waitForTestIdGone(${testid})`);
 
     await waitForSelectorGone(page, `[data-testid="${testid}"]`, {
         timeout,
@@ -888,7 +962,7 @@ async function waitForTestIdGone(
         checkEvery,
     });
 
-    addBreadcrumb(config, `exit waitForTestIdGone(${testid})`);
+    endBreadcrumb();
 }
 
 /**
@@ -901,7 +975,7 @@ async function assertValue(input, expected) {
     const page = input._page;
     assert(page);
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter assertValue(${expected})`);
+    const endBreadcrumb = addBreadcrumb(config, `assertValue(${expected})`);
     try {
         await page.waitForFunction(
             (inp, expected) => {
@@ -911,7 +985,7 @@ async function assertValue(input, expected) {
             input,
             expected
         );
-        addBreadcrumb(config, `exit assertValue(${expected})`);
+        endBreadcrumb();
     } catch (e) {
         if (e.name !== 'TimeoutError') throw e;
 
@@ -954,7 +1028,7 @@ async function waitForXPathGone(
     {timeout = getDefaultTimeout(page), message, checkEvery = 200} = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter waitForXPathGone(${xpath})`);
+    const endBreadcrumb = addBreadcrumb(config, `waitForXPathGone(${xpath})`);
 
     assert.equal(
         typeof xpath,
@@ -999,7 +1073,7 @@ async function waitForXPathGone(
         await wait(Math.min(checkEvery, remainingTimeout));
         remainingTimeout -= checkEvery;
     }
-    addBreadcrumb(config, `exit waitForXPathGone(${xpath})`);
+    endBreadcrumb();
 }
 
 /**
@@ -1014,7 +1088,7 @@ async function waitForXPathGone(
  */
 async function assertNotXPath(page, xpath, options, _timeout = 2000, _checkEvery = 200) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter assertNotXPath(${xpath})`);
+    const endBreadcrumb = addBreadcrumb(config, `assertNotXPath(${xpath})`);
     assert.equal(
         typeof xpath,
         'string',
@@ -1064,7 +1138,7 @@ async function assertNotXPath(page, xpath, options, _timeout = 2000, _checkEvery
         await wait(Math.min(checkEvery, remainingTimeout));
         remainingTimeout -= checkEvery;
     }
-    addBreadcrumb(config, `exit assertNotXPath(${xpath})`);
+    endBreadcrumb();
 }
 
 /**
@@ -1136,7 +1210,7 @@ async function clickSelector(
     } = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter clickSelector(${selector})`);
+    const endBreadcrumb = addBreadcrumb(config, `clickSelector(${selector})`);
     assert.equal(
         typeof selector,
         'string',
@@ -1228,8 +1302,7 @@ async function clickSelector(
                 (found || (!found && retryUntilError !== null)) &&
                 (await onSuccess(retryUntil || assertSuccess))
             ) {
-                const config = getBrowser(page)._pentf_config;
-                addBreadcrumb(config, `exit clickSelector(${selector})`);
+                endBreadcrumb();
                 return;
             }
         } catch (err) {
@@ -1272,11 +1345,11 @@ async function assertNotSelector(
     {timeout = getDefaultTimeout(page), message} = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter assertNotSelector(${selector})`);
+    const endBreadcrumb = addBreadcrumb(config, `assertNotSelector(${selector})`);
     try {
         await page.waitForSelector(selector, {timeout});
     } catch (err) {
-        addBreadcrumb(config, `exit assertNotSelector(${selector})`);
+        endBreadcrumb();
         return;
     }
 
@@ -1320,7 +1393,7 @@ async function clickXPath(
     } = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter clickXPath(${xpath})`);
+    const endBreadcrumb = addBreadcrumb(config, `clickXPath(${xpath})`);
     assert.equal(typeof xpath, 'string', 'XPath should be string (forgot page argument?)');
 
     let remainingTimeout = timeout;
@@ -1455,7 +1528,7 @@ async function clickXPath(
                 (found || (!found && retryUntilError !== null)) &&
                 (await onSuccess(retryUntil || assertSuccess))
             ) {
-                addBreadcrumb(config, `exit clickXPath(${xpath})`);
+                endBreadcrumb();
                 return;
             }
         } catch (err) {
@@ -1506,7 +1579,7 @@ async function clickText(
     } = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter clickText(${textOrRegExp})`);
+    const endBreadcrumb = addBreadcrumb(config, `clickText(${textOrRegExp})`);
     if (typeof textOrRegExp === 'string') {
         checkText(textOrRegExp);
     }
@@ -1523,6 +1596,7 @@ async function clickText(
         let found = false;
 
         try {
+            page._no_trace = true;
             found = await page.evaluate(
                 async (matcher, visible) => {
                     // eslint-disable-next-line no-undef
@@ -1637,7 +1711,9 @@ async function clickText(
             if (found !== null && typeof found === 'object') {
                 await getMouse(page).click(found.x, found.y);
             }
+            page._no_trace = false;
         } catch (err) {
+            page._no_trace = false;
             if (!ignoreError(err)) {
                 throw await enhanceError(config, page, err);
             }
@@ -1648,7 +1724,7 @@ async function clickText(
                 (found || (!found && retryUntilError !== null)) &&
                 (await onSuccess(retryUntil || assertSuccess))
             ) {
-                addBreadcrumb(config, `exit clickText(${textOrRegExp})`);
+                endBreadcrumb();
                 return;
             }
         } catch (err) {
@@ -1701,7 +1777,7 @@ async function clickTestId(
     } = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter clickTestId(${testId})`);
+    const endBreadcrumb = addBreadcrumb(config, `clickTestId(${testId})`);
     _checkTestId(testId);
 
     const xpath = `//*[@data-testid="${testId}"]`;
@@ -1715,7 +1791,7 @@ async function clickTestId(
         visible,
         retryUntil: retryUntil || assertSuccess,
     });
-    addBreadcrumb(config, `exit clickTestId(${testId})`);
+    endBreadcrumb();
     return res;
 }
 
@@ -1734,13 +1810,13 @@ async function clickTestId(
  */
 async function assertNotTestId(page, testId, {timeout = getDefaultTimeout(page), message} = {}) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter assertNotTestId(${testId})`);
+    const endBreadcrumb = addBreadcrumb(config, `assertNotTestId(${testId})`);
     _checkTestId(testId);
 
     const xpath = `//*[@data-testid="${testId}"]`;
     try {
         await assertNotXPath(page, xpath, {timeout});
-        addBreadcrumb(config, `exit assertNotTestId(${testId})`);
+        endBreadcrumb();
     } catch (err) {
         if (/Element\smatching/.test(err.message)) {
             throw new Error(
@@ -1769,10 +1845,10 @@ async function typeSelector(
     {message = undefined, timeout = getDefaultTimeout(page), delay} = {}
 ) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter typeSelector(${selector}, text: ${text})`);
+    const endBreadcrumb = addBreadcrumb(config, `typeSelector(${selector}, text: ${text})`);
     const el = await waitForVisible(page, selector, {timeout, message});
     await el.type(text, {delay});
-    addBreadcrumb(config, `exit typeSelector(${selector}, text: ${text})`);
+    endBreadcrumb();
 }
 
 /**
@@ -1787,7 +1863,7 @@ async function setLanguage(page, lang) {
     }
     assert(Array.isArray(lang));
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter setLanguage(${lang.join(', ')})`);
+    const endBreadcrumb = addBreadcrumb(config, `setLanguage(${lang.join(', ')})`);
 
     // From https://stackoverflow.com/a/47292022/35070
     await page.setExtraHTTPHeaders({'Accept-Language': lang.join(',')}); // For HTTP requests
@@ -1808,7 +1884,7 @@ async function setLanguage(page, lang) {
             },
         });
     }, lang);
-    addBreadcrumb(config, `exit setLanguage(${lang.join(', ')})`);
+    endBreadcrumb();
 }
 
 /**
@@ -1821,7 +1897,7 @@ async function setLanguage(page, lang) {
  */
 async function getAttribute(page, selector, name) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter getAttribute(${selector}, attr: ${name})`);
+    const endBreadcrumb = addBreadcrumb(config, `getAttribute(${selector}, attr: ${name})`);
     await page.waitForSelector(selector);
     const res = await page.$eval(
         selector,
@@ -1834,7 +1910,7 @@ async function getAttribute(page, selector, name) {
         },
         name
     );
-    addBreadcrumb(config, `exit getAttribute(${selector}, attr: ${name})`);
+    endBreadcrumb();
     return res;
 }
 
@@ -1847,9 +1923,9 @@ async function getAttribute(page, selector, name) {
  */
 async function getText(page, selector) {
     const config = getBrowser(page)._pentf_config;
-    addBreadcrumb(config, `enter getText(${selector})`);
+    const endBreadcrumb = addBreadcrumb(config, `getText(${selector})`);
     const res = await getAttribute(page, selector, 'textContent');
-    addBreadcrumb(config, `exit getText(${selector})`);
+    endBreadcrumb();
     return res;
 }
 
@@ -2262,6 +2338,9 @@ async function html2pdf(config, path, html, modifyPage = null) {
     // crash when attempting to generate a pdf snapshot. See:
     // https://github.com/puppeteer/puppeteer/blob/v2.1.1/docs/api.md#puppeteerdefaultargsoptions
     pdfConfig.devtools = false;
+    pdfConfig._breadcrumb = [];
+    pdfConfig.start = performance.now();
+    pdfConfig.showBreadcrumbTrace = false;
     const page = await newPage(pdfConfig);
 
     await workaround_setContent(page, html);

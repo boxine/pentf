@@ -791,8 +791,9 @@ async function logTaskError(config, task) {
             // There won't be a useful stack trace if the test timed out.
             // Display collected breadcrumb additionally if there is one.
             if (/Timeout:\sTest\scase/.test(e.message)) {
-                if (task.breadcrumb) {
-                    log(config, `${await formatError(config, task.breadcrumb)}\n`);
+                if (task.breadcrumb.length) {
+                    const lastError = task.breadcrumb[task.breadcrumb.length - 1].error;
+                    log(config, `${await formatError(config, lastError)}\n`);
                 } else {
                     log(config, '  No breadcrumbs were collected.\n');
                 }

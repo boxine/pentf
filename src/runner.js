@@ -30,7 +30,7 @@ async function run_task(config, state, task) {
         resources: Object.freeze(task.resources),
         _teardown_hooks: [],
         _browser_pages: [],
-        _breadcrumb: null,
+        _breadcrumb: [],
         _testName: task.tc.name,
         _taskName: task.name,
         _taskGroup: task.group,

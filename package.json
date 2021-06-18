@@ -107,7 +107,7 @@
     "form-data": "^2.3.3",
     "glob": "^7.1.6",
     "he": "^1.2.0",
-    "kolorist": "^1.2.3",
+    "kolorist": "^1.5.0",
     "libmime": "^4.0.1",
     "minimatch": "^3.0.4",
     "mkdirp": "^0.5.1",

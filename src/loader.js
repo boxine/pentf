@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
+const kl = require('kolorist');
 const {promisify} = require('util');
 const {pathToFileURL} = require('url');
 const assert = require('assert').strict;
@@ -205,6 +206,10 @@ async function loadTests(config, globPattern) {
             }
         })
     );
+
+    if (!testCases.length) {
+        output.log(config, kl.red(`No test files found with glob ${kl.cyan(config.testsGlob)}`));
+    }
 
     return testCases;
 }

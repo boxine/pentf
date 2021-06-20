@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
+    "moduleResolution": "Node",
     "allowJs": true,
     "alwaysStrict": true,
     "strict": true,

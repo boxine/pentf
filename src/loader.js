@@ -199,7 +199,12 @@ async function loadTests(config, globPattern) {
             } else if (typeof tc.run === 'function') {
                 // ESM modules are readonly, so we need to create our own writable
                 // object.
-                testCases.push({...tc, name: t.name, fileName: t.fileName});
+                testCases.push({
+                    ...tc,
+                    name: t.name,
+                    fileName: t.fileName,
+                    retryTimes: tc.retryTimes || 0
+                });
             } else {
                 output.log(config, output.color(config, 'red', `No tests found in file "${t.fileName}", skipping.`));
             }

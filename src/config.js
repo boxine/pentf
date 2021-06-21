@@ -459,8 +459,9 @@ function parseArgs(options, raw_args) {
         args.keep_open = true;
         args.forward_console = true;
         args.show_interactions = true;
+        args.showBreadcrumbTrace = true;
     }
-    args.showBreadcrumbTrace = true;
+
     if (args.keep_open) {
         args.headless = false;
     }

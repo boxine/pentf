@@ -28,7 +28,7 @@ export interface Task {
     tc: TestCase;
     status: TaskStatus;
     start: number;
-    breadcrumb: BreadCrumb[];
+    breadcrumbs: Breadcrumb[];
     pageUrls: string[];
     skipReason?: boolean;
     error_screenshots: Buffer[];
@@ -39,18 +39,20 @@ export interface Task {
 
 export type TeardownHook = (config: TaskConfig) => Promise<void> | void;
 
-export interface BreadCrumb {
-    id: number;
-    error: Error;
-    /** in ms */
-    time: number;
+export interface Breadcrumb {
     text: string;
+    startError: Error;
+    endError: Error | null;
+    /** in ms */
+    startTime: number;
+    /** in ms */
+    endTime: number;
 }
 
 export interface TaskConfig extends Config {
     _teardown_hooks: TeardownHook[];
     _browser_pages: Page[];
-    _breadcrumb: BreadCrumb[]
+    _breadcrumbs: Breadcrumb[]
     _testName: string;
     _taskName: string;
     _taskGroup: string;

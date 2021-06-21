@@ -359,6 +359,7 @@ async function enhanceError(config, pageOrFrame, error) {
     if (!page.isClosed()) {
         // Check if the page is injected by the browser like for an insecure
         // form submission in Chrome.
+        page._no_trace = true;
         const content = await page.evaluate(() => {
             const s = '.interstitial-wrapper #main-content #main-message';
             const node = document.querySelector(s);
@@ -517,8 +518,6 @@ function getDefaultTimeout(pageOrFrame) {
     return getBrowser(pageOrFrame)._pentf_config.default_timeout;
 }
 
-let _breadCrumbId = 0;
-
 /**
  * Mark progress in test. Useful for when the test times out and there is no
  * hint as to why.
@@ -528,45 +527,28 @@ let _breadCrumbId = 0;
  * @private
  */
 function addBreadcrumb(config, text) {
-    const id = _breadCrumbId++;
+    const startTime = Math.round(performance.now() - config.start);
 
-    const time = Math.round(performance.now() - config.start);
-    config._breadcrumb.push({
-        id,
-        error: new Error(`Last breadcrumb "${text}" at ${time}ms after test started.`),
-        type: 'enter',
+    /** @type {import('./internal').Breadcrumb} */
+    const breadcrumb = {
+        startError: new Error(`Last breadcrumb "${text}" at ${startTime}ms after test started.`),
+        endError: null,
+        startTime,
+        endTime: startTime,
         text,
-        time,
-    });
+    };
+    config._breadcrumbs.push(breadcrumb);
 
     return () => {
+        const now = performance.now();
+        const endTime = Math.round(now - config.start);
+
+        breadcrumb.endError = new Error(`Last breadcrumb "${text}" at ${endTime}ms after test started.`),
+        breadcrumb.endTime = endTime;
+
         if (config.showBreadcrumbTrace) {
-            const now = performance.now();
-            const time = Math.round(now - config.start);
-
-            // Find corresponding enter call to get duration.
-            // Optimization: Search backwards because it's more likely
-            // that the match is at the end.
-            let duration = 0;
-            for (let i = config._breadcrumb.length - 1; i >= 0; i--) {
-                const prev = config._breadcrumb[i];
-                if (prev.id === id) {
-                    duration = time - prev.time;
-                }
-            }
-
-            config._breadcrumb.push({
-                id,
-                error: new Error(`Last breadcrumb "${text}" at ${time}ms after test started.`),
-                type: 'exit',
-                text,
-                time,
-            });
-
-            const prettyDuration = output.color(config, 'magenta', `+${output.formatTime(duration)}`);
-            const check = output.color(config, 'green', '✓');
-            output.log(config, `  ${check} ${text} ${prettyDuration}`);
-            // output.log(config, output.color(config, 'dim', `  … ${text}`));
+            const duration = breadcrumb.endTime - breadcrumb.startTime;
+            output.log(config, output.formatBreadcrumb(config, text, duration, config._taskName));
         }
     };
 }
@@ -581,7 +563,14 @@ function withBreadcrumb(config, page, prop, getName) {
     const original = page[prop];
     page[prop] = (...args) => {
         if (page._no_trace) {
-            return original.apply(page, args);
+            try {
+                const res = original.apply(page, args);
+                page._no_trace = false;
+                return res;
+            } catch (err) {
+                page._no_trace = false;
+                throw err;
+            }
         }
 
         const name = getName.apply(null, args);
@@ -632,6 +621,7 @@ async function closePage(page) {
             // Only close page if it's not already closed. Sometimes this happens when
             // puppeteer has an internal error.
             if (!page.isClosed()) {
+                page._no_trace = true;
                 await page.close();
             }
         } catch (err) {
@@ -683,13 +673,14 @@ async function waitForSelector(
             selector,
             visible
         );
-        page._no_trace = false;
     } catch (e) {
-        page._no_trace = false;
+        page._no_trace = true;
         const foundCount = await page.evaluate(
             qs => document.querySelectorAll(qs).length,
             selector
         );
+
+        page._no_trace = false;
         if (foundCount > 0) {
             const moreCount = foundCount - 1;
             const suffix =
@@ -743,9 +734,7 @@ async function waitForSelectorGone(
             found = await page.evaluate(selector => {
                 return !!document.querySelector(selector);
             }, selector);
-            page._no_trace = false;
         } catch (err) {
-            page._no_trace = false;
             errored = true;
             if (!ignoreError(err)) {
                 throw await enhanceError(config, page, err);
@@ -869,11 +858,9 @@ async function waitForText(
     try {
         page._no_trace = true;
         const res = await page.waitForXPath(xpath, {timeout});
-        page._no_trace = false;
         endBreadcrumb();
         return res;
     } catch (e) {
-        page._no_trace = false;
         throw await enhanceError(config, page, err);
     }
 }
@@ -929,9 +916,7 @@ async function waitForTestId(
             qs,
             visible
         );
-        page._no_trace = false;
     } catch (e) {
-        page._no_trace = false;
         throw await enhanceError(config, page, err); // Do not construct error here lest stack trace gets lost
     }
     assert(el !== null);
@@ -1042,6 +1027,7 @@ async function waitForXPathGone(
         let found = false;
         let errored = false;
         try {
+            page._no_trace = true;
             found = await page.evaluate(xpath => {
                 const element = document
                     .evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null)
@@ -1112,6 +1098,7 @@ async function assertNotXPath(page, xpath, options, _timeout = 2000, _checkEvery
     while (true) {
         let found = false;
         try {
+            page._no_trace = true;
             found = await page.evaluate(xpath => {
                 const element = document
                     .evaluate(xpath, document, null, window.XPathResult.ANY_TYPE, null)
@@ -1223,6 +1210,7 @@ async function clickSelector(
     while (true) {
         let found = false;
         try {
+            page._no_trace = true;
             found = await page.evaluate(
                 async (selector, visible) => {
                     const element = document.querySelector(selector);
@@ -1402,6 +1390,7 @@ async function clickXPath(
     while (true) {
         let found = false;
         try {
+            page._no_trace = true;
             found = await page.evaluate(
                 async (xpath, visible) => {
                     /** @type {Element | Text} */
@@ -1711,9 +1700,7 @@ async function clickText(
             if (found !== null && typeof found === 'object') {
                 await getMouse(page).click(found.x, found.y);
             }
-            page._no_trace = false;
         } catch (err) {
-            page._no_trace = false;
             if (!ignoreError(err)) {
                 throw await enhanceError(config, page, err);
             }
@@ -1865,8 +1852,10 @@ async function setLanguage(page, lang) {
     const config = getBrowser(page)._pentf_config;
     const endBreadcrumb = addBreadcrumb(config, `setLanguage(${lang.join(', ')})`);
 
+    page._no_trace = true;
     // From https://stackoverflow.com/a/47292022/35070
     await page.setExtraHTTPHeaders({'Accept-Language': lang.join(',')}); // For HTTP requests
+    page._no_trace = true;
     await page.evaluateOnNewDocument(lang => {
         // For JavaScript code
         Object.defineProperty(navigator, 'language', {
@@ -2338,7 +2327,7 @@ async function html2pdf(config, path, html, modifyPage = null) {
     // crash when attempting to generate a pdf snapshot. See:
     // https://github.com/puppeteer/puppeteer/blob/v2.1.1/docs/api.md#puppeteerdefaultargsoptions
     pdfConfig.devtools = false;
-    pdfConfig._breadcrumb = [];
+    pdfConfig._breadcrumbs = [];
     pdfConfig.start = performance.now();
     pdfConfig.showBreadcrumbTrace = false;
     const page = await newPage(pdfConfig);

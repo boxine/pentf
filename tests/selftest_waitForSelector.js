@@ -32,6 +32,7 @@ async function run(config) {
     assert.strictEqual(await page.evaluate(foo => foo.innerText, foo), 'this is c');
 
     await assert.rejects(waitForSelector(page, '.hidden', {timeout: 1000}), {message: /There are 1 more/});
+    throw "Poop";
 }
 
 module.exports = {

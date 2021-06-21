@@ -781,18 +781,28 @@ async function logTaskError(config, task) {
             const pageUrlString = task.pageUrls.length
                 ? `  Open pages: ${task.pageUrls.join(', ')}\n`
                 : '';
+
+            // Print breadcrumb trace
+            let breadcrumbs = task.breadcrumbs.map(breadcrumb => {
+                const duration = breadcrumb.endTime - breadcrumb.startTime;
+                return formatBreadcrumb(config, breadcrumb.text, duration);
+            });
+            breadcrumbs = breadcrumbs.length ? `\n${breadcrumbs.join('\n')}\n` : '';
+
             log(
                 config,
                 `${label} test case ${name} at ${utils.localIso8601()}:\n` +
                     pageUrlString +
+                    breadcrumbs +
                     `${await formatError(config, e)}\n`
             );
+
 
             // There won't be a useful stack trace if the test timed out.
             // Display collected breadcrumb additionally if there is one.
             if (/Timeout:\sTest\scase/.test(e.message)) {
-                if (task.breadcrumb.length) {
-                    const lastError = task.breadcrumb[task.breadcrumb.length - 1].error;
+                if (task.breadcrumbs.length) {
+                    const lastError = task.breadcrumbs[task.breadcrumbs.length - 1].error;
                     log(config, `${await formatError(config, lastError)}\n`);
                 } else {
                     log(config, '  No breadcrumbs were collected.\n');
@@ -800,6 +810,21 @@ async function logTaskError(config, task) {
             }
         }
     }
+}
+
+/**
+ * Print a single breadcrumb item
+ * @param {import('./config').Config} config
+ * @param {string} text
+ * @param {number} duration
+ * @param {string} [taskName]
+ * @returns {string}
+ */
+function formatBreadcrumb(config, text, duration, taskName) {
+    const prettyDuration = color(config, 'magenta', `+${formatTime(duration)}`);
+    const check = color(config, 'dim', '-');
+    const name = taskName ? color(config, 'dim', ` (${taskName})`) : '';
+    return `  ${check} ${text} ${prettyDuration}${name}`;
 }
 
 /**
@@ -873,6 +898,7 @@ module.exports = {
     logTaskError,
     logVerbose,
     generateDiff,
+    formatBreadcrumb,
     proxyConsole,
     shouldShowError,
     status,

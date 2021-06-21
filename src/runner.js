@@ -30,7 +30,7 @@ async function run_task(config, state, task) {
         resources: Object.freeze(task.resources),
         _teardown_hooks: [],
         _browser_pages: [],
-        _breadcrumb: [],
+        _breadcrumbs: [],
         _testName: task.tc.name,
         _taskName: task.name,
         _taskGroup: task.group,
@@ -88,7 +88,7 @@ async function run_task(config, state, task) {
         task.duration = performance.now() - task.start;
         task.error = e;
         task_config.error = e;
-        task.breadcrumb = task_config._breadcrumb;
+        task.breadcrumbs = task_config._breadcrumbs;
         task.status = 'error';
         task.accessibilityErrors = task_config.accessibilityErrors;
 
@@ -329,7 +329,7 @@ async function run_one(config, state, task) {
         state.tasks.push({
             ...task,
             status: 'todo',
-            breadcrumb: null,
+            breadcrumbs: null,
             id: `${tcName}_${repeat + count}`,
             name: `${tcName}[${repeat + count}]`,
             // Keep group the same, so that we can group results together

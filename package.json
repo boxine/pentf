@@ -114,7 +114,7 @@
     "node-fetch": "^2.3.0",
     "pixelmatch": "^5.2.1",
     "pngjs": "^6.0.0",
-    "sharp": "^0.27.1",
+    "sharp": "^0.28.3",
     "stream-buffers": "^3.0.2",
     "tmp-promise": "^2.0.2",
     "tough-cookie": "^4.0.0"
@@ -126,7 +126,7 @@
     "@types/node": "^14.14.35",
     "@types/pixelmatch": "^5.2.2",
     "@types/pngjs": "^3.4.2",
-    "@types/sharp": "^0.27.1",
+    "@types/sharp": "^0.28.3",
     "@types/tmp": "^0.2.0",
     "deep-equal": "^1.0.1",
     "eslint": "^7.0.0",

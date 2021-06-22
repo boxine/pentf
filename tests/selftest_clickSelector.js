@@ -1,7 +1,7 @@
 const assert = require('assert').strict;
 
-const {clickSelector, closePage, newPage} = require('../src/browser_utils');
-const {assertEventually} = require('../src/assert_utils');
+const { clickSelector, closePage, newPage } = require('../src/browser_utils');
+const { assertEventually } = require('../src/assert_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -35,32 +35,37 @@ async function run(config) {
         </html>
     `);
 
-    await clickSelector(page, 'button#clickme', {timeout: 1000});
-    await assertEventually(() => {
-        assert.deepStrictEqual(clicks, ['clickme']);
-        return true;
-    }, {crashOnError: false, timeout: 1000});
-
-    await assert.rejects(
-        clickSelector(
-            page, '#notfound',
-            {timeout: 100, message: 'Could not click something that does not exist'}),
-        {message: 'Could not click something that does not exist'}
+    await clickSelector(page, 'button#clickme', { timeout: 1000 });
+    await assertEventually(
+        () => {
+            assert.deepStrictEqual(clicks, ['clickme']);
+            return true;
+        },
+        { crashOnError: false, timeout: 1000 }
     );
 
     await assert.rejects(
-        clickSelector(page, '#invisible', {timeout: 100}),
-        {message: 'Unable to find visible element #invisible after 100ms'}
+        clickSelector(page, '#notfound', {
+            timeout: 100,
+            message: 'Could not click something that does not exist',
+        }),
+        { message: 'Could not click something that does not exist' }
     );
-    await clickSelector(page, '#invisible', {visible: false, timeout: 1000});
-    await assertEventually(() => {
-        assert.deepStrictEqual(clicks, ['clickme', 'invisible']);
-        return true;
-    }, {crashOnError: false, timeout: 1000});
 
-    await assert.rejects(
-        clickSelector(page, 'invalid['),
-        e => e.stack.includes("'invalid[' is not a valid selector")
+    await assert.rejects(clickSelector(page, '#invisible', { timeout: 100 }), {
+        message: 'Unable to find visible element #invisible after 100ms',
+    });
+    await clickSelector(page, '#invisible', { visible: false, timeout: 1000 });
+    await assertEventually(
+        () => {
+            assert.deepStrictEqual(clicks, ['clickme', 'invisible']);
+            return true;
+        },
+        { crashOnError: false, timeout: 1000 }
+    );
+
+    await assert.rejects(clickSelector(page, 'invalid['), e =>
+        e.stack.includes("'invalid[' is not a valid selector")
     );
 
     // Option: assertSuccess
@@ -72,7 +77,7 @@ async function run(config) {
             const old = success;
             success = !success;
             return old;
-        }
+        },
     });
     assert(called, 'assertSuccess was not invoked');
 
@@ -80,7 +85,8 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'browser_utils.clickSelector to atomically click an element by query selector',
+    description:
+        'browser_utils.clickSelector to atomically click an element by query selector',
     resources: [],
     run,
 };

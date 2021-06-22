@@ -1,10 +1,9 @@
 const assert = require('assert').strict;
 const net = require('net');
-const {promisify} = require('util');
+const { promisify } = require('util');
 
-const {connect} = require('../src/email');
-const {wait} = require('../src/utils');
-
+const { connect } = require('../src/email');
+const { wait } = require('../src/utils');
 
 async function run() {
     // Set up example IMAP server
@@ -14,7 +13,7 @@ async function run() {
 
         socket.write('* OK IMAP4rev1 Server test ready\r\n');
         if (healthy) {
-            socket.on('data', function(data) {
+            socket.on('data', function (data) {
                 const input = data.toString('utf-8');
 
                 for (let line of input.split('\n')) {
@@ -28,11 +27,14 @@ async function run() {
                     if (command === 'CAPABILITY') {
                         socket.write(
                             '* CAPABILITY IMAP4rev1 UIDPLUS\r\n' +
-                            `${msgId} OK CAPABILITY completed.\r\n`);
+                                `${msgId} OK CAPABILITY completed.\r\n`
+                        );
                     } else if (command === 'LOGIN') {
                         socket.write(`${msgId} OK LOGIN completed.\r\n`);
                     } else if (command === 'SELECT') {
-                        socket.write(`${msgId} OK [READ-WRITE] SELECT completed.\r\n`);
+                        socket.write(
+                            `${msgId} OK [READ-WRITE] SELECT completed.\r\n`
+                        );
                     } else {
                         throw new Error(`Unsupported line ${line}`);
                     }
@@ -40,13 +42,13 @@ async function run() {
             });
         } else {
             await wait(500); // Socket is ok at first
-            socket.destroy();  // server hangs indefinitely
+            socket.destroy(); // server hangs indefinitely
         }
     });
 
     // Manual promisify for variadic listen method
     await promisify(callback => server.listen(0, 'localhost', callback))();
-    const {port} = server.address();
+    const { port } = server.address();
     assert(port);
     const pseudoConfig = {
         imap: {
@@ -63,7 +65,7 @@ async function run() {
     pseudoConfig.imap.socket_timeout = 1;
     await assert.rejects(
         connect(pseudoConfig, 'foo@example.org'),
-        {message: ' Socket timed out!'} // yes, with a space in front
+        { message: ' Socket timed out!' } // yes, with a space in front
     );
 
     healthy = true;

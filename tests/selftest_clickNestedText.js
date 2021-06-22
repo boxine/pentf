@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {closePage, newPage, clickNestedText} = require('../src/browser_utils');
+const { closePage, newPage, clickNestedText } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -31,12 +31,19 @@ async function run(config) {
     assert.deepStrictEqual(await getClicks(), ['first', 'nested']);
 
     await resetClicks();
-    await assert.rejects(clickNestedText(page, 'not-present', {timeout: 1, extraMessage: 'blabla'}), {
-        message: 'Unable to find visible text "not-present" after 1ms (blabla)',
-    });
+    await assert.rejects(
+        clickNestedText(page, 'not-present', {
+            timeout: 1,
+            extraMessage: 'blabla',
+        }),
+        {
+            message:
+                'Unable to find visible text "not-present" after 1ms (blabla)',
+        }
+    );
     assert.deepStrictEqual(await getClicks(), []);
 
-    await assert.rejects(clickNestedText(page, 'invisible', {timeout: 43}), {
+    await assert.rejects(clickNestedText(page, 'invisible', { timeout: 43 }), {
         message: 'Unable to find visible text "invisible" after 43ms',
     });
 
@@ -90,7 +97,7 @@ async function run(config) {
             const old = success;
             success = !success;
             return old;
-        }
+        },
     });
     assert(called, 'assertSuccess was not invoked');
 
@@ -98,7 +105,8 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'The clickNestedText browser_utils function clicks elements by matching text content',
+    description:
+        'The clickNestedText browser_utils function clicks elements by matching text content',
     resources: [],
     run,
 };

@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const {craftResults} = require('../src/render');
+const { craftResults } = require('../src/render');
 const runner = require('../src/runner');
 
 async function run(config) {
@@ -10,15 +10,15 @@ async function run(config) {
 
     /** @type {import('../src/runner').TestCase[]} */
     const cases = [
-        {name: 'success', run: noop},
-        {name: 'skipped', run: noop, skip: () => true},
-        {name: 'expectedToFailButPassed', run: noop, expectedToFail: 'fail'},
-        {name: 'expectedToFail', run: fail, expectedToFail: 'fail'},
-        {name: 'error #2', run: fail},
-        {name: 'error #1', run: fail},
+        { name: 'success', run: noop },
+        { name: 'skipped', run: noop, skip: () => true },
+        { name: 'expectedToFailButPassed', run: noop, expectedToFail: 'fail' },
+        { name: 'expectedToFail', run: fail, expectedToFail: 'fail' },
+        { name: 'error #2', run: fail },
+        { name: 'error #1', run: fail },
     ];
 
-    const testConfig = {...config, logFunc: () => null, quiet: true};
+    const testConfig = { ...config, logFunc: () => null, quiet: true };
     const info = await runner.run(testConfig, cases);
     const results = craftResults(config, info).tests.map(t => t.name);
     assert.deepEqual(results, [

@@ -21,12 +21,17 @@ function parseConsoleArg(value) {
             } else if (value.type === 'Map') {
                 return new Map(
                     value.items.map(item => {
-                        return [parseConsoleArg(item[0]), parseConsoleArg(item[1])];
+                        return [
+                            parseConsoleArg(item[0]),
+                            parseConsoleArg(item[1]),
+                        ];
                     })
                 );
             } else if (value.type === 'Function') {
                 // Mirror node output format
-                return !value.name ? '[Function (anonymous)]' : `[Function: ${value.name}]`;
+                return !value.name
+                    ? '[Function (anonymous)]'
+                    : `[Function: ${value.name}]`;
             }
         }
 
@@ -83,7 +88,10 @@ function serialize(value, seen) {
                 __pentf_serialized: true,
                 type: 'Map',
                 items: Array.from(value.entries()).map(entry => {
-                    return [serialize(entry[0], seen), serialize(entry[1], seen)];
+                    return [
+                        serialize(entry[0], seen),
+                        serialize(entry[1], seen),
+                    ];
                 }),
             };
         }
@@ -151,27 +159,30 @@ function printRawMessage(config, type, message) {
  */
 async function forwardBrowserConsole(config, page) {
     // The stack is not present on the trace method, so we need to patch it in
-    await page.evaluateOnNewDocument((fn) => {
+    await page.evaluateOnNewDocument(fn => {
         const serialize = new Function(`return ${fn}`)();
         const native = {};
         native.trace = console.trace;
         console.trace = (...args) => {
             const stack = new Error().stack.split('\n').slice(2).join('\n');
             args = ['\n' + stack, ...args];
-            native.trace.apply(null, args.map(arg => serialize(arg, new Set())));
+            native.trace.apply(
+                null,
+                args.map(arg => serialize(arg, new Set()))
+            );
         };
     }, serialize.toString());
 
     const browser = page.browser();
     page.on('console', async message => {
         let resolve;
-        browser._logs.push(new Promise(r => resolve = r));
+        browser._logs.push(new Promise(r => (resolve = r)));
 
         let type = message.type();
         // Correct log type
         const typeMap = {
             warning: 'warn',
-            verbose: 'log'
+            verbose: 'log',
         };
         type = typeMap[type] || type;
 
@@ -184,10 +195,14 @@ async function forwardBrowserConsole(config, page) {
         try {
             const args = await Promise.all(
                 message.args().map(arg => {
-                    return arg.executionContext().evaluate((handle, fn) => {
-                        const serialize = new Function(`return ${fn}`)();
-                        return serialize(handle, new Set());
-                    }, arg, serialize.toString());
+                    return arg.executionContext().evaluate(
+                        (handle, fn) => {
+                            const serialize = new Function(`return ${fn}`)();
+                            return serialize(handle, new Set());
+                        },
+                        arg,
+                        serialize.toString()
+                    );
                 })
             );
 

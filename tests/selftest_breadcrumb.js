@@ -132,7 +132,10 @@ async function run(config) {
 
     await execRunner(config, 'clickTestId(foo)', async config => {
         const page = await newPage(config);
-        await workaround_setContent(page, '<button data-testid="foo">foo</button>');
+        await workaround_setContent(
+            page,
+            '<button data-testid="foo">foo</button>'
+        );
         await clickTestId(page, 'foo');
     });
 

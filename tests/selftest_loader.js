@@ -1,19 +1,19 @@
 const assert = require('assert').strict;
 
-const {loadTests} = require('../src/loader');
+const { loadTests } = require('../src/loader');
 
 async function run(config) {
     assert.deepStrictEqual(
-        (await loadTests(
-            {
-                filter: 'selftest_lo[ao]der',
-                rootDir: config.rootDir,
-                moduleType: 'commonjs'
-            },
-            'tests/*.js'
-        )).map(
-            t => t.name
-        ),
+        (
+            await loadTests(
+                {
+                    filter: 'selftest_lo[ao]der',
+                    rootDir: config.rootDir,
+                    moduleType: 'commonjs',
+                },
+                'tests/*.js'
+            )
+        ).map(t => t.name),
         ['selftest_loader']
     );
 
@@ -23,7 +23,7 @@ async function run(config) {
             filter: 'selftest_[a-l]',
             filter_body: 'he5Eih1oh+ai8sho',
             rootDir: config.rootDir,
-            moduleType: 'commonjs'
+            moduleType: 'commonjs',
         },
         'tests/*.js'
     );

@@ -4,5 +4,5 @@ function run() {
 
 module.exports = {
     run,
-    description: 'Support synchronous run function'
+    description: 'Support synchronous run function',
 };

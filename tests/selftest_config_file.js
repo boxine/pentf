@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 const path = require('path');
-const {readConfig} = require('../src/config');
+const { readConfig } = require('../src/config');
 
 async function run() {
     const dir = path.join(__dirname, 'config_file');
@@ -20,6 +20,7 @@ async function run() {
 }
 
 module.exports = {
-    description: 'Support loading "--config FILE" configuration file (pentf.config.js)',
+    description:
+        'Support loading "--config FILE" configuration file (pentf.config.js)',
     run,
 };

@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {closePage, newPage, clickXPath} = require('../src/browser_utils');
+const { closePage, newPage, clickXPath } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -23,9 +23,12 @@ async function run(config) {
     assert.rejects(clickXPath(page, '//foo', { timeout: 1 }));
     assert.deepStrictEqual(await getClicks(), []);
 
-    assert.rejects(clickXPath(page, '//foo', { timeout: 1, message: 'blabla' }), {
-        message: 'blabla'
-    });
+    assert.rejects(
+        clickXPath(page, '//foo', { timeout: 1, message: 'blabla' }),
+        {
+            message: 'blabla',
+        }
+    );
     assert.deepStrictEqual(await getClicks(), []);
 
     await clickXPath(page, '//button');
@@ -40,7 +43,7 @@ async function run(config) {
             const old = success;
             success = !success;
             return old;
-        }
+        },
     });
     assert(called, 'assertSuccess was not invoked');
 
@@ -48,7 +51,8 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'browser_utils.clickXPath to atomically click an element by query selector',
+    description:
+        'browser_utils.clickXPath to atomically click an element by query selector',
     resources: [],
     run,
 };

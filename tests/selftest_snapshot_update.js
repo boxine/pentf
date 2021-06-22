@@ -1,15 +1,15 @@
 const path = require('path');
 const mkdirpCb = require('mkdirp');
 const rimrafCb = require('rimraf');
-const {promisify} = require('util');
+const { promisify } = require('util');
 const mkdirp = promisify(mkdirpCb);
 const rimraf = promisify(rimrafCb);
 
-const {newPage, assertSnapshot} = require('../src/browser_utils');
+const { newPage, assertSnapshot } = require('../src/browser_utils');
 
 async function run(config) {
     const dir = path.join(__dirname, 'snapshot_update_test', 'snapshots');
-    config = {...config, snapshot_directory: dir, update_snapshots: true};
+    config = { ...config, snapshot_directory: dir, update_snapshots: true };
 
     // Clean before running tests
     await rimraf(dir);

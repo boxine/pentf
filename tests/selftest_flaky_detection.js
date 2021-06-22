@@ -15,7 +15,6 @@ async function run(config) {
         quiet: true,
     };
 
-
     function createTests() {
         let i = 0;
         let j = 0;
@@ -63,26 +62,32 @@ async function run(config) {
         });
 
         assert.deepEqual(formatted, [
-            {id: 'bar', status: 'error', runs: 3},
-            {id: 'bob', status: 'flaky', runs: 2},
-            {id: 'foo', status: 'flaky', runs: 3},
-            {id: 'baz', status: 'success', runs: 1},
+            { id: 'bar', status: 'error', runs: 3 },
+            { id: 'bob', status: 'flaky', runs: 2 },
+            { id: 'foo', status: 'flaky', runs: 3 },
+            { id: 'baz', status: 'success', runs: 1 },
         ]);
     }
 
     // Sequential run
     let tests = createTests();
     output = [];
-    let result = await runner.run({...runnerConfig, concurrency: 1}, tests);
+    let result = await runner.run({ ...runnerConfig, concurrency: 1 }, tests);
     assertResult(result);
-    assert(output[output.length-1].includes('2 flaky (foo, bob)'), 'Summary did not include flaky tests');
+    assert(
+        output[output.length - 1].includes('2 flaky (foo, bob)'),
+        'Summary did not include flaky tests'
+    );
 
     // Parallel run
     tests = createTests();
     output = [];
-    result = await runner.run({...runnerConfig, concurrency: 1}, tests);
+    result = await runner.run({ ...runnerConfig, concurrency: 1 }, tests);
     assertResult(result);
-    assert(output[output.length-1].includes('2 flaky (foo, bob)'), 'Summary did not include flaky tests');
+    assert(
+        output[output.length - 1].includes('2 flaky (foo, bob)'),
+        'Summary did not include flaky tests'
+    );
 }
 
 module.exports = {

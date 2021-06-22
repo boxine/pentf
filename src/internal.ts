@@ -1,6 +1,6 @@
-import {Page} from 'puppeteer';
-import {AxeResults} from 'axe-core';
-import {Config} from './config';
+import { Page } from 'puppeteer';
+import { AxeResults } from 'axe-core';
+import { Config } from './config';
 
 export interface TestFile {
     fileName: string;
@@ -33,7 +33,10 @@ export interface Task {
     skipReason?: boolean;
     error_screenshots: Buffer[];
     resources: string[];
-    expectedToFail?: boolean | string | ((config: import('./config').Config) => boolean);
+    expectedToFail?:
+        | boolean
+        | string
+        | ((config: import('./config').Config) => boolean);
     accessibilityErrors: A11yResult[];
 }
 
@@ -115,7 +118,11 @@ export interface RunnerResult {
 export type TestOptions = Omit<TestCase, 'name' | 'run'>;
 
 export interface TestFn {
-    (name: string, test: (config: TaskConfig) => Promise<void> | void, options?: TestOptions): void;
+    (
+        name: string,
+        test: (config: TaskConfig) => Promise<void> | void,
+        options?: TestOptions
+    ): void;
     /** Only run this test case in the current file */
     only: (
         name: string,

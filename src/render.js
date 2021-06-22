@@ -1,7 +1,7 @@
 const fs = require('fs');
-const {html2pdf} = require('./browser_utils');
-const {timezoneOffsetString} = require('./utils');
-const {resultCountString} = require('./results');
+const { html2pdf } = require('./browser_utils');
+const { timezoneOffsetString } = require('./utils');
+const { resultCountString } = require('./results');
 
 const output = require('./output');
 
@@ -13,13 +13,24 @@ const output = require('./output');
 function getTestOrder(config, result) {
     const expectNothing = config.expect_nothing;
 
-    if (result.status === 'error' && (!result.expectedToFail || expectNothing)) {
+    if (
+        result.status === 'error' &&
+        (!result.expectedToFail || expectNothing)
+    ) {
         return 1; // error
-    } else if (result.status === 'success' && (result.expectedToFail && !expectNothing)) {
+    } else if (
+        result.status === 'success' &&
+        result.expectedToFail &&
+        !expectNothing
+    ) {
         return 2; // expectedToFailButPassed
-    } else if (result.status === 'error' && (result.expectedToFail && !expectNothing)) {
+    } else if (
+        result.status === 'error' &&
+        result.expectedToFail &&
+        !expectNothing
+    ) {
         return 3; // expectedToFail
-    } else if (result.status ==='flaky') {
+    } else if (result.status === 'flaky') {
         return 4; // flaky
     } else if (result.status === 'skipped') {
         return 5; // skipped
@@ -35,7 +46,7 @@ function getTestOrder(config, result) {
  */
 function craftResults(config, test_info) {
     output.logVerbose(config, '[results] crafting results...');
-    const {test_start, test_end, state, ...moreInfo} = test_info;
+    const { test_start, test_end, state, ...moreInfo } = test_info;
 
     /** @type {TestResult[]} */
     const tests = Array.from(state.resultByTaskGroup.values());
@@ -75,24 +86,39 @@ function craftResults(config, test_info) {
  * @param {import('./internal').CraftedResults} results
  */
 async function doRender(config, results) {
-    output.logVerbose(config, `[results] Render results JSON: ${config.json}, Markdown: ${config.markdown}, HTML: ${config.html}, PDF: ${config.pdf}`);
+    output.logVerbose(
+        config,
+        `[results] Render results JSON: ${config.json}, Markdown: ${config.markdown}, HTML: ${config.html}, PDF: ${config.pdf}`
+    );
 
     if (config.json) {
-        output.logVerbose(config, `Rendering to JSON to ${config.json_file}...`);
+        output.logVerbose(
+            config,
+            `Rendering to JSON to ${config.json_file}...`
+        );
         const json = JSON.stringify(results, undefined, 2) + '\n';
-        await fs.promises.writeFile(config.json_file, json, {encoding: 'utf-8'});
+        await fs.promises.writeFile(config.json_file, json, {
+            encoding: 'utf-8',
+        });
     }
 
     if (config.markdown) {
-        output.logVerbose(config, `Rendering to Markdown to ${config.markdown_file} ...`);
+        output.logVerbose(
+            config,
+            `Rendering to Markdown to ${config.markdown_file} ...`
+        );
         const md = markdown(results);
-        await fs.promises.writeFile(config.markdown_file, md, {encoding: 'utf-8'});
+        await fs.promises.writeFile(config.markdown_file, md, {
+            encoding: 'utf-8',
+        });
     }
 
     if (config.html) {
         output.logVerbose(config, `Rendering to HTML ${config.html_file}...`);
         const html_code = html(results);
-        await fs.promises.writeFile(config.html_file, html_code, {encoding: 'utf-8'});
+        await fs.promises.writeFile(config.html_file, html_code, {
+            encoding: 'utf-8',
+        });
     }
 
     if (config.pdf) {
@@ -106,12 +132,12 @@ function format_duration(ms) {
         return '';
     }
 
-    const rounded = (Math.round(10 * ms / 1000) / 10);
+    const rounded = Math.round((10 * ms) / 1000) / 10;
     if (rounded < 0.1) {
         return '<0.1s';
     }
     let rounded_str = '' + rounded;
-    if (! rounded_str.includes('.')) {
+    if (!rounded_str.includes('.')) {
         rounded_str += '\xa0\xa0\xa0';
     }
 
@@ -123,13 +149,18 @@ function format_timestamp(ts) {
     const date = new Date(ts);
 
     return (
-        date.getFullYear()
-        + '-' + _pad(date.getMonth() + 1)
-        + '-' + _pad(date.getDate())
-        + ' ' + _pad(date.getHours())
-        + ':' + _pad(date.getMinutes())
-        + ':' + _pad(date.getSeconds())
-        + timezoneOffsetString(date.getTimezoneOffset())
+        date.getFullYear() +
+        '-' +
+        _pad(date.getMonth() + 1) +
+        '-' +
+        _pad(date.getDate()) +
+        ' ' +
+        _pad(date.getHours()) +
+        ':' +
+        _pad(date.getMinutes()) +
+        ':' +
+        _pad(date.getSeconds()) +
+        timezoneOffsetString(date.getTimezoneOffset())
     );
 }
 
@@ -151,12 +182,12 @@ function linkify(str) {
 
 function escape_html(str) {
     // From https://stackoverflow.com/a/6234804/35070
-    return (str
+    return str
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;'));
+        .replace(/'/g, '&#039;');
 }
 
 function heading(results) {
@@ -167,31 +198,51 @@ function heading(results) {
  * @param {CraftedResults} results
  */
 function markdown(results) {
-    const table = results.tests.map((test_result, idx) => {
-        return (
-            '|' +
-            (idx + 1) + ' | ' +
-            test_result.name + ' | ' +
-            (test_result.description || '') + ' | ' +
-            _calcDuration(test_result.taskResults) + ' | ' +
-            _calcSummaryStatus(test_result.taskResults) + ' |'
-        );
-    }).join('\n');
+    const table = results.tests
+        .map((test_result, idx) => {
+            return (
+                '|' +
+                (idx + 1) +
+                ' | ' +
+                test_result.name +
+                ' | ' +
+                (test_result.description || '') +
+                ' | ' +
+                _calcDuration(test_result.taskResults) +
+                ' | ' +
+                _calcSummaryStatus(test_result.taskResults) +
+                ' |'
+            );
+        })
+        .join('\n');
 
-    const report_header_md = (
-        results.config.report_header_md ? '\n' + results.config.report_header_md + '\n' : '');
+    const report_header_md = results.config.report_header_md
+        ? '\n' + results.config.report_header_md + '\n'
+        : '';
 
     return `# ${heading(results)}
 ${report_header_md}
 ### Options
 Tested Environment: **${results.config.env}**
-Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}${results.cpuCount ? ' (' + results.cpuCount + ' CPUs)' : ''}
-${((results.config.repeat || 1) > 1) ?
-        'Each test repeated **' + escape_html(results.config.repeat + '') + '** times  \n' : ''
+Concurrency: ${
+        results.config.concurrency === 0
+            ? 'sequential'
+            : results.config.concurrency
+    }${results.cpuCount ? ' (' + results.cpuCount + ' CPUs)' : ''}
+${
+    (results.config.repeat || 1) > 1
+        ? 'Each test repeated **' +
+          escape_html(results.config.repeat + '') +
+          '** times  \n'
+        : ''
 }Start: ${format_timestamp(results.start)}
 
 ### Results
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})
+Total number of tests: ${results.tests.length} (${resultCountString(
+        results.config,
+        results.tests,
+        true
+    )})
 Total test duration: ${format_duration(results.duration)}
 
 | #     | Test              | Description       | Duration | Result  |
@@ -206,22 +257,27 @@ ${table}
  * @returns {string}
  */
 function screenshots_html(screenshot) {
-    const dataUri = 'data:image/png;base64,' + (screenshot.toString('base64'));
+    const dataUri = 'data:image/png;base64,' + screenshot.toString('base64');
     return (
         `<img src="${dataUri}" ` +
-        'style="display:inline-block; width:250px; margin:2px 10px 2px 0; border: 1px solid #888;"/>');
+        'style="display:inline-block; width:250px; margin:2px 10px 2px 0; border: 1px solid #888;"/>'
+    );
 }
 
 function _calcSingleStatusStr(status) {
-    return ({
-        'success': '✔️',
-        'error': '✘',
-    }[status] || status);
+    return (
+        {
+            success: '✔️',
+            error: '✘',
+        }[status] || status
+    );
 }
 
 function _calcSummaryStatus(taskResults) {
     if (taskResults.every(tr => tr.status === taskResults[0].status)) {
-        return _calcSingleStatusStr(taskResults.length ? taskResults[0].status : 'skipped');
+        return _calcSingleStatusStr(
+            taskResults.length ? taskResults[0].status : 'skipped'
+        );
     }
 
     // Flaky results, tabulate
@@ -230,10 +286,10 @@ function _calcSummaryStatus(taskResults) {
         counter.set(tr.status, (counter.get(tr.status) || 0) + 1);
     }
 
-    return (Array.from(counter.keys())
+    return Array.from(counter.keys())
         .sort()
         .map(status => counter.get(status) + _calcSingleStatusStr(status))
-        .join(' '));
+        .join(' ');
 }
 
 function _calcDuration(taskResults) {
@@ -242,8 +298,8 @@ function _calcDuration(taskResults) {
     }
 
     const durations = taskResults.map(tr => tr.duration);
-    const max = Math.max(... durations);
-    const min = Math.min(... durations);
+    const max = Math.max(...durations);
+    const min = Math.min(...durations);
     return format_duration(min) + ' - ' + format_duration(max);
 }
 
@@ -251,139 +307,178 @@ function _calcDuration(taskResults) {
  * @param {import('./internal').CraftedResults} results
  */
 function html(results) {
-    const table = results.tests.map((testResult, idx) => {
-        const {skipped, taskResults} = testResult;
+    const table = results.tests
+        .map((testResult, idx) => {
+            const { skipped, taskResults } = testResult;
 
-        const errored = taskResults.some(tr => tr.status === 'error');
-        let statusStr = _calcSummaryStatus(taskResults);
-        if (skipped && testResult.skipReason) {
-            statusStr = 'skipped: ' + testResult.skipReason;
-        }
+            const errored = taskResults.some(tr => tr.status === 'error');
+            let statusStr = _calcSummaryStatus(taskResults);
+            if (skipped && testResult.skipReason) {
+                statusStr = 'skipped: ' + testResult.skipReason;
+            }
 
-        const rowspan = (
-            1 +
-            (testResult.description ? 1 : 0) +
-            (testResult.expectedToFail ? 1 : 0) +
-            (errored ? 1 : 0));
+            const rowspan =
+                1 +
+                (testResult.description ? 1 : 0) +
+                (testResult.expectedToFail ? 1 : 0) +
+                (errored ? 1 : 0);
 
-        let res = (
-            `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-            `<td class="test_number" rowspan="${rowspan}">` + (idx + 1) + '</td>' +
-            '<td class="test_name">' + escape_html(testResult.name) + '</td>' +
-            (skipped ? '' : '<td class="duration">' + escape_html(_calcDuration(taskResults)) + '</td>') +
-            `<td class="result result-${testResult.status}"` +
-            ` ${skipped ? 'colspan="2"' : ''} rowspan=${testResult.description ? 2 : 1}>` +
-            '<div>' + statusStr + '</div></td>' +
-            '</tr>'
-        );
-
-        if (testResult.description) {
-            res += (
+            let res =
                 `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                '<td class="description" colspan="2">' +
-                escape_html(testResult.description) +
+                `<td class="test_number" rowspan="${rowspan}">` +
+                (idx + 1) +
                 '</td>' +
-                '</tr>'
-            );
-        }
-
-        if (testResult.expectedToFail) {
-            res += (
-                `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-                '<td class="expectedToFail" colspan="3">' +
-                ((typeof testResult.expectedToFail === 'string')
-                    ? 'Expected to fail: ' + linkify(testResult.expectedToFail)
-                    : 'Expected to fail.'
-                ) +
+                '<td class="test_name">' +
+                escape_html(testResult.name) +
                 '</td>' +
-                '</tr>'
-            );
-        }
+                (skipped
+                    ? ''
+                    : '<td class="duration">' +
+                      escape_html(_calcDuration(taskResults)) +
+                      '</td>') +
+                `<td class="result result-${testResult.status}"` +
+                ` ${skipped ? 'colspan="2"' : ''} rowspan=${
+                    testResult.description ? 2 : 1
+                }>` +
+                '<div>' +
+                statusStr +
+                '</div></td>' +
+                '</tr>';
 
-        if (errored) {
-            res += `<tr class="${idx % 2 != 0 ? 'odd' : ''}"><td colspan="3">`;
+            if (testResult.description) {
+                res +=
+                    `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                    '<td class="description" colspan="2">' +
+                    escape_html(testResult.description) +
+                    '</td>' +
+                    '</tr>';
+            }
 
-            let first = true;
-            for (const tr of taskResults) {
-                if (tr.status !== 'error') continue;
+            if (testResult.expectedToFail) {
+                res +=
+                    `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                    '<td class="expectedToFail" colspan="3">' +
+                    (typeof testResult.expectedToFail === 'string'
+                        ? 'Expected to fail: ' +
+                          linkify(testResult.expectedToFail)
+                        : 'Expected to fail.') +
+                    '</td>' +
+                    '</tr>';
+            }
 
-                if (first) first = false;
+            if (errored) {
+                res += `<tr class="${
+                    idx % 2 != 0 ? 'odd' : ''
+                }"><td colspan="3">`;
 
-                if (tr.pageUrls.length) {
-                    const pageUrls = tr.pageUrls
-                        .map(url => `<a href="${escape_html(url)}">${escape_html(url)}</a>`)
-                        .join(', ');
-                    res += `<p class="open_pages">Open pages: <span class="open_pages_list">${pageUrls}</span></p>`;
-                }
+                let first = true;
+                for (const tr of taskResults) {
+                    if (tr.status !== 'error') continue;
 
-                res += (
-                    '<div class="error_stack"' + (first ? '' : ' style="margin-top:2em; overflow-wrap: break-word;word-break: break-all;"') + '>' +
-                    escape_html(tr.error_stack || 'INTERNAL ERROR: no error stack') +
-                    '</div>'
-                );
-                if (tr.error_screenshots) {
-                    res += tr.error_screenshots
-                        .map(img => screenshots_html(img))
-                        .join('\n');
-                }
+                    if (first) first = false;
 
-                /** @type {import('./browser_utils').A11yResult[]} */
-                const violations = tr.accessibilityErrors;
+                    if (tr.pageUrls.length) {
+                        const pageUrls = tr.pageUrls
+                            .map(
+                                url =>
+                                    `<a href="${escape_html(
+                                        url
+                                    )}">${escape_html(url)}</a>`
+                            )
+                            .join(', ');
+                        res += `<p class="open_pages">Open pages: <span class="open_pages_list">${pageUrls}</span></p>`;
+                    }
 
-                if (violations.length) {
-                    res += '<h3>Accessibility Violations</h3>';
-                    for (const v of violations) {
-                        const elements = v.nodes.map(node => {
-                            let out = '<li class="axe-element">';
-                            out +=  '<p>HTML: <code>' + escape_html(node.html) + '</code><br />';
+                    res +=
+                        '<div class="error_stack"' +
+                        (first
+                            ? ''
+                            : ' style="margin-top:2em; overflow-wrap: break-word;word-break: break-all;"') +
+                        '>' +
+                        escape_html(
+                            tr.error_stack || 'INTERNAL ERROR: no error stack'
+                        ) +
+                        '</div>';
+                    if (tr.error_screenshots) {
+                        res += tr.error_screenshots
+                            .map(img => screenshots_html(img))
+                            .join('\n');
+                    }
 
-                            for (let i = 0; i < node.selectors.length; i++) {
-                                out += 'Selector: ' + escape_html(node.selectors[i]);
+                    /** @type {import('./browser_utils').A11yResult[]} */
+                    const violations = tr.accessibilityErrors;
 
-                                if (node.screenshots[i] !== null) {
-                                    out += '<span class="axe-img">' + screenshots_html(node.screenshots[i]);
-                                    out += '</span>';
+                    if (violations.length) {
+                        res += '<h3>Accessibility Violations</h3>';
+                        for (const v of violations) {
+                            const elements = v.nodes.map(node => {
+                                let out = '<li class="axe-element">';
+                                out +=
+                                    '<p>HTML: <code>' +
+                                    escape_html(node.html) +
+                                    '</code><br />';
+
+                                for (
+                                    let i = 0;
+                                    i < node.selectors.length;
+                                    i++
+                                ) {
+                                    out +=
+                                        'Selector: ' +
+                                        escape_html(node.selectors[i]);
+
+                                    if (node.screenshots[i] !== null) {
+                                        out +=
+                                            '<span class="axe-img">' +
+                                            screenshots_html(
+                                                node.screenshots[i]
+                                            );
+                                        out += '</span>';
+                                    }
+
+                                    out += '</p>';
                                 }
 
-                                out += '</p>';
-                            }
+                                out += '</li>';
 
-                            out += '</li>';
+                                return out;
+                            });
 
-                            return out;
-                        });
+                            const labels = {
+                                minor: 'Minor',
+                                moderate: 'Moderate',
+                                serious: 'serious',
+                                critical: 'critical',
+                            };
 
-                        const labels = {
-                            minor: 'Minor',
-                            moderate: 'Moderate',
-                            serious: 'serious',
-                            critical: 'critical',
-                        };
+                            const impact = labels[v.impact] + ': ';
 
-                        const impact = labels[v.impact] + ': ';
-
-                        res += (
-                            '<p class="axe-description">' +
-                                impact + escape_html(v.description) +
-                            '</p>' +
-                            '<span class="axe-link">' + linkify(v.helpUrl) + '</span>' +
-                            '<ul>' + elements + '</ul>'
-                        );
+                            res +=
+                                '<p class="axe-description">' +
+                                impact +
+                                escape_html(v.description) +
+                                '</p>' +
+                                '<span class="axe-link">' +
+                                linkify(v.helpUrl) +
+                                '</span>' +
+                                '<ul>' +
+                                elements +
+                                '</ul>';
+                        }
                     }
                 }
+                res += '</td></tr>';
             }
-            res += '</td></tr>';
-        }
 
-        res += (
-            `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
-            '<td colspan="4" class="test_footer">' +
-            '</td>' +
-            '</tr>'
-        );
+            res +=
+                `<tr class="${idx % 2 != 0 ? 'odd' : ''}">` +
+                '<td colspan="4" class="test_footer">' +
+                '</td>' +
+                '</tr>';
 
-        return res;
-    }).join('\n');
+            return res;
+        })
+        .join('\n');
 
     const report_header_html = results.config.report_header_html || '';
 
@@ -516,14 +611,28 @@ td.test_footer {
 ${report_header_html}
 <h2>Options</h2>
 <p>Tested Environment: <strong>${results.config.env}</strong><br/>
-Concurrency: ${results.config.concurrency === 0 ? 'sequential' : results.config.concurrency}${results.cpuCount ? ' (' + results.cpuCount + ' CPUs)' : ''}<br/>
-${((results.config.repeat || 1) > 1) ? 'Each test repeated <strong>' + escape_html(results.config.repeat + '') + '</strong> times<br/>' : ''}
+Concurrency: ${
+        results.config.concurrency === 0
+            ? 'sequential'
+            : results.config.concurrency
+    }${results.cpuCount ? ' (' + results.cpuCount + ' CPUs)' : ''}<br/>
+${
+    (results.config.repeat || 1) > 1
+        ? 'Each test repeated <strong>' +
+          escape_html(results.config.repeat + '') +
+          '</strong> times<br/>'
+        : ''
+}
 Start: ${format_timestamp(results.start)}<br/>
 Version: ${results.testsVersion}, pentf ${results.pentfVersion}<br/>
 </p>
 
 <h2>Results</h2>
-Total number of tests: ${results.tests.length} (${resultCountString(results.config, results.tests, true)})<br/>
+Total number of tests: ${results.tests.length} (${resultCountString(
+        results.config,
+        results.tests,
+        true
+    )})<br/>
 Total test duration: ${escape_html(format_duration(results.duration))}<br/>
 
 <table style="width: 100%">
@@ -535,7 +644,6 @@ ${table}
 </html>
 
 `;
-
 }
 
 async function pdf(config, path, results) {

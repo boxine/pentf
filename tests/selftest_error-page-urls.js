@@ -11,11 +11,19 @@ function runPentf(test) {
     return new Promise((resolve, reject) => {
         child_process.execFile(
             process.execPath,
-            [sub_run, '--exit-zero', '--no-colors', '--no-screenshots', '--ci', '-f', test],
+            [
+                sub_run,
+                '--exit-zero',
+                '--no-colors',
+                '--no-screenshots',
+                '--ci',
+                '-f',
+                test,
+            ],
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {
                 if (err) reject(err);
-                else resolve({stdout, stderr});
+                else resolve({ stdout, stderr });
             }
         );
     });
@@ -23,11 +31,11 @@ function runPentf(test) {
 
 async function run() {
     {
-        const {stdout} = await runPentf('with-page');
+        const { stdout } = await runPentf('with-page');
         assert.match(stdout, /Open pages: https:\/\/example.com\//);
     }
     {
-        const {stdout} = await runPentf('no-page');
+        const { stdout } = await runPentf('no-page');
         assert.doesNotMatch(stdout, /Open pages:/);
     }
 }

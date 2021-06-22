@@ -19,9 +19,11 @@ function getResults(config, results) {
     const flaky = results.filter(t => t.status === 'flaky');
     const skipped = results.filter(t => t.status === 'skipped');
     const expectedToFail =
-        !expectNothing && results.filter(t => t.expectedToFail && t.status === 'error');
+        !expectNothing &&
+        results.filter(t => t.expectedToFail && t.status === 'error');
     const expectedToFailButPassed =
-        !expectNothing && results.filter(t => t.expectedToFail && t.status === 'success');
+        !expectNothing &&
+        results.filter(t => t.expectedToFail && t.status === 'success');
     const todo = results.filter(t => t.status === 'todo');
     const running = results.filter(t => t.status === 'running');
 
@@ -46,10 +48,14 @@ function getResults(config, results) {
  * @returns {string} A string with counts of the results.
  **/
 function resultCountString(config, tests) {
-    const {success, errored, flaky, skipped, expectedToFail, expectedToFailButPassed} = getResults(
-        config,
-        tests
-    );
+    const {
+        success,
+        errored,
+        flaky,
+        skipped,
+        expectedToFail,
+        expectedToFailButPassed,
+    } = getResults(config, tests);
 
     let res = `${success.length} tests passed, ${errored.length} failed`;
     if (flaky.length) {

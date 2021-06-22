@@ -1,7 +1,7 @@
 /* eslint no-console: 0 */
 
 const assert = require('assert').strict;
-const {performance} = require('perf_hooks');
+const { performance } = require('perf_hooks');
 const kolorist = require('kolorist');
 
 const browser_utils = require('./browser_utils');
@@ -13,7 +13,7 @@ const locking = require('./locking');
 const output = require('./output');
 const utils = require('./utils');
 const version = require('./version');
-const {timeoutPromise} = require('./promise_utils');
+const { timeoutPromise } = require('./promise_utils');
 const { getCPUCount } = require('./config');
 const { shouldShowError } = require('./output');
 
@@ -48,16 +48,16 @@ async function run_task(config, state, task) {
         });
 
         let finished = false;
-        const testPromise = Promise.resolve(task.tc.run(task_config))
-            .finally(() => (finished = true));
+        const testPromise = Promise.resolve(task.tc.run(task_config)).finally(
+            () => (finished = true)
+        );
 
-        await Promise.race([
-            testPromise,
-            timeoutPromise
-        ]);
+        await Promise.race([testPromise, timeoutPromise]);
 
         if (!finished) {
-            throw new Error(`Timeout: Test case "${task.tc.name}" didn't finish in ${timeoutMs}ms.`);
+            throw new Error(
+                `Timeout: Test case "${task.tc.name}" didn't finish in ${timeoutMs}ms.`
+            );
         }
 
         clearTimeout(timeout);
@@ -70,20 +70,34 @@ async function run_task(config, state, task) {
         );
         task.duration = performance.now() - task.start;
         if (task.expectedToFail && !config.expect_nothing) {
-            const etf = (typeof task.expectedToFail === 'string') ? ` (${task.expectedToFail})` : '';
+            const etf =
+                typeof task.expectedToFail === 'string'
+                    ? ` (${task.expectedToFail})`
+                    : '';
             const label = output.color(config, 'inverse-red', 'PASSED');
             output.log(
                 config,
-                `${label} test case ${output.color(config, 'lightCyan', task.name)}` +
-                `, but expectedToFail was set${etf}\n`);
+                `${label} test case ${output.color(
+                    config,
+                    'lightCyan',
+                    task.name
+                )}` + `, but expectedToFail was set${etf}\n`
+            );
         }
-    } catch(e) {
+    } catch (e) {
         if (!e || !e.stack) {
             // eslint-disable-next-line no-ex-assign
-            e = new Error(`Non-error object thrown by ${task.name}: ${output.valueRepr(e)}`);
+            e = new Error(
+                `Non-error object thrown by ${task.name}: ${output.valueRepr(
+                    e
+                )}`
+            );
         }
 
-        output.logVerbose(config, `[task] (${task.name}) Failed with error ${e.message}`);
+        output.logVerbose(
+            config,
+            `[task] (${task.name}) Failed with error ${e.message}`
+        );
 
         task.duration = performance.now() - task.start;
         task.error = e;
@@ -104,20 +118,27 @@ async function run_task(config, state, task) {
             output.logVerbose(
                 config,
                 `[task] Taking ${task_config._browser_pages.length} screenshots for task` +
-                ` #${task._runner_task_id} (${task.name})`);
+                    ` #${task._runner_task_id} (${task.name})`
+            );
             try {
-                const screenshotPromise = Promise.all(task_config._browser_pages.map(
-                    async (page, i) => {
+                const screenshotPromise = Promise.all(
+                    task_config._browser_pages.map(async (page, i) => {
                         try {
-                            return await browser_utils.takeScreenshot(config, page, `${task.id || task.name}-${i}.png`);
+                            return await browser_utils.takeScreenshot(
+                                config,
+                                page,
+                                `${task.id || task.name}-${i}.png`
+                            );
                         } catch (err) {
                             return err;
                         }
                     })
                 );
                 const screenshots = await timeoutPromise(
-                    config, screenshotPromise,
-                    {timeout: 10000, message: 'screenshots took too long'});
+                    config,
+                    screenshotPromise,
+                    { timeout: 10000, message: 'screenshots took too long' }
+                );
 
                 // Collect all screenshots first before throwing
                 // potential errors.
@@ -134,25 +155,34 @@ async function run_task(config, state, task) {
                 if (error) {
                     throw error;
                 }
-            } catch(e) {
+            } catch (e) {
                 output.log(
                     config,
-                    `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}\n${e.stack}`);
+                    `INTERNAL ERROR: failed to take screenshot of #${task.id} (${task.name}): ${e}\n${e.stack}`
+                );
             }
         }
 
         task.pageUrls = task_config._browser_pages.map(page => page.url());
 
         // Close all browser windows
-        if (! config.keep_open && task_config._browser_pages.length > 0) {
+        if (!config.keep_open && task_config._browser_pages.length > 0) {
             output.logVerbose(
                 config,
                 `[task] Closing ${task_config._browser_pages.length} browser pages for task` +
-                ` #${task._runner_task_id} (${task.name})`);
+                    ` #${task._runner_task_id} (${task.name})`
+            );
             try {
-                await Promise.all(task_config._browser_pages.slice().map(page => browser_utils.closePage(page)));
-            } catch(e) {
-                output.log(config, `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}\n${e.stack}`);
+                await Promise.all(
+                    task_config._browser_pages
+                        .slice()
+                        .map(page => browser_utils.closePage(page))
+                );
+            } catch (e) {
+                output.log(
+                    config,
+                    `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}\n${e.stack}`
+                );
             }
         }
 
@@ -161,13 +191,15 @@ async function run_task(config, state, task) {
         output.logVerbose(
             config,
             '[task] Decided whether to show error for task ' +
-            `${task._runner_task_id} (${task.name}): ${JSON.stringify(show_error)}`
+                `${task._runner_task_id} (${task.name}): ${JSON.stringify(
+                    show_error
+                )}`
         );
         if (config.sentry && show_error && !e.pentf_expectedToSucceed) {
             output.logVerbose(
                 config,
                 '[task] Reporting error to sentry for ' +
-                `${task._runner_task_id} (${task.name})`
+                    `${task._runner_task_id} (${task.name})`
             );
 
             try {
@@ -183,35 +215,44 @@ async function run_task(config, state, task) {
             } catch (sentryErr) {
                 output.log(
                     config,
-                    `INTERNAL ERROR: Sentry reporting failed for ${task.name}: ${sentryErr}`);
+                    `INTERNAL ERROR: Sentry reporting failed for ${task.name}: ${sentryErr}`
+                );
             }
         }
 
         output.logVerbose(
-            config, `[task] Error teardown done for ${task._runner_task_id} (${task.name})`);
+            config,
+            `[task] Error teardown done for ${task._runner_task_id} (${task.name})`
+        );
 
         if (config.fail_fast) {
             process.exit(3);
         }
     } finally {
         if (!config.keep_open || task.status === 'success') {
-            output.logVerbose(config, `[runner] Executing ${task_config._teardown_hooks.length} teardown hooks`);
+            output.logVerbose(
+                config,
+                `[runner] Executing ${task_config._teardown_hooks.length} teardown hooks`
+            );
             try {
                 // Run teardown functions if there are any
-                const teardownPromise = Promise.all(task_config._teardown_hooks.map(fn => fn(task_config)));
-                await timeoutPromise(
-                    config,
-                    teardownPromise,
-                    {timeout: 30000, message: 'teardown took too long'}
+                const teardownPromise = Promise.all(
+                    task_config._teardown_hooks.map(fn => fn(task_config))
                 );
-            } catch(e) {
+                await timeoutPromise(config, teardownPromise, {
+                    timeout: 30000,
+                    message: 'teardown took too long',
+                });
+            } catch (e) {
                 output.log(
                     config,
                     `INTERNAL ERROR: failed to run teardown for #${task.id} (${task.name}): ${e.stack}`
                 );
             }
         } else if (config.watch) {
-            state.remaining_teardowns.push(...task_config._teardown_hooks.map(fn => () => fn(config)));
+            state.remaining_teardowns.push(
+                ...task_config._teardown_hooks.map(fn => () => fn(config))
+            );
         }
     }
 }
@@ -224,14 +265,18 @@ async function run_task(config, state, task) {
 async function sequential_run(config, state) {
     const skipped = state.tasks.filter(s => s.status === 'skipped');
     if (!config.quiet && skipped.length > 0) {
-        console.log(`Skipped ${skipped.length} tests (${skipped.map(s => s.name).join(' ')})`);
+        console.log(
+            `Skipped ${skipped.length} tests (${skipped
+                .map(s => s.name)
+                .join(' ')})`
+        );
     }
 
     for (const task of state.tasks) {
         if (task.status === 'skipped') continue;
         await locking.acquireEventually(config, state, task);
 
-        if (! config.quiet) {
+        if (!config.quiet) {
             console.log(task.name + ' ...');
         }
 
@@ -249,14 +294,17 @@ async function sequential_run(config, state) {
  */
 function update_results(config, state, task) {
     const { resultByTaskGroup, flakyCounts } = state;
-    const {group} = task;
+    const { group } = task;
     assert(group);
 
     const result = resultByTaskGroup.get(group);
     assert(result);
 
     let status = task.status;
-    if (config.repeatFlaky > 0 && status === 'success' || status === 'error') {
+    if (
+        (config.repeatFlaky > 0 && status === 'success') ||
+        status === 'error'
+    ) {
         const runs = flakyCounts.get(group) || 1;
         // Not flaky if the first run was successful
         if (!(runs === 1 && task.status === 'success')) {
@@ -278,18 +326,22 @@ function update_results(config, state, task) {
     result.status = status;
 
     // Append the task result if the task finished
-    if (task.status === 'error' || task.status === 'success' || task.status === 'skipped') {
+    if (
+        task.status === 'error' ||
+        task.status === 'success' ||
+        task.status === 'skipped'
+    ) {
         result.taskResults.push({
             pageUrls: task.pageUrls,
             status: task.status,
             duration: task.duration, // TODO,
-            error_stack: task.error ?
-                // Node's assert module modifies the Error's stack property and
-                // adds ansi color codes. These can only be disabled globally via
-                // an environment variable, but we want to keep colorized output
-                // for the cli. So we need to strip the ansi codes from the assert
-                // stack.
-                kolorist.stripColors(task.error.stack)
+            error_stack: task.error
+                ? // Node's assert module modifies the Error's stack property and
+                  // adds ansi color codes. These can only be disabled globally via
+                  // an environment variable, but we want to keep colorized output
+                  // for the cli. So we need to strip the ansi codes from the assert
+                  // stack.
+                  kolorist.stripColors(task.error.stack)
                 : null,
             error_screenshots: task.error_screenshots,
             accessibilityErrors: task.accessibilityErrors,
@@ -323,8 +375,17 @@ async function run_one(config, state, task) {
     await run_task(config, state, task);
 
     const repeat = config.repeat || 1;
-    if (count < config.repeatFlaky - 1 && task.status === 'error' && !task.expectedToFail) {
-        output.logVerbose(config, `[runner] Retrying task for flaky detection. Retry count: ${count + 1} (${task.id})`);
+    if (
+        count < config.repeatFlaky - 1 &&
+        task.status === 'error' &&
+        !task.expectedToFail
+    ) {
+        output.logVerbose(
+            config,
+            `[runner] Retrying task for flaky detection. Retry count: ${
+                count + 1
+            } (${task.id})`
+        );
         const tcName = task.tc.name;
         state.tasks.push({
             ...task,
@@ -333,7 +394,7 @@ async function run_one(config, state, task) {
             id: `${tcName}_${repeat + count}`,
             name: `${tcName}[${repeat + count}]`,
             // Keep group the same, so that we can group results together
-            group: task.group
+            group: task.group,
         });
     }
 
@@ -373,7 +434,9 @@ async function parallel_run(config, state) {
     // eslint-disable-next-line no-constant-condition
     while (true) {
         if (config.verbose) {
-            const tasksStr = state.running.map(t => `#${t._runner_task_id}`).join(' ');
+            const tasksStr = state.running
+                .map(t => `#${t._runner_task_id}`)
+                .join(' ');
             output.log(config, `[runner] running tasks: ${tasksStr}`);
         }
 
@@ -384,7 +447,7 @@ async function parallel_run(config, state) {
             for (const t of state.tasks) {
                 if (t.status !== 'todo') continue;
 
-                if (! await locking.acquire(config, state, t)) {
+                if (!(await locking.acquire(config, state, t))) {
                     anyLocked = true;
                     continue;
                 }
@@ -396,17 +459,26 @@ async function parallel_run(config, state) {
             if (!task) {
                 if (anyLocked) {
                     if (config.verbose || config.locking_verbose) {
-                        output.log(config, `[runner] All tasks are locked, sleeping for ${state.locking_backoff} ms`);
+                        output.log(
+                            config,
+                            `[runner] All tasks are locked, sleeping for ${state.locking_backoff} ms`
+                        );
                     }
                     await utils.wait(state.locking_backoff);
-                    state.locking_backoff = Math.min(2 * state.locking_backoff, 10000);
+                    state.locking_backoff = Math.min(
+                        2 * state.locking_backoff,
+                        10000
+                    );
                 }
                 break;
             }
 
             task._runner_task_id = runner_task_id;
             const promise = run_one(config, state, task);
-            output.logVerbose(config, `[runner] started task #${task._runner_task_id}: ${task.id}`);
+            output.logVerbose(
+                config,
+                `[runner] started task #${task._runner_task_id}: ${task.id}`
+            );
             promise._runner_task_id = runner_task_id;
             runner_task_id++;
             state.running.push(promise);
@@ -416,14 +488,23 @@ async function parallel_run(config, state) {
             if (state.tasks.some(t => t.status === 'todo')) {
                 // Still waiting for locks
                 if (config.verbose || config.locking_verbose) {
-                    const waitingTasksStr = state.tasks.filter(t => t.status === 'todo').map(t => t.id).join(',');
-                    output.log(config, `[runner] Still waiting for locks on tasks ${waitingTasksStr}`);
+                    const waitingTasksStr = state.tasks
+                        .filter(t => t.status === 'todo')
+                        .map(t => t.id)
+                        .join(',');
+                    output.log(
+                        config,
+                        `[runner] Still waiting for locks on tasks ${waitingTasksStr}`
+                    );
                 } else if (state.running.length < config.concurrency) {
                     const waitingTasksStr = state.tasks
                         .filter(t => t.status === 'todo')
                         .map(t => output.color(config, 'cyan', t.id))
                         .join(',');
-                    output.log(config, `Waiting for locks on ${waitingTasksStr}`);
+                    output.log(
+                        config,
+                        `Waiting for locks on ${waitingTasksStr}`
+                    );
                 }
                 continue;
             }
@@ -439,18 +520,29 @@ async function parallel_run(config, state) {
                     `Would end testing now, but task ${task.name} is still in status ${task.status}`
                 );
             }
-            return;  // no more tasks to add, no more tasks running => we're done!
+            return; // no more tasks to add, no more tasks running => we're done!
         }
 
         // Wait for one task to finish
         if (config.verbose) {
-            const tasksStr = state.running.map(t => `#${t._runner_task_id}`).join(' ');
-            output.log(config, `[runner] waiting for one of the tasks ${tasksStr} to finish`);
+            const tasksStr = state.running
+                .map(t => `#${t._runner_task_id}`)
+                .join(' ');
+            output.log(
+                config,
+                `[runner] waiting for one of the tasks ${tasksStr} to finish`
+            );
         }
         const done_task = await Promise.race(state.running);
-        output.logVerbose(config, `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`);
+        output.logVerbose(
+            config,
+            `[runner] finished task #${done_task._runner_task_id}: ${done_task.id} (${done_task.status})`
+        );
         await locking.release(config, state, done_task);
-        utils.remove(state.running, promise => promise._runner_task_id === done_task._runner_task_id);
+        utils.remove(
+            state.running,
+            promise => promise._runner_task_id === done_task._runner_task_id
+        );
     }
 }
 
@@ -468,7 +560,7 @@ function initTaskResult(resultByTaskGroup, task) {
         group: task.group,
         description: task.tc.description,
         skipped: task.status === 'skipped',
-        taskResults: []
+        taskResults: [],
     });
 }
 
@@ -481,59 +573,64 @@ function initTaskResult(resultByTaskGroup, task) {
  */
 async function testCases2tasks(config, testCases, resultByTaskGroup) {
     const repeat = config.repeat || 1;
-    assert(Number.isInteger(repeat), `Repeat configuration is not an integer: ${repeat}`);
+    assert(
+        Number.isInteger(repeat),
+        `Repeat configuration is not an integer: ${repeat}`
+    );
 
     const tasks = new Array(testCases.length * repeat);
-    await Promise.all(testCases.map(async (tc, position) => {
-        /** @type {import('./internal').Task} */
-        const task = {
-            tc,
-            resources: tc.resources || [],
-            status: 'todo',
-            name: tc.name,
-            group: tc.name,
-            id: tc.name,
-            start: 0,
-            accessibilityErrors: [],
-            pageUrls: [],
-        };
-
-        const skipReason = tc.skip && await tc.skip(config);
-        if (skipReason) {
-            task.status = 'skipped';
-            if (typeof skipReason === 'string') {
-                task.skipReason = skipReason;
-            }
-        }
-
-        if (Object.prototype.hasOwnProperty.call(tc, 'expectedToFail')) {
-            if (typeof tc.expectedToFail === 'function') {
-                task.expectedToFail = tc.expectedToFail(config);
-            } else {
-                task.expectedToFail = tc.expectedToFail;
-            }
-        }
-
-        locking.annotateTaskResources(config, task);
-
-        if (skipReason || (repeat === 1)) {
-            tasks[position] = task;
-            initTaskResult(resultByTaskGroup, task);
-            return;
-        }
-
-        for (let runId = 0;runId < repeat;runId++) {
-            const repeatTask = {
-                ...task,
-                breadcrumb: null,
-                id: `${tc.name}_${runId}`,
-                group: `${tc.name}_${runId}`,
-                name: `${tc.name}[${runId}]`,
+    await Promise.all(
+        testCases.map(async (tc, position) => {
+            /** @type {import('./internal').Task} */
+            const task = {
+                tc,
+                resources: tc.resources || [],
+                status: 'todo',
+                name: tc.name,
+                group: tc.name,
+                id: tc.name,
+                start: 0,
+                accessibilityErrors: [],
+                pageUrls: [],
             };
-            tasks[runId * testCases.length + position] = repeatTask;
-            initTaskResult(resultByTaskGroup, repeatTask);
-        }
-    }));
+
+            const skipReason = tc.skip && (await tc.skip(config));
+            if (skipReason) {
+                task.status = 'skipped';
+                if (typeof skipReason === 'string') {
+                    task.skipReason = skipReason;
+                }
+            }
+
+            if (Object.prototype.hasOwnProperty.call(tc, 'expectedToFail')) {
+                if (typeof tc.expectedToFail === 'function') {
+                    task.expectedToFail = tc.expectedToFail(config);
+                } else {
+                    task.expectedToFail = tc.expectedToFail;
+                }
+            }
+
+            locking.annotateTaskResources(config, task);
+
+            if (skipReason || repeat === 1) {
+                tasks[position] = task;
+                initTaskResult(resultByTaskGroup, task);
+                return;
+            }
+
+            for (let runId = 0; runId < repeat; runId++) {
+                const repeatTask = {
+                    ...task,
+                    breadcrumb: null,
+                    id: `${tc.name}_${runId}`,
+                    group: `${tc.name}_${runId}`,
+                    name: `${tc.name}[${runId}]`,
+                };
+                tasks[runId * testCases.length + position] = repeatTask;
+                initTaskResult(resultByTaskGroup, repeatTask);
+            }
+        })
+    );
     return tasks.filter(t => t);
 }
 
@@ -547,7 +644,9 @@ async function run(config, testCases) {
     const test_start = Date.now();
 
     external_locking.prepare(config);
-    const initData = config.beforeAllTests ? await config.beforeAllTests(config) : undefined;
+    const initData = config.beforeAllTests
+        ? await config.beforeAllTests(config)
+        : undefined;
 
     /** @type {import('./internal').RunnerState["resultByTaskGroup"]} */
     const resultByTaskGroup = new Map();
@@ -568,7 +667,7 @@ async function run(config, testCases) {
         assert(
             sentry_dsn,
             'Sentry enabled with --sentry, but no DSN configured. Use --sentry-dsn,' +
-            ' set the configuration sentry_dsn, or the environment variable SENTRY_DSN.'
+                ' set the configuration sentry_dsn, or the environment variable SENTRY_DSN.'
         );
         const Sentry = require('@sentry/node');
         Sentry.init({
@@ -576,8 +675,13 @@ async function run(config, testCases) {
             environment: config.env,
             beforeBreadcrumb(breadcrumb) {
                 // Strip ansi color codes from sentry messages.
-                if (breadcrumb.message && typeof breadcrumb.message === 'string') {
-                    breadcrumb.message = kolorist.stripColors(breadcrumb.message);
+                if (
+                    breadcrumb.message &&
+                    typeof breadcrumb.message === 'string'
+                ) {
+                    breadcrumb.message = kolorist.stripColors(
+                        breadcrumb.message
+                    );
                 }
                 return breadcrumb;
             },
@@ -588,11 +692,16 @@ async function run(config, testCases) {
     try {
         if (config.manually_lock) {
             const resources = config.manually_lock.split(',');
-            const acquireRes = await external_locking.externalAcquire(config, resources, 60000);
+            const acquireRes = await external_locking.externalAcquire(
+                config,
+                resources,
+                60000
+            );
             if (acquireRes !== true) {
                 throw new Error(
                     `Failed to lock ${acquireRes.resource}: ` +
-                    `Locked by ${acquireRes.client}, expires in ${acquireRes.expireIn}ms`);
+                        `Locked by ${acquireRes.client}, expires in ${acquireRes.expireIn}ms`
+                );
             }
         }
 
@@ -633,14 +742,26 @@ async function run(config, testCases) {
             // We may have printed a lot of things to stdout making it hard to see
             // failed tests and their stack traces. Therefore we re-print all stack
             // traces of all failed tests at the end.
-            if (config.verbose || config.ci || config.status_interval || config.debug) {
-                const errored = tasks.filter(t => t.status === 'error' && (!t.expectedToFail || config.expect_nothing));
+            if (
+                config.verbose ||
+                config.ci ||
+                config.status_interval ||
+                config.debug
+            ) {
+                const errored = tasks.filter(
+                    t =>
+                        t.status === 'error' &&
+                        (!t.expectedToFail || config.expect_nothing)
+                );
                 for (const task of errored) {
                     const group = resultByTaskGroup.get(task.group);
                     assert(group);
 
                     // Don't re-print errors if the test is marked as flaky
-                    if (group.status !== 'flaky' && shouldShowError(config, task)) {
+                    if (
+                        group.status !== 'flaky' &&
+                        shouldShowError(config, task)
+                    ) {
                         await output.logTaskError(config, task);
                     }
                 }
@@ -648,14 +769,20 @@ async function run(config, testCases) {
             output.finish(config, state);
         }
 
-        output.logVerbose(config, 'Test run complete, shutting down locks & email connections ...');
+        output.logVerbose(
+            config,
+            'Test run complete, shutting down locks & email connections ...'
+        );
 
         const lockPromise = timeoutPromise(
-            config, locking.shutdown(config, state),
-            {message: 'locking shutdown', warning: true});
-        const emailPromise = timeoutPromise(
-            config, email.shutdown(config),
-            {message: 'email shutdown', warning: true});
+            config,
+            locking.shutdown(config, state),
+            { message: 'locking shutdown', warning: true }
+        );
+        const emailPromise = timeoutPromise(config, email.shutdown(config), {
+            message: 'email shutdown',
+            warning: true,
+        });
         await Promise.all([lockPromise, emailPromise]);
 
         output.logVerbose(config, 'lock & email shutdown complete');
@@ -663,10 +790,15 @@ async function run(config, testCases) {
         restoreConsole();
 
         if (config.afterAllTests) {
-            output.logVerbose(config, 'running custom per-project teardown ...');
+            output.logVerbose(
+                config,
+                'running custom per-project teardown ...'
+            );
             await timeoutPromise(
-                config, config.afterAllTests(config, initData),
-                {message: 'afterAllTests function', warning: true});
+                config,
+                config.afterAllTests(config, initData),
+                { message: 'afterAllTests function', warning: true }
+            );
         }
     }
 
@@ -675,7 +807,10 @@ async function run(config, testCases) {
 
     output.logVerbose(config, `Test run ended at ${utils.localIso8601(now)}`);
     const testsVersion = await timeoutPromise(
-        config, version.testsVersion(config), {message: 'version determination', warning: true});
+        config,
+        version.testsVersion(config),
+        { message: 'version determination', warning: true }
+    );
     const pentfVersion = version.pentfVersion();
     const cpuCount = getCPUCount();
 

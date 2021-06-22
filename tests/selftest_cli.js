@@ -4,13 +4,20 @@ const child_process = require('child_process');
 
 async function run() {
     const sub_run = path.join(__dirname, '..', 'bin', 'cli.js');
-    const {stderr} = await new Promise((resolve, reject) => {
+    const { stderr } = await new Promise((resolve, reject) => {
         child_process.execFile(
             process.execPath,
-            [sub_run, '--exit-zero', '--no-screenshots', '--tests-glob', 'tests/skip_tests/*.js', '--no-pdf'],
+            [
+                sub_run,
+                '--exit-zero',
+                '--no-screenshots',
+                '--tests-glob',
+                'tests/skip_tests/*.js',
+                '--no-pdf',
+            ],
             (err, stdout, stderr) => {
                 if (err) reject(err);
-                else resolve({stdout, stderr});
+                else resolve({ stdout, stderr });
             }
         );
     });

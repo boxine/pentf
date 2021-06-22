@@ -1,8 +1,10 @@
-const {newPage, assertAccessibility} = require('../src/browser_utils');
+const { newPage, assertAccessibility } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
-    await page.setContent('<div style="width: 300px; height: 300px; background: red;"><blink></blink></div>');
+    await page.setContent(
+        '<div style="width: 300px; height: 300px; background: red;"><blink></blink></div>'
+    );
 
     try {
         await assertAccessibility(config, page);

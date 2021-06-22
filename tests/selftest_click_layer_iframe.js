@@ -91,7 +91,9 @@ async function run(config) {
     await page.goto('http://pentf.dev');
 
     const waitForIframe = async () => {
-        const iframe = page.frames().find(f => page.mainFrame() !== f && f.url().includes('pentf.dev'));
+        const iframe = page
+            .frames()
+            .find(f => page.mainFrame() !== f && f.url().includes('pentf.dev'));
         await iframe.waitForSelector('button');
         return iframe;
     };
@@ -100,13 +102,16 @@ async function run(config) {
 
     const getClicks = async () =>
         page.evaluate(() => {
-            return {overlay: window.overlayClicks, button: window.buttonClicks};
+            return {
+                overlay: window.overlayClicks,
+                button: window.buttonClicks,
+            };
         });
 
     // All following assertions check that the overlay div that is positioned
     // above the button intercepts all click events, so that none are triggered
     // on the button.
-    await clickSelector(iframe, 'button', {timeout: 1000});
+    await clickSelector(iframe, 'button', { timeout: 1000 });
     let clicks = await getClicks();
     assert.equal(clicks.button, 0);
     assert.equal(clicks.overlay, 1);
@@ -114,7 +119,7 @@ async function run(config) {
     // Click element
     await page.reload();
     iframe = await waitForIframe();
-    await clickXPath(iframe, '//button', {timeout: 1000});
+    await clickXPath(iframe, '//button', { timeout: 1000 });
     clicks = await getClicks();
     assert.equal(clicks.button, 0);
     assert.equal(clicks.overlay, 1);
@@ -122,7 +127,7 @@ async function run(config) {
     // Click text node
     await page.reload();
     iframe = await waitForIframe();
-    await clickXPath(iframe, '//button/text()[2]', {timeout: 1000});
+    await clickXPath(iframe, '//button/text()[2]', { timeout: 1000 });
     clicks = await getClicks();
     assert.equal(clicks.button, 0);
     assert.equal(clicks.overlay, 1);
@@ -130,13 +135,14 @@ async function run(config) {
     // Click text node
     await page.reload();
     iframe = await waitForIframe();
-    await clickNestedText(iframe, 'click me', {timeout: 1000});
+    await clickNestedText(iframe, 'click me', { timeout: 1000 });
     clicks = await getClicks();
     assert.equal(clicks.button, 0);
     assert.equal(clicks.overlay, 1);
 }
 
 module.exports = {
-    description: 'Simulates clicks via a mouse like a user would inside an iframe',
+    description:
+        'Simulates clicks via a mouse like a user would inside an iframe',
     run,
 };

@@ -27,7 +27,7 @@ async function reset(page) {
 }
 
 async function run(config) {
-    const page = await newPage({...config, default_timeout: 3000});
+    const page = await newPage({ ...config, default_timeout: 3000 });
 
     await reset(page);
     await clickXPath(page, '//h1');

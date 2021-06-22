@@ -8,7 +8,7 @@ async function stream2buf(stream) {
         write_stream.on('finish', () => {
             resolve(write_stream.getContents());
         });
-        write_stream.on('error', (e) => {
+        write_stream.on('error', e => {
             reject(e);
         });
     });
@@ -19,17 +19,23 @@ function escape_shell(arg) {
         return arg;
     }
 
-    return '\'' + arg.replace(/'/g, '\'"\'"\'') + '\'';
+    return "'" + arg.replace(/'/g, "'\"'\"'") + "'";
 }
 
 function add_binary_data(curl_command, data_b64) {
-    return 'echo ' + escape_shell(data_b64) + ' | base64 -d | ' + curl_command + ' -d @-';
+    return (
+        'echo ' +
+        escape_shell(data_b64) +
+        ' | base64 -d | ' +
+        curl_command +
+        ' -d @-'
+    );
 }
 
 async function makeCurlCommand(options, url) {
     let curl_command = 'curl';
 
-    if (options.agent && (options.agent.options.rejectUnauthorized === false)) {
+    if (options.agent && options.agent.options.rejectUnauthorized === false) {
         curl_command += ' -k';
     }
 
@@ -47,7 +53,8 @@ async function makeCurlCommand(options, url) {
 
     const headers = options.headers || {};
     for (const header_key in headers) {
-        curl_command += ' -H ' + escape_shell(header_key + ': ' + headers[header_key]);
+        curl_command +=
+            ' -H ' + escape_shell(header_key + ': ' + headers[header_key]);
     }
 
     if (options.body) {
@@ -70,10 +77,12 @@ async function makeCurlCommand(options, url) {
             curl_command += ' -d ' + escape_shell(options.body);
         }
     }
-    assert(! /^-/.test(url));
+    assert(!/^-/.test(url));
 
     if (options.curl_extra_options) {
-        curl_command += ' ' + options.curl_extra_options.map(ce => escape_shell(ce)).join(' ');
+        curl_command +=
+            ' ' +
+            options.curl_extra_options.map(ce => escape_shell(ce)).join(' ');
     }
 
     curl_command += ' ' + escape_shell(url);

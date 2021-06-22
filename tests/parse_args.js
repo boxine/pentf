@@ -1,8 +1,8 @@
 const assert = require('assert').strict;
-const {parseArgs} = require('../src/config');
+const { parseArgs } = require('../src/config');
 
 async function run() {
-    assert.equal(parseArgs({}, [ '--ci']).ci, true);
+    assert.equal(parseArgs({}, ['--ci']).ci, true);
 
     // Only pentf.main
     assert.equal(
@@ -15,7 +15,10 @@ async function run() {
         '*.foo.js'
     );
     // Only cli
-    assert.equal(parseArgs({}, ['--tests-glob', '*.bar.js']).testsGlob, '*.bar.js');
+    assert.equal(
+        parseArgs({}, ['--tests-glob', '*.bar.js']).testsGlob,
+        '*.bar.js'
+    );
     // Both pentf.main + cli. Cli should overwrite properties
     assert.equal(
         parseArgs(

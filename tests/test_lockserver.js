@@ -1,14 +1,19 @@
 const assert = require('assert').strict;
 
-const {fetch} = require('../src/net_utils');
-const {externalList, externalAcquire, externalRelease} = require('../src/external_locking');
-const {wait, cmpKey} = require('../src/utils');
-
+const { fetch } = require('../src/net_utils');
+const {
+    externalList,
+    externalAcquire,
+    externalRelease,
+} = require('../src/external_locking');
+const { wait, cmpKey } = require('../src/utils');
 
 async function run(config) {
     assert(config.pentf_lockserver_url);
 
-    const baseUrl = `${config.pentf_lockserver_url}test_lockserver_${Math.random().toString(36).slice(2)}`;
+    const baseUrl = `${
+        config.pentf_lockserver_url
+    }test_lockserver_${Math.random().toString(36).slice(2)}`;
     const config1 = {
         ...config,
         no_locking: false,
@@ -47,47 +52,93 @@ async function run(config) {
     assert.equal(acquireTooLong.status, 400);
 
     // Actually acquire something
-    let acquireRes = await externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget3'], 30000);
+    let acquireRes = await externalAcquire(
+        config1,
+        ['test1', 'widget1', 'widget2', 'widget3'],
+        30000
+    );
     assert.strictEqual(acquireRes, true);
 
     const firstList = await externalList(config1);
     const firstExpireIn = firstList[0].expireIn;
     assert(firstExpireIn > 20000);
     assert(firstExpireIn <= 30000);
-    assert.deepStrictEqual(firstList.map(l => l.resource).sort(), ['test1', 'widget1', 'widget2', 'widget3']);
-    assert.deepStrictEqual(firstList.map(l => l.client), [config1.external_locking_client, config1.external_locking_client, config1.external_locking_client, config1.external_locking_client]);
-    assert.deepStrictEqual(firstList.map(l => l.expireIn), [firstExpireIn, firstExpireIn, firstExpireIn, firstExpireIn]);
+    assert.deepStrictEqual(firstList.map(l => l.resource).sort(), [
+        'test1',
+        'widget1',
+        'widget2',
+        'widget3',
+    ]);
+    assert.deepStrictEqual(
+        firstList.map(l => l.client),
+        [
+            config1.external_locking_client,
+            config1.external_locking_client,
+            config1.external_locking_client,
+            config1.external_locking_client,
+        ]
+    );
+    assert.deepStrictEqual(
+        firstList.map(l => l.expireIn),
+        [firstExpireIn, firstExpireIn, firstExpireIn, firstExpireIn]
+    );
 
     await wait(2); // ensure clock tick
     const secondList = await externalList(config2);
-    assert.deepStrictEqual(secondList.map(l => l.resource).sort(), ['test1', 'widget1', 'widget2', 'widget3']);
+    assert.deepStrictEqual(secondList.map(l => l.resource).sort(), [
+        'test1',
+        'widget1',
+        'widget2',
+        'widget3',
+    ]);
     assert(secondList.every(l => l.client === config1.external_locking_client));
     const secondExpireIn = secondList[0].expireIn;
     assert(secondExpireIn < firstExpireIn);
     assert(secondExpireIn > 15000);
     assert(secondExpireIn <= 30000);
-    assert.deepStrictEqual(secondList.map(l => l.expireIn), [secondExpireIn, secondExpireIn, secondExpireIn, secondExpireIn]);
+    assert.deepStrictEqual(
+        secondList.map(l => l.expireIn),
+        [secondExpireIn, secondExpireIn, secondExpireIn, secondExpireIn]
+    );
 
     // Extend locks
-    acquireRes = await externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget3'], 40000);
+    acquireRes = await externalAcquire(
+        config1,
+        ['test1', 'widget1', 'widget2', 'widget3'],
+        40000
+    );
     assert.strictEqual(acquireRes, true);
 
     let curList = await externalList(config2);
-    assert.deepStrictEqual(curList.map(l => l.resource).sort(), ['test1', 'widget1', 'widget2', 'widget3']);
+    assert.deepStrictEqual(curList.map(l => l.resource).sort(), [
+        'test1',
+        'widget1',
+        'widget2',
+        'widget3',
+    ]);
     assert(curList.every(l => l.client === config1.external_locking_client));
     const thirdExpireIn = curList[0].expireIn;
     assert(thirdExpireIn > 30000);
     assert(thirdExpireIn <= 40000);
-    assert.deepStrictEqual(curList.map(l => l.expireIn), [thirdExpireIn, thirdExpireIn, thirdExpireIn, thirdExpireIn]);
+    assert.deepStrictEqual(
+        curList.map(l => l.expireIn),
+        [thirdExpireIn, thirdExpireIn, thirdExpireIn, thirdExpireIn]
+    );
 
     // Extending can add new locks
-    acquireRes = await externalAcquire(config1, ['test1', 'widget1', 'widget2', 'widget4'], 50000);
+    acquireRes = await externalAcquire(
+        config1,
+        ['test1', 'widget1', 'widget2', 'widget4'],
+        50000
+    );
     assert.strictEqual(acquireRes, true);
 
     curList = await externalList(config1);
     curList.sort(cmpKey('resource'));
     assert.deepStrictEqual(
-        curList.map(l => l.resource), ['test1', 'widget1', 'widget2', 'widget3', 'widget4']);
+        curList.map(l => l.resource),
+        ['test1', 'widget1', 'widget2', 'widget3', 'widget4']
+    );
     assert(curList.every(l => l.client === config1.external_locking_client));
     assert(curList[0].expireIn > 40000);
     assert(curList[0].expireIn <= 50000);
@@ -110,7 +161,9 @@ async function run(config) {
 
     curList = (await externalList(config1)).sort(cmpKey('resource'));
     assert.deepStrictEqual(
-        curList.map(l => l.resource), ['test1', 'widget1', 'widget2', 'widget3', 'widget4']);
+        curList.map(l => l.resource),
+        ['test1', 'widget1', 'widget2', 'widget3', 'widget4']
+    );
     assert(curList.every(l => l.client === config1.external_locking_client));
 
     // Second client can not delete resources locked by the first one
@@ -121,7 +174,9 @@ async function run(config) {
     assert(releaseRes.expireIn <= 50000);
     curList = (await externalList(config1)).sort(cmpKey('resource'));
     assert.deepStrictEqual(
-        curList.map(l => l.resource), ['test1', 'widget1', 'widget2', 'widget3', 'widget4']);
+        curList.map(l => l.resource),
+        ['test1', 'widget1', 'widget2', 'widget3', 'widget4']
+    );
     assert(curList.every(l => l.client === config1.external_locking_client));
 
     // First client can delete their resources
@@ -129,7 +184,9 @@ async function run(config) {
     assert.deepStrictEqual(releaseRes, true);
     curList = (await externalList(config1)).sort(cmpKey('resource'));
     assert.deepStrictEqual(
-        curList.map(l => l.resource), ['widget2', 'widget3', 'widget4']);
+        curList.map(l => l.resource),
+        ['widget2', 'widget3', 'widget4']
+    );
     assert(curList.every(l => l.client === config1.external_locking_client));
 
     // Second client can now acquire resources
@@ -137,16 +194,17 @@ async function run(config) {
     assert.deepStrictEqual(acquireRes, true);
     curList = (await externalList(config1)).sort(cmpKey('resource'));
     assert.deepStrictEqual(
-        curList.map(({client, resource}) => {return {client, resource};}),
+        curList.map(({ client, resource }) => {
+            return { client, resource };
+        }),
         [
-            {resource: 'client2', client: config2.external_locking_client},
-            {resource: 'widget1', client: config2.external_locking_client},
-            {resource: 'widget2', client: config1.external_locking_client},
-            {resource: 'widget3', client: config1.external_locking_client},
-            {resource: 'widget4', client: config1.external_locking_client},
+            { resource: 'client2', client: config2.external_locking_client },
+            { resource: 'widget1', client: config2.external_locking_client },
+            { resource: 'widget2', client: config1.external_locking_client },
+            { resource: 'widget3', client: config1.external_locking_client },
+            { resource: 'widget4', client: config1.external_locking_client },
         ]
     );
-
 }
 
 module.exports = {

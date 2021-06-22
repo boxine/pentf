@@ -1,6 +1,11 @@
 const assert = require('assert').strict;
 
-const {closePage, newPage, getAttribute, getText} = require('../src/browser_utils');
+const {
+    closePage,
+    newPage,
+    getAttribute,
+    getText,
+} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -13,7 +18,10 @@ async function run(config) {
     assert.strictEqual(await getAttribute(page, 'div', 'id'), 'a');
 
     // Special case for style
-    assert.strictEqual(await getAttribute(page, 'div', 'style'), 'display: none;');
+    assert.strictEqual(
+        await getAttribute(page, 'div', 'style'),
+        'display: none;'
+    );
 
     // Get correct type
     assert.strictEqual(await getAttribute(page, 'input', 'checked'), true);

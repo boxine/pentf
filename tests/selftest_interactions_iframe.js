@@ -1,8 +1,12 @@
 const assert = require('assert').strict;
-const {clickSelector, newPage, interceptRequest} = require('../src/browser_utils');
+const {
+    clickSelector,
+    newPage,
+    interceptRequest,
+} = require('../src/browser_utils');
 
 async function run(config) {
-    const page = await newPage({...config, show_interactions: true});
+    const page = await newPage({ ...config, show_interactions: true });
     await interceptRequest(page, req => {
         if (req.url().endsWith('pentf.dev/')) {
             return req.respond({
@@ -60,20 +64,23 @@ async function run(config) {
     await page.goto('http://pentf.dev');
 
     const waitForIframe = async () => {
-        const iframe = page.frames().find(f => page.mainFrame() !== f && f.url().includes('pentf.dev'));
+        const iframe = page
+            .frames()
+            .find(f => page.mainFrame() !== f && f.url().includes('pentf.dev'));
         await iframe.waitForSelector('button');
         return iframe;
     };
 
     const iframe = await waitForIframe();
 
-    await clickSelector(iframe, 'button', {timeout: 1000});
+    await clickSelector(iframe, 'button', { timeout: 1000 });
 
     const pos = await page.evaluate(() => {
         const el = document.querySelector('#pentf-mouse-pointer');
         return {
             left: +el.style.left.replace('px', ''),
-            top: +el.style.top.replace('px', '') };
+            top: +el.style.top.replace('px', ''),
+        };
     });
 
     const iframePos = await page.evaluate(() => {

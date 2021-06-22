@@ -1,8 +1,12 @@
 const assert = require('assert').strict;
-const {newPage, interceptRequest, waitForSelector} = require('../src/browser_utils');
+const {
+    newPage,
+    interceptRequest,
+    waitForSelector,
+} = require('../src/browser_utils');
 
 async function run(config) {
-    const page = await newPage({...config, show_interactions: true});
+    const page = await newPage({ ...config, show_interactions: true });
     await interceptRequest(page, req => {
         if (req.url().endsWith('pentf.dev/')) {
             return req.respond({
@@ -60,7 +64,9 @@ async function run(config) {
     await page.goto('http://pentf.dev');
 
     const waitForIframe = async () => {
-        const iframe = page.frames().find(f => page.mainFrame() !== f && f.url().includes('pentf.dev'));
+        const iframe = page
+            .frames()
+            .find(f => page.mainFrame() !== f && f.url().includes('pentf.dev'));
         await iframe.waitForSelector('button');
         return iframe;
     };

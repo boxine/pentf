@@ -12,6 +12,7 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'Test that is flaky and fails every 3rd run in the same flaky group',
+    description:
+        'Test that is flaky and fails every 3rd run in the same flaky group',
     run,
 };

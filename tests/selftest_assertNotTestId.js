@@ -1,5 +1,9 @@
 const assert = require('assert').strict;
-const { newPage, workaround_setContent, assertNotTestId } = require('../src/browser_utils');
+const {
+    newPage,
+    workaround_setContent,
+    assertNotTestId,
+} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -8,15 +12,21 @@ async function run(config) {
     await assertNotTestId(page, 'bar', { timeout: 10 });
 
     try {
-        await assertNotTestId(page, 'foobar', { timeout: 3000, message: 'foobar' });
+        await assertNotTestId(page, 'foobar', {
+            timeout: 3000,
+            message: 'foobar',
+        });
         throw new Error('assertNotTestId did not throw');
     } catch (err) {
         // success
-        assert(err.message.includes('foobar'), `Custom message "foobar" not found in "${err.message}"`);
+        assert(
+            err.message.includes('foobar'),
+            `Custom message "foobar" not found in "${err.message}"`
+        );
     }
 }
 
 module.exports = {
     run,
-    description: 'Assert that a Test ID is not present.'
+    description: 'Assert that a Test ID is not present.',
 };

@@ -4,5 +4,5 @@ const pentf = require('../../src/index.js');
 
 pentf.main({
     rootDir: __dirname,
-    testsGlob: '*.spec.{js,jsx}'
+    testsGlob: '*.spec.{js,jsx}',
 });

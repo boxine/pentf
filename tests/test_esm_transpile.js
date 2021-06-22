@@ -1,4 +1,4 @@
-const {transformAsync} = require('@babel/core');
+const { transformAsync } = require('@babel/core');
 const path = require('path');
 const assert = require('assert').strict;
 
@@ -10,7 +10,12 @@ const assert = require('assert').strict;
 async function assertTranspile(input, expected, options = {}) {
     const result = await transformAsync(input, {
         babelrc: false,
-        plugins: [[path.join(__dirname, '../babel-transform-commonjs-to-esm.js'), options]],
+        plugins: [
+            [
+                path.join(__dirname, '../babel-transform-commonjs-to-esm.js'),
+                options,
+            ],
+        ],
     });
     assert.equal(result.code, expected);
 }
@@ -111,7 +116,7 @@ import { bar } from "./bar.mjs";
 export function baz() {
   return foo() + bar();
 }`,
-        {extension: '.mjs'}
+        { extension: '.mjs' }
     );
 }
 

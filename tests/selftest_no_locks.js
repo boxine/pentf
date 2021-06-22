@@ -19,7 +19,7 @@ async function run(config) {
             external_locking_client: 'test_locking_server',
             // We should not do any request to the lockserver at all,
             // so we simply pick an invalid URL and let the agent throw.
-            external_locking_url: 'https://localhost:1'
+            external_locking_url: 'https://localhost:1',
         },
         tasks
     );
@@ -27,5 +27,5 @@ async function run(config) {
 
 module.exports = {
     run,
-    description: 'Don\'t create temporary resources for tasks without resources',
+    description: "Don't create temporary resources for tasks without resources",
 };

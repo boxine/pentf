@@ -36,7 +36,10 @@ function makeRandomEmail(config, prefix) {
     // See: https://stackoverflow.com/a/2049510
     prefix = prefix.replace(/[[\]]/g, '_');
 
-    return makeEmailAddress(config, prefix + Math.random().toString(36).slice(2));
+    return makeEmailAddress(
+        config,
+        prefix + Math.random().toString(36).slice(2)
+    );
 }
 
 /**
@@ -62,6 +65,7 @@ async function retry(func, waitTimes) {
 }
 
 function randomHex() {
+    // prettier-ignore
     return [
         '0', '1', '2', '3', '4', '5', '6', '7',
         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'][Math.floor(Math.random() * 16)];
@@ -100,7 +104,7 @@ function isValidRegex(s) {
 }
 
 function* range(count) {
-    for (let i = 0;i < count;i++) {
+    for (let i = 0; i < count; i++) {
         yield i;
     }
 }
@@ -138,7 +142,7 @@ function pluck(obj, keys) {
 
 // Remove the element for which callback returns true from the array.
 function remove(array, callback) {
-    for (let i = 0;i < array.length;i++) {
+    for (let i = 0; i < array.length; i++) {
         if (callback(array[i])) {
             array.splice(i, 1);
             return;
@@ -148,7 +152,7 @@ function remove(array, callback) {
 
 function filterMap(ar, cb) {
     const res = [];
-    for (let i = 0;i < ar.length;i++) {
+    for (let i = 0; i < ar.length; i++) {
         const mapped = cb(ar[i], i);
         if (mapped) {
             res.push(mapped);
@@ -162,7 +166,7 @@ const _pad = num => ('' + num).padStart(2, '0');
 function timezoneOffsetString(offset) {
     if (!offset) return 'Z';
 
-    const sign = (offset < 0) ? '+' : '-';
+    const sign = offset < 0 ? '+' : '-';
     offset = Math.abs(offset);
     const minutes = offset % 60;
     const hours = (offset - minutes) / 60;
@@ -173,6 +177,7 @@ function localIso8601(date) {
     if (!date) date = new Date();
 
     // Adapted from: https://stackoverflow.com/a/8563517/35070
+    // prettier-ignore
     return (
         date.getFullYear()
         + '-' + _pad(date.getMonth() + 1)
@@ -204,7 +209,9 @@ function assertAsyncEventually(...args) {
         // eslint-disable-next-line no-console
         console.log(); // new line (we can't call output.log here)
         // eslint-disable-next-line no-console
-        console.trace('utils.assertAsyncEventually has been moved to assert_utils');
+        console.trace(
+            'utils.assertAsyncEventually has been moved to assert_utils'
+        );
     }
     return assert_utils.assertAsyncEventually(...args);
 }
@@ -232,7 +239,7 @@ function cmp(a, b) {
 }
 
 function cmpKey(key) {
-    return function(x, y) {
+    return function (x, y) {
         return cmp(x[key], y[key]);
     };
 }
@@ -255,7 +262,9 @@ function removeAt(input, idx, count) {
  * @param {Error} err
  */
 function ignoreError(err) {
-    return /Execution context was destroyed|(Session|Connection|Target) closed/.test(err.message);
+    return /Execution context was destroyed|(Session|Connection|Target) closed/.test(
+        err.message
+    );
 }
 
 module.exports = {

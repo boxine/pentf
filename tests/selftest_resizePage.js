@@ -1,16 +1,16 @@
 const assert = require('assert').strict;
-const {newPage, resizePage} = require('../src/browser_utils');
-const {assertEventually} = require('../src/assert_utils');
+const { newPage, resizePage } = require('../src/browser_utils');
+const { assertEventually } = require('../src/assert_utils');
 
 async function run(config) {
     const page = await newPage(config);
 
     const size = await page.evaluate(() => {
-        return {width: window.innerWidth, height: window.innerHeight};
+        return { width: window.innerWidth, height: window.innerHeight };
     });
-    assert.deepEqual(size, {width: 800, height: 600});
+    assert.deepEqual(size, { width: 800, height: 600 });
 
-    await resizePage(config, page, {width: 1280, height: 900});
+    await resizePage(config, page, { width: 1280, height: 900 });
 
     await assertEventually(async () => {
         return await page.evaluate(() => {

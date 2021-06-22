@@ -1,8 +1,8 @@
 const assert = require('assert').strict;
-const {getMail} = require('pentf/email');
-const {newPage, closePage} = require('pentf/browser_utils');
-const {fetch} = require('pentf/net_utils');
-const {makeRandomEmail} = require('pentf/utils');
+const { getMail } = require('pentf/email');
+const { newPage, closePage } = require('pentf/browser_utils');
+const { fetch } = require('pentf/net_utils');
+const { makeRandomEmail } = require('pentf/utils');
 
 async function run(config) {
     const email = makeRandomEmail(config, 'pentf_example');
@@ -23,7 +23,12 @@ async function run(config) {
     assert.equal(response.status, 201);
     assert((await response.json()).jwt);
 
-    const mail = await getMail(config, start, email, 'Your Toniecloud confirmation link');
+    const mail = await getMail(
+        config,
+        start,
+        email,
+        'Your Toniecloud confirmation link'
+    );
     assert(mail);
 
     // Test with a browser
@@ -50,7 +55,8 @@ module.exports = {
     // Used to indicate tests for bugs/features that are not yet implemented (e.g. with TDD).
     // Strings will be reported; the URL to an issue is a good and typical value.
     // Alternatively, a function that is called with the config and returns a value as described above.
-    expectedToFail: config => (config.env === 'alwaysbroken') ? 'Known to be broken here' : false,
+    expectedToFail: config =>
+        config.env === 'alwaysbroken' ? 'Known to be broken here' : false,
 
     // Resources is a list of strings. Tests accessing the same resources are run sequentially.
     resources: ['toniebox_1234', 'another_resource'],

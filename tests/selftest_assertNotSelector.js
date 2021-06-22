@@ -1,5 +1,9 @@
 const assert = require('assert').strict;
-const { newPage, workaround_setContent, assertNotSelector } = require('../src/browser_utils');
+const {
+    newPage,
+    workaround_setContent,
+    assertNotSelector,
+} = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -8,15 +12,21 @@ async function run(config) {
     await assertNotSelector(page, 'span', { timeout: 10 });
 
     try {
-        await assertNotSelector(page, 'div', { timeout: 3000, message: 'foobar' });
+        await assertNotSelector(page, 'div', {
+            timeout: 3000,
+            message: 'foobar',
+        });
         throw new Error('assertNotSelector did not throw');
     } catch (err) {
         // success
-        assert(err.message.includes('foobar'), `Custom message "foobar" not found in "${err.message}"`);
+        assert(
+            err.message.includes('foobar'),
+            `Custom message "foobar" not found in "${err.message}"`
+        );
     }
 }
 
 module.exports = {
     run,
-    description: 'Assert that a selector is not present.'
+    description: 'Assert that a selector is not present.',
 };

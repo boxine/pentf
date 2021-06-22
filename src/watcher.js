@@ -5,7 +5,7 @@ const readline = require('readline');
 
 const output = require('./output');
 const utils = require('./utils');
-const {loadTests, applyTestFilters} = require('./loader');
+const { loadTests, applyTestFilters } = require('./loader');
 
 /**
  * Delete a file from node's module cache. Only CJS is supported for now.
@@ -22,8 +22,11 @@ function removeFromModuleCache(fileName) {
  * @param {string} description
  */
 function keyHint(config, key, description) {
-    return output.color(config, 'dim', 'Press ') +
-        key + output.color(config, 'dim', ' ' + description);
+    return (
+        output.color(config, 'dim', 'Press ') +
+        key +
+        output.color(config, 'dim', ' ' + description)
+    );
 }
 
 /**
@@ -46,7 +49,11 @@ function watchFooter(config) {
     out += [
         keyHint(config, 'a', 'to re-run all tests'),
         keyHint(config, 'p', 'to search by file pattern'),
-        keyHint(config, 'd', `to ${config.debug ? 'disable' : 'enable'} debug mode`),
+        keyHint(
+            config,
+            'd',
+            `to ${config.debug ? 'disable' : 'enable'} debug mode`
+        ),
         keyHint(config, 'q', 'to quit watch mode'),
         keyHint(config, 'Enter', 'to re-run current tests'),
     ].join('\n');
@@ -73,15 +80,26 @@ function renderSearch(config, state, test_cases) {
     if (!file_pattern) {
         input = output.color(config, 'inverse', ' ');
     } else {
-        input = file_pattern.slice(0, cursor_pos) +
-            output.color(config, 'inverse', file_pattern.slice(cursor_pos, cursor_pos + 1) || ' ') +
+        input =
+            file_pattern.slice(0, cursor_pos) +
+            output.color(
+                config,
+                'inverse',
+                file_pattern.slice(cursor_pos, cursor_pos + 1) || ' '
+            ) +
             file_pattern.slice(cursor_pos + 1);
     }
 
     let results = [];
     if (file_pattern.length) {
         if (!utils.isValidRegex(file_pattern)) {
-            results.push(output.color(config, 'red', 'Pattern contains invalid characters'));
+            results.push(
+                output.color(
+                    config,
+                    'red',
+                    'Pattern contains invalid characters'
+                )
+            );
         } else {
             const seen_files = new Set();
             /** @type {import('./internal').TestCase[]} */
@@ -98,18 +116,39 @@ function renderSearch(config, state, test_cases) {
                 test_files = test_files.slice(0, MAX_ITEMS);
             }
             results = test_files.map((tc, i) => {
-                const name = path.basename(tc.fileName, path.extname(tc.fileName));
+                const name = path.basename(
+                    tc.fileName,
+                    path.extname(tc.fileName)
+                );
                 if (state.selection_active && state.selected_row === i) {
-                    return output.color(config, 'dim', '- ') +
-                        output.color(config, 'inverse', output.color(config, 'yellow', name));
+                    return (
+                        output.color(config, 'dim', '- ') +
+                        output.color(
+                            config,
+                            'inverse',
+                            output.color(config, 'yellow', name)
+                        )
+                    );
                 }
 
                 let tcName = output.color(config, 'dim', name);
                 const match = tc.name.match(new RegExp(file_pattern));
                 if (match) {
-                    tcName = output.color(config, 'dim', name.slice(0, match.index)) +
-                        tc.name.slice(match.index, match.index + match[0].length) +
-                        output.color(config, 'dim', name.slice(match.index + match[0].length));
+                    tcName =
+                        output.color(
+                            config,
+                            'dim',
+                            name.slice(0, match.index)
+                        ) +
+                        tc.name.slice(
+                            match.index,
+                            match.index + match[0].length
+                        ) +
+                        output.color(
+                            config,
+                            'dim',
+                            name.slice(match.index + match[0].length)
+                        );
                 }
 
                 return `  ${tcName}`;
@@ -118,19 +157,30 @@ function renderSearch(config, state, test_cases) {
             if (len > 10) {
                 results.push(`  ...and ${len - 10} more`);
             } else if (len === 0) {
-                results.push(output.color(config, 'yellow', 'Could not find any test files matching that pattern'));
+                results.push(
+                    output.color(
+                        config,
+                        'yellow',
+                        'Could not find any test files matching that pattern'
+                    )
+                );
             }
         }
     } else {
-        results.push(output.color(config, 'yellow', 'Start typing to filter by filename'));
+        results.push(
+            output.color(config, 'yellow', 'Start typing to filter by filename')
+        );
     }
 
     const footer = [
         keyHint(config, 'Esc', 'to exit pattern mode'),
-        keyHint(config, 'Enter', 'to apply pattern')
+        keyHint(config, 'Enter', 'to apply pattern'),
     ].join('\n');
 
-    output.log(config, `${label} ${input}\n\n${results.join('\n')}\n\n${footer}`);
+    output.log(
+        config,
+        `${label} ${input}\n\n${results.join('\n')}\n\n${footer}`
+    );
 }
 
 /**
@@ -271,15 +321,20 @@ async function createWatcher(config, onChange) {
                 renderDefault(config);
             } else if (key.name === 'p') {
                 watchState.current_view = 'pattern';
-                const test_cases = await loadTests({ ...config, filter: watchState.file_pattern }, config.testsGlob);
+                const test_cases = await loadTests(
+                    { ...config, filter: watchState.file_pattern },
+                    config.testsGlob
+                );
                 renderSearch(config, watchState, test_cases);
             }
         } else {
             if (key.name === 'return') {
                 watchState.current_view = 'default';
-                config.filter = watchState.selection_active && watchState.selected_file !== null
-                    ? `^${utils.regexEscape(watchState.selected_file)}$`
-                    : watchState.file_pattern;
+                config.filter =
+                    watchState.selection_active &&
+                    watchState.selected_file !== null
+                        ? `^${utils.regexEscape(watchState.selected_file)}$`
+                        : watchState.file_pattern;
 
                 renderDefault(config, watchState);
                 await scheduleRun(config, watchState, onChange);
@@ -287,16 +342,18 @@ async function createWatcher(config, onChange) {
                 watchState.current_view = 'default';
                 renderDefault(config, watchState);
             } else {
-                let { cursor_pos, file_pattern, selected_row, selection_active, selected_file } = watchState;
+                let {
+                    cursor_pos,
+                    file_pattern,
+                    selected_row,
+                    selection_active,
+                    selected_file,
+                } = watchState;
                 if (key.name === 'up') {
-                    selected_row = selection_active
-                        ? selected_row - 1
-                        : 10;
+                    selected_row = selection_active ? selected_row - 1 : 10;
                     selection_active = true;
                 } else if (key.name === 'down') {
-                    selected_row = selection_active
-                        ? selected_row + 1
-                        : 0;
+                    selected_row = selection_active ? selected_row + 1 : 0;
                     selection_active = true;
                 } else if (key.name === 'escape') {
                     selection_active = false;
@@ -305,10 +362,18 @@ async function createWatcher(config, onChange) {
                     selected_file = null;
 
                     if (key.name === 'backspace') {
-                        file_pattern = utils.removeAt(file_pattern, cursor_pos - 1, 1);
+                        file_pattern = utils.removeAt(
+                            file_pattern,
+                            cursor_pos - 1,
+                            1
+                        );
                         cursor_pos--;
                     } else if (key.name === 'delete') {
-                        file_pattern = utils.removeAt(file_pattern, cursor_pos, 1);
+                        file_pattern = utils.removeAt(
+                            file_pattern,
+                            cursor_pos,
+                            1
+                        );
                     } else if (key.name === 'left') {
                         cursor_pos--;
                     } else if (key.name === 'right') {
@@ -324,20 +389,35 @@ async function createWatcher(config, onChange) {
 
                 let test_cases = [];
                 if (file_pattern.length && utils.isValidRegex(file_pattern)) {
-                    test_cases = await loadTests({ ...config, filter: file_pattern}, config.testsGlob);
+                    test_cases = await loadTests(
+                        { ...config, filter: file_pattern },
+                        config.testsGlob
+                    );
                     if (selection_active) {
                         const selected = test_cases[selected_row];
                         if (selected) {
-                            const name = path.basename(selected.fileName, path.extname(selected.fileName));
+                            const name = path.basename(
+                                selected.fileName,
+                                path.extname(selected.fileName)
+                            );
                             selected_file = name;
                         }
                     }
                 }
 
-                watchState.cursor_pos = Math.max(0, Math.min(file_pattern.length, cursor_pos));
+                watchState.cursor_pos = Math.max(
+                    0,
+                    Math.min(file_pattern.length, cursor_pos)
+                );
                 watchState.file_pattern = file_pattern;
                 watchState.selection_active = selection_active;
-                watchState.selected_row = Math.max(0, Math.min(selected_row, Math.min(test_cases.length -1, MAX_ITEMS - 1)));
+                watchState.selected_row = Math.max(
+                    0,
+                    Math.min(
+                        selected_row,
+                        Math.min(test_cases.length - 1, MAX_ITEMS - 1)
+                    )
+                );
                 watchState.selected_file = selected_file;
                 renderSearch(config, watchState, test_cases);
             }
@@ -349,20 +429,23 @@ async function createWatcher(config, onChange) {
         process.stdin.on('data', async e => {
             if (Buffer.isBuffer(e)) {
                 switch (e.toString()) {
-                case String.fromCharCode(13):
-                    await onKeyPress({name: 'return'});
-                    break;
-                case String.fromCharCode(27):
-                    await onKeyPress({name: 'escape'});
-                    break;
-                case '↓':
-                    await onKeyPress({name: 'down'});
-                    break;
-                case '↑':
-                    await onKeyPress({name: 'up'});
-                    break;
-                default:
-                    await onKeyPress({name: e.toString(), sequence: e.toString()});
+                    case String.fromCharCode(13):
+                        await onKeyPress({ name: 'return' });
+                        break;
+                    case String.fromCharCode(27):
+                        await onKeyPress({ name: 'escape' });
+                        break;
+                    case '↓':
+                        await onKeyPress({ name: 'down' });
+                        break;
+                    case '↑':
+                        await onKeyPress({ name: 'up' });
+                        break;
+                    default:
+                        await onKeyPress({
+                            name: e.toString(),
+                            sequence: e.toString(),
+                        });
                 }
             }
         });

@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const {parseArgs} = require('../src/config');
+const { parseArgs } = require('../src/config');
 
 async function run() {
     const args = parseArgs(

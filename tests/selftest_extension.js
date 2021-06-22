@@ -1,12 +1,12 @@
 const assert = require('assert').strict;
 const path = require('path');
-const {closePage, newPage} = require('../src/browser_utils');
+const { closePage, newPage } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage({
         ...config,
         headless: false, // Extensions are not loaded in headless mode
-        extensions: [path.join(__dirname, 'fixtures', 'extension')]
+        extensions: [path.join(__dirname, 'fixtures', 'extension')],
     });
 
     // Extension can't be injected into toplevel about:blank page.

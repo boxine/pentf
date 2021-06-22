@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {closePage, newPage, typeSelector} = require('../src/browser_utils');
+const { closePage, newPage, typeSelector } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -14,14 +14,17 @@ async function run(config) {
         </script>`);
     await typeSelector(page, '#input', 'foobar');
 
-    const value = await page.evaluate(() => document.querySelector('#input').value);
+    const value = await page.evaluate(
+        () => document.querySelector('#input').value
+    );
     assert.equal(value, 'foobar');
 
     await closePage(page);
 }
 
 module.exports = {
-    description: 'browser_utils.typeSelector to type text into an <input> element',
+    description:
+        'browser_utils.typeSelector to type text into an <input> element',
     resources: [],
     run,
 };

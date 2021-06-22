@@ -6,7 +6,15 @@ const { onTeardown } = require('../src/runner');
 
 async function run(config) {
     const sub_run = path.join(__dirname, 'watch_tests', 'run');
-    const child = child_process.spawn(process.execPath, [sub_run, '--watch', '-f', 'foo', '--ci', '--no-colors', '--no-pdf']);
+    const child = child_process.spawn(process.execPath, [
+        sub_run,
+        '--watch',
+        '-f',
+        'foo',
+        '--ci',
+        '--no-colors',
+        '--no-pdf',
+    ]);
     onTeardown(config, () => child.kill());
 
     const out = [];
@@ -29,5 +37,5 @@ async function run(config) {
 module.exports = {
     run,
     description: 'Re-run test files if they change',
-    skip: () => process.env.CI && 'Watch mode is flaky inside a container'
+    skip: () => process.env.CI && 'Watch mode is flaky inside a container',
 };

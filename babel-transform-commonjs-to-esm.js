@@ -1,11 +1,16 @@
 function isRequireCall(t, node) {
     return (
-        t.isCallExpression(node) && t.isIdentifier(node.callee) && node.callee.name === 'require'
+        t.isCallExpression(node) &&
+        t.isIdentifier(node.callee) &&
+        node.callee.name === 'require'
     );
 }
 
 function moveComments(node, target) {
-    if (Array.isArray(node.leadingComments) && node.leadingComments.length > 0) {
+    if (
+        Array.isArray(node.leadingComments) &&
+        node.leadingComments.length > 0
+    ) {
         target.leadingComments = node.leadingComments;
         node.leadingComments = undefined;
     }
@@ -17,7 +22,7 @@ function moveComments(node, target) {
  * @param {object} options
  * @param {import('@babel/core').types} options.types
  */
-module.exports = function cjs2esm({types: t}) {
+module.exports = function cjs2esm({ types: t }) {
     return {
         visitor: {
             Program: {
@@ -58,7 +63,7 @@ module.exports = function cjs2esm({types: t}) {
                     const vars = [];
                     path.node.body.forEach((node, i) => {
                         if (t.isFunctionDeclaration(node)) {
-                            fns.set(node.id.name, {i, node});
+                            fns.set(node.id.name, { i, node });
                         } else if (
                             t.isVariableDeclaration(node) &&
                             node.declarations.length === 1 &&
@@ -84,11 +89,19 @@ module.exports = function cjs2esm({types: t}) {
                                             t.isIdentifier(prop.value)
                                         ) {
                                             specifiers.push(
-                                                t.importSpecifier(prop.key, prop.value)
+                                                t.importSpecifier(
+                                                    prop.key,
+                                                    prop.value
+                                                )
                                             );
-                                            requires.set(prop.key.name, {i, node: varDecl});
+                                            requires.set(prop.key.name, {
+                                                i,
+                                                node: varDecl,
+                                            });
                                         } else {
-                                            throw new Error('Unsupported require statement');
+                                            throw new Error(
+                                                'Unsupported require statement'
+                                            );
                                         }
                                     });
                                 } else if (t.isIdentifier(left)) {
@@ -99,8 +112,12 @@ module.exports = function cjs2esm({types: t}) {
                                     // import __foo from 'foo';
                                     // const foo = __foo.default || foo;
                                     // ```
-                                    const leftImported = t.identifier(`__${left.name}`);
-                                    specifiers.push(t.importNamespaceSpecifier(leftImported));
+                                    const leftImported = t.identifier(
+                                        `__${left.name}`
+                                    );
+                                    specifiers.push(
+                                        t.importNamespaceSpecifier(leftImported)
+                                    );
 
                                     vars.push(
                                         t.variableDeclaration('const', [
@@ -117,7 +134,10 @@ module.exports = function cjs2esm({types: t}) {
                                             ),
                                         ])
                                     );
-                                    requires.set(left.name, {i, node: varDecl});
+                                    requires.set(left.name, {
+                                        i,
+                                        node: varDecl,
+                                    });
                                 } else {
                                     throw new Error('Unsupported node');
                                 }
@@ -130,7 +150,10 @@ module.exports = function cjs2esm({types: t}) {
                             ) {
                                 source = varDecl.init.object.arguments[0];
                                 specifiers.push(
-                                    t.importSpecifier(varDecl.id, varDecl.init.property)
+                                    t.importSpecifier(
+                                        varDecl.id,
+                                        varDecl.init.property
+                                    )
                                 );
                             }
 
@@ -143,7 +166,10 @@ module.exports = function cjs2esm({types: t}) {
                                     source.value += state.opts.extension;
                                 }
 
-                                path.node.body[i] = t.importDeclaration(specifiers, source);
+                                path.node.body[i] = t.importDeclaration(
+                                    specifiers,
+                                    source
+                                );
                             }
                         }
                     });
@@ -151,7 +177,10 @@ module.exports = function cjs2esm({types: t}) {
                     const newImports = [];
                     const obj = moduleExp.expression.right;
                     obj.properties.forEach(prop => {
-                        if (!t.isIdentifier(prop.key) || !t.isIdentifier(prop.value)) {
+                        if (
+                            !t.isIdentifier(prop.key) ||
+                            !t.isIdentifier(prop.value)
+                        ) {
                             throw new Error(
                                 'Only references are supported right now in module.export statements'
                             );
@@ -169,9 +198,10 @@ module.exports = function cjs2esm({types: t}) {
 
                                 const source = reExport.node.init.arguments[0];
 
-                                const exportNode = t.exportNamedDeclaration(null, [
-                                    t.exportSpecifier(prop.key, prop.key),
-                                ]);
+                                const exportNode = t.exportNamedDeclaration(
+                                    null,
+                                    [t.exportSpecifier(prop.key, prop.key)]
+                                );
                                 path.node.body[reExport.i] = exportNode;
 
                                 const importNode = t.importDeclaration(
@@ -180,7 +210,9 @@ module.exports = function cjs2esm({types: t}) {
                                 );
                                 newImports.push(importNode);
                             } else {
-                                const exportNode = t.exportNamedDeclaration(decl.node);
+                                const exportNode = t.exportNamedDeclaration(
+                                    decl.node
+                                );
                                 moveComments(decl.node, exportNode);
                                 path.node.body[decl.i] = exportNode;
                             }
@@ -206,7 +238,11 @@ module.exports = function cjs2esm({types: t}) {
                         if (!state.hasPathModule) {
                             path.node.body.unshift(
                                 t.importDeclaration(
-                                    [t.importNamespaceSpecifier(t.identifier('path'))],
+                                    [
+                                        t.importNamespaceSpecifier(
+                                            t.identifier('path')
+                                        ),
+                                    ],
                                     t.stringLiteral('path')
                                 )
                             );
@@ -221,7 +257,9 @@ module.exports = function cjs2esm({types: t}) {
                         );
                     }
 
-                    const varIdx = path.node.body.findIndex(node => !t.isImportDeclaration(node));
+                    const varIdx = path.node.body.findIndex(
+                        node => !t.isImportDeclaration(node)
+                    );
 
                     vars.forEach(decl => {
                         path.node.body.splice(varIdx, 0, decl);
@@ -240,9 +278,10 @@ module.exports = function cjs2esm({types: t}) {
                                             t.identifier('dirname')
                                         ),
                                         [
-                                            t.callExpression(t.identifier('fileURLToPath'), [
-                                                t.identifier('url'),
-                                            ]),
+                                            t.callExpression(
+                                                t.identifier('fileURLToPath'),
+                                                [t.identifier('url')]
+                                            ),
                                         ]
                                     )
                                 )
@@ -282,7 +321,10 @@ module.exports = function cjs2esm({types: t}) {
                     path.replaceWith(
                         t.callExpression(t.identifier('__dirnameEsm'), [
                             t.memberExpression(
-                                t.memberExpression(t.identifier('import'), t.identifier('meta')),
+                                t.memberExpression(
+                                    t.identifier('import'),
+                                    t.identifier('meta')
+                                ),
                                 t.identifier('url')
                             ),
                         ])

@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
-const {promisify} = require('util');
-const {pathToFileURL} = require('url');
+const { promisify } = require('util');
+const { pathToFileURL } = require('url');
 const assert = require('assert').strict;
 const output = require('./output');
 
@@ -16,7 +16,7 @@ async function findPackageJson(dir) {
     try {
         await fs.promises.readFile(fileName);
         return fileName;
-    } catch(e) {
+    } catch (e) {
         // File doesn't exist, traverse upwards
         if (e.code === 'ENOENT' && dir !== path.dirname(dir)) {
             return await findPackageJson(path.dirname(dir));
@@ -38,13 +38,20 @@ const BUILD_TYPE = 'commonjs';
  * @param {"commonjs" | "module"} moduleType
  */
 async function importFile(file, moduleType) {
-    assert(moduleType, 'Module type argument was undefined. Expected "commonjs" or "esm"');
+    assert(
+        moduleType,
+        'Module type argument was undefined. Expected "commonjs" or "esm"'
+    );
     // Only use import() for JavaScript files. Patching module
     // resolution of import() calls is still very experimental, so
     // tools like `ts-node´ need to keep using `require` calls.
     // Note that we still need to forward loading from `node_modules`
     // to `import()` regardless.
-    if (BUILD_TYPE === 'module' || moduleType === 'esm' || /\.mjs$/.test(file)) {
+    if (
+        BUILD_TYPE === 'module' ||
+        moduleType === 'esm' ||
+        /\.mjs$/.test(file)
+    ) {
         // Use dynamic import statement to be able to load both native esm
         // and commonjs modules.
 
@@ -165,10 +172,16 @@ async function applyTestFilters(config, tests) {
     }
     if (config.filter_body) {
         const bodyFilterRe = new RegExp(config.filter_body);
-        tests = (await Promise.all(tests.map(async test => {
-            const contents = await fs.promises.readFile(test.fileName, {encoding: 'utf-8'});
-            return bodyFilterRe.test(contents) ? test : null;
-        }))).filter(t => t);
+        tests = (
+            await Promise.all(
+                tests.map(async test => {
+                    const contents = await fs.promises.readFile(test.fileName, {
+                        encoding: 'utf-8',
+                    });
+                    return bodyFilterRe.test(contents) ? test : null;
+                })
+            )
+        ).filter(t => t);
     }
 
     return tests;
@@ -181,7 +194,10 @@ async function applyTestFilters(config, tests) {
  * @private
  */
 async function loadTests(config, globPattern) {
-    const testFiles = await promisify(glob.glob)(globPattern, {cwd: config.rootDir, absolute: true});
+    const testFiles = await promisify(glob.glob)(globPattern, {
+        cwd: config.rootDir,
+        absolute: true,
+    });
     let tests = testFiles.map(n => ({
         fileName: n,
         name: path.basename(n, path.extname(n)),
@@ -199,9 +215,16 @@ async function loadTests(config, globPattern) {
             } else if (typeof tc.run === 'function') {
                 // ESM modules are readonly, so we need to create our own writable
                 // object.
-                testCases.push({...tc, name: t.name, fileName: t.fileName});
+                testCases.push({ ...tc, name: t.name, fileName: t.fileName });
             } else {
-                output.log(config, output.color(config, 'red', `No tests found in file "${t.fileName}", skipping.`));
+                output.log(
+                    config,
+                    output.color(
+                        config,
+                        'red',
+                        `No tests found in file "${t.fileName}", skipping.`
+                    )
+                );
             }
         })
     );

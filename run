@@ -14,7 +14,9 @@ pentf.main({
     defaultConfig: config => {
         // You can compute more complicated properties here. For example ...
         config.rejectUnauthorized = false; // Allow self-signed TLS certificates
-        config.report_header_md = 'This is the end-to-end test report in *markdown* form.';
-        config.report_header_html = 'This is the end-to-end test report in <strong>HTML/PDF</strong> form.';
+        config.report_header_md =
+            'This is the end-to-end test report in *markdown* form.';
+        config.report_header_html =
+            'This is the end-to-end test report in <strong>HTML/PDF</strong> form.';
     },
 });

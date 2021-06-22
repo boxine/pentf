@@ -8,25 +8,27 @@
 
 const assert = require('assert').strict;
 
-const {wait, ignoreError} = require('./utils');
+const { wait, ignoreError } = require('./utils');
 const output = require('./output');
 
 /**
-* Assert that a value is a Number or BigInt.
-* @param x {number|BigInt} The value to check.
-*/
+ * Assert that a value is a Number or BigInt.
+ * @param x {number|BigInt} The value to check.
+ */
 function assertNumeric(x, message = undefined) {
     assert(
         ['number', 'bigint'].includes(typeof x),
-        `${x} is not a number, but ${typeof x}.` + (message ? ' ' + message : ''));
+        `${x} is not a number, but ${typeof x}.` +
+            (message ? ' ' + message : '')
+    );
 }
 
 /**
-* Assert `x < y`.
-* @param {number|BigInt} x The ostensibly smaller value.
-* @param {number|BigInt} y The ostensibly larger value.
-* @param {string?} message Optional error message if the assertion does not hold.
-*/
+ * Assert `x < y`.
+ * @param {number|BigInt} x The ostensibly smaller value.
+ * @param {number|BigInt} y The ostensibly larger value.
+ * @param {string?} message Optional error message if the assertion does not hold.
+ */
 function assertLess(x, y, message = undefined) {
     assertNumeric(x);
     assertNumeric(y);
@@ -36,11 +38,11 @@ function assertLess(x, y, message = undefined) {
 }
 
 /**
-* Assert `x <= y`.
-* @param {number|BigInt} x The ostensibly smaller or equal value.
-* @param {number|BigInt} y The ostensibly larger or equal value.
-* @param {string?} message Optional error message if the assertion does not hold.
-*/
+ * Assert `x <= y`.
+ * @param {number|BigInt} x The ostensibly smaller or equal value.
+ * @param {number|BigInt} y The ostensibly larger or equal value.
+ * @param {string?} message Optional error message if the assertion does not hold.
+ */
 function assertLessEqual(x, y, message = undefined) {
     assertNumeric(x);
     assertNumeric(y);
@@ -50,11 +52,11 @@ function assertLessEqual(x, y, message = undefined) {
 }
 
 /**
-* Assert `x < y`.
-* @param {number|BigInt} x The ostensibly larger value.
-* @param {number|BigInt} y The ostensibly smaller value.
-* @param {string?} message Optional error message if the assertion does not hold.
-*/
+ * Assert `x < y`.
+ * @param {number|BigInt} x The ostensibly larger value.
+ * @param {number|BigInt} y The ostensibly smaller value.
+ * @param {string?} message Optional error message if the assertion does not hold.
+ */
 function assertGreater(x, y, message = undefined) {
     assertNumeric(x);
     assertNumeric(y);
@@ -64,11 +66,11 @@ function assertGreater(x, y, message = undefined) {
 }
 
 /**
-* Assert `x >= y`.
-* @param {number|BigInt} x The ostensibly smaller or equal value.
-* @param {number|BigInt} y The ostensibly larger or equal value.
-* @param {string?} message Optional error message if the assertion does not hold.
-*/
+ * Assert `x >= y`.
+ * @param {number|BigInt} x The ostensibly smaller or equal value.
+ * @param {number|BigInt} y The ostensibly larger or equal value.
+ * @param {string?} message Optional error message if the assertion does not hold.
+ */
 function assertGreaterEqual(x, y, message = undefined) {
     assertNumeric(x);
     assertNumeric(y);
@@ -78,53 +80,58 @@ function assertGreaterEqual(x, y, message = undefined) {
 }
 
 /**
-* Assert that a string is included in another, or object is included in an array.
-*
-* @example
-* ```javascript
-* assertIncludes('foobar', 'foo');
-* assertIncludes([9, 5, 3], 5);
-* ```
-* @param {string|array} haystack The thing to search in.
-* @param {string|array} needle The thing to search for.
-* @param {string?} message Optional error message if the assertion does not hold.
-*/
+ * Assert that a string is included in another, or object is included in an array.
+ *
+ * @example
+ * ```javascript
+ * assertIncludes('foobar', 'foo');
+ * assertIncludes([9, 5, 3], 5);
+ * ```
+ * @param {string|array} haystack The thing to search in.
+ * @param {string|array} needle The thing to search for.
+ * @param {string?} message Optional error message if the assertion does not hold.
+ */
 function assertIncludes(haystack, needle, message = undefined) {
     lazyAssert(
-        haystack.includes, () => `Haystack object ${haystack} does not have an includes method`);
+        haystack.includes,
+        () => `Haystack object ${haystack} does not have an includes method`
+    );
 
     lazyAssert(
         haystack.includes(needle),
-        () => (
-            `Expected ${JSON.stringify(haystack)} to include ${JSON.stringify(needle)}.` +
-            (message ? ' ' + message : '')
-        )
+        () =>
+            `Expected ${JSON.stringify(haystack)} to include ${JSON.stringify(
+                needle
+            )}.` + (message ? ' ' + message : '')
     );
 }
 
 /**
-* Assert that a string is <b>not</b> included in another, or object is <b>not</b> included in an array.
-*
-* @example
-* ```javascript
-* assertNotIncludes('foobar', 'xxx');
-* assertNotIncludes([9, 5, 3], 2);
-* ```
-* @template T
-* @param {T[]} haystack The thing to search in.
-* @param {T} needle The thing to search for.
-* @param {string?} message Optional error message if the assertion does not hold.
-*/
+ * Assert that a string is <b>not</b> included in another, or object is <b>not</b> included in an array.
+ *
+ * @example
+ * ```javascript
+ * assertNotIncludes('foobar', 'xxx');
+ * assertNotIncludes([9, 5, 3], 2);
+ * ```
+ * @template T
+ * @param {T[]} haystack The thing to search in.
+ * @param {T} needle The thing to search for.
+ * @param {string?} message Optional error message if the assertion does not hold.
+ */
 function assertNotIncludes(haystack, needle, message = undefined) {
     lazyAssert(
-        haystack.includes, () => `Haystack object ${haystack} does not have an includes method`);
+        haystack.includes,
+        () => `Haystack object ${haystack} does not have an includes method`
+    );
 
     lazyAssert(
         !haystack.includes(needle),
-        () => (
-            `Expected ${JSON.stringify(haystack)} to not include ${JSON.stringify(needle)}.` +
+        () =>
+            `Expected ${JSON.stringify(
+                haystack
+            )} to not include ${JSON.stringify(needle)}.` +
             (message ? ' ' + message : '')
-        )
     );
 }
 /**
@@ -144,13 +151,19 @@ function assertNotIncludes(haystack, needle, message = undefined) {
  * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
  *                                `false`: A thrown error/exception is treated as if the test function returned false.
  */
-async function assertEventually(testfunc,
-    {message='assertEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
-
+async function assertEventually(
+    testfunc,
+    {
+        message = 'assertEventually failed',
+        timeout = 10000,
+        checkEvery = 200,
+        crashOnError = true,
+    } = {}
+) {
     /** @type {null | Error} */
     let caughtError = null;
 
-    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
+    for (let remaining = timeout; remaining > 0; remaining -= checkEvery) {
         if (crashOnError) {
             try {
                 const res = await testfunc();
@@ -214,10 +227,16 @@ async function waitForPass(testfunc, options = {}) {
  * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
  *                                `false`: A thrown error/exception is treated as if the test function returned false.
  */
-async function assertAsyncEventually(testfunc,
-    {message='assertAsyncEventually failed', timeout=10000, checkEvery=200, crashOnError=true} = {}) {
-
-    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
+async function assertAsyncEventually(
+    testfunc,
+    {
+        message = 'assertAsyncEventually failed',
+        timeout = 10000,
+        checkEvery = 200,
+        crashOnError = true,
+    } = {}
+) {
+    for (let remaining = timeout; remaining > 0; remaining -= checkEvery) {
         if (crashOnError) {
             const res = await testfunc();
             if (res) return res;
@@ -245,12 +264,17 @@ async function assertAsyncEventually(testfunc,
  * @param {string?} message Error message shown if the testfunc fails.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
-*/
-async function assertAlways(testfunc, {message='assertAlways failed', timeout=10000, checkEvery=200} = {}) {
-    for (let remaining = timeout;remaining > 0;remaining -= checkEvery) {
+ */
+async function assertAlways(
+    testfunc,
+    { message = 'assertAlways failed', timeout = 10000, checkEvery = 200 } = {}
+) {
+    for (let remaining = timeout; remaining > 0; remaining -= checkEvery) {
         const res = testfunc();
         if (!res) {
-            throw new Error(`${message} (after ${output.formatTime(timeout - remaining)})`);
+            throw new Error(
+                `${message} (after ${output.formatTime(timeout - remaining)})`
+            );
         }
 
         await wait(checkEvery);
@@ -273,10 +297,15 @@ async function assertAlways(testfunc, {message='assertAlways failed', timeout=10
  * @param {string?} message Error message shown if the assertion fails.
  * @returns {*} The fetch response object.
  */
-async function assertHttpStatus(response, expectedStatus=200, {message=undefined}={}) {
+async function assertHttpStatus(
+    response,
+    expectedStatus = 200,
+    { message = undefined } = {}
+) {
     const err = new Error(); // Capture correct stack trace
 
-    if (response.then) { // It's a promise, resolve it
+    if (response.then) {
+        // It's a promise, resolve it
         response = await response;
     }
     if (response.status === expectedStatus) {
@@ -287,11 +316,10 @@ async function assertHttpStatus(response, expectedStatus=200, {message=undefined
     if (body.length > 400) {
         body = body.slice(0, 399) + '…';
     }
-    err.message = (
+    err.message =
         (message ? message + ': ' : '') +
         `Expected request to ${response.url} to return HTTP ${expectedStatus}, but it returned` +
-        ` HTTP ${response.status}. HTTP body: ${body}`
-    );
+        ` HTTP ${response.status}. HTTP body: ${body}`;
     throw err;
 }
 
@@ -303,9 +331,9 @@ async function assertHttpStatus(response, expectedStatus=200, {message=undefined
  * ```
  * @param {boolean} value The value to be asserted to be true.
  * @param {() => string} makeMessage Function to generate the error message, should the value be false.
-*/
+ */
 function lazyAssert(value, makeMessage) {
-    if (! value) {
+    if (!value) {
         assert(value, makeMessage());
     }
 }

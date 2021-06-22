@@ -1,8 +1,8 @@
 const assert = require('assert').strict;
-const {clickSelector, newPage} = require('../src/browser_utils');
+const { clickSelector, newPage } = require('../src/browser_utils');
 
 async function run(config) {
-    const page = await newPage({...config, show_interactions: true});
+    const page = await newPage({ ...config, show_interactions: true });
 
     const content = `<!DOCTYPE html>
         <html>
@@ -25,16 +25,20 @@ async function run(config) {
 
     await page.setContent(content);
 
-    await clickSelector(page, 'button', {timeout: 1000});
+    await clickSelector(page, 'button', { timeout: 1000 });
 
     const isPresent = await page.evaluate(() => {
         return document.querySelector('#pentf-mouse-pointer') !== null;
     });
 
-    assert(!isPresent, 'Interaction ui was injected, despite TrustedHTML warning');
+    assert(
+        !isPresent,
+        'Interaction ui was injected, despite TrustedHTML warning'
+    );
 }
 
 module.exports = {
-    description: 'Skip injecting user interactions on the page when TrustedHTML is enabled',
+    description:
+        'Skip injecting user interactions on the page when TrustedHTML is enabled',
     run,
 };

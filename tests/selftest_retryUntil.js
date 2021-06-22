@@ -46,7 +46,10 @@ async function testFn(fn) {
         });
         assert(0);
     } catch (err) {
-        assert.match(err.message, /Expected values to be strictly equal:\n\n0 !== 1\n/);
+        assert.match(
+            err.message,
+            /Expected values to be strictly equal:\n\n0 !== 1\n/
+        );
     }
 
     // With passing assertion
@@ -85,19 +88,19 @@ async function run(config) {
         return true;
     };
 
-    await clickSelector(page, 'button', {retryUntil});
+    await clickSelector(page, 'button', { retryUntil });
 
     await page.setContent(content);
     visible = true;
-    await clickXPath(page, '//button', {retryUntil});
+    await clickXPath(page, '//button', { retryUntil });
 
     await page.setContent(content);
     visible = true;
-    await clickText(page, 'first', {retryUntil});
+    await clickText(page, 'first', { retryUntil });
 
     await page.setContent(content);
     visible = true;
-    await clickNestedText(page, 'first', {retryUntil});
+    await clickNestedText(page, 'first', { retryUntil });
 
     await closePage(page);
 }

@@ -25,7 +25,7 @@ async function run() {
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {
                 if (err) reject(err);
-                else resolve({stdout, stderr});
+                else resolve({ stdout, stderr });
             }
         );
     });
@@ -41,5 +41,5 @@ async function run() {
 
 module.exports = {
     run,
-    description: 'Writes logs to disk'
+    description: 'Writes logs to disk',
 };

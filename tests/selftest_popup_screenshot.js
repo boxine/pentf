@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const child_process = require('child_process');
 const rimrafCb = require('rimraf');
-const {promisify} = require('util');
+const { promisify } = require('util');
 
 const rimraf = promisify(rimrafCb);
 
@@ -24,7 +24,7 @@ async function run() {
             { cwd: path.dirname(sub_run) },
             (err, stdout, stderr) => {
                 if (err) reject(err);
-                else resolve({stdout, stderr});
+                else resolve({ stdout, stderr });
             }
         );
     });

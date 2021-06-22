@@ -6,7 +6,7 @@ async function run(config) {
     await page.evaluate(() => {
         setTimeout(() => {
             console.warn('Some warning');
-            console.log({foo: 'bar'});
+            console.log({ foo: 'bar' });
         }, 0);
         window.location = 'https://example.com';
     });

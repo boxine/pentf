@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const {closePage, newPage, clickText} = require('../src/browser_utils');
+const { closePage, newPage, clickText } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -25,9 +25,13 @@ async function run(config) {
     assert.deepStrictEqual(await getClicks(), ['first']);
 
     await resetClicks();
-    await assert.rejects(clickText(page, 'not-present', {timeout: 1, extraMessage: 'blabla'}), {
-        message: 'Unable to find visible text "not-present" after 1ms (blabla)',
-    });
+    await assert.rejects(
+        clickText(page, 'not-present', { timeout: 1, extraMessage: 'blabla' }),
+        {
+            message:
+                'Unable to find visible text "not-present" after 1ms (blabla)',
+        }
+    );
     assert.deepStrictEqual(await getClicks(), []);
 
     // Option: assertSuccess

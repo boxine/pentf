@@ -1,6 +1,10 @@
 const assert = require('assert').strict;
 
-const {closePage, newPage, createUserProfileDir} = require('../src/browser_utils');
+const {
+    closePage,
+    newPage,
+    createUserProfileDir,
+} = require('../src/browser_utils');
 
 async function run(config) {
     const dir = await createUserProfileDir(config);

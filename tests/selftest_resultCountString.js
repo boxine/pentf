@@ -1,35 +1,41 @@
 const assert = require('assert').strict;
 
-const {resultCountString} = require('../src/results');
+const { resultCountString } = require('../src/results');
 
 async function run() {
     const simple = [
-        {status: 'success'},
-        {status: 'success'},
-        {status: 'success'},
-        {status: 'skipped'},
-        {status: 'error'},
-        {status: 'error'},
+        { status: 'success' },
+        { status: 'success' },
+        { status: 'success' },
+        { status: 'skipped' },
+        { status: 'error' },
+        { status: 'error' },
     ];
     assert.strictEqual(
-        resultCountString({}, simple), '3 tests passed, 2 failed, 1 skipped');
+        resultCountString({}, simple),
+        '3 tests passed, 2 failed, 1 skipped'
+    );
     assert.strictEqual(
-        resultCountString({expect_nothing: true}, simple), '3 tests passed, 2 failed, 1 skipped');
+        resultCountString({ expect_nothing: true }, simple),
+        '3 tests passed, 2 failed, 1 skipped'
+    );
 
     const everythingOnce = [
-        {status: 'success'},
-        {status: 'skipped'},
-        {status: 'skipped', expectedToFail: 'should count as skipped'},
-        {status: 'error'},
-        {status: 'error', expectedToFail: 'expected error'},
-        {status: 'success', expectedToFail: 'expected error but passed'},
+        { status: 'success' },
+        { status: 'skipped' },
+        { status: 'skipped', expectedToFail: 'should count as skipped' },
+        { status: 'error' },
+        { status: 'error', expectedToFail: 'expected error' },
+        { status: 'success', expectedToFail: 'expected error but passed' },
     ];
     assert.strictEqual(
         resultCountString({}, everythingOnce),
-        '1 tests passed, 1 failed, 2 skipped, 1 failed as expected, 1 were expected to fail but passed');
+        '1 tests passed, 1 failed, 2 skipped, 1 failed as expected, 1 were expected to fail but passed'
+    );
     assert.strictEqual(
-        resultCountString({expect_nothing: true}, everythingOnce),
-        '2 tests passed, 2 failed, 2 skipped');
+        resultCountString({ expect_nothing: true }, everythingOnce),
+        '2 tests passed, 2 failed, 2 skipped'
+    );
 }
 
 module.exports = {

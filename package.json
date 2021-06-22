@@ -130,8 +130,10 @@
     "@types/tmp": "^0.2.0",
     "deep-equal": "^1.0.1",
     "eslint": "^7.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
     "nodemon": "^2.0.4",
-    "prettier": "^2.0.5",
+    "prettier": "^2.3.1",
     "puppeteer": "^8.0.0",
     "rimraf": "^3.0.2",
     "ts-node": "^9.0.0",
@@ -147,7 +149,13 @@
     "types": "tsc && node patch-types.js",
     "build": "babel --out-dir dist/ --out-file-extension .mjs src/*.js",
     "clean": "rimraf doc dist *.d.ts",
+    "format": "prettier --write '{src,tests,lockserver}/**/*.{js,jsx,ts,tsx,json,md}' '*.js', tests/**/run",
     "prepublishOnly": "npm run clean && npm run types && npm run build"
+  },
+  "prettier": {
+    "arrowParens": "avoid",
+    "semi": true,
+    "singleQuote": true
   },
   "repository": {
     "type": "git",

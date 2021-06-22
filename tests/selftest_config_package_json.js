@@ -1,13 +1,10 @@
 const assert = require('assert').strict;
 const path = require('path');
-const {readConfig} = require('../src/config');
+const { readConfig } = require('../src/config');
 
 async function run() {
     const dir = path.join(__dirname, 'config_pkg_json');
-    const config = await readConfig(
-        { rootDir: path.join(dir, 'nested') },
-        {}
-    );
+    const config = await readConfig({ rootDir: path.join(dir, 'nested') }, {});
 
     assert(config.foo);
 
@@ -20,7 +17,8 @@ async function run() {
 }
 
 module.exports = {
-    description: 'Support loading configuration from "pentf" key in package.json',
+    description:
+        'Support loading configuration from "pentf" key in package.json',
     resources: [],
     run,
 };

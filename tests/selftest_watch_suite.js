@@ -28,7 +28,9 @@ function createTyper(getOutput, clearOutput) {
                 },
                 {
                     timeout: 2000,
-                    message: `Didn't match ${retryUntil.toString()}\n${getOutput().join('\n')}`
+                    message: `Didn't match ${retryUntil.toString()}\n${getOutput().join(
+                        '\n'
+                    )}`,
                 }
             );
         }
@@ -37,11 +39,20 @@ function createTyper(getOutput, clearOutput) {
 
 async function run(config) {
     const sub_run = path.join(__dirname, 'watch_suite', 'run');
-    const child = child_process.spawn(process.execPath, [sub_run, '--watch', '--ci', '--no-colors', '--no-pdf']);
+    const child = child_process.spawn(process.execPath, [
+        sub_run,
+        '--watch',
+        '--ci',
+        '--no-colors',
+        '--no-pdf',
+    ]);
     onTeardown(config, () => child.kill());
 
     let out = [];
-    const type = createTyper(() => out, () => (out = []));
+    const type = createTyper(
+        () => out,
+        () => (out = [])
+    );
 
     child.stdout.on('data', data => out.push(data.toString()));
     child.stderr.on('data', data => out.push(data.toString()));

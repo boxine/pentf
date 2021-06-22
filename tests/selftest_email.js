@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {parseHeader} = require('../src/email');
+const { parseHeader } = require('../src/email');
 
 async function run() {
     assert.equal(parseHeader('To', 'To: somebody\r\n'), 'somebody');
@@ -14,9 +14,12 @@ async function run() {
     }
 
     assert.equal(
-        parseHeader('To',
-            'To: integrationtests+api2_invitation_owner3mmx1hxg467@boxine.de\r\n abc\r\n abc\r\n'),
-        'integrationtests+api2_invitation_owner3mmx1hxg467@boxine.de abc abc');
+        parseHeader(
+            'To',
+            'To: integrationtests+api2_invitation_owner3mmx1hxg467@boxine.de\r\n abc\r\n abc\r\n'
+        ),
+        'integrationtests+api2_invitation_owner3mmx1hxg467@boxine.de abc abc'
+    );
 }
 
 module.exports = {

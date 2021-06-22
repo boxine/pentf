@@ -1,7 +1,12 @@
 const assert = require('assert').strict;
 const http = require('http');
 
-const {closePage, interceptRequest, newPage, waitForTestId} = require('../src/browser_utils');
+const {
+    closePage,
+    interceptRequest,
+    newPage,
+    waitForTestId,
+} = require('../src/browser_utils');
 
 async function get_result(page) {
     return await page.evaluate(
@@ -32,7 +37,7 @@ async function run(config) {
         server.listen(0, err => {
             if (err) return reject(err);
 
-            const {port} = server.address();
+            const { port } = server.address();
             return resolve(port);
         });
     });

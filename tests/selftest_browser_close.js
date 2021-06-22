@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const {newPage} = require('../src/browser_utils');
+const { newPage } = require('../src/browser_utils');
 const runner = require('../src/runner');
 
 async function run(config) {

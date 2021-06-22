@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {assertEventually} = require('../src/assert_utils');
+const { assertEventually } = require('../src/assert_utils');
 const {
     assertNotXPath,
     clickXPath,
@@ -12,23 +12,38 @@ const {
 
 async function run(config) {
     const page = await newPage(config);
-    await page.setContent('<div id="d1"><div id="d2">test" text \\ " a</div></div>');
+    await page.setContent(
+        '<div id="d1"><div id="d2">test" text \\ " a</div></div>'
+    );
 
     await assert.rejects(
-        assertNotXPath(page, '//div[@id="d2"]', {message: 'extra', timeout: 10, checkEvery: 1}),
-        {message: 'Element matching //div[@id="d2"] is present, but should not be there. extra'}
+        assertNotXPath(page, '//div[@id="d2"]', {
+            message: 'extra',
+            timeout: 10,
+            checkEvery: 1,
+        }),
+        {
+            message:
+                'Element matching //div[@id="d2"] is present, but should not be there. extra',
+        }
     );
     await assertNotXPath(page, '//div[@id="d3"]');
 
     await waitForText(page, 'test');
     await waitForText(page, 'test" text \\ " a');
-    await assert.rejects(waitForText(page, 'foobar', {timeout: 10}), {
+    await assert.rejects(waitForText(page, 'foobar', { timeout: 10 }), {
         message: 'Unable to find text "foobar" after 10ms',
     });
-    await assert.rejects(waitForText(page, 'foo " bar', {timeout: 10, extraMessage: 'too short'}), {
-        message: 'Unable to find text "foo \\" bar" after 10ms (too short)',
-    });
-    await assert.rejects(waitForText(page, {error: 'not-a-string'}), {
+    await assert.rejects(
+        waitForText(page, 'foo " bar', {
+            timeout: 10,
+            extraMessage: 'too short',
+        }),
+        {
+            message: 'Unable to find text "foo \\" bar" after 10ms (too short)',
+        }
+    );
+    await assert.rejects(waitForText(page, { error: 'not-a-string' }), {
         message: 'Invalid text argument: {"error":"not-a-string"}',
     });
     await assert.rejects(waitForText(page, page), {
@@ -66,22 +81,34 @@ async function run(config) {
     await assertEventually(() => clickCount === 1, {
         message: 'expected 1 click, but got ' + clickCount,
     });
-    await assert.rejects(clickXPath(page, '//notfound', {timeout: 10}), {
+    await assert.rejects(clickXPath(page, '//notfound', { timeout: 10 }), {
         message: 'Unable to find XPath //notfound after 10ms',
     });
-    await assert.rejects(clickXPath(page, '//*[@id="invisible"]', {timeout: 10}), {
-        message: 'Unable to find XPath //*[@id="invisible"] after 10ms',
-    });
+    await assert.rejects(
+        clickXPath(page, '//*[@id="invisible"]', { timeout: 10 }),
+        {
+            message: 'Unable to find XPath //*[@id="invisible"] after 10ms',
+        }
+    );
     await assertEventually(() => clickCount === 1);
 
     await clickText(page, 'click "this" button');
-    await assertEventually(() => clickCount === 2, {message: 'Expect 2 clicks'});
-    await assert.rejects(clickText(page, '404', {timeout: 10}), {
+    await assertEventually(() => clickCount === 2, {
+        message: 'Expect 2 clicks',
+    });
+    await assert.rejects(clickText(page, '404', { timeout: 10 }), {
         message: 'Unable to find visible text "404" after 10ms',
     });
-    await assert.rejects(clickText(page, 'invisible button', {timeout: 10, extraMessage: '12'}), {
-        message: 'Unable to find visible text "invisible button" after 10ms (12)',
-    });
+    await assert.rejects(
+        clickText(page, 'invisible button', {
+            timeout: 10,
+            extraMessage: '12',
+        }),
+        {
+            message:
+                'Unable to find visible text "invisible button" after 10ms (12)',
+        }
+    );
     assert.strictEqual(clickCount, 2);
 
     await closePage(page);

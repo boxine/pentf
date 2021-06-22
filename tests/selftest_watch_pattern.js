@@ -1,8 +1,8 @@
 const child_process = require('child_process');
 const path = require('path');
 const assert = require('assert');
-const {assertEventually} = require('../src/assert_utils');
-const {onTeardown} = require('../src/runner');
+const { assertEventually } = require('../src/assert_utils');
+const { onTeardown } = require('../src/runner');
 const { wait } = require('../src/utils');
 
 /**
@@ -29,7 +29,9 @@ function createTyper(getOutput, clearOutput) {
                 },
                 {
                     timeout: 2000,
-                    message: `Didn't match ${retryUntil.toString()}\n${getOutput().join('\n')}`
+                    message: `Didn't match ${retryUntil.toString()}\n${getOutput().join(
+                        '\n'
+                    )}`,
                 }
             );
         }
@@ -38,11 +40,20 @@ function createTyper(getOutput, clearOutput) {
 
 async function run(config) {
     const sub_run = path.join(__dirname, 'watch_tests_no_writes', 'run');
-    const child = child_process.spawn(process.execPath, [sub_run, '--watch', '--ci', '--no-colors', '--no-pdf']);
+    const child = child_process.spawn(process.execPath, [
+        sub_run,
+        '--watch',
+        '--ci',
+        '--no-colors',
+        '--no-pdf',
+    ]);
     onTeardown(config, () => child.kill());
 
     let out = [];
-    const type = createTyper(() => out, () => (out = []));
+    const type = createTyper(
+        () => out,
+        () => (out = [])
+    );
 
     child.stdout.on('data', data => out.push(data.toString()));
     child.stderr.on('data', data => out.push(data.toString()));
@@ -60,13 +71,13 @@ async function run(config) {
     await type(child, 'foo', /pattern › foo/);
 
     assert.deepStrictEqual(out.join('').split('\n'), [
-        'pattern › foo ' ,
-        '' ,
+        'pattern › foo ',
+        '',
         '  foo',
         '',
         'Press Esc to exit pattern mode',
         'Press Enter to apply pattern',
-        ''
+        '',
     ]);
 
     const ENTER = String.fromCharCode(13);
@@ -100,7 +111,6 @@ async function run(config) {
     await type(child, ARROW_UP, /- bar/);
     await type(child, ENTER, /Active filter: \^bar\$/);
     await type(child, ENTER, /1 tests passed/);
-
 
     // Enter an invalid filter
     await type(child, 'c', /(?!Active filter)/i);

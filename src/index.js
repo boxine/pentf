@@ -1,4 +1,4 @@
-const {main} = require('./main');
+const { main } = require('./main');
 
 module.exports = {
     main,

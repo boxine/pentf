@@ -1,4 +1,4 @@
-const {closePage, newPage} = require('../src/browser_utils');
+const { closePage, newPage } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -17,9 +17,11 @@ async function run(config) {
 }
 
 module.exports = {
-    description: 'Demonstration of an anti-pattern when typing into text fields',
+    description:
+        'Demonstration of an anti-pattern when typing into text fields',
     resources: [],
     run,
-    skip: () => !process.env.PENTF_DEMO && 'PENTF_DEMO environment variable not set',
+    skip: () =>
+        !process.env.PENTF_DEMO && 'PENTF_DEMO environment variable not set',
     expectedToFail: 'Will crash',
 };

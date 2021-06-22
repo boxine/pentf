@@ -1,5 +1,5 @@
-import {newPage, waitForText} from "../../src/browser_utils";
-import { TaskConfig } from "../../src/internal";
+import { newPage, waitForText } from '../../src/browser_utils';
+import { TaskConfig } from '../../src/internal';
 
 async function run(config: TaskConfig) {
     const page = await newPage(config);

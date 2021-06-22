@@ -1,7 +1,7 @@
-const {closePage, newPage} = require('../src/browser_utils');
+const { closePage, newPage } = require('../src/browser_utils');
 
 async function run(config) {
-    const page = await newPage({...config, forward_console: true});
+    const page = await newPage({ ...config, forward_console: true });
     await page.evaluate(() => {
         function foo() {
             console.log([
@@ -29,18 +29,18 @@ async function run(config) {
                 new Error('fail'),
             ]);
 
-            console.log([{'foo': null}]);
+            console.log([{ foo: null }]);
 
             // Circular
-            const a = {foo: null};
+            const a = { foo: null };
             a.foo = a;
             console.log(a);
 
-            console.log(new Set([1, 2, {foo: 123}]));
+            console.log(new Set([1, 2, { foo: 123 }]));
             console.log(
                 new Map([
-                    [{foo: 123}, [1, 2]],
-                    [{foo: 123}, [1, 2]],
+                    [{ foo: 123 }, [1, 2]],
+                    [{ foo: 123 }, [1, 2]],
                 ])
             );
 
@@ -49,7 +49,7 @@ async function run(config) {
             console.log(class Foo {});
 
             console.log('foo');
-            console.log([1,2]);
+            console.log([1, 2]);
 
             console.trace();
             console.trace('bar');

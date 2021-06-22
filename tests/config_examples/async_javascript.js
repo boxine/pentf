@@ -1,5 +1,5 @@
 // A complex JavaScript configuration file can run arbitrary async code
-module.exports = async (env) => {
+module.exports = async env => {
     // We could download something here, or read a file, or ...
     await new Promise(resolve => resolve());
 

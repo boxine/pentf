@@ -1,16 +1,16 @@
 const assert = require('assert').strict;
 const http = require('http');
-const {newPage, closePage, setLanguage} = require('../src/browser_utils');
+const { newPage, closePage, setLanguage } = require('../src/browser_utils');
 
 async function run(config) {
     const server = http.createServer((req, res) => {
         res.end('Hello World!');
     });
     const port = await new Promise((resolve, reject) => {
-        server.listen(0, (err) => {
+        server.listen(0, err => {
             if (err) return reject(err);
 
-            const {port} = server.address();
+            const { port } = server.address();
             return resolve(port);
         });
     });

@@ -5,7 +5,7 @@ const assert = require('assert').strict;
 const http = require('http');
 const he = require('he');
 
-const {readJSONBody, requestError, writeJSON} = require('./server_utils');
+const { readJSONBody, requestError, writeJSON } = require('./server_utils');
 
 const MAX_EXPIRE_IN = 60000;
 
@@ -14,9 +14,13 @@ function listNamespaces(namespaces, request, response) {
         'Content-Type': 'text/html; charset=utf-8',
     });
 
-    const namespaceList = Array.from(namespaces.keys()).map(nskey => {
-        return `<li><a href="${he.encode(nskey)}">${he.encode(nskey)}</a></li>`;
-    }).join('\n');
+    const namespaceList = Array.from(namespaces.keys())
+        .map(nskey => {
+            return `<li><a href="${he.encode(nskey)}">${he.encode(
+                nskey
+            )}</a></li>`;
+        })
+        .join('\n');
     response.end(`<!DOCTYPE html>
 <html>
 <head><title>pentf lockserver</title></head>
@@ -64,16 +68,16 @@ async function acquireLocks(locks, request, response) {
     if (data.client.length > 256) {
         return requestError(response, 'client is too long');
     }
-    if (! Array.isArray(data.resources)) {
+    if (!Array.isArray(data.resources)) {
         return requestError(response, 'resources is not an array');
     }
-    if (! data.resources.every(r => typeof r === 'string')) {
+    if (!data.resources.every(r => typeof r === 'string')) {
         return requestError(response, 'not all resources are strings');
     }
-    if (! data.resources.every(r => r)) {
+    if (!data.resources.every(r => r)) {
         return requestError(response, 'not all resources are non-empty');
     }
-    if (! data.resources.every(r => r.length < 256)) {
+    if (!data.resources.every(r => r.length < 256)) {
         return requestError(response, 'not all resources are < 256 chars long');
     }
     if (!Number.isInteger(data.expireIn)) {
@@ -88,7 +92,7 @@ async function acquireLocks(locks, request, response) {
 
     // Actually lock
     const now = Date.now();
-    const {client, resources, expireIn} = data;
+    const { client, resources, expireIn } = data;
 
     // First, check that we can lock
     for (const r of resources) {
@@ -100,7 +104,7 @@ async function acquireLocks(locks, request, response) {
             writeJSON(response, 409, {
                 resource: r,
                 client: e.client,
-                expireIn: (e.expireAt - now),
+                expireIn: e.expireAt - now,
             });
             return;
         }
@@ -123,7 +127,10 @@ async function releaseLocks(locks, request, response) {
     if (!data) return;
 
     if (typeof data.client !== 'string') {
-        return requestError(response, `client ${JSON.stringify(data.client)} is not a string`);
+        return requestError(
+            response,
+            `client ${JSON.stringify(data.client)} is not a string`
+        );
     }
     if (!data.client) {
         return requestError(response, 'client is empty');
@@ -131,21 +138,21 @@ async function releaseLocks(locks, request, response) {
     if (data.client.length > 256) {
         return requestError(response, 'client is too long');
     }
-    if (! Array.isArray(data.resources)) {
+    if (!Array.isArray(data.resources)) {
         return requestError(response, 'resources is not an array');
     }
-    if (! data.resources.every(r => typeof r === 'string')) {
+    if (!data.resources.every(r => typeof r === 'string')) {
         return requestError(response, 'not all resources are strings');
     }
-    if (! data.resources.every(r => r)) {
+    if (!data.resources.every(r => r)) {
         return requestError(response, 'not all resources are non-empty');
     }
-    if (! data.resources.every(r => r.length < 256)) {
+    if (!data.resources.every(r => r.length < 256)) {
         return requestError(response, 'not all resources are < 256 chars long');
     }
 
     const now = Date.now();
-    const {client, resources} = data;
+    const { client, resources } = data;
 
     // First, check that we can release all
     for (const r of resources) {
@@ -157,7 +164,7 @@ async function releaseLocks(locks, request, response) {
             writeJSON(response, 409, {
                 resource: r,
                 client: e.client,
-                expireIn: (e.expireAt - now),
+                expireIn: e.expireAt - now,
             });
             return;
         }
@@ -172,7 +179,7 @@ async function releaseLocks(locks, request, response) {
 }
 
 function handleRequest(request, response) {
-    const {namespaces} = request.socket.server;
+    const { namespaces } = request.socket.server;
     assert(namespaces);
 
     if (request.url === '/' && request.method === 'GET') {
@@ -182,7 +189,7 @@ function handleRequest(request, response) {
     if (m) {
         const namespaceName = m[1];
         let namespace = namespaces.get(namespaceName);
-        if (! namespace) {
+        if (!namespace) {
             namespace = new Map();
             namespaces.set(namespaceName, namespace);
         }
@@ -217,10 +224,10 @@ async function lockserver(options) {
     }
 
     return new Promise((resolve, reject) => {
-        server.listen(options.port, (err) => {
+        server.listen(options.port, err => {
             if (err) return reject(err);
 
-            const {port} = server.address();
+            const { port } = server.address();
             return resolve({
                 server,
                 port,
@@ -230,21 +237,22 @@ async function lockserver(options) {
 }
 
 async function beforeAllTests(config) {
-    if (! config.pentf_boot_lockserver) {
+    if (!config.pentf_boot_lockserver) {
         return;
     }
 
-    const serverData = await lockserver({port: 0, keepAliveTimeout: 500});
+    const serverData = await lockserver({ port: 0, keepAliveTimeout: 500 });
     config.pentf_lockserver_url = `http://localhost:${serverData.port}/`;
-    if (! config.external_locking_url) {
+    if (!config.external_locking_url) {
         config.external_locking_url = config.pentf_lockserver_url + 'pentf';
     }
     return serverData;
 }
 
 async function afterAllTests(config, serverData) {
-    if (!serverData) { // Nothing configured
-        assert(! config.pentf_boot_lockserver);
+    if (!serverData) {
+        // Nothing configured
+        assert(!config.pentf_boot_lockserver);
         return;
     }
 
@@ -266,7 +274,7 @@ async function main() {
     });
     const args = parser.parseArgs();
 
-    const {port} = await lockserver(args);
+    const { port } = await lockserver(args);
     if (!args.port) {
         console.log(`Running on http://localhost:${port}/`); // eslint-disable-line no-console
     }

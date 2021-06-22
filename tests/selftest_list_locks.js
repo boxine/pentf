@@ -9,11 +9,18 @@ async function run() {
         await new Promise((resolve, reject) => {
             child_process.execFile(
                 process.execPath,
-                [sub_run, '--exit-zero', '--no-screenshots', '--ci', '--list-locks', '--quiet'],
-                {cwd: path.dirname(sub_run)},
+                [
+                    sub_run,
+                    '--exit-zero',
+                    '--no-screenshots',
+                    '--ci',
+                    '--list-locks',
+                    '--quiet',
+                ],
+                { cwd: path.dirname(sub_run) },
                 (err, stdout, stderr) => {
                     if (err) reject(err);
-                    else resolve({stdout, stderr});
+                    else resolve({ stdout, stderr });
                 }
             );
         });

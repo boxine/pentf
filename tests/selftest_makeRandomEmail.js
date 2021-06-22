@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
-const {assertIncludes} = require('../src/assert_utils');
-const {makeRandomEmail} = require('../src/utils');
+const { assertIncludes } = require('../src/assert_utils');
+const { makeRandomEmail } = require('../src/utils');
 
 async function run(config) {
     const testConfig = {
@@ -15,11 +15,17 @@ async function run(config) {
     assertIncludes(makeRandomEmail(testConfig, 'foo[0]'), 'john.smith+foo_0_');
 
     // Throw on invalid local path length
-    assert.throws(() => makeRandomEmail(testConfig, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'));
+    assert.throws(() =>
+        makeRandomEmail(
+            testConfig,
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        )
+    );
 }
 
 module.exports = {
-    description: 'utils.makeRandomEmail: Generate a random email address (usually for an e2etest mailbox)',
+    description:
+        'utils.makeRandomEmail: Generate a random email address (usually for an e2etest mailbox)',
     run,
     resources: [],
 };

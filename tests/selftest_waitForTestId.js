@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {closePage, newPage, waitForTestId} = require('../src/browser_utils');
+const { closePage, newPage, waitForTestId } = require('../src/browser_utils');
 
 async function run(config) {
     const page = await newPage(config);
@@ -10,15 +10,22 @@ async function run(config) {
         <div data-testid="invisible" style="display:none;"></div>
     `);
 
-    await assert.rejects(waitForTestId(page, 'foo', {timeout: 1, extraMessage: 'blabla'}), {
-        message: 'Failed to find visible element with data-testid "foo" within 1ms. blabla',
-    });
+    await assert.rejects(
+        waitForTestId(page, 'foo', { timeout: 1, extraMessage: 'blabla' }),
+        {
+            message:
+                'Failed to find visible element with data-testid "foo" within 1ms. blabla',
+        }
+    );
 
     const bar = await waitForTestId(page, 'bar.');
-    assert.strictEqual(await page.evaluate(bar => bar.innerText, bar), 'bartext');
+    assert.strictEqual(
+        await page.evaluate(bar => bar.innerText, bar),
+        'bartext'
+    );
 
-    await assert.rejects(waitForTestId(page, 'invisible', {timeout: 201}));
-    await waitForTestId(page, 'invisible', {visible: false, timeout: 1002});
+    await assert.rejects(waitForTestId(page, 'invisible', { timeout: 201 }));
+    await waitForTestId(page, 'invisible', { visible: false, timeout: 1002 });
 
     // Return first element when multiple elements match
     await page.setContent(`
@@ -27,13 +34,17 @@ async function run(config) {
     `);
 
     const baz = await waitForTestId(page, 'baz');
-    assert.strictEqual(await page.evaluate(baz => baz.textContent, baz), 'baztext');
+    assert.strictEqual(
+        await page.evaluate(baz => baz.textContent, baz),
+        'baztext'
+    );
 
     await closePage(page);
 }
 
 module.exports = {
-    description: 'The waitForTestId browser_utils function finds an element by its data-testid attribute',
+    description:
+        'The waitForTestId browser_utils function finds an element by its data-testid attribute',
     resources: [],
     run,
 };

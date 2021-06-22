@@ -5,14 +5,14 @@ const assert = require('assert').strict;
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const {promisify} = require('util');
+const { promisify } = require('util');
 
 const utils = require('./utils');
 const { importFile, findPackageJson } = require('./loader');
 
 class AutoWidthArgumentParser extends argparse.ArgumentParser {
     _getFormatter() {
-        const options = {prog: this.prog};
+        const options = { prog: this.prog };
         if (process.env.COLUMNS) {
             options.width = parseInt(process.env.COLUMNS);
         } else if (process.stdout.getWindowSize) {
@@ -37,27 +37,34 @@ function getCPUCount() {
     // TODO handle scenarios where our process is limited to less
 }
 
-function computeConcurrency(spec, {cpuCount=undefined}={}) {
-    if (typeof spec === 'number') { // Somebody passed in result value directly
+function computeConcurrency(spec, { cpuCount = undefined } = {}) {
+    if (typeof spec === 'number') {
+        // Somebody passed in result value directly
         return spec;
     }
     if (cpuCount === undefined) {
         cpuCount = getCPUCount();
     }
 
-    return spec.split('+').map(
-        subSpec => subSpec.split('*').map(
-            numeric => {
-                numeric = numeric.trim();
-                if (numeric === 'cpus') {
-                    return cpuCount;
-                }
-                assert(
-                    /^[0-9]+$/.test(numeric), `Invalid concurrency spec ${JSON.stringify(spec)}`);
-                return parseInt(numeric);
-            }
-        ).reduce((x, y) => x * y, 1)
-    ).reduce((x, y) => x + y, 0);
+    return spec
+        .split('+')
+        .map(subSpec =>
+            subSpec
+                .split('*')
+                .map(numeric => {
+                    numeric = numeric.trim();
+                    if (numeric === 'cpus') {
+                        return cpuCount;
+                    }
+                    assert(
+                        /^[0-9]+$/.test(numeric),
+                        `Invalid concurrency spec ${JSON.stringify(spec)}`
+                    );
+                    return parseInt(numeric);
+                })
+                .reduce((x, y) => x * y, 1)
+        )
+        .reduce((x, y) => x + y, 0);
 }
 
 function parseArgs(options, raw_args) {
@@ -71,7 +78,7 @@ function parseArgs(options, raw_args) {
     });
 
     // General arguments
-    const {configDir} = options;
+    const { configDir } = options;
     if (configDir) {
         assert.equal(typeof configDir, 'string');
         parser.addArgument(['-e', '--env'], {
@@ -93,16 +100,16 @@ function parseArgs(options, raw_args) {
         help: 'Path to config file. (Default: pentf.config.js)',
     });
 
-    const output_group = parser.addArgumentGroup({title: 'Output'});
+    const output_group = parser.addArgumentGroup({ title: 'Output' });
     output_group.addArgument(['-v', '--verbose'], {
         action: 'storeTrue',
         help: 'Let tests output diagnostic details',
     });
     output_group.addArgument(['--log-file'], {
-        help: 'Write verbose log information to disk. Doesn\'t affect tty logging.',
+        help: "Write verbose log information to disk. Doesn't affect tty logging.",
         metavar: 'FILE',
         type: 'string',
-        dest: 'log_file'
+        dest: 'log_file',
     });
     output_group.addArgument(['-q', '--quiet'], {
         action: 'storeTrue',
@@ -132,10 +139,12 @@ function parseArgs(options, raw_args) {
     output_group.addArgument(['--no-colors'], {
         action: 'storeFalse',
         dest: 'colors',
-        help: 'Disable colors in stdout'
+        help: 'Disable colors in stdout',
     });
 
-    const results_group = parser.addArgumentGroup({title: 'Writing results to disk'});
+    const results_group = parser.addArgumentGroup({
+        title: 'Writing results to disk',
+    });
     results_group.addArgument(['-J', '--json'], {
         action: 'storeTrue',
         help: 'Write tests results as a JSON file.',
@@ -164,7 +173,7 @@ function parseArgs(options, raw_args) {
     results_group.addArgument(['--no-pdf'], {
         dest: 'pdf',
         action: 'storeFalse',
-        help: 'Do not write a PDF report with test results.'
+        help: 'Do not write a PDF report with test results.',
     });
     results_group.addArgument(['--pdf-file'], {
         metavar: 'FILE.pdf',
@@ -190,10 +199,10 @@ function parseArgs(options, raw_args) {
         action: 'storeConst',
         constant: true,
         dest: 'override_sentry',
-        help: (
+        help:
             'Enable error reporting via Sentry.' +
             ' By default, this will be activated if the CI environment variable is set and a ' +
-            ' SENTRY_DSN is configured.'),
+            ' SENTRY_DSN is configured.',
     });
     results_group.addArgument(['--no-sentry'], {
         action: 'storeConst',
@@ -206,7 +215,9 @@ function parseArgs(options, raw_args) {
         help: 'Override Sentry DSN. By default, the SENTRY_DSN environment variable is used.',
     });
 
-    const selection_group = parser.addArgumentGroup({title: 'Test selection'});
+    const selection_group = parser.addArgumentGroup({
+        title: 'Test selection',
+    });
     selection_group.addArgument(['-f', '--filter'], {
         metavar: 'REGEXP',
         help: 'Regular expression to match names of tests to run',
@@ -230,7 +241,7 @@ function parseArgs(options, raw_args) {
         help: 'Glob pattern to use when searching test files',
     });
 
-    const email_group = parser.addArgumentGroup({title: 'Email'});
+    const email_group = parser.addArgumentGroup({ title: 'Email' });
     email_group.addArgument(['--keep-emails'], {
         action: 'storeTrue',
         help: 'Keep generated emails instead of deleting them',
@@ -240,7 +251,9 @@ function parseArgs(options, raw_args) {
         help: 'Log all IMAP commands and responses',
     });
 
-    const puppeteer_group = parser.addArgumentGroup({title: 'puppeteer browser test'});
+    const puppeteer_group = parser.addArgumentGroup({
+        title: 'puppeteer browser test',
+    });
     puppeteer_group.addArgument(['-V', '--visible'], {
         dest: 'headless',
         action: 'storeFalse',
@@ -252,18 +265,28 @@ function parseArgs(options, raw_args) {
         help: 'Do not take screenshots of browser failures',
     });
     const defaultScreenshotDir = path.join(
-        options.rootDir ? options.rootDir : process.cwd(), 'screenshots');
+        options.rootDir ? options.rootDir : process.cwd(),
+        'screenshots'
+    );
     puppeteer_group.addArgument(['--screenshot-directory'], {
         metavar: 'DIR',
         defaultValue: defaultScreenshotDir,
-        help: `Directory to write screenshots to (default: ${process.env.PENTF_GENERIC_HELP ? './screenshots' : '%(defaultValue)s'})`,
+        help: `Directory to write screenshots to (default: ${
+            process.env.PENTF_GENERIC_HELP
+                ? './screenshots'
+                : '%(defaultValue)s'
+        })`,
     });
     const defaultSnapshotDir = path.join(
-        options.rootDir ? options.rootDir : process.cwd(), 'snapshots');
+        options.rootDir ? options.rootDir : process.cwd(),
+        'snapshots'
+    );
     puppeteer_group.addArgument(['--snapshot-directory'], {
         metavar: 'DIR',
         defaultValue: defaultSnapshotDir,
-        help: `Directory to write snapshots to (default: ${process.env.PENTF_GENERIC_HELP ? './snapshots' : '%(defaultValue)s'})`,
+        help: `Directory to write snapshots to (default: ${
+            process.env.PENTF_GENERIC_HELP ? './snapshots' : '%(defaultValue)s'
+        })`,
     });
     puppeteer_group.addArgument(['-u', '--update-snapshots'], {
         help: 'Update existing snapshots on mismatch',
@@ -309,19 +332,20 @@ function parseArgs(options, raw_args) {
         help: 'Default timeout value for various browser functions (default: 30s)',
         metavar: 'MS',
         type: 'int',
-        defaultValue: 30000
+        defaultValue: 30000,
     });
 
-    const runner_group = parser.addArgumentGroup({title: 'Test runner'});
+    const runner_group = parser.addArgumentGroup({ title: 'Test runner' });
     const concurrency_default = 'cpus';
     runner_group.addArgument(['-C', '--concurrency'], {
         metavar: 'COUNT',
-        help: (
+        help:
             'Maximum number of tests to run in parallel.' +
             ' 0 to run without a pool, sequentially.' +
             ' Can include *, +, and cpus for the number of CPUs.' +
-            ' Defaults to ' + concurrency_default + '.'
-        ),
+            ' Defaults to ' +
+            concurrency_default +
+            '.',
         dest: 'concurrency',
     });
     runner_group.addArgument(['-S', '--sequential'], {
@@ -353,7 +377,7 @@ function parseArgs(options, raw_args) {
         metavar: 'COUNT',
         defaultValue: 0,
         help: 'Repeat a failing test until it passes or the specified run count limit is reached',
-        dest: 'repeatFlaky'
+        dest: 'repeatFlaky',
     });
     runner_group.addArgument(['--timeout'], {
         type: 'int',
@@ -377,7 +401,7 @@ function parseArgs(options, raw_args) {
         nargs: '*',
     });
 
-    const locking_group = parser.addArgumentGroup({title: 'Locking'});
+    const locking_group = parser.addArgumentGroup({ title: 'Locking' });
     locking_group.addArgument(['-L', '--no-locking'], {
         help: 'Completely disable any locking of resources between tests.',
         action: 'storeTrue',
@@ -385,7 +409,7 @@ function parseArgs(options, raw_args) {
     locking_group.addArgument(['--locking-verbose'], {
         help: 'Output status messages about locking',
         action: 'storeTrue',
-        dest: 'locking_verbose'
+        dest: 'locking_verbose',
     });
     locking_group.addArgument(['--list-conflicts'], {
         help: 'Show which tasks conflict on which resources, and exit immediately',
@@ -442,16 +466,24 @@ function parseArgs(options, raw_args) {
     }
 
     if (args.json_file !== DEFAULT_JSON_NAME && !args.json) {
-        console.log('Warning: --json-file given, but not -j/--json. Will NOT write JSON.'); // eslint-disable-line no-console
+        console.log(
+            'Warning: --json-file given, but not -j/--json. Will NOT write JSON.'
+        ); // eslint-disable-line no-console
     }
     if (args.markdown_file !== DEFAULT_MARKDOWN_NAME && !args.markdown) {
-        console.log('Warning: --markdown-file given, but not -m/--markdown. Will NOT write Markdown.'); // eslint-disable-line no-console
+        console.log(
+            'Warning: --markdown-file given, but not -m/--markdown. Will NOT write Markdown.'
+        ); // eslint-disable-line no-console
     }
     if (args.html_file !== DEFAULT_HTML_NAME && !args.html) {
-        console.log('Warning: --html-file given, but not -h/--html. Will NOT write HTML.'); // eslint-disable-line no-console
+        console.log(
+            'Warning: --html-file given, but not -h/--html. Will NOT write HTML.'
+        ); // eslint-disable-line no-console
     }
     if (args.pdf_file !== DEFAULT_PDF_NAME && !args.pdf) {
-        console.log('Warning: --pdf-file given, but not --pdf. Will NOT write PDF.'); // eslint-disable-line no-console
+        console.log(
+            'Warning: --pdf-file given, but not --pdf. Will NOT write PDF.'
+        ); // eslint-disable-line no-console
     }
 
     if (args.debug) {
@@ -471,7 +503,9 @@ function parseArgs(options, raw_args) {
     }
 
     if (args.fail_fast && !args.no_locking) {
-        parser.error('At the moment, --fail-fast does not work with locking. Pass in --no-locking');
+        parser.error(
+            'At the moment, --fail-fast does not work with locking. Pass in --no-locking'
+        );
     }
 
     args.concurrency = computeConcurrency(args.concurrency);
@@ -500,7 +534,10 @@ async function readConfigFile(configDir, env, moduleType) {
     assert.equal(typeof config, 'object');
 
     if (config.extends) {
-        config = {... await readConfigFile(configDir, config.extends, moduleType), ...config};
+        config = {
+            ...(await readConfigFile(configDir, config.extends, moduleType)),
+            ...config,
+        };
     }
     return config;
 }
@@ -515,7 +552,7 @@ async function readConfigFile(configDir, env, moduleType) {
  * @returns {Config}
  */
 async function readConfig(options, args) {
-    const {configDir} = options;
+    const { configDir } = options;
 
     let config = args;
 
@@ -542,7 +579,7 @@ async function readConfig(options, args) {
         if (await promisify(fs.exists)(configPath)) {
             const res = await importFile(configPath, moduleType);
             const data = typeof res === 'function' ? res(args.env) : res;
-            config = {...config, ...data };
+            config = { ...config, ...data };
         }
     }
 
@@ -558,7 +595,8 @@ async function readConfig(options, args) {
     }
 
     // Configure Sentry
-    config.sentry_dsn = args.override_sentry_dsn || config.sentry_dsn || process.env.SENTRY_DSN;
+    config.sentry_dsn =
+        args.override_sentry_dsn || config.sentry_dsn || process.env.SENTRY_DSN;
     if (args.override_sentry !== null) {
         config.sentry = args.override_sentry;
     } else if (process.env.CI && config.sentry_dsn) {
@@ -567,7 +605,7 @@ async function readConfig(options, args) {
 
     config.moduleType = moduleType;
 
-    return {...config, ...args};
+    return { ...config, ...args };
 }
 
 module.exports = {

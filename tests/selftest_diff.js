@@ -1,56 +1,44 @@
 const assert = require('assert').strict;
-const {generateDiff} = require('../src/output');
+const { generateDiff } = require('../src/output');
 
 function assertDiff(a, b, expected) {
     assert.equal(
-        generateDiff({}, {actual: a, expected: b}).trim(),
+        generateDiff({}, { actual: a, expected: b }).trim(),
         expected.join('\n').trim()
     );
 }
 
 async function run() {
-    assertDiff(
-        {foo: 123, bar: 23},
-        {bar: 23},
-        [
-            '   {',
-            '     "bar": 23,',
-            '  -  "foo": 123,',
-            '   }'
-        ]
-    );
+    assertDiff({ foo: 123, bar: 23 }, { bar: 23 }, [
+        '   {',
+        '     "bar": 23,',
+        '  -  "foo": 123,',
+        '   }',
+    ]);
+
+    assertDiff({ foo: 123, bar: 23 }, { bar: 23, foo: 1 }, [
+        '   {',
+        '     "bar": 23,',
+        '  -  "foo": 123,',
+        '  +  "foo": 1,',
+        '   }',
+    ]);
+
+    assertDiff({ foo: 123, bar: [1, 2] }, { bar: [2, 1], foo: 1 }, [
+        '   {',
+        '     "bar": [',
+        '  +    2,',
+        '       1,',
+        '  -    2,',
+        '     ],',
+        '  -  "foo": 123,',
+        '  +  "foo": 1,',
+        '   }',
+    ]);
 
     assertDiff(
-        {foo: 123, bar: 23},
-        {bar: 23, foo: 1},
-        [
-            '   {',
-            '     "bar": 23,',
-            '  -  "foo": 123,',
-            '  +  "foo": 1,',
-            '   }'
-        ]
-    );
-
-    assertDiff(
-        {foo: 123, bar: [1, 2]},
-        {bar: [2, 1], foo: 1},
-        [
-            '   {',
-            '     "bar": [',
-            '  +    2,',
-            '       1,',
-            '  -    2,',
-            '     ],',
-            '  -  "foo": 123,',
-            '  +  "foo": 1,',
-            '   }'
-        ]
-    );
-
-    assertDiff(
-        [1, {foo: 123}],
-        [{bar: 1}],
+        [1, { foo: 123 }],
+        [{ bar: 1 }],
         [
             '   [',
             '  -  1,',
@@ -58,7 +46,7 @@ async function run() {
             '  -    "foo": 123,',
             '  +    "bar": 1,',
             '     },',
-            '   ]'
+            '   ]',
         ]
     );
 
@@ -71,9 +59,9 @@ async function run() {
                 3,
                 {
                     c: 123,
-                    b: [1, 2, 'asd', 'asdasd']
-                }
-            ]
+                    b: [1, 2, 'asd', 'asdasd'],
+                },
+            ],
         },
         {
             foo: [
@@ -82,9 +70,9 @@ async function run() {
                 undefined,
                 {
                     b: [1, 2, 'asdasd'],
-                    c: 123
-                }
-            ]
+                    c: 123,
+                },
+            ],
         },
         [
             '    "foo": [',

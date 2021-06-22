@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const {timezoneOffsetString} = require('../src/utils');
+const { timezoneOffsetString } = require('../src/utils');
 
 async function run() {
     assert.equal(timezoneOffsetString(0), 'Z');
@@ -11,7 +11,8 @@ async function run() {
 }
 
 module.exports = {
-    description: 'Testing the integration test framework itself: Small utility functions',
+    description:
+        'Testing the integration test framework itself: Small utility functions',
     resources: [],
     run,
 };

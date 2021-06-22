@@ -4,13 +4,22 @@ const child_process = require('child_process');
 
 async function run() {
     const script = path.join(__dirname, '..', 'bin', 'cli.js');
-    const {stderr} = await new Promise((resolve, reject) => {
+    const { stderr } = await new Promise((resolve, reject) => {
         child_process.execFile(
             process.execPath,
-            ['-r', 'ts-node/register', script, '--exit-zero', '--no-screenshots', '--tests-glob', 'tests/ts_node/*.ts', '--no-pdf'],
+            [
+                '-r',
+                'ts-node/register',
+                script,
+                '--exit-zero',
+                '--no-screenshots',
+                '--tests-glob',
+                'tests/ts_node/*.ts',
+                '--no-pdf',
+            ],
             (err, stdout, stderr) => {
                 if (err) reject(err);
-                else resolve({stdout, stderr});
+                else resolve({ stdout, stderr });
             }
         );
     });

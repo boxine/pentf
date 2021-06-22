@@ -1,8 +1,10 @@
-const {assertEventually} = require('../src/assert_utils');
-const {closePage, newPage, waitForText} = require('../src/browser_utils');
+const { assertEventually } = require('../src/assert_utils');
+const { closePage, newPage, waitForText } = require('../src/browser_utils');
 
 async function run(config) {
-    const page = await newPage(config, ['--disable-features=IsolateOrigins,site-per-process']);
+    const page = await newPage(config, [
+        '--disable-features=IsolateOrigins,site-per-process',
+    ]);
     await page.setContent(`
         This is a webpage which loads an iframe
         <script>
@@ -11,8 +13,10 @@ async function run(config) {
         document.body.appendChild(iframe);
         </script>`);
 
-    const exampleFrame = await assertEventually(
-        () => page.frames().find(frame => frame.url().startsWith('https://example.org/'))
+    const exampleFrame = await assertEventually(() =>
+        page
+            .frames()
+            .find(frame => frame.url().startsWith('https://example.org/'))
     );
     await waitForText(exampleFrame, 'Example Domain');
 

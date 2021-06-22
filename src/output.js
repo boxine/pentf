@@ -6,11 +6,11 @@ const diff = require('diff');
 const kolorist = require('kolorist');
 const errorstacks = require('errorstacks');
 const fs = require('fs');
-const {isAbsolute} = require('path');
-const {performance} = require('perf_hooks');
+const { isAbsolute } = require('path');
+const { performance } = require('perf_hooks');
 
 const utils = require('./utils');
-const {getResults} = require('./results');
+const { getResults } = require('./results');
 
 const STATUS_STREAM = process.stderr;
 
@@ -69,17 +69,29 @@ function status(config, state) {
     last_state = state;
 
     const testResults = Array.from(state.resultByTaskGroup.values());
-    const {errored, expectedToFail, skipped, success} = getResults(config, testResults);
-    const {tasks} = state;
+    const { errored, expectedToFail, skipped, success } = getResults(
+        config,
+        testResults
+    );
+    const { tasks } = state;
 
-    const done = tasks.filter(t => t.status === 'error' || t.status === 'success');
+    const done = tasks.filter(
+        t => t.status === 'error' || t.status === 'success'
+    );
     const running = tasks.filter(t => t.status === 'running');
 
-    const failed_str = errored.length > 0 ? color(config, 'red', `${errored.length} failed, `) : '';
+    const failed_str =
+        errored.length > 0
+            ? color(config, 'red', `${errored.length} failed, `)
+            : '';
     const expected_fail_str =
-        expectedToFail.length > 0 ? `${expectedToFail.length} failed as expected, ` : '';
+        expectedToFail.length > 0
+            ? `${expectedToFail.length} failed as expected, `
+            : '';
     const success_str =
-        success.length > 0 ? color(config, 'green', `${success.length} passed, `) : '';
+        success.length > 0
+            ? color(config, 'green', `${success.length} passed, `)
+            : '';
 
     // Fit output into one line
     // Instead of listing all running tests  (aaa bbb ccc), we write (aaa  +2).
@@ -93,7 +105,9 @@ function status(config, state) {
                 .slice(0, running_show)
                 .map(task => task.name)
                 .join(' ') +
-            (running_show < running.length ? '  +' + (running.length - running_show) : '');
+            (running_show < running.length
+                ? '  +' + (running.length - running_show)
+                : '');
         if (running_str.length > 0) {
             running_str = ` (${running_str})`;
         }
@@ -171,17 +185,22 @@ function formatDuration(config, duration) {
  * @private
  */
 function detailedStatus(config, state) {
-    const {tasks} = state;
+    const { tasks } = state;
     const testResults = Array.from(state.resultByTaskGroup.values());
-    const {skipped} = getResults(config, testResults);
+    const { skipped } = getResults(config, testResults);
 
-    const done = tasks.filter(t => t.status === 'success' || t.status === 'error');
+    const done = tasks.filter(
+        t => t.status === 'success' || t.status === 'error'
+    );
     const running = tasks.filter(t => t.status === 'running');
 
     const label = color(config, 'inverse-blue', 'STATUS');
     const progress =
-        color(config, 'yellow', `${done.length}/${tasks.length - skipped.length} done`) +
-        `, ${running.length} running`;
+        color(
+            config,
+            'yellow',
+            `${done.length}/${tasks.length - skipped.length} done`
+        ) + `, ${running.length} running`;
     let str = `\n${label} at ${utils.localIso8601()}: ${progress}`;
 
     if (running.length > 0) {
@@ -190,13 +209,18 @@ function detailedStatus(config, state) {
         str += running
             .sort((a, b) => a.start - b.start)
             .map(t => {
-                let out = `  ${t.name} ${formatDuration(config, now - t.start)}`;
+                let out = `  ${t.name} ${formatDuration(
+                    config,
+                    now - t.start
+                )}`;
 
                 if (t.resources.length) {
                     let waiting = [];
                     let aquired = [];
                     for (const r of t.resources) {
-                        const pending = state.pending_locks ? state.pending_locks.get(r) : null;
+                        const pending = state.pending_locks
+                            ? state.pending_locks.get(r)
+                            : null;
                         if (pending) {
                             waiting.push(r);
                         } else {
@@ -205,7 +229,11 @@ function detailedStatus(config, state) {
                     }
 
                     const waiting_format = waiting.length
-                        ? `, waiting: ${color(config, 'red', waiting.join(', '))}`
+                        ? `, waiting: ${color(
+                              config,
+                              'red',
+                              waiting.join(', ')
+                          )}`
                         : '';
                     const aquired_format = aquired.length
                         ? `, ${color(config, 'cyan', aquired.join(', '))}`
@@ -255,31 +283,43 @@ function resultSummary(config, results) {
 
     let res = '';
     if (success.length > 0) {
-        res += color(config, 'green', `  ${pad(success.length)} tests passed\n`);
+        res += color(
+            config,
+            'green',
+            `  ${pad(success.length)} tests passed\n`
+        );
     }
     if (errored.length > 0) {
         res += color(
             config,
             'red',
-            `  ${pad(errored.length)} failed (${errored.map(s => s.name).join(', ')})\n`
+            `  ${pad(errored.length)} failed (${errored
+                .map(s => s.name)
+                .join(', ')})\n`
         );
     }
     if (flaky.length) {
         res += color(
             config,
             'lightMagenta',
-            `  ${pad(flaky.length)} flaky (${flaky.map(s => s.name).join(', ')})\n`
+            `  ${pad(flaky.length)} flaky (${flaky
+                .map(s => s.name)
+                .join(', ')})\n`
         );
     }
     if (skipped.length) {
         res += color(
             config,
             'cyan',
-            `  ${pad(skipped.length)} skipped (${skipped.map(s => s.name).join(', ')})\n`
+            `  ${pad(skipped.length)} skipped (${skipped
+                .map(s => s.name)
+                .join(', ')})\n`
         );
     }
     if (expectedToFail.length) {
-        res += `  ${pad(expectedToFail.length)} failed as expected (${expectedToFail
+        res += `  ${pad(
+            expectedToFail.length
+        )} failed as expected (${expectedToFail
             .map(s => s.name)
             .join(', ')})\n`;
     }
@@ -300,7 +340,10 @@ function resultSummary(config, results) {
         const slowish = all.map(result => {
             return {
                 name: result.name,
-                duration: result.taskResults.reduce((sum, item) => sum + item.duration, 0),
+                duration: result.taskResults.reduce(
+                    (sum, item) => sum + item.duration,
+                    0
+                ),
             };
         });
         slowish.sort((a, b) => {
@@ -310,8 +353,11 @@ function resultSummary(config, results) {
             return `${item.name} (${formatDuration(config, item.duration)})`;
         });
         res +=
-            color(config, 'yellow', `  ${pad(slowTestsToList)} slowest tests: `) +
-            `${formatted.join(', ')}\n`;
+            color(
+                config,
+                'yellow',
+                `  ${pad(slowTestsToList)} slowest tests: `
+            ) + `${formatted.join(', ')}\n`;
     }
     return res;
 }
@@ -322,7 +368,7 @@ function resultSummary(config, results) {
  */
 function finish(config, state) {
     last_state = null;
-    const {tasks} = state;
+    const { tasks } = state;
     assert(tasks);
 
     clean(config);
@@ -345,7 +391,9 @@ function finish(config, state) {
     }
 
     // Internal self-check
-    const inconsistent = tasks.filter(t => !['success', 'error', 'skipped'].includes(t.status));
+    const inconsistent = tasks.filter(
+        t => !['success', 'error', 'skipped'].includes(t.status)
+    );
     if (inconsistent.length) {
         msg +=
             `INTERNAL ERROR: ${inconsistent.length} out of ${tasks.length} tasks` +
@@ -453,7 +501,9 @@ function stringify(value, level = 0) {
 
     if (Array.isArray(value)) {
         if (value.length === 0) return '[]';
-        const items = value.map(item => `${start}${stringify(item, level + 1)}`).join(',\n');
+        const items = value
+            .map(item => `${start}${stringify(item, level + 1)}`)
+            .join(',\n');
 
         return `[\n${items},\n${end}]`;
     }
@@ -478,7 +528,8 @@ function shouldShowDiff(err) {
 
     // Check if actual and expected are the same type
     if (
-        Object.prototype.toString.call(err.actual) !== Object.prototype.toString.call(err.expected)
+        Object.prototype.toString.call(err.actual) !==
+        Object.prototype.toString.call(err.expected)
     ) {
         return false;
     }
@@ -629,11 +680,9 @@ function genCodeFrame(config, content, lineNum, columnNum, before, after) {
 
                 return (
                     formatted +
-                    `\n  ${padding} ${color(config, 'dim', '|')} ${' '.repeat(count)}${color(
-                        config,
-                        'bold-red',
-                        '^'
-                    )}`
+                    `\n  ${padding} ${color(config, 'dim', '|')} ${' '.repeat(
+                        count
+                    )}${color(config, 'bold-red', '^')}`
                 );
             } else {
                 return color(config, 'dim', `  ${currentLine} | ${normalized}`);
@@ -687,7 +736,11 @@ async function formatError(config, err) {
                     nearestFrame = frame;
                 }
 
-                const location = link(config, frame.fileName, `file://${frame.fileName}`);
+                const location = link(
+                    config,
+                    frame.fileName,
+                    `file://${frame.fileName}`
+                );
                 // Differentiate files that either are in user-space or were used to display the code-frame clearly.
                 const locationLink =
                     nearestFrame === frame ||
@@ -710,15 +763,25 @@ async function formatError(config, err) {
     let codeFrame = '';
     try {
         if (nearestFrame) {
-            const {fileName, line, column} = nearestFrame;
+            const { fileName, line, column } = nearestFrame;
             if (isAbsolute(fileName)) {
                 // relative path = node internals
                 const content = await fs.promises.readFile(fileName, 'utf-8');
-                codeFrame = `\n${genCodeFrame(config, content, line - 1, column, 2, 3)}\n\n`;
+                codeFrame = `\n${genCodeFrame(
+                    config,
+                    content,
+                    line - 1,
+                    column,
+                    2,
+                    3
+                )}\n\n`;
             }
         }
     } catch (readError) {
-        log(config, 'INTERNAL WARNING: Failed to read stack frame code: ' + readError);
+        log(
+            config,
+            'INTERNAL WARNING: Failed to read stack frame code: ' + readError
+        );
     }
 
     let message = `${err.name}: ${err.message}`;
@@ -733,7 +796,11 @@ async function formatError(config, err) {
     }
 
     return (
-        '\n' + diff + indentLines(message, 1) + indentLines(codeFrame, 1) + indentLines(stack, 2)
+        '\n' +
+        diff +
+        indentLines(message, 1) +
+        indentLines(codeFrame, 1) +
+        indentLines(stack, 2)
     );
 }
 
@@ -744,7 +811,10 @@ async function formatError(config, err) {
  */
 function shouldShowError(config, task) {
     return (
-        !(config.ignore_errors && new RegExp(config.ignore_errors).test(task.error.stack)) &&
+        !(
+            config.ignore_errors &&
+            new RegExp(config.ignore_errors).test(task.error.stack)
+        ) &&
         (config.expect_nothing ||
             !task.expectedToFail ||
             (task.expectedToFail && task.status === 'success'))
@@ -763,7 +833,9 @@ async function logTaskError(config, task) {
         log(
             config,
             '[task] Decided whether to show error for task ' +
-                `${task._runner_task_id} (${task.name}): ${JSON.stringify(show_error)}`
+                `${task._runner_task_id} (${task.name}): ${JSON.stringify(
+                    show_error
+                )}`
         );
     }
     if (show_error) {
@@ -792,7 +864,10 @@ async function logTaskError(config, task) {
             // Display collected breadcrumb additionally if there is one.
             if (/Timeout:\sTest\scase/.test(e.message)) {
                 if (task.breadcrumb) {
-                    log(config, `${await formatError(config, task.breadcrumb)}\n`);
+                    log(
+                        config,
+                        `${await formatError(config, task.breadcrumb)}\n`
+                    );
                 } else {
                     log(config, '  No breadcrumbs were collected.\n');
                 }
@@ -813,7 +888,9 @@ function valueRepr(value) {
     }
 
     if (
-        ['undefined', 'boolean', 'number', 'bigint', 'string'].includes(typeof value) ||
+        ['undefined', 'boolean', 'number', 'bigint', 'string'].includes(
+            typeof value
+        ) ||
         value === null ||
         (typeof value === 'object' &&
             value &&
@@ -838,18 +915,26 @@ function valueRepr(value) {
 function formatA11yError(config, violation) {
     /** @type {Record<import('./browser_utils').A11yImpact, { sign: string, color: string }>} */
     const label = {
-        minor: {sign: 'Minor', color: 'yellow'},
-        moderate: {sign: 'Moderate', color: 'yellow'},
-        serious: {sign: 'Serious', color: 'red'},
-        critical: {sign: 'Critical', color: 'red'},
+        minor: { sign: 'Minor', color: 'yellow' },
+        moderate: { sign: 'Moderate', color: 'yellow' },
+        serious: { sign: 'Serious', color: 'red' },
+        critical: { sign: 'Critical', color: 'red' },
     };
 
     const sign = label[violation.impact].sign;
-    let out = color(config, label[violation.impact].color, `  ${sign}: ${violation.description}\n`);
+    let out = color(
+        config,
+        label[violation.impact].color,
+        `  ${sign}: ${violation.description}\n`
+    );
     out += color(
         config,
         'yellow',
-        color(config, 'dim', `  ${link(config, violation.helpUrl, violation.helpUrl)}\n`)
+        color(
+            config,
+            'dim',
+            `  ${link(config, violation.helpUrl, violation.helpUrl)}\n`
+        )
     );
 
     violation.nodes.forEach(node => {

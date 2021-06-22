@@ -2,15 +2,15 @@ const assert = require('assert').strict;
 const http = require('http');
 const querystring = require('querystring');
 
-const {fetch} = require('../src/net_utils');
+const { fetch } = require('../src/net_utils');
 
 function escapeHTML(s) {
     // from https://stackoverflow.com/a/20403618/35070
-    return (s
+    return s
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
         .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;'));
+        .replace(/>/g, '&gt;');
 }
 
 // NOT part of the official API, this is parsing cookies on the server side.
@@ -32,7 +32,8 @@ function handleRequest(request, response) {
         const httpCode = parseInt(redirectMatch[1]);
         const redirectCount = parseInt(request.cookies.redirectCount || 0);
         const redirectNum = parseInt(redirectMatch[2]);
-        const location = (redirectNum > 1) ? `/${httpCode}redirect${redirectNum - 1}` : '/end';
+        const location =
+            redirectNum > 1 ? `/${httpCode}redirect${redirectNum - 1}` : '/end';
         response.writeHead(httpCode, {
             location,
             'Set-Cookie': `redirectCount=${redirectCount + 1}`,
@@ -63,7 +64,7 @@ function handleRequest(request, response) {
             if (body.length > 1e6) request.connection.destroy();
         });
         request.on('end', function () {
-            const {name} = querystring.parse(body);
+            const { name } = querystring.parse(body);
 
             if (!name || !/^[-_a-zA-Z0-9_\s,;.]+$/.test(name)) {
                 response.writeHead(400);
@@ -72,7 +73,7 @@ function handleRequest(request, response) {
             }
 
             response.writeHead(302, {
-                'Location': '/',
+                Location: '/',
                 'Set-Cookie': `name=${name}`,
             });
             response.end('302');
@@ -80,7 +81,9 @@ function handleRequest(request, response) {
         return;
     }
 
-    const visitCount = request.cookies.visitCount ? parseInt(request.cookies.visitCount) : 0;
+    const visitCount = request.cookies.visitCount
+        ? parseInt(request.cookies.visitCount)
+        : 0;
     const setCookies = [
         `previousVisit=${new Date().toString()}; SameSite=Lax`,
         `visitCount=${visitCount + 1}`,
@@ -113,10 +116,10 @@ async function run(config) {
         });
     });
     const port = await new Promise((resolve, reject) => {
-        server.listen(0, (err) => {
+        server.listen(0, err => {
             if (err) return reject(err);
 
-            const {port} = server.address();
+            const { port } = server.address();
             return resolve(port);
         });
     });
@@ -127,13 +130,13 @@ async function run(config) {
     assert.equal(response.status, 200);
 
     // Create a cookie jar
-    response = await fetch(config, url, {cookieJar: 'create'});
+    response = await fetch(config, url, { cookieJar: 'create' });
     assert.equal(response.status, 200);
     assert.equal(await response.getCookieValue('visitCount'), '1');
     const cookieJar = response.cookieJar;
 
     // Use an existing cookie jar
-    response = await fetch(config, url, {cookieJar});
+    response = await fetch(config, url, { cookieJar });
     assert.equal(response.status, 200);
     assert.equal(await response.getCookieValue('visitCount'), '2');
 
@@ -147,9 +150,9 @@ async function run(config) {
     assert.equal(await response.getCookieValue('visitCount'), '2');
     assert.equal(await response.getCookieValue('name'), 'John Smith');
 
-    response = await fetch(config, url, {cookieJar});
+    response = await fetch(config, url, { cookieJar });
     assert.equal(response.status, 200);
-    let html = (await response.text());
+    let html = await response.text();
     assert(html.includes('Hello John Smith'));
     assert(html.includes('Visit count: 2'));
     assert.equal(await response.getCookieValue('name'), 'John Smith');
@@ -163,7 +166,7 @@ async function run(config) {
         redirect: 'follow',
     });
     assert.equal(response.status, 200);
-    html = (await response.text());
+    html = await response.text();
     assert(html.includes('Hello Jane Johnson'));
     assert.equal(await response.getCookieValue('name'), 'Jane Johnson');
     assert.equal(await response.getCookieValue('visitCount'), '4');
@@ -176,7 +179,7 @@ async function run(config) {
         redirect: 'follow',
     });
     assert.equal(response.status, 200);
-    html = (await response.text());
+    html = await response.text();
     assert(html.includes('Hello Aaron Aaberg'));
     assert.equal(await response.getCookieValue('name'), 'Aaron Aaberg');
     assert.equal(await response.getCookieValue('redirectCount'), '3');
@@ -189,17 +192,18 @@ async function run(config) {
         redirect: 'follow',
     });
     assert.equal(response.status, 200);
-    html = (await response.text());
+    html = await response.text();
     assert(html.includes('Hello Aaron Aaberg'));
     assert.equal(await response.getCookieValue('name'), 'Aaron Aaberg');
     assert.equal(await response.getCookieValue('redirectCount'), '7');
 
     // Abort if loop is too long
     await assert.rejects(
-        fetch(config, url + '302redirect40', {redirect: 'follow'}),
+        fetch(config, url + '302redirect40', { redirect: 'follow' }),
         err => {
             return err.message.startsWith('Too many redirects:');
-        });
+        }
+    );
 
     // Redirect from HTTP to HTTPS
     response = await fetch(config, url + 'https-redirect', {
@@ -214,7 +218,7 @@ async function run(config) {
             redirect: 'follow',
             agent: new http.Agent(),
         }),
-        {message: 'Protocol "https:" not supported. Expected "http:"'}
+        { message: 'Protocol "https:" not supported. Expected "http:"' }
     );
 
     // Terminate server

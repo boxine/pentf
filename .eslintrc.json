@@ -6,6 +6,7 @@
         "node": true
     },
     "extends": "eslint:recommended",
+    "plugins": ["prettier"],
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
@@ -14,22 +15,10 @@
         "ecmaVersion": 2020
     },
     "rules": {
-        "indent": [
-            "error",
-            4
-        ],
+        "prettier/prettier": "error",
         "linebreak-style": [
             "error",
             "unix"
-        ],
-        "quotes": [
-            "error",
-            "single",
-            "avoid-escape"
-        ],
-        "semi": [
-            "error",
-            "always"
         ],
         "require-atomic-updates": "off"
     }

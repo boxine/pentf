@@ -196,6 +196,27 @@ async function newPage(config, chrome_args = []) {
 
     // Make sure that the browser window matches the viewport size
     if (!config.headless) {
+        // If devtools is enabled we need to wait until they've been
+        // initialized and our viewport has been resized accordingly.
+        if (config.devtools) {
+            const devtoolsTarget = await page
+                .browser()
+                .waitForTarget(
+                    target => target.url().startsWith('devtools://'),
+                    { timeout: 1000 }
+                );
+
+            // Hack to get puppeteer to allow us to access the page context
+            devtoolsTarget._targetInfo.type = 'page';
+
+            // Wait until devtools are fully initialized
+            const devtoolsPage = await devtoolsTarget.page();
+            await devtoolsPage.waitForFunction(
+                () => document.readyState === 'complete',
+                { timeout: 1000 }
+            );
+        }
+
         // Default puppeteer viewport size
         await resizePage(config, page, { width: 800, height: 600 });
     }

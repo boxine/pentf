@@ -203,7 +203,7 @@ async function newPage(config, chrome_args = []) {
                 .browser()
                 .waitForTarget(
                     target => target.url().startsWith('devtools://'),
-                    { timeout: 1000 }
+                    { timeout: 4000 }
                 );
 
             // Hack to get puppeteer to allow us to access the page context
@@ -213,7 +213,7 @@ async function newPage(config, chrome_args = []) {
             const devtoolsPage = await devtoolsTarget.page();
             await devtoolsPage.waitForFunction(
                 () => document.readyState === 'complete',
-                { timeout: 1000 }
+                { timeout: 4000 }
             );
         }
 

@@ -2009,7 +2009,7 @@ async function getAttribute(page, selector, name) {
 /**
  * Get the text content of a given DOM Element.
  *
- * @returns {import('puppeteer').Page} The puppeteer page handle.
+ * @param {import('puppeteer').Page} page The puppeteer page handle.
  * @param {string} selector Query selector.
  * @returns {Promise<string>} Text content of the selected element.
  */

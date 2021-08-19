@@ -190,6 +190,9 @@ function localIso8601(date) {
     );
 }
 
+/**
+ * @deprecated use assert_utils/assertEventually
+ */
 function assertEventually(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');
@@ -202,6 +205,9 @@ function assertEventually(...args) {
     return assert_utils.assertEventually(...args);
 }
 
+/**
+ * @deprecated use assert_utils/assertAsyncEventually
+ */
 function assertAsyncEventually(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');
@@ -216,6 +222,9 @@ function assertAsyncEventually(...args) {
     return assert_utils.assertAsyncEventually(...args);
 }
 
+/**
+ * @deprecated use assert_utils/assertAlways
+ */
 function assertAlways(...args) {
     // Deprecated here; will warn in the future, and eventually be removed
     const assert_utils = require('./assert_utils');

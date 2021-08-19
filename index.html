@@ -7,6 +7,7 @@
 	<meta name="description" content="Documentation for pentf">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -47,11 +48,6 @@
 	</div>
 	<div class="tsd-page-title">
 		<div class="container">
-			<ul class="tsd-breadcrumb">
-				<li>
-					<a href="globals.html">Globals</a>
-				</li>
-			</ul>
 			<h1>pentf</h1>
 		</div>
 	</div>
@@ -72,7 +68,8 @@
 				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
 					<h2>Installation</h2>
 				</a>
-				<pre><code class="language-shell">npm i --save-dev pentf puppeteer</code></pre>
+				<pre><code class="language-shell"><span style="color: #000000">npm i --save-dev pentf puppeteer</span>
+</code></pre>
 				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
 					<h2>Usage</h2>
 				</a>
@@ -81,144 +78,152 @@
 					<h2>Binary (npm scripts)</h2>
 				</a>
 				<p>Add the following script to your <code>package.json</code> with the <code>--tests-glob</code> parameter matching to your test files:</p>
-				<pre><code class="language-json">{
-    <span class="hljs-attr">"name"</span>: <span class="hljs-string">"my-package"</span>,
-    <span class="hljs-attr">"scripts"</span>: {
-        <span class="hljs-attr">"test"</span>: <span class="hljs-string">"pentf --tests-glob tests/**/*.js"</span>,
-    }
-}</code></pre>
+				<pre><code class="language-json"><span style="color: #000000">{</span>
+<span style="color: #000000">    </span><span style="color: #0451A5">&quot;name&quot;</span><span style="color: #000000">: </span><span style="color: #A31515">&quot;my-package&quot;</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #0451A5">&quot;scripts&quot;</span><span style="color: #000000">: {</span>
+<span style="color: #000000">        </span><span style="color: #0451A5">&quot;test&quot;</span><span style="color: #000000">: </span><span style="color: #A31515">&quot;pentf --tests-glob tests/**/*.js&quot;</span><span style="color: #000000">,</span>
+<span style="color: #000000">    }</span>
+<span style="color: #000000">}</span>
+</code></pre>
 				<p>Run <code>npm test</code> or <code>yarn test</code> to launch pentf. While working on a test, use <code>npm test -- --debug --watch</code> to see the Chromium instance and rerun tests when files change.</p>
 				<a href="#node-api" id="node-api" style="color: inherit; text-decoration: none;">
 					<h2>Node API</h2>
 				</a>
 				<p>Create a script named <code>run.js</code> in the directory of your tests, and fill it like this:</p>
-				<pre><code class="language-javascript"><span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf'</span>).main({
-    <span class="hljs-attr">rootDir</span>: __dirname,
-    <span class="hljs-attr">description</span>: <span class="hljs-string">'Test my cool application'</span>,
-});</code></pre>
+				<pre><code class="language-javascript"><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;pentf&#039;</span><span style="color: #000000">).</span><span style="color: #795E26">main</span><span style="color: #000000">({</span>
+<span style="color: #000000">    </span><span style="color: #001080">rootDir:</span><span style="color: #000000"> </span><span style="color: #001080">__dirname</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #001080">description:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;Test my cool application&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">});</span>
+</code></pre>
 				<p>Then type the following command</p>
-				<pre><code class="language-shell">node run.js</code></pre>
+				<pre><code class="language-shell"><span style="color: #000000">node run.js</span>
+</code></pre>
 				<p>to execute all tests. You may also want to have a look at the <a href="#options">options</a>.</p>
 				<a href="#writing-tests" id="writing-tests" style="color: inherit; text-decoration: none;">
 					<h2>Writing tests</h2>
 				</a>
 				<p>Plop a new <code>example.js</code> file into <code>tests/</code>. Its name will be the test&#39;&#39;s name, and it should have an async <code>run</code> function, like this:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">"assert"</span>).strict;
-<span class="hljs-keyword">const</span> { newPage, clickSelector, waitForText } = <span class="hljs-built_in">require</span>(<span class="hljs-string">"pentf/browser_utils"</span>);
+				<pre><code class="language-javascript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">assert</span><span style="color: #000000"> = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;assert&quot;</span><span style="color: #000000">).</span><span style="color: #001080">strict</span><span style="color: #000000">;</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">newPage</span><span style="color: #000000">, </span><span style="color: #0070C1">clickSelector</span><span style="color: #000000">, </span><span style="color: #0070C1">waitForText</span><span style="color: #000000"> } = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;pentf/browser_utils&quot;</span><span style="color: #000000">);</span>
 
-<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params">config</span>) </span>{
-    <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> newPage(config);
-    <span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">"https://example.com"</span>);
+<span style="color: #0000FF">async</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">run</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">) {</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">page</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">newPage</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">);</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">page</span><span style="color: #000000">.</span><span style="color: #795E26">goto</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;https://example.com&quot;</span><span style="color: #000000">);</span>
 
-    <span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">"Example Domain"</span>);
-    <span class="hljs-keyword">await</span> clickSelector(page, <span class="hljs-string">"a"</span>);
+<span style="color: #000000">    </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">waitForText</span><span style="color: #000000">(</span><span style="color: #001080">page</span><span style="color: #000000">, </span><span style="color: #A31515">&quot;Example Domain&quot;</span><span style="color: #000000">);</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">clickSelector</span><span style="color: #000000">(</span><span style="color: #001080">page</span><span style="color: #000000">, </span><span style="color: #A31515">&quot;a&quot;</span><span style="color: #000000">);</span>
 
-    <span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">"IANA-managed Reserved Domains"</span>);
-    <span class="hljs-comment">// During development, you can make the test fail.</span>
-    <span class="hljs-comment">// Run with --debug to see the browser's state at this time!</span>
-    <span class="hljs-comment">// Any test failure is fine, but in a pinch, try uncommenting:</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">waitForText</span><span style="color: #000000">(</span><span style="color: #001080">page</span><span style="color: #000000">, </span><span style="color: #A31515">&quot;IANA-managed Reserved Domains&quot;</span><span style="color: #000000">);</span>
+<span style="color: #000000">    </span><span style="color: #008000">// During development, you can make the test fail.</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Run with --debug to see the browser&#039;s state at this time!</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Any test failure is fine, but in a pinch, try uncommenting:</span>
 
-    <span class="hljs-comment">// assert(false);</span>
-}
+<span style="color: #000000">    </span><span style="color: #008000">// assert(false);</span>
+<span style="color: #000000">}</span>
 
-<span class="hljs-built_in">module</span>.exports = {
-    run,
-    <span class="hljs-attr">description</span>: <span class="hljs-string">"pentf test example"</span>,
-};</code></pre>
+<span style="color: #267F99">module</span><span style="color: #000000">.</span><span style="color: #267F99">exports</span><span style="color: #000000"> = {</span>
+<span style="color: #000000">    </span><span style="color: #001080">run</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #001080">description:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;pentf test example&quot;</span><span style="color: #000000">,</span>
+<span style="color: #000000">};</span>
+</code></pre>
 				<p>You can also use pentf to test APIs, check for emails, configure tests per environment and use locking for shared resources:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>).strict;
-<span class="hljs-keyword">const</span> {getMail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/email'</span>);
-<span class="hljs-keyword">const</span> {newPage} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/browser_utils'</span>);
-<span class="hljs-keyword">const</span> {fetch} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/net_utils'</span>);
-<span class="hljs-keyword">const</span> {makeRandomEmail} = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pentf/utils'</span>);
+				<pre><code class="language-javascript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">assert</span><span style="color: #000000"> = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;assert&#039;</span><span style="color: #000000">).</span><span style="color: #001080">strict</span><span style="color: #000000">;</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> {</span><span style="color: #0070C1">getMail</span><span style="color: #000000">} = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;pentf/email&#039;</span><span style="color: #000000">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> {</span><span style="color: #0070C1">newPage</span><span style="color: #000000">} = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;pentf/browser_utils&#039;</span><span style="color: #000000">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> {</span><span style="color: #0070C1">fetch</span><span style="color: #000000">} = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;pentf/net_utils&#039;</span><span style="color: #000000">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> {</span><span style="color: #0070C1">makeRandomEmail</span><span style="color: #000000">} = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;pentf/utils&#039;</span><span style="color: #000000">);</span>
 
-<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">run</span>(<span class="hljs-params">config</span>) </span>{
-    <span class="hljs-keyword">const</span> email = makeRandomEmail(config, <span class="hljs-string">'pentf_example'</span>);
-    <span class="hljs-keyword">const</span> start = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>();
-    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(config, <span class="hljs-string">'https://api.tonie.cloud/v2/users'</span>, {
-        <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
-        <span class="hljs-attr">headers</span>: {
-            <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
-        },
-        <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
-            <span class="hljs-attr">locale</span>: <span class="hljs-string">'en'</span>,
-            <span class="hljs-attr">email</span>: email,
-            <span class="hljs-attr">password</span>: <span class="hljs-string">'Secret123'</span>,
-            <span class="hljs-attr">acceptedGeneralTerms</span>: <span class="hljs-literal">true</span>,
-            <span class="hljs-attr">acceptedPrivacyTerms</span>: <span class="hljs-literal">true</span>,
-        }),
-    });
-    assert.equal(response.status, <span class="hljs-number">201</span>);
-    assert((<span class="hljs-keyword">await</span> response.json()).jwt);
+<span style="color: #0000FF">async</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">run</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">) {</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">email</span><span style="color: #000000"> = </span><span style="color: #795E26">makeRandomEmail</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;pentf_example&#039;</span><span style="color: #000000">);</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">start</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">Date</span><span style="color: #000000">();</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">response</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">fetch</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;https://api.tonie.cloud/v2/users&#039;</span><span style="color: #000000">, {</span>
+<span style="color: #000000">        </span><span style="color: #001080">method:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;POST&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">        </span><span style="color: #001080">headers:</span><span style="color: #000000"> {</span>
+<span style="color: #000000">            </span><span style="color: #A31515">&#039;Content-Type&#039;</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;application/json&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">        },</span>
+<span style="color: #000000">        </span><span style="color: #001080">body:</span><span style="color: #000000"> </span><span style="color: #267F99">JSON</span><span style="color: #000000">.</span><span style="color: #795E26">stringify</span><span style="color: #000000">({</span>
+<span style="color: #000000">            </span><span style="color: #001080">locale:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;en&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">            </span><span style="color: #001080">email:</span><span style="color: #000000"> </span><span style="color: #001080">email</span><span style="color: #000000">,</span>
+<span style="color: #000000">            </span><span style="color: #001080">password:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;Secret123&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">            </span><span style="color: #001080">acceptedGeneralTerms:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span><span style="color: #000000">,</span>
+<span style="color: #000000">            </span><span style="color: #001080">acceptedPrivacyTerms:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span><span style="color: #000000">,</span>
+<span style="color: #000000">        }),</span>
+<span style="color: #000000">    });</span>
+<span style="color: #000000">    </span><span style="color: #001080">assert</span><span style="color: #000000">.</span><span style="color: #795E26">equal</span><span style="color: #000000">(</span><span style="color: #001080">response</span><span style="color: #000000">.</span><span style="color: #001080">status</span><span style="color: #000000">, </span><span style="color: #098658">201</span><span style="color: #000000">);</span>
+<span style="color: #000000">    </span><span style="color: #795E26">assert</span><span style="color: #000000">((</span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">response</span><span style="color: #000000">.</span><span style="color: #795E26">json</span><span style="color: #000000">()).</span><span style="color: #001080">jwt</span><span style="color: #000000">);</span>
 
-    <span class="hljs-keyword">const</span> mail = <span class="hljs-keyword">await</span> getMail(config, start, email, <span class="hljs-string">'Your Toniecloud confirmation link'</span>);
-    assert(mail);
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">mail</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">getMail</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">, </span><span style="color: #001080">start</span><span style="color: #000000">, </span><span style="color: #001080">email</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;Your Toniecloud confirmation link&#039;</span><span style="color: #000000">);</span>
+<span style="color: #000000">    </span><span style="color: #795E26">assert</span><span style="color: #000000">(</span><span style="color: #001080">mail</span><span style="color: #000000">);</span>
 
-    <span class="hljs-comment">// Test with a browser</span>
-    <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> newPage(config);
-    <span class="hljs-keyword">await</span> page.goto(<span class="hljs-string">'https://meine.tonies.de/'</span>);
+<span style="color: #000000">    </span><span style="color: #008000">// Test with a browser</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">page</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">newPage</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">);</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">page</span><span style="color: #000000">.</span><span style="color: #795E26">goto</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;https://meine.tonies.de/&#039;</span><span style="color: #000000">);</span>
 
-    <span class="hljs-comment">// During development, you can make the test fail.</span>
-    <span class="hljs-comment">// Run with --debug to see the browser's state at this time!</span>
-    <span class="hljs-comment">// Any test failure is fine, but in a pinch, try uncommenting:</span>
+<span style="color: #000000">    </span><span style="color: #008000">// During development, you can make the test fail.</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Run with --debug to see the browser&#039;s state at this time!</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Any test failure is fine, but in a pinch, try uncommenting:</span>
 
-    <span class="hljs-comment">// assert(false);</span>
-}
+<span style="color: #000000">    </span><span style="color: #008000">// assert(false);</span>
+<span style="color: #000000">}</span>
 
-<span class="hljs-built_in">module</span>.exports = {
-    run,
-    <span class="hljs-attr">description</span>: <span class="hljs-string">'pentf test example'</span>, <span class="hljs-comment">// optional description for test reports, can be left out</span>
+<span style="color: #267F99">module</span><span style="color: #000000">.</span><span style="color: #267F99">exports</span><span style="color: #000000"> = {</span>
+<span style="color: #000000">    </span><span style="color: #001080">run</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #001080">description:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;pentf test example&#039;</span><span style="color: #000000">, </span><span style="color: #008000">// optional description for test reports, can be left out</span>
 
-    <span class="hljs-comment">// You can skip the test in some conditions by defining an optional skip method:</span>
-    <span class="hljs-attr">skip</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> config.env === <span class="hljs-string">'prod'</span>,
+<span style="color: #000000">    </span><span style="color: #008000">// You can skip the test in some conditions by defining an optional skip method:</span>
+<span style="color: #000000">    </span><span style="color: #795E26">skip</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #001080">config</span><span style="color: #000000"> </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">config</span><span style="color: #000000">.</span><span style="color: #001080">env</span><span style="color: #000000"> === </span><span style="color: #A31515">&#039;prod&#039;</span><span style="color: #000000">,</span>
 
-    <span class="hljs-comment">// Optional: a true-ish value to indicate that to suppress output about this test if it fails.</span>
-    <span class="hljs-comment">// Used to indicate tests for bugs/features that are not yet implemented (e.g. with TDD).</span>
-    <span class="hljs-comment">// Strings will be reported; the URL to an issue is a good and typical value.</span>
-    <span class="hljs-comment">// Alternatively, a function that is called with the config and returns a value as described above.</span>
-    <span class="hljs-attr">expectedToFail</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> (config.env === <span class="hljs-string">'alwaysbroken'</span>) ? <span class="hljs-string">'Known to be broken here'</span> : <span class="hljs-literal">false</span>,
+<span style="color: #000000">    </span><span style="color: #008000">// Optional: a true-ish value to indicate that to suppress output about this test if it fails.</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Used to indicate tests for bugs/features that are not yet implemented (e.g. with TDD).</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Strings will be reported; the URL to an issue is a good and typical value.</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Alternatively, a function that is called with the config and returns a value as described above.</span>
+<span style="color: #000000">    </span><span style="color: #795E26">expectedToFail</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #001080">config</span><span style="color: #000000"> </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> (</span><span style="color: #001080">config</span><span style="color: #000000">.</span><span style="color: #001080">env</span><span style="color: #000000"> === </span><span style="color: #A31515">&#039;alwaysbroken&#039;</span><span style="color: #000000">) ? </span><span style="color: #A31515">&#039;Known to be broken here&#039;</span><span style="color: #000000"> : </span><span style="color: #0000FF">false</span><span style="color: #000000">,</span>
 
-    <span class="hljs-comment">// Resources is a list of strings. Tests accessing the same resources are run sequentially.</span>
-    <span class="hljs-attr">resources</span>: [<span class="hljs-string">'toniebox_1234'</span>, <span class="hljs-string">'another_resource'</span>],
-    <span class="hljs-comment">// Default is one resource with the name `test_${test.name}`, i.e. tests are not run concurrently by default</span>
-    <span class="hljs-comment">// Using no shared resources? Set resources: []</span>
-};</code></pre>
+<span style="color: #000000">    </span><span style="color: #008000">// Resources is a list of strings. Tests accessing the same resources are run sequentially.</span>
+<span style="color: #000000">    </span><span style="color: #001080">resources:</span><span style="color: #000000"> [</span><span style="color: #A31515">&#039;toniebox_1234&#039;</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;another_resource&#039;</span><span style="color: #000000">],</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Default is one resource with the name `test_${test.name}`, i.e. tests are not run concurrently by default</span>
+<span style="color: #000000">    </span><span style="color: #008000">// Using no shared resources? Set resources: []</span>
+<span style="color: #000000">};</span>
+</code></pre>
 				<p>Note that while the above example tests a webpage with <a href="https://github.com/GoogleChrome/puppeteer">puppeteer</a> and uses pentf&#39;s has native support for HTTP requests (in <code>net_utils</code>) and email sending (in <code>email</code>), tests can be anything – they just have to fail the promise if the test fails.</p>
 				<p>Have a look in the <a href="https://boxine.github.io/pentf/">API documentation</a> for various helper functions.</p>
 				<a href="#creating-a-test-suite" id="creating-a-test-suite" style="color: inherit; text-decoration: none;">
 					<h3>Creating a test suite</h3>
 				</a>
 				<p>Pentf supports creating multiple test cases in the same file, which is commonly referred to as a suite.</p>
-				<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">suite</span>(<span class="hljs-params">test, describe</span>) </span>{
-    test(<span class="hljs-string">'should do something'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
-    test(<span class="hljs-string">'should do something else'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+				<pre><code class="language-js"><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">suite</span><span style="color: #000000">(</span><span style="color: #001080">test</span><span style="color: #000000">, </span><span style="color: #001080">describe</span><span style="color: #000000">) {</span>
+<span style="color: #000000">    </span><span style="color: #795E26">test</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;should do something&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000"> () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
+<span style="color: #000000">    </span><span style="color: #795E26">test</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;should do something else&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000"> () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
 
-    describe(<span class="hljs-string">'sub feature'</span>, () =&gt; {
-        test(<span class="hljs-string">'should work too'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
-    });
-}
+<span style="color: #000000">    </span><span style="color: #795E26">describe</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;sub feature&#039;</span><span style="color: #000000">, () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">        </span><span style="color: #795E26">test</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;should work too&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000"> () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
+<span style="color: #000000">    });</span>
+<span style="color: #000000">}</span>
 
-<span class="hljs-built_in">module</span>.exports = {
-    suite
-}</code></pre>
+<span style="color: #267F99">module</span><span style="color: #000000">.</span><span style="color: #267F99">exports</span><span style="color: #000000"> = {</span>
+<span style="color: #000000">    </span><span style="color: #001080">suite</span>
+<span style="color: #000000">}</span>
+</code></pre>
 				<p>Specific tests or groups can be focused by appending <code>.only</code>. Only those defined with that property will run when the current suite is executed.</p>
-				<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">suite</span>(<span class="hljs-params">test, describe</span>) </span>{
-    test(<span class="hljs-string">'I won\'t run'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
-    test.only(<span class="hljs-string">'I will run'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+				<pre><code class="language-js"><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">suite</span><span style="color: #000000">(</span><span style="color: #001080">test</span><span style="color: #000000">, </span><span style="color: #001080">describe</span><span style="color: #000000">) {</span>
+<span style="color: #000000">    </span><span style="color: #795E26">test</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;I won</span><span style="color: #EE0000">\&#039;</span><span style="color: #A31515">t run&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000"> () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
+<span style="color: #000000">    </span><span style="color: #001080">test</span><span style="color: #000000">.</span><span style="color: #795E26">only</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;I will run&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000"> () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
 
-    describe.only(<span class="hljs-string">'foo'</span>, () =&gt; {
-        test(<span class="hljs-string">'I will run too'</span>, <span class="hljs-keyword">async</span>() =&gt; {});
-    });
-}</code></pre>
+<span style="color: #000000">    </span><span style="color: #001080">describe</span><span style="color: #000000">.</span><span style="color: #795E26">only</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;foo&#039;</span><span style="color: #000000">, () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">        </span><span style="color: #795E26">test</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;I will run too&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000">() </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
+<span style="color: #000000">    });</span>
+<span style="color: #000000">}</span>
+</code></pre>
 				<p>Test cases or groups can be skipped in a similar way by appending <code>.skip</code>. Those tests will not be executed during a test run.</p>
-				<pre><code class="language-js"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">suite</span>(<span class="hljs-params">test, describe</span>) </span>{
-    test(<span class="hljs-string">'I will run'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
-    test.skip(<span class="hljs-string">'I won\'t run'</span>, <span class="hljs-keyword">async</span> () =&gt; {});
+				<pre><code class="language-js"><span style="color: #0000FF">function</span><span style="color: #000000"> </span><span style="color: #795E26">suite</span><span style="color: #000000">(</span><span style="color: #001080">test</span><span style="color: #000000">, </span><span style="color: #001080">describe</span><span style="color: #000000">) {</span>
+<span style="color: #000000">    </span><span style="color: #795E26">test</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;I will run&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000"> () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
+<span style="color: #000000">    </span><span style="color: #001080">test</span><span style="color: #000000">.</span><span style="color: #795E26">skip</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;I won</span><span style="color: #EE0000">\&#039;</span><span style="color: #A31515">t run&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000"> () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
 
-    describe.skip(<span class="hljs-string">'foo'</span>, () =&gt; {
-        test(<span class="hljs-string">'I won\'t run'</span>, <span class="hljs-keyword">async</span>() =&gt; {});
-    });
-}</code></pre>
+<span style="color: #000000">    </span><span style="color: #001080">describe</span><span style="color: #000000">.</span><span style="color: #795E26">skip</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;foo&#039;</span><span style="color: #000000">, () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">        </span><span style="color: #795E26">test</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;I won</span><span style="color: #EE0000">\&#039;</span><span style="color: #A31515">t run&#039;</span><span style="color: #000000">, </span><span style="color: #0000FF">async</span><span style="color: #000000">() </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {});</span>
+<span style="color: #000000">    });</span>
+<span style="color: #000000">}</span>
+</code></pre>
 				<a href="#tips-for-writing-good-tests" id="tips-for-writing-good-tests" style="color: inherit; text-decoration: none;">
 					<h2>Tips for writing good tests</h2>
 				</a>
@@ -242,28 +247,32 @@
 				</a>
 				<p>Make sure that an action you are waiting on has not already happend. In particular, <code>await page.waitForNavigation()</code> calls should probably be replaced by checks for the new page.</p>
 				<p><strong>Avoid</strong>:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">await</span> page.press(<span class="hljs-string">'Enter'</span>);
-<span class="hljs-comment">// If the page is quick, navigation may have already occured here!</span>
-<span class="hljs-keyword">await</span> page.waitForNavigation();
-<span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">'email sent'</span>);
+				<pre><code class="language-javascript"><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">page</span><span style="color: #000000">.</span><span style="color: #795E26">press</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Enter&#039;</span><span style="color: #000000">);</span>
+<span style="color: #008000">// If the page is quick, navigation may have already occured here!</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">page</span><span style="color: #000000">.</span><span style="color: #795E26">waitForNavigation</span><span style="color: #000000">();</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">waitForText</span><span style="color: #000000">(</span><span style="color: #001080">page</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;email sent&#039;</span><span style="color: #000000">);</span>
 
-<span class="hljs-keyword">const</span> since = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(); <span class="hljs-comment">// Too late, email may already have been sent!</span>
-<span class="hljs-keyword">await</span> getMail(config, since, email, <span class="hljs-string">'Enter was pressed'</span>);</code></pre>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">since</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">Date</span><span style="color: #000000">(); </span><span style="color: #008000">// Too late, email may already have been sent!</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">getMail</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">, </span><span style="color: #001080">since</span><span style="color: #000000">, </span><span style="color: #001080">email</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;Enter was pressed&#039;</span><span style="color: #000000">);</span>
+</code></pre>
 				<p><strong>Use</strong>:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> since = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>();
-<span class="hljs-keyword">await</span> page.press(<span class="hljs-string">'Enter'</span>);
-<span class="hljs-keyword">await</span> waitForText(page, <span class="hljs-string">'email sent'</span>);
+				<pre><code class="language-javascript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">since</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">Date</span><span style="color: #000000">();</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">page</span><span style="color: #000000">.</span><span style="color: #795E26">press</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;Enter&#039;</span><span style="color: #000000">);</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">waitForText</span><span style="color: #000000">(</span><span style="color: #001080">page</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;email sent&#039;</span><span style="color: #000000">);</span>
 
-<span class="hljs-keyword">await</span> getMail(config, since, email, <span class="hljs-string">'Enter was pressed'</span>);</code></pre>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">getMail</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">, </span><span style="color: #001080">since</span><span style="color: #000000">, </span><span style="color: #001080">email</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;Enter was pressed&#039;</span><span style="color: #000000">);</span>
+</code></pre>
 				<a href="#click-atomically-if-the-application-updates-its-dom-a-lot" id="click-atomically-if-the-application-updates-its-dom-a-lot" style="color: inherit; text-decoration: none;">
 					<h3>Click atomically if the application updates its DOM a lot</h3>
 				</a>
 				<p>If the application rerenders its DOM with JavaScript, you must take special care not to hold onto handles, because they might be invalid (the DOM nodes replaced by other ones) by the time you interact with them again.</p>
 				<p><strong>Avoid</strong>:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> buttonHandle = <span class="hljs-keyword">await</span> page.waitForSelector(<span class="hljs-string">'button[data-testid="send-email"]'</span>);
-buttonHandle.click();</code></pre>
+				<pre><code class="language-javascript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">buttonHandle</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">page</span><span style="color: #000000">.</span><span style="color: #795E26">waitForSelector</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;button[data-testid=&quot;send-email&quot;]&#039;</span><span style="color: #000000">);</span>
+<span style="color: #001080">buttonHandle</span><span style="color: #000000">.</span><span style="color: #795E26">click</span><span style="color: #000000">();</span>
+</code></pre>
 				<p><strong>Use</strong> atomic clicking functions, e.g. from <a href="https://boxine.github.io/pentf/modules/_browser_utils_.html"><code>browser_utils</code></a>:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">await</span> clickTestId(page, <span class="hljs-string">'send-email'</span>);</code></pre>
+				<pre><code class="language-javascript"><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">clickTestId</span><span style="color: #000000">(</span><span style="color: #001080">page</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;send-email&#039;</span><span style="color: #000000">);</span>
+</code></pre>
 				<a href="#segregate-tests-by-service" id="segregate-tests-by-service" style="color: inherit; text-decoration: none;">
 					<h3>Segregate tests by service</h3>
 				</a>
@@ -275,17 +284,19 @@ buttonHandle.click();</code></pre>
 				</a>
 				<p>When an error occurs, the test should abort immediately and not keep going on. This makes it clear where the error is and avoids confusion. A helpful error message is quick to write and saves a lot of debugging time later.</p>
 				<p><strong>Avoid</strong>:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> id = data.foo.bar.id;
-<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`https://example.org/widget/<span class="hljs-subst">${id}</span>`</span>);
-<span class="hljs-keyword">const</span> text = <span class="hljs-keyword">await</span> response.text();</code></pre>
+				<pre><code class="language-javascript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">id</span><span style="color: #000000"> = </span><span style="color: #001080">data</span><span style="color: #000000">.</span><span style="color: #001080">foo</span><span style="color: #000000">.</span><span style="color: #001080">bar</span><span style="color: #000000">.</span><span style="color: #001080">id</span><span style="color: #000000">;</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">response</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">fetch</span><span style="color: #000000">(</span><span style="color: #A31515">`https://example.org/widget/</span><span style="color: #0000FF">${</span><span style="color: #001080">id</span><span style="color: #0000FF">}</span><span style="color: #A31515">`</span><span style="color: #000000">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">text</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">response</span><span style="color: #000000">.</span><span style="color: #795E26">text</span><span style="color: #000000">();</span>
+</code></pre>
 				<p>What happens if the ID is not found? Then we will request <code>https://example.org/widget/undefined</code>!
 				If the server is down, the text we get back may be an error page.</p>
 				<p><strong>Use</strong>:</p>
-				<pre><code class="language-javascript"><span class="hljs-keyword">const</span> id = data.foo.bar.id;
-assert(id, <span class="hljs-string">'ID is not set – unrecognized error in the backend?'</span>);
-<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(<span class="hljs-string">`https://example.org/widget/<span class="hljs-subst">${id}</span>`</span>);
-assert.equal(response.status, <span class="hljs-number">200</span>);
-<span class="hljs-keyword">const</span> text = <span class="hljs-keyword">await</span> response.text();</code></pre>
+				<pre><code class="language-javascript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">id</span><span style="color: #000000"> = </span><span style="color: #001080">data</span><span style="color: #000000">.</span><span style="color: #001080">foo</span><span style="color: #000000">.</span><span style="color: #001080">bar</span><span style="color: #000000">.</span><span style="color: #001080">id</span><span style="color: #000000">;</span>
+<span style="color: #795E26">assert</span><span style="color: #000000">(</span><span style="color: #001080">id</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;ID is not set – unrecognized error in the backend?&#039;</span><span style="color: #000000">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">response</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">fetch</span><span style="color: #000000">(</span><span style="color: #A31515">`https://example.org/widget/</span><span style="color: #0000FF">${</span><span style="color: #001080">id</span><span style="color: #0000FF">}</span><span style="color: #A31515">`</span><span style="color: #000000">);</span>
+<span style="color: #001080">assert</span><span style="color: #000000">.</span><span style="color: #795E26">equal</span><span style="color: #000000">(</span><span style="color: #001080">response</span><span style="color: #000000">.</span><span style="color: #001080">status</span><span style="color: #000000">, </span><span style="color: #098658">200</span><span style="color: #000000">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">text</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">response</span><span style="color: #000000">.</span><span style="color: #795E26">text</span><span style="color: #000000">();</span>
+</code></pre>
 				<a href="#use-assert-in-strict-mode" id="use-assert-in-strict-mode" style="color: inherit; text-decoration: none;">
 					<h3>Use <code>assert</code> in strict mode</h3>
 				</a>
@@ -296,18 +307,20 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 					<h2>Skipping tests</h2>
 				</a>
 				<p>If a test should not run within an environment – maybe the tested service is not available in that environment, or you don&#39;t want to run a DoS test against prod – you can skip it. Simply export a function <code>skip</code> that gets called with the pentf configuration object. It returns true or a non-empty string to indicate that the test should be skipped, like this:</p>
-				<pre><code class="language-javascript"><span class="hljs-built_in">module</span>.exports = {
-    run,
-    <span class="hljs-attr">skip</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> (config.env === <span class="hljs-string">'prod'</span>) &amp;&amp; <span class="hljs-string">'This test could impact customers and is therefore not run against prod'</span>,
-};</code></pre>
+				<pre><code class="language-javascript"><span style="color: #267F99">module</span><span style="color: #000000">.</span><span style="color: #267F99">exports</span><span style="color: #000000"> = {</span>
+<span style="color: #000000">    </span><span style="color: #001080">run</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #795E26">skip</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #001080">config</span><span style="color: #000000"> </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> (</span><span style="color: #001080">config</span><span style="color: #000000">.</span><span style="color: #001080">env</span><span style="color: #000000"> === </span><span style="color: #A31515">&#039;prod&#039;</span><span style="color: #000000">) &amp;&amp; </span><span style="color: #A31515">&#039;This test could impact customers and is therefore not run against prod&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">};</span>
+</code></pre>
 				<a href="#test-driven-development-with-expectedtofail" id="test-driven-development-with-expectedtofail" style="color: inherit; text-decoration: none;">
 					<h2>Test-driven development with <code>expectedToFail</code></h2>
 				</a>
 				<p>If you write the test before a bug is fixed or a new feature is deployed, you can mark the test as <code>expectedToFail</code>. An <code>expectedToFail</code> test is still run, but if it fails the pipeline will still be green. If an <code>expectedToFail</code> test succeeds, a warning is printed, but the test is still seen as successful. It is a good idea to include a ticket number in the output so that everybody can look up the status, like this:</p>
-				<pre><code class="language-javascript"><span class="hljs-built_in">module</span>.exports = {
-    run,
-    <span class="hljs-attr">expectedToFail</span>: <span class="hljs-function"><span class="hljs-params">config</span> =&gt;</span> [<span class="hljs-string">'stage'</span>, <span class="hljs-string">'prod'</span>].includes(config.env) &amp;&amp; <span class="hljs-string">'Not yet rolled out (BUG-1234)'</span>,
-};</code></pre>
+				<pre><code class="language-javascript"><span style="color: #267F99">module</span><span style="color: #000000">.</span><span style="color: #267F99">exports</span><span style="color: #000000"> = {</span>
+<span style="color: #000000">    </span><span style="color: #001080">run</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #795E26">expectedToFail</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #001080">config</span><span style="color: #000000"> </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> [</span><span style="color: #A31515">&#039;stage&#039;</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;prod&#039;</span><span style="color: #000000">].</span><span style="color: #795E26">includes</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">.</span><span style="color: #001080">env</span><span style="color: #000000">) &amp;&amp; </span><span style="color: #A31515">&#039;Not yet rolled out (BUG-1234)&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">};</span>
+</code></pre>
 				<p>You can also mark a code section instead of a full test with the <a href="https://boxine.github.io/pentf/modules/_promise_utils_.html#expectedtofail">function <code>expectedToFail</code></a>.</p>
 				<p>Use <code>-E</code>/<code>--expect-nothing</code> to disable the expectedToFail special treatment.</p>
 				<a href="#configuration" id="configuration" style="color: inherit; text-decoration: none;">
@@ -325,135 +338,145 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 					<li><strong><code>extends</code></strong> Inherit from the specified environment. It is common to have a <code>_common</code> environment (i.e. a file <code>_common.json</code> or <code>common.</code>) which all environments inherit from. You can also construct combined environments, e.g. prod backend with a development frontend.</li>
 					<li><strong><code>external_locking_url</code></strong> Base URL of the external lockserver to use to avoid test runs on different machines using shared resources (such as test accounts, limited widgets etc.) at the same time (see <em>locking</em> below).</li>
 					<li><strong><code>email</code></strong> The base email address used in <a href="https://boxine.github.io/pentf/modules/_utils_.html#makerandomemail"><code>makeRandomEmail</code></a>.</li>
-					<li><strong><code>imap</code></strong> If you are using the <code>pentf/email</code> module to fetch and test emails, configure your imap connection here, like<pre><code><span class="hljs-string">"imap"</span>: {
-  <span class="hljs-string">"user"</span>: <span class="hljs-string">"user@example.com"</span>,
-  <span class="hljs-string">"password"</span>: <span class="hljs-string">"secret"</span>,
-  <span class="hljs-string">"host"</span>: <span class="hljs-string">"mail.example.com"</span>,
-  <span class="hljs-string">"port"</span>: <span class="hljs-number">993</span>,
-  <span class="hljs-string">"tls"</span>: <span class="hljs-literal">true</span>
-}</code></pre></li>
+					<li><strong><code>imap</code></strong> If you are using the <code>pentf/email</code> module to fetch and test emails, configure your imap connection here, like<pre><code><span style="color: #A31515">&quot;imap&quot;</span><span style="color: #000000">: {</span>
+<span style="color: #000000">  </span><span style="color: #A31515">&quot;user&quot;</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;user@example.com&quot;</span><span style="color: #000000">,</span>
+<span style="color: #000000">  </span><span style="color: #A31515">&quot;password&quot;</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;secret&quot;</span><span style="color: #000000">,</span>
+<span style="color: #000000">  </span><span style="color: #A31515">&quot;host&quot;</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;mail.example.com&quot;</span><span style="color: #000000">,</span>
+<span style="color: #000000">  </span><span style="color: #A31515">&quot;port&quot;</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #098658">993</span><span style="color: #000000">,</span>
+<span style="color: #000000">  </span><span style="color: #A31515">&quot;tls&quot;</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span>
+<span style="color: #000000">}</span>
+</code></pre>
+					</li>
 					<li><strong><code>rejectUnauthorized</code></strong> Set to <code>false</code> to not check the certificate in TLS connections.</li>
 				</ul>
 				<a href="#options" id="options" style="color: inherit; text-decoration: none;">
 					<h2>Options</h2>
 				</a>
-				<pre><code>-h, --help            Show this help message <span class="hljs-keyword">and</span> exit.
--e YOUR_ENVIRONMENTS, --env YOUR_ENVIRONMENTS
-                      The environment <span class="hljs-keyword">to</span> test against.<span class="hljs-built_in"> Default </span>is local.
---version             <span class="hljs-builtin-name">Print</span> version of tests <span class="hljs-keyword">and</span> test framework <span class="hljs-keyword">and</span> exit.
---config FILE         Path <span class="hljs-keyword">to</span><span class="hljs-built_in"> config </span>file. (Default: pentf.config.js)</code></pre>
+				<pre><code><span style="color: #000000">-</span><span style="color: #001080">h</span><span style="color: #000000">, --</span><span style="color: #001080">help</span><span style="color: #000000">            </span><span style="color: #001080">Show</span><span style="color: #000000"> </span><span style="color: #0000FF">this</span><span style="color: #000000"> </span><span style="color: #001080">help</span><span style="color: #000000"> </span><span style="color: #001080">message</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">exit</span><span style="color: #000000">.</span>
+<span style="color: #000000">-</span><span style="color: #001080">e</span><span style="color: #000000"> </span><span style="color: #0070C1">YOUR_ENVIRONMENTS</span><span style="color: #000000">, --</span><span style="color: #001080">env</span><span style="color: #000000"> </span><span style="color: #0070C1">YOUR_ENVIRONMENTS</span>
+<span style="color: #000000">                      </span><span style="color: #001080">The</span><span style="color: #000000"> </span><span style="color: #001080">environment</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">against</span><span style="color: #000000">. </span><span style="color: #001080">Default</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">local</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">version</span><span style="color: #000000">             </span><span style="color: #001080">Print</span><span style="color: #000000"> </span><span style="color: #001080">version</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">framework</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">exit</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">config</span><span style="color: #000000"> </span><span style="color: #0070C1">FILE</span><span style="color: #000000">         </span><span style="color: #001080">Path</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">config</span><span style="color: #000000"> </span><span style="color: #001080">file</span><span style="color: #000000">. (</span><span style="color: #001080">Default</span><span style="color: #000000">: </span><span style="color: #267F99">pentf</span><span style="color: #000000">.</span><span style="color: #267F99">config</span><span style="color: #000000">.</span><span style="color: #267F99">js</span><span style="color: #000000">)</span>
+</code></pre>
 				<a href="#output" id="output" style="color: inherit; text-decoration: none;">
 					<h6>Output</h6>
 				</a>
-				<pre><code>-v, --verbose         Let tests output diagnostic details
---<span class="hljs-keyword">log</span>-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>       Write verbose <span class="hljs-keyword">log</span> information to disk. Doesn't affect tty logging.
--q, --quiet           <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">test</span> status
---<span class="hljs-keyword">no</span>-<span class="hljs-keyword">clear</span>-<span class="hljs-keyword">line</span>, --<span class="hljs-keyword">ci</span>
-                      Never <span class="hljs-keyword">clear</span> the current output <span class="hljs-keyword">line</span> (<span class="hljs-keyword">as</span> <span class="hljs-keyword">if</span> output is not a tty)
---<span class="hljs-keyword">print</span>-config        Output the effective configuration and <span class="hljs-keyword">exit</span>.
--c, --<span class="hljs-keyword">print</span>-curl      <span class="hljs-keyword">Print</span> curl commands <span class="hljs-keyword">for</span> each HTTP request
--I REGEXP, --ignore-errors REGEXP
-                      <span class="hljs-keyword">Do</span> not output <span class="hljs-keyword">error</span> messages matching the regular expression. Example: -I 
-                      <span class="hljs-string">"\(TOC-[0-9]+\)"</span>
--<span class="hljs-keyword">E</span>, --expect-nothing  Ignore expectedToFail attributes <span class="hljs-keyword">on</span> tests
---<span class="hljs-keyword">no</span>-colors           Disable colors <span class="hljs-keyword">in</span> stdout</code></pre>
+				<pre><code><span style="color: #000000">-</span><span style="color: #001080">v</span><span style="color: #000000">, --</span><span style="color: #001080">verbose</span><span style="color: #000000">         </span><span style="color: #001080">Let</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">output</span><span style="color: #000000"> </span><span style="color: #001080">diagnostic</span><span style="color: #000000"> </span><span style="color: #001080">details</span>
+<span style="color: #000000">--</span><span style="color: #001080">log</span><span style="color: #000000">-</span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #0070C1">FILE</span><span style="color: #000000">       </span><span style="color: #001080">Write</span><span style="color: #000000"> </span><span style="color: #001080">verbose</span><span style="color: #000000"> </span><span style="color: #001080">log</span><span style="color: #000000"> </span><span style="color: #001080">information</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">disk</span><span style="color: #000000">. </span><span style="color: #001080">Doesn</span><span style="color: #A31515">&#039;t affect tty logging</span><span style="color: #CD3131">.</span>
+<span style="color: #000000">-</span><span style="color: #001080">q</span><span style="color: #000000">, --</span><span style="color: #001080">quiet</span><span style="color: #000000">           </span><span style="color: #001080">Do</span><span style="color: #000000"> </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">output</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">status</span>
+<span style="color: #000000">--</span><span style="color: #001080">no</span><span style="color: #000000">-</span><span style="color: #001080">clear</span><span style="color: #000000">-</span><span style="color: #001080">line</span><span style="color: #000000">, --</span><span style="color: #001080">ci</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Never</span><span style="color: #000000"> </span><span style="color: #001080">clear</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">current</span><span style="color: #000000"> </span><span style="color: #001080">output</span><span style="color: #000000"> </span><span style="color: #795E26">line</span><span style="color: #000000"> (</span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #267F99">if</span><span style="color: #000000"> </span><span style="color: #267F99">output</span><span style="color: #000000"> </span><span style="color: #267F99">is</span><span style="color: #000000"> </span><span style="color: #267F99">not</span><span style="color: #000000"> </span><span style="color: #267F99">a</span><span style="color: #000000"> </span><span style="color: #267F99">tty</span><span style="color: #000000">)</span>
+<span style="color: #000000">--</span><span style="color: #001080">print</span><span style="color: #000000">-</span><span style="color: #001080">config</span><span style="color: #000000">        </span><span style="color: #001080">Output</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">effective</span><span style="color: #000000"> </span><span style="color: #001080">configuration</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">exit</span><span style="color: #000000">.</span>
+<span style="color: #000000">-</span><span style="color: #001080">c</span><span style="color: #000000">, --</span><span style="color: #001080">print</span><span style="color: #000000">-</span><span style="color: #001080">curl</span><span style="color: #000000">      </span><span style="color: #001080">Print</span><span style="color: #000000"> </span><span style="color: #001080">curl</span><span style="color: #000000"> </span><span style="color: #001080">commands</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">each</span><span style="color: #000000"> </span><span style="color: #0070C1">HTTP</span><span style="color: #000000"> </span><span style="color: #001080">request</span>
+<span style="color: #000000">-</span><span style="color: #0070C1">I</span><span style="color: #000000"> </span><span style="color: #0070C1">REGEXP</span><span style="color: #000000">, --</span><span style="color: #001080">ignore</span><span style="color: #000000">-</span><span style="color: #001080">errors</span><span style="color: #000000"> </span><span style="color: #0070C1">REGEXP</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Do</span><span style="color: #000000"> </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">output</span><span style="color: #000000"> </span><span style="color: #001080">error</span><span style="color: #000000"> </span><span style="color: #001080">messages</span><span style="color: #000000"> </span><span style="color: #001080">matching</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">regular</span><span style="color: #000000"> </span><span style="color: #001080">expression</span><span style="color: #000000">. </span><span style="color: #001080">Example</span><span style="color: #000000">: -</span><span style="color: #0070C1">I</span><span style="color: #000000"> </span>
+<span style="color: #000000">                      </span><span style="color: #A31515">&quot;</span><span style="color: #EE0000">\(</span><span style="color: #A31515">TOC-[0-9]+</span><span style="color: #EE0000">\)</span><span style="color: #A31515">&quot;</span>
+<span style="color: #000000">-</span><span style="color: #0070C1">E</span><span style="color: #000000">, --</span><span style="color: #001080">expect</span><span style="color: #000000">-</span><span style="color: #001080">nothing</span><span style="color: #000000">  </span><span style="color: #001080">Ignore</span><span style="color: #000000"> </span><span style="color: #001080">expectedToFail</span><span style="color: #000000"> </span><span style="color: #001080">attributes</span><span style="color: #000000"> </span><span style="color: #001080">on</span><span style="color: #000000"> </span><span style="color: #001080">tests</span>
+<span style="color: #000000">--</span><span style="color: #001080">no</span><span style="color: #000000">-</span><span style="color: #001080">colors</span><span style="color: #000000">           </span><span style="color: #001080">Disable</span><span style="color: #000000"> </span><span style="color: #001080">colors</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">stdout</span>
+</code></pre>
 				<a href="#writing-results-to-disk" id="writing-results-to-disk" style="color: inherit; text-decoration: none;">
 					<h6>Writing results to disk</h6>
 				</a>
-				<pre><code>-J, --json            <span class="hljs-keyword">Write</span> tests results <span class="hljs-keyword">as</span> a JSON <span class="hljs-keyword">file</span>.
---json-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.json
-                      JSON <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.json .
--H, --html            <span class="hljs-keyword">Write</span> test results <span class="hljs-keyword">as</span> an HTML <span class="hljs-keyword">file</span>.
---html-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.html
-                      HTML <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.html .
---pdf                 <span class="hljs-keyword">Write</span> test results <span class="hljs-keyword">as</span> a PDF <span class="hljs-keyword">file</span>. (Now enabled by <span class="hljs-keyword">default</span>)
---no-pdf              <span class="hljs-keyword">Do</span> <span class="hljs-keyword">not</span> <span class="hljs-keyword">write</span> a PDF report <span class="hljs-keyword">with</span> test results.
---pdf-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.pdf   PDF <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.pdf .
--M, --markdown        <span class="hljs-keyword">Write</span> tests results <span class="hljs-keyword">as</span> a Markdown <span class="hljs-keyword">file</span>.
---markdown-<span class="hljs-keyword">file</span> <span class="hljs-keyword">FILE</span>.md
-                      Markdown <span class="hljs-keyword">file</span> <span class="hljs-keyword">to</span> <span class="hljs-keyword">write</span> a report <span class="hljs-keyword">to</span>. Defaults <span class="hljs-keyword">to</span> results.md .
---load-json INPUT.json
-                      Load test results from JSON (instead <span class="hljs-keyword">of</span> executing tests)
---sentry              Enable error reporting via Sentry. By <span class="hljs-keyword">default</span>, this will be activated <span class="hljs-keyword">if</span> the CI 
-                      environment variable <span class="hljs-keyword">is</span> <span class="hljs-keyword">set</span> <span class="hljs-keyword">and</span> a SENTRY_DSN <span class="hljs-keyword">is</span> configured.
---no-sentry           Disable error reporting via Sentry even <span class="hljs-keyword">if</span> it <span class="hljs-keyword">is</span> configured
---sentry-dsn OVERRIDE_SENTRY_DSN
-                      <span class="hljs-keyword">Override</span> Sentry DSN. By <span class="hljs-keyword">default</span>, the SENTRY_DSN environment variable <span class="hljs-keyword">is</span> used.</code></pre>
+				<pre><code><span style="color: #000000">-</span><span style="color: #0070C1">J</span><span style="color: #000000">, --</span><span style="color: #001080">json</span><span style="color: #000000">            </span><span style="color: #001080">Write</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #267F99">a</span><span style="color: #000000"> </span><span style="color: #267F99">JSON</span><span style="color: #000000"> </span><span style="color: #267F99">file</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">json</span><span style="color: #000000">-</span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #0070C1">FILE</span><span style="color: #000000">.</span><span style="color: #001080">json</span>
+<span style="color: #000000">                      </span><span style="color: #267F99">JSON</span><span style="color: #000000"> </span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">write</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000">. </span><span style="color: #001080">Defaults</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000">.</span><span style="color: #001080">json</span><span style="color: #000000"> .</span>
+<span style="color: #000000">-</span><span style="color: #0070C1">H</span><span style="color: #000000">, --</span><span style="color: #001080">html</span><span style="color: #000000">            </span><span style="color: #001080">Write</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #267F99">an</span><span style="color: #000000"> </span><span style="color: #267F99">HTML</span><span style="color: #000000"> </span><span style="color: #267F99">file</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">html</span><span style="color: #000000">-</span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #0070C1">FILE</span><span style="color: #000000">.</span><span style="color: #001080">html</span>
+<span style="color: #000000">                      </span><span style="color: #0070C1">HTML</span><span style="color: #000000"> </span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">write</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">report</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000">. </span><span style="color: #001080">Defaults</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000">.</span><span style="color: #001080">html</span><span style="color: #000000"> .</span>
+<span style="color: #000000">--</span><span style="color: #001080">pdf</span><span style="color: #000000">                 </span><span style="color: #001080">Write</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #267F99">a</span><span style="color: #000000"> </span><span style="color: #267F99">PDF</span><span style="color: #000000"> </span><span style="color: #267F99">file</span><span style="color: #000000">. (</span><span style="color: #267F99">Now</span><span style="color: #000000"> </span><span style="color: #267F99">enabled</span><span style="color: #000000"> </span><span style="color: #267F99">by</span><span style="color: #000000"> </span><span style="color: #267F99">default</span><span style="color: #000000">)</span>
+<span style="color: #000000">--</span><span style="color: #001080">no</span><span style="color: #000000">-</span><span style="color: #001080">pdf</span><span style="color: #000000">              </span><span style="color: #001080">Do</span><span style="color: #000000"> </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">write</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #0070C1">PDF</span><span style="color: #000000"> </span><span style="color: #001080">report</span><span style="color: #000000"> </span><span style="color: #AF00DB">with</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">pdf</span><span style="color: #000000">-</span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #0070C1">FILE</span><span style="color: #000000">.</span><span style="color: #001080">pdf</span><span style="color: #000000">   </span><span style="color: #0070C1">PDF</span><span style="color: #000000"> </span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">write</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">report</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000">. </span><span style="color: #001080">Defaults</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000">.</span><span style="color: #001080">pdf</span><span style="color: #000000"> .</span>
+<span style="color: #000000">-</span><span style="color: #0070C1">M</span><span style="color: #000000">, --</span><span style="color: #001080">markdown</span><span style="color: #000000">        </span><span style="color: #001080">Write</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #267F99">a</span><span style="color: #000000"> </span><span style="color: #267F99">Markdown</span><span style="color: #000000"> </span><span style="color: #267F99">file</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">markdown</span><span style="color: #000000">-</span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #0070C1">FILE</span><span style="color: #000000">.</span><span style="color: #001080">md</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Markdown</span><span style="color: #000000"> </span><span style="color: #001080">file</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">write</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">report</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000">. </span><span style="color: #001080">Defaults</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000">.</span><span style="color: #001080">md</span><span style="color: #000000"> .</span>
+<span style="color: #000000">--</span><span style="color: #001080">load</span><span style="color: #000000">-</span><span style="color: #001080">json</span><span style="color: #000000"> </span><span style="color: #0070C1">INPUT</span><span style="color: #000000">.</span><span style="color: #001080">json</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Load</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">results</span><span style="color: #000000"> </span><span style="color: #001080">from</span><span style="color: #000000"> </span><span style="color: #267F99">JSON</span><span style="color: #000000"> (</span><span style="color: #001080">instead</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">executing</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000">)</span>
+<span style="color: #000000">--</span><span style="color: #001080">sentry</span><span style="color: #000000">              </span><span style="color: #001080">Enable</span><span style="color: #000000"> </span><span style="color: #001080">error</span><span style="color: #000000"> </span><span style="color: #001080">reporting</span><span style="color: #000000"> </span><span style="color: #001080">via</span><span style="color: #000000"> </span><span style="color: #001080">Sentry</span><span style="color: #000000">. </span><span style="color: #001080">By</span><span style="color: #000000"> </span><span style="color: #AF00DB">default</span><span style="color: #000000">, </span><span style="color: #0000FF">this</span><span style="color: #000000"> </span><span style="color: #001080">will</span><span style="color: #000000"> </span><span style="color: #001080">be</span><span style="color: #000000"> </span><span style="color: #001080">activated</span><span style="color: #000000"> </span><span style="color: #AF00DB">if</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #0070C1">CI</span><span style="color: #000000"> </span>
+<span style="color: #000000">                      </span><span style="color: #001080">environment</span><span style="color: #000000"> </span><span style="color: #001080">variable</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">set</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #0070C1">SENTRY_DSN</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">configured</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">no</span><span style="color: #000000">-</span><span style="color: #001080">sentry</span><span style="color: #000000">           </span><span style="color: #001080">Disable</span><span style="color: #000000"> </span><span style="color: #001080">error</span><span style="color: #000000"> </span><span style="color: #001080">reporting</span><span style="color: #000000"> </span><span style="color: #001080">via</span><span style="color: #000000"> </span><span style="color: #001080">Sentry</span><span style="color: #000000"> </span><span style="color: #001080">even</span><span style="color: #000000"> </span><span style="color: #AF00DB">if</span><span style="color: #000000"> </span><span style="color: #001080">it</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">configured</span>
+<span style="color: #000000">--</span><span style="color: #001080">sentry</span><span style="color: #000000">-</span><span style="color: #001080">dsn</span><span style="color: #000000"> </span><span style="color: #0070C1">OVERRIDE_SENTRY_DSN</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Override</span><span style="color: #000000"> </span><span style="color: #001080">Sentry</span><span style="color: #000000"> </span><span style="color: #0070C1">DSN</span><span style="color: #000000">. </span><span style="color: #001080">By</span><span style="color: #000000"> </span><span style="color: #AF00DB">default</span><span style="color: #000000">, </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #0070C1">SENTRY_DSN</span><span style="color: #000000"> </span><span style="color: #001080">environment</span><span style="color: #000000"> </span><span style="color: #001080">variable</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">used</span><span style="color: #000000">.</span>
+</code></pre>
 				<a href="#test-selection" id="test-selection" style="color: inherit; text-decoration: none;">
 					<h6>Test selection</h6>
 				</a>
-				<pre><code>-<span class="hljs-keyword">f</span> REGEXP, --<span class="hljs-built_in">filter</span> REGEXP
-                      Regular expression <span class="hljs-keyword">to</span> <span class="hljs-keyword">match</span> names of tests <span class="hljs-keyword">to</span> run
--<span class="hljs-keyword">b</span> REGEXP, --<span class="hljs-built_in">filter</span>-body REGEXP
-                      Run <span class="hljs-keyword">only</span> tests whose full code <span class="hljs-keyword">is</span> matched by this regular expression
--<span class="hljs-keyword">l</span>, --<span class="hljs-keyword">list</span>            List <span class="hljs-keyword">all</span> tests that would <span class="hljs-keyword">be</span> run <span class="hljs-built_in">and</span> <span class="hljs-keyword">exit</span>
--<span class="hljs-keyword">a</span>, --<span class="hljs-keyword">all</span>, --include-slow-tests
-                      Run tests that take <span class="hljs-keyword">a</span> very long time
---tests-<span class="hljs-built_in">glob</span> TESTSGLOB
-                      Glob pattern <span class="hljs-keyword">to</span> use when searching test <span class="hljs-keyword">files</span></code></pre>
+				<pre><code><span style="color: #000000">-</span><span style="color: #001080">f</span><span style="color: #000000"> </span><span style="color: #0070C1">REGEXP</span><span style="color: #000000">, --</span><span style="color: #001080">filter</span><span style="color: #000000"> </span><span style="color: #0070C1">REGEXP</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Regular</span><span style="color: #000000"> </span><span style="color: #001080">expression</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">match</span><span style="color: #000000"> </span><span style="color: #001080">names</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">run</span>
+<span style="color: #000000">-</span><span style="color: #001080">b</span><span style="color: #000000"> </span><span style="color: #0070C1">REGEXP</span><span style="color: #000000">, --</span><span style="color: #001080">filter</span><span style="color: #000000">-</span><span style="color: #001080">body</span><span style="color: #000000"> </span><span style="color: #0070C1">REGEXP</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Run</span><span style="color: #000000"> </span><span style="color: #001080">only</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">whose</span><span style="color: #000000"> </span><span style="color: #001080">full</span><span style="color: #000000"> </span><span style="color: #001080">code</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">matched</span><span style="color: #000000"> </span><span style="color: #001080">by</span><span style="color: #000000"> </span><span style="color: #0000FF">this</span><span style="color: #000000"> </span><span style="color: #001080">regular</span><span style="color: #000000"> </span><span style="color: #001080">expression</span>
+<span style="color: #000000">-</span><span style="color: #001080">l</span><span style="color: #000000">, --</span><span style="color: #001080">list</span><span style="color: #000000">            </span><span style="color: #001080">List</span><span style="color: #000000"> </span><span style="color: #001080">all</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">that</span><span style="color: #000000"> </span><span style="color: #001080">would</span><span style="color: #000000"> </span><span style="color: #001080">be</span><span style="color: #000000"> </span><span style="color: #001080">run</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">exit</span>
+<span style="color: #000000">-</span><span style="color: #001080">a</span><span style="color: #000000">, --</span><span style="color: #001080">all</span><span style="color: #000000">, --</span><span style="color: #001080">include</span><span style="color: #000000">-</span><span style="color: #001080">slow</span><span style="color: #000000">-</span><span style="color: #001080">tests</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Run</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">that</span><span style="color: #000000"> </span><span style="color: #001080">take</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">very</span><span style="color: #000000"> </span><span style="color: #001080">long</span><span style="color: #000000"> </span><span style="color: #001080">time</span>
+<span style="color: #000000">--</span><span style="color: #001080">tests</span><span style="color: #000000">-</span><span style="color: #001080">glob</span><span style="color: #000000"> </span><span style="color: #0070C1">TESTSGLOB</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Glob</span><span style="color: #000000"> </span><span style="color: #001080">pattern</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">use</span><span style="color: #000000"> </span><span style="color: #001080">when</span><span style="color: #000000"> </span><span style="color: #001080">searching</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">files</span>
+</code></pre>
 				<a href="#email" id="email" style="color: inherit; text-decoration: none;">
 					<h6>Email</h6>
 				</a>
-				<pre><code>--<span class="hljs-meta">keep</span>-emails         <span class="hljs-meta">Keep</span> generated emails instead of deleting them
---email-verbose       Log all IMAP commands <span class="hljs-keyword">and </span>responses</code></pre>
+				<pre><code><span style="color: #000000">--</span><span style="color: #001080">keep</span><span style="color: #000000">-</span><span style="color: #001080">emails</span><span style="color: #000000">         </span><span style="color: #001080">Keep</span><span style="color: #000000"> </span><span style="color: #001080">generated</span><span style="color: #000000"> </span><span style="color: #001080">emails</span><span style="color: #000000"> </span><span style="color: #001080">instead</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">deleting</span><span style="color: #000000"> </span><span style="color: #001080">them</span>
+<span style="color: #000000">--</span><span style="color: #001080">email</span><span style="color: #000000">-</span><span style="color: #001080">verbose</span><span style="color: #000000">       </span><span style="color: #001080">Log</span><span style="color: #000000"> </span><span style="color: #001080">all</span><span style="color: #000000"> </span><span style="color: #0070C1">IMAP</span><span style="color: #000000"> </span><span style="color: #001080">commands</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">responses</span>
+</code></pre>
 				<a href="#puppeteer-browser-test" id="puppeteer-browser-test" style="color: inherit; text-decoration: none;">
 					<h6>puppeteer browser test</h6>
 				</a>
-				<pre><code>-V, --visible         Make browser tests visible (i.e. <span class="hljs-keyword">not</span> headless)
---no-screenshots      <span class="hljs-keyword">Do</span> <span class="hljs-keyword">not</span> take screenshots of browser failures
---screenshot-directory DIR
-                      Directory <span class="hljs-keyword">to</span> write screenshots <span class="hljs-keyword">to</span> (default: ./screenshots)
---snapshot-directory DIR
-                      Directory <span class="hljs-keyword">to</span> write snapshots <span class="hljs-keyword">to</span> (default: ./snapshots)
--u, --update-snapshots
-                      Update existing snapshots on mismatch
--s MS, --slow-mo MS   Wait this many milliseconds after every call <span class="hljs-keyword">to</span> the virtual browser
--k, --keep-open       Keep browser sessions open <span class="hljs-keyword">in</span> case of failures. Implies -V.
---devtools            Start browser with devtools open. Implies -V
---devtools-preserve   Configure devtools <span class="hljs-keyword">to</span> preserve logs <span class="hljs-keyword">and</span><span class="hljs-built_in"> network </span>requests upon navigation. Implies 
-                      --devtools
---extensions [EXTENSION_DIR [EXTENSION_DIR <span class="hljs-built_in">..</span>.]]
-                      Load unpacked browser extensions
---forward-console     Forward browser<span class="hljs-built_in"> console </span>logs
---show-interactions   Visually show on the<span class="hljs-built_in"> page </span>where a<span class="hljs-built_in"> user </span>interaction took place (clicks, taps,<span class="hljs-built_in">..</span>.)
--d, --<span class="hljs-builtin-name">debug</span>           Shorthand <span class="hljs-keyword">for</span> <span class="hljs-string">"--keep-open --devtools-preserve --forward-console"</span>
---default-timeout MS <span class="hljs-built_in"> Default </span>timeout value <span class="hljs-keyword">for</span> various browser functions (default: 30s)</code></pre>
+				<pre><code><span style="color: #000000">-</span><span style="color: #0070C1">V</span><span style="color: #000000">, --</span><span style="color: #001080">visible</span><span style="color: #000000">         </span><span style="color: #001080">Make</span><span style="color: #000000"> </span><span style="color: #001080">browser</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #795E26">visible</span><span style="color: #000000"> (</span><span style="color: #001080">i</span><span style="color: #000000">.</span><span style="color: #001080">e</span><span style="color: #000000">. </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">headless</span><span style="color: #000000">)</span>
+<span style="color: #000000">--</span><span style="color: #001080">no</span><span style="color: #000000">-</span><span style="color: #001080">screenshots</span><span style="color: #000000">      </span><span style="color: #001080">Do</span><span style="color: #000000"> </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">take</span><span style="color: #000000"> </span><span style="color: #001080">screenshots</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">browser</span><span style="color: #000000"> </span><span style="color: #001080">failures</span>
+<span style="color: #000000">--</span><span style="color: #001080">screenshot</span><span style="color: #000000">-</span><span style="color: #001080">directory</span><span style="color: #000000"> </span><span style="color: #0070C1">DIR</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Directory</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">write</span><span style="color: #000000"> </span><span style="color: #001080">screenshots</span><span style="color: #000000"> </span><span style="color: #795E26">to</span><span style="color: #000000"> (</span><span style="color: #001080">default</span><span style="color: #000000">: ./</span><span style="color: #001080">screenshots</span><span style="color: #000000">)</span>
+<span style="color: #000000">--</span><span style="color: #001080">snapshot</span><span style="color: #000000">-</span><span style="color: #001080">directory</span><span style="color: #000000"> </span><span style="color: #0070C1">DIR</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Directory</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">write</span><span style="color: #000000"> </span><span style="color: #001080">snapshots</span><span style="color: #000000"> </span><span style="color: #795E26">to</span><span style="color: #000000"> (</span><span style="color: #001080">default</span><span style="color: #000000">: ./</span><span style="color: #001080">snapshots</span><span style="color: #000000">)</span>
+<span style="color: #000000">-</span><span style="color: #001080">u</span><span style="color: #000000">, --</span><span style="color: #001080">update</span><span style="color: #000000">-</span><span style="color: #001080">snapshots</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Update</span><span style="color: #000000"> </span><span style="color: #001080">existing</span><span style="color: #000000"> </span><span style="color: #001080">snapshots</span><span style="color: #000000"> </span><span style="color: #001080">on</span><span style="color: #000000"> </span><span style="color: #001080">mismatch</span>
+<span style="color: #000000">-</span><span style="color: #001080">s</span><span style="color: #000000"> </span><span style="color: #0070C1">MS</span><span style="color: #000000">, --</span><span style="color: #001080">slow</span><span style="color: #000000">-</span><span style="color: #001080">mo</span><span style="color: #000000"> </span><span style="color: #0070C1">MS</span><span style="color: #000000">   </span><span style="color: #001080">Wait</span><span style="color: #000000"> </span><span style="color: #0000FF">this</span><span style="color: #000000"> </span><span style="color: #001080">many</span><span style="color: #000000"> </span><span style="color: #001080">milliseconds</span><span style="color: #000000"> </span><span style="color: #001080">after</span><span style="color: #000000"> </span><span style="color: #001080">every</span><span style="color: #000000"> </span><span style="color: #001080">call</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">virtual</span><span style="color: #000000"> </span><span style="color: #001080">browser</span>
+<span style="color: #000000">-</span><span style="color: #001080">k</span><span style="color: #000000">, --</span><span style="color: #001080">keep</span><span style="color: #000000">-</span><span style="color: #001080">open</span><span style="color: #000000">       </span><span style="color: #001080">Keep</span><span style="color: #000000"> </span><span style="color: #001080">browser</span><span style="color: #000000"> </span><span style="color: #001080">sessions</span><span style="color: #000000"> </span><span style="color: #001080">open</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #AF00DB">case</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">failures</span><span style="color: #000000">. </span><span style="color: #001080">Implies</span><span style="color: #000000"> -</span><span style="color: #0070C1">V</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">devtools</span><span style="color: #000000">            </span><span style="color: #001080">Start</span><span style="color: #000000"> </span><span style="color: #001080">browser</span><span style="color: #000000"> </span><span style="color: #AF00DB">with</span><span style="color: #000000"> </span><span style="color: #001080">devtools</span><span style="color: #000000"> </span><span style="color: #001080">open</span><span style="color: #000000">. </span><span style="color: #001080">Implies</span><span style="color: #000000"> -</span><span style="color: #0070C1">V</span>
+<span style="color: #000000">--</span><span style="color: #001080">devtools</span><span style="color: #000000">-</span><span style="color: #001080">preserve</span><span style="color: #000000">   </span><span style="color: #001080">Configure</span><span style="color: #000000"> </span><span style="color: #001080">devtools</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">preserve</span><span style="color: #000000"> </span><span style="color: #001080">logs</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">network</span><span style="color: #000000"> </span><span style="color: #001080">requests</span><span style="color: #000000"> </span><span style="color: #001080">upon</span><span style="color: #000000"> </span><span style="color: #001080">navigation</span><span style="color: #000000">. </span><span style="color: #001080">Implies</span><span style="color: #000000"> </span>
+<span style="color: #000000">                      --</span><span style="color: #001080">devtools</span>
+<span style="color: #000000">--</span><span style="color: #001080">extensions</span><span style="color: #000000"> [</span><span style="color: #0070C1">EXTENSION_DIR</span><span style="color: #000000"> [</span><span style="color: #0070C1">EXTENSION_DIR</span><span style="color: #000000"> ...]]</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Load</span><span style="color: #000000"> </span><span style="color: #001080">unpacked</span><span style="color: #000000"> </span><span style="color: #001080">browser</span><span style="color: #000000"> </span><span style="color: #001080">extensions</span>
+<span style="color: #000000">--</span><span style="color: #001080">forward</span><span style="color: #000000">-</span><span style="color: #001080">console</span><span style="color: #000000">     </span><span style="color: #001080">Forward</span><span style="color: #000000"> </span><span style="color: #001080">browser</span><span style="color: #000000"> </span><span style="color: #001080">console</span><span style="color: #000000"> </span><span style="color: #001080">logs</span>
+<span style="color: #000000">--</span><span style="color: #001080">show</span><span style="color: #000000">-</span><span style="color: #001080">interactions</span><span style="color: #000000">   </span><span style="color: #001080">Visually</span><span style="color: #000000"> </span><span style="color: #001080">show</span><span style="color: #000000"> </span><span style="color: #001080">on</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">page</span><span style="color: #000000"> </span><span style="color: #001080">where</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">user</span><span style="color: #000000"> </span><span style="color: #001080">interaction</span><span style="color: #000000"> </span><span style="color: #001080">took</span><span style="color: #000000"> </span><span style="color: #795E26">place</span><span style="color: #000000"> (</span><span style="color: #001080">clicks</span><span style="color: #000000">, </span><span style="color: #001080">taps</span><span style="color: #000000">,...)</span>
+<span style="color: #000000">-</span><span style="color: #001080">d</span><span style="color: #000000">, --</span><span style="color: #001080">debug</span><span style="color: #000000">           </span><span style="color: #001080">Shorthand</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;--keep-open --devtools-preserve --forward-console&quot;</span>
+<span style="color: #000000">--</span><span style="color: #AF00DB">default</span><span style="color: #000000">-</span><span style="color: #001080">timeout</span><span style="color: #000000"> </span><span style="color: #0070C1">MS</span><span style="color: #000000">  </span><span style="color: #001080">Default</span><span style="color: #000000"> </span><span style="color: #001080">timeout</span><span style="color: #000000"> </span><span style="color: #001080">value</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">various</span><span style="color: #000000"> </span><span style="color: #001080">browser</span><span style="color: #000000"> </span><span style="color: #795E26">functions</span><span style="color: #000000"> (</span><span style="color: #001080">default</span><span style="color: #000000">: 30</span><span style="color: #001080">s</span><span style="color: #000000">)</span>
+</code></pre>
 				<a href="#test-runner" id="test-runner" style="color: inherit; text-decoration: none;">
 					<h6>Test runner</h6>
 				</a>
-				<pre><code>-C COUNT, <span class="hljs-comment">--concurrency COUNT</span>
-                      Maximum <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> tests <span class="hljs-built_in">to</span> run <span class="hljs-keyword">in</span> parallel. <span class="hljs-number">0</span> <span class="hljs-built_in">to</span> run <span class="hljs-keyword">without</span> <span class="hljs-keyword">a</span> pool, sequentially. 
-                      Can <span class="hljs-built_in">include</span> *, +, <span class="hljs-keyword">and</span> cpus <span class="hljs-keyword">for</span> <span class="hljs-keyword">the</span> <span class="hljs-built_in">number</span> <span class="hljs-keyword">of</span> CPUs. Defaults <span class="hljs-built_in">to</span> cpus.
--S, <span class="hljs-comment">--sequential      Do not run tests in parallel (same as -C 0)</span>
-<span class="hljs-comment">--fail-fast           Abort once a test fails</span>
-<span class="hljs-comment">--print-tasks         Output all tasks that the runner would perform, and exit</span>
-<span class="hljs-comment">--exit-zero           Terminate with exit code 0 (success) even if tests fail. (Exit codes != 0 are still </span>
-                      emitted <span class="hljs-keyword">in</span> cases <span class="hljs-keyword">of</span> internal crashes)
-<span class="hljs-comment">--repeat COUNT        Run the tests the specified number of times</span>
-<span class="hljs-comment">--repeat-flaky COUNT  Repeat a failing test until it passes or the specified run count limit is reached</span>
-<span class="hljs-comment">--timeout MS          Set a maximum duration for a test case in ms before timing out. (Default: 1h)</span>
-<span class="hljs-comment">--status-interval MS  Interval in MS to print a detailed list of the current runner state.</span>
--w, <span class="hljs-comment">--watch           Re-run tests if a test file changes.</span>
-<span class="hljs-comment">--watch-files [WATCH_FILES [WATCH_FILES ...]]</span>
-                      Listen <span class="hljs-keyword">for</span> these additional <span class="hljs-built_in">files</span> <span class="hljs-keyword">in</span> watch mode.</code></pre>
+				<pre><code><span style="color: #000000">-</span><span style="color: #0070C1">C</span><span style="color: #000000"> </span><span style="color: #0070C1">COUNT</span><span style="color: #000000">, --</span><span style="color: #001080">concurrency</span><span style="color: #000000"> </span><span style="color: #0070C1">COUNT</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Maximum</span><span style="color: #000000"> </span><span style="color: #001080">number</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">run</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">parallel</span><span style="color: #000000">. </span><span style="color: #098658">0</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">run</span><span style="color: #000000"> </span><span style="color: #001080">without</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">pool</span><span style="color: #000000">, </span><span style="color: #001080">sequentially</span><span style="color: #000000">. </span>
+<span style="color: #000000">                      </span><span style="color: #001080">Can</span><span style="color: #000000"> </span><span style="color: #001080">include</span><span style="color: #000000"> *, +, </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">cpus</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">number</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">CPUs</span><span style="color: #000000">. </span><span style="color: #001080">Defaults</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">cpus</span><span style="color: #000000">.</span>
+<span style="color: #000000">-</span><span style="color: #0070C1">S</span><span style="color: #000000">, --</span><span style="color: #001080">sequential</span><span style="color: #000000">      </span><span style="color: #001080">Do</span><span style="color: #000000"> </span><span style="color: #001080">not</span><span style="color: #000000"> </span><span style="color: #001080">run</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #795E26">parallel</span><span style="color: #000000"> (</span><span style="color: #001080">same</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> -</span><span style="color: #0070C1">C</span><span style="color: #000000"> </span><span style="color: #098658">0</span><span style="color: #000000">)</span>
+<span style="color: #000000">--</span><span style="color: #001080">fail</span><span style="color: #000000">-</span><span style="color: #001080">fast</span><span style="color: #000000">           </span><span style="color: #001080">Abort</span><span style="color: #000000"> </span><span style="color: #001080">once</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">fails</span>
+<span style="color: #000000">--</span><span style="color: #001080">print</span><span style="color: #000000">-</span><span style="color: #001080">tasks</span><span style="color: #000000">         </span><span style="color: #001080">Output</span><span style="color: #000000"> </span><span style="color: #001080">all</span><span style="color: #000000"> </span><span style="color: #001080">tasks</span><span style="color: #000000"> </span><span style="color: #001080">that</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">runner</span><span style="color: #000000"> </span><span style="color: #001080">would</span><span style="color: #000000"> </span><span style="color: #001080">perform</span><span style="color: #000000">, </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">exit</span>
+<span style="color: #000000">--</span><span style="color: #001080">exit</span><span style="color: #000000">-</span><span style="color: #001080">zero</span><span style="color: #000000">           </span><span style="color: #001080">Terminate</span><span style="color: #000000"> </span><span style="color: #AF00DB">with</span><span style="color: #000000"> </span><span style="color: #001080">exit</span><span style="color: #000000"> </span><span style="color: #001080">code</span><span style="color: #000000"> </span><span style="color: #098658">0</span><span style="color: #000000"> (</span><span style="color: #001080">success</span><span style="color: #000000">) </span><span style="color: #001080">even</span><span style="color: #000000"> </span><span style="color: #AF00DB">if</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">fail</span><span style="color: #000000">. (</span><span style="color: #001080">Exit</span><span style="color: #000000"> </span><span style="color: #001080">codes</span><span style="color: #000000"> != </span><span style="color: #098658">0</span><span style="color: #000000"> </span><span style="color: #001080">are</span><span style="color: #000000"> </span><span style="color: #001080">still</span><span style="color: #000000"> </span>
+<span style="color: #000000">                      </span><span style="color: #001080">emitted</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">cases</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">internal</span><span style="color: #000000"> </span><span style="color: #001080">crashes</span><span style="color: #000000">)</span>
+<span style="color: #000000">--</span><span style="color: #001080">repeat</span><span style="color: #000000"> </span><span style="color: #0070C1">COUNT</span><span style="color: #000000">        </span><span style="color: #001080">Run</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">specified</span><span style="color: #000000"> </span><span style="color: #001080">number</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">times</span>
+<span style="color: #000000">--</span><span style="color: #001080">repeat</span><span style="color: #000000">-</span><span style="color: #001080">flaky</span><span style="color: #000000"> </span><span style="color: #0070C1">COUNT</span><span style="color: #000000">  </span><span style="color: #001080">Repeat</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">failing</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #001080">until</span><span style="color: #000000"> </span><span style="color: #001080">it</span><span style="color: #000000"> </span><span style="color: #001080">passes</span><span style="color: #000000"> </span><span style="color: #001080">or</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">specified</span><span style="color: #000000"> </span><span style="color: #001080">run</span><span style="color: #000000"> </span><span style="color: #001080">count</span><span style="color: #000000"> </span><span style="color: #001080">limit</span><span style="color: #000000"> </span><span style="color: #001080">is</span><span style="color: #000000"> </span><span style="color: #001080">reached</span>
+<span style="color: #000000">--</span><span style="color: #001080">timeout</span><span style="color: #000000"> </span><span style="color: #0070C1">MS</span><span style="color: #000000">          </span><span style="color: #267F99">Set</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">maximum</span><span style="color: #000000"> </span><span style="color: #001080">duration</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">test</span><span style="color: #000000"> </span><span style="color: #AF00DB">case</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">ms</span><span style="color: #000000"> </span><span style="color: #001080">before</span><span style="color: #000000"> </span><span style="color: #001080">timing</span><span style="color: #000000"> </span><span style="color: #001080">out</span><span style="color: #000000">. (</span><span style="color: #001080">Default</span><span style="color: #000000">: 1</span><span style="color: #267F99">h</span><span style="color: #000000">)</span>
+<span style="color: #000000">--status-interval MS  Interval in MS to print a detailed list of the current runner state.</span>
+<span style="color: #000000">-w, --watch           Re-run tests if a test file changes.</span>
+<span style="color: #000000">--watch-files [WATCH_FILES [WATCH_FILES ...]]</span>
+<span style="color: #000000">                      Listen for these additional files in watch mode.</span>
+</code></pre>
 				<a href="#locking" id="locking" style="color: inherit; text-decoration: none;">
 					<h6>Locking</h6>
 				</a>
-				<pre><code>-L, --no-locking      Completely disable any locking of resources between tests.
---locking-verbose     Output status messages about locking
---list-conflicts      Show which tasks conflict on which resources, and <span class="hljs-keyword">exit</span> immediately
---manually-lock RESOURCES
-                      Externally lock the specified comma-separated resources <span class="hljs-keyword">for</span> <span class="hljs-number">60</span>s before the test
---list-locks, --list-external-locks
-                      List (external) locks and <span class="hljs-keyword">exit</span>
---clear-locks, --clear-external-locks
-                      Clear all external locks and <span class="hljs-keyword">exit</span>
---no-external-locking
-                      Disable external locking (via a lockserver)
---external-locking-url URL
-                      Override URL of lockserver
---display-locking-client
-                      Display the locking client ID we would use <span class="hljs-keyword">if</span> we would lock something now</code></pre>
+				<pre><code><span style="color: #000000">-</span><span style="color: #0070C1">L</span><span style="color: #000000">, --</span><span style="color: #001080">no</span><span style="color: #000000">-</span><span style="color: #001080">locking</span><span style="color: #000000">      </span><span style="color: #001080">Completely</span><span style="color: #000000"> </span><span style="color: #001080">disable</span><span style="color: #000000"> </span><span style="color: #001080">any</span><span style="color: #000000"> </span><span style="color: #001080">locking</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">resources</span><span style="color: #000000"> </span><span style="color: #001080">between</span><span style="color: #000000"> </span><span style="color: #001080">tests</span><span style="color: #000000">.</span>
+<span style="color: #000000">--</span><span style="color: #001080">locking</span><span style="color: #000000">-</span><span style="color: #001080">verbose</span><span style="color: #000000">     </span><span style="color: #001080">Output</span><span style="color: #000000"> </span><span style="color: #001080">status</span><span style="color: #000000"> </span><span style="color: #001080">messages</span><span style="color: #000000"> </span><span style="color: #001080">about</span><span style="color: #000000"> </span><span style="color: #001080">locking</span>
+<span style="color: #000000">--</span><span style="color: #001080">list</span><span style="color: #000000">-</span><span style="color: #001080">conflicts</span><span style="color: #000000">      </span><span style="color: #001080">Show</span><span style="color: #000000"> </span><span style="color: #001080">which</span><span style="color: #000000"> </span><span style="color: #001080">tasks</span><span style="color: #000000"> </span><span style="color: #001080">conflict</span><span style="color: #000000"> </span><span style="color: #001080">on</span><span style="color: #000000"> </span><span style="color: #001080">which</span><span style="color: #000000"> </span><span style="color: #001080">resources</span><span style="color: #000000">, </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">exit</span><span style="color: #000000"> </span><span style="color: #001080">immediately</span>
+<span style="color: #000000">--</span><span style="color: #001080">manually</span><span style="color: #000000">-</span><span style="color: #001080">lock</span><span style="color: #000000"> </span><span style="color: #0070C1">RESOURCES</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Externally</span><span style="color: #000000"> </span><span style="color: #001080">lock</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">specified</span><span style="color: #000000"> </span><span style="color: #001080">comma</span><span style="color: #000000">-</span><span style="color: #001080">separated</span><span style="color: #000000"> </span><span style="color: #001080">resources</span><span style="color: #000000"> </span><span style="color: #001080">for</span><span style="color: #000000"> 60</span><span style="color: #001080">s</span><span style="color: #000000"> </span><span style="color: #001080">before</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">test</span>
+<span style="color: #000000">--</span><span style="color: #001080">list</span><span style="color: #000000">-</span><span style="color: #001080">locks</span><span style="color: #000000">, --</span><span style="color: #001080">list</span><span style="color: #000000">-</span><span style="color: #001080">external</span><span style="color: #000000">-</span><span style="color: #001080">locks</span>
+<span style="color: #000000">                      </span><span style="color: #795E26">List</span><span style="color: #000000"> (</span><span style="color: #001080">external</span><span style="color: #000000">) </span><span style="color: #001080">locks</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">exit</span>
+<span style="color: #000000">--</span><span style="color: #001080">clear</span><span style="color: #000000">-</span><span style="color: #001080">locks</span><span style="color: #000000">, --</span><span style="color: #001080">clear</span><span style="color: #000000">-</span><span style="color: #001080">external</span><span style="color: #000000">-</span><span style="color: #001080">locks</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Clear</span><span style="color: #000000"> </span><span style="color: #001080">all</span><span style="color: #000000"> </span><span style="color: #001080">external</span><span style="color: #000000"> </span><span style="color: #001080">locks</span><span style="color: #000000"> </span><span style="color: #001080">and</span><span style="color: #000000"> </span><span style="color: #001080">exit</span>
+<span style="color: #000000">--</span><span style="color: #001080">no</span><span style="color: #000000">-</span><span style="color: #001080">external</span><span style="color: #000000">-</span><span style="color: #001080">locking</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Disable</span><span style="color: #000000"> </span><span style="color: #001080">external</span><span style="color: #000000"> </span><span style="color: #795E26">locking</span><span style="color: #000000"> (</span><span style="color: #001080">via</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">lockserver</span><span style="color: #000000">)</span>
+<span style="color: #000000">--</span><span style="color: #001080">external</span><span style="color: #000000">-</span><span style="color: #001080">locking</span><span style="color: #000000">-</span><span style="color: #001080">url</span><span style="color: #000000"> </span><span style="color: #0070C1">URL</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Override</span><span style="color: #000000"> </span><span style="color: #0070C1">URL</span><span style="color: #000000"> </span><span style="color: #0000FF">of</span><span style="color: #000000"> </span><span style="color: #001080">lockserver</span>
+<span style="color: #000000">--</span><span style="color: #001080">display</span><span style="color: #000000">-</span><span style="color: #001080">locking</span><span style="color: #000000">-</span><span style="color: #001080">client</span>
+<span style="color: #000000">                      </span><span style="color: #001080">Display</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">locking</span><span style="color: #000000"> </span><span style="color: #001080">client</span><span style="color: #000000"> </span><span style="color: #0070C1">ID</span><span style="color: #000000"> </span><span style="color: #001080">we</span><span style="color: #000000"> </span><span style="color: #001080">would</span><span style="color: #000000"> </span><span style="color: #001080">use</span><span style="color: #000000"> </span><span style="color: #AF00DB">if</span><span style="color: #000000"> </span><span style="color: #001080">we</span><span style="color: #000000"> </span><span style="color: #001080">would</span><span style="color: #000000"> </span><span style="color: #001080">lock</span><span style="color: #000000"> </span><span style="color: #001080">something</span><span style="color: #000000"> </span><span style="color: #001080">now</span>
+</code></pre>
 				<a href="#environment-variables" id="environment-variables" style="color: inherit; text-decoration: none;">
 					<h2>Environment Variables</h2>
 				</a>
@@ -519,68 +542,38 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="globals.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="modules.html">Modules</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_assert_utils_.html">&quot;assert_<wbr>utils&quot;</a>
+						<a href="modules/assert_utils.html">assert_<wbr>utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_browser_console_.html">&quot;browser_<wbr>console&quot;</a>
+						<a href="modules/browser_console.html">browser_<wbr>console</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_browser_utils_.html">&quot;browser_<wbr>utils&quot;</a>
+						<a href="modules/email.html">email</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_config_.html">&quot;config&quot;</a>
+						<a href="modules/loader.html">loader</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_curl_command_.html">&quot;curl_<wbr>command&quot;</a>
+						<a href="modules/locking.html">locking</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_email_.html">&quot;email&quot;</a>
+						<a href="modules/net_utils.html">net_<wbr>utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_external_locking_.html">&quot;external_<wbr>locking&quot;</a>
+						<a href="modules/output.html">output</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_index_.html">&quot;index&quot;</a>
+						<a href="modules/promise_utils.html">promise_<wbr>utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_loader_.html">&quot;loader&quot;</a>
+						<a href="modules/results.html">results</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_locking_.html">&quot;locking&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_main_.html">&quot;main&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_net_utils_.html">&quot;net_<wbr>utils&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_output_.html">&quot;output&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_promise_utils_.html">&quot;promise_<wbr>utils&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_render_.html">&quot;render&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_results_.html">&quot;results&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_runner_.html">&quot;runner&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_utils_.html">&quot;utils&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_version_.html">&quot;version&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="modules/_watcher_.html">&quot;watcher&quot;</a>
+						<a href="modules/utils.html">utils</a>
 					</li>
 				</ul>
 			</nav>
@@ -596,8 +589,8 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
 				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 			</ul>
 		</div>
 	</div>
@@ -607,6 +600,5 @@ assert.equal(response.status, <span class="hljs-number">200</span>);
 </div>
 <div class="overlay"></div>
 <script src="assets/js/main.js"></script>
-<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
 </body>
 </html>

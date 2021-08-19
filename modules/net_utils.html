@@ -3,10 +3,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;net_utils&quot; | pentf</title>
+	<title>net_utils | pentf</title>
 	<meta name="description" content="Documentation for pentf">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -49,13 +50,13 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../globals.html">Globals</a>
+					<a href="../modules.html">pentf</a>
 				</li>
 				<li>
-					<a href="_net_utils_.html">&quot;net_utils&quot;</a>
+					<a href="net_utils.html">net_utils</a>
 				</li>
 			</ul>
-			<h1>Module &quot;net_utils&quot;</h1>
+			<h1>Module net_utils</h1>
 		</div>
 	</div>
 </header>
@@ -69,8 +70,8 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_net_utils_.html#fetch" class="tsd-kind-icon">fetch</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_net_utils_.html#setuptlsclientauth" class="tsd-kind-icon">setupTLSClient<wbr>Auth</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="net_utils.html#fetch" class="tsd-kind-icon">fetch</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="net_utils.html#setupTLSClientAuth" class="tsd-kind-icon">setupTLSClient<wbr>Auth</a></li>
 							</ul>
 						</section>
 					</div>
@@ -88,7 +89,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/111335f/src/net_utils.js#L42">net_utils.js:42</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/42f1f1d/src/net_utils.js#L42">net_utils.js:42</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -99,17 +100,18 @@
 								</div>
 								<dl class="tsd-comment-tags">
 									<dt>example</dt>
-									<dd><pre><code class="language-javascript"><span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(config, <span class="hljs-string">'https://example.org/json-api'</span>, {
-    <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
-    <span class="hljs-attr">headers</span>: {
-        <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
-    },
-    <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
-        <span class="hljs-attr">key</span>: <span class="hljs-string">'value'</span>,
-    }),
-});
-assert.strictEqual(response.status, <span class="hljs-number">200</span>);
-<span class="hljs-keyword">const</span> data = <span class="hljs-keyword">await</span> response.json();</code></pre>
+									<dd><pre><code class="language-javascript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">response</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">fetch</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;https://example.org/json-api&#039;</span><span style="color: #000000">, {</span>
+<span style="color: #000000">    </span><span style="color: #001080">method:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;POST&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #001080">headers:</span><span style="color: #000000"> {</span>
+<span style="color: #000000">        </span><span style="color: #A31515">&#039;Content-Type&#039;</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;application/json&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">    },</span>
+<span style="color: #000000">    </span><span style="color: #001080">body:</span><span style="color: #000000"> </span><span style="color: #267F99">JSON</span><span style="color: #000000">.</span><span style="color: #795E26">stringify</span><span style="color: #000000">({</span>
+<span style="color: #000000">        </span><span style="color: #001080">key:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;value&#039;</span><span style="color: #000000">,</span>
+<span style="color: #000000">    }),</span>
+<span style="color: #000000">});</span>
+<span style="color: #001080">assert</span><span style="color: #000000">.</span><span style="color: #795E26">strictEqual</span><span style="color: #000000">(</span><span style="color: #001080">response</span><span style="color: #000000">.</span><span style="color: #001080">status</span><span style="color: #000000">, </span><span style="color: #098658">200</span><span style="color: #000000">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">data</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">response</span><span style="color: #000000">.</span><span style="color: #795E26">json</span><span style="color: #000000">();</span>
+</code></pre>
 									</dd>
 								</dl>
 							</div>
@@ -136,8 +138,10 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 											<li><code>agent</code>: node <a href="https://nodejs.org/api/https.html#https_class_https_agent">HTTP/HTTPS agent</a></li>
 											<li><code>curl_include_headers</code>: boolean (default false) of whether to include <code>-k</code> in the curl output.</li>
 											<li><code>curl_extra_options</code>: List of extra options for the curl output.</li>
-											<li><code>cookieJar</code>: A <a href="https://github.com/salesforce/tough-cookie/blob/master/README.md#cookiejar">CookieJar object</a> to use.<pre><code>        Pass <span class="hljs-keyword">in</span> <span class="hljs-keyword">the</span> <span class="hljs-keyword">string</span> `<span class="hljs-string">'create'</span>` <span class="hljs-built_in">to</span> <span class="hljs-built_in">create</span> <span class="hljs-keyword">a</span> <span class="hljs-built_in">new</span> <span class="hljs-literal">one</span> (returned <span class="hljs-keyword">as</span> `response.cookieJar`).
-        The response will have <span class="hljs-keyword">a</span> utility <span class="hljs-function"><span class="hljs-keyword">function</span> `<span class="hljs-title">async</span> <span class="hljs-title">getCookieValue</span>(<span class="hljs-title">name</span>)` <span class="hljs-title">to</span> <span class="hljs-title">quickly</span> <span class="hljs-title">retrieve</span> <span class="hljs-title">a</span> <span class="hljs-title">cookie</span> <span class="hljs-title">value</span> <span class="hljs-title">from</span> <span class="hljs-title">the</span> <span class="hljs-title">jar</span>.</span></code></pre></li>
+											<li><code>cookieJar</code>: A <a href="https://github.com/salesforce/tough-cookie/blob/master/README.md#cookiejar">CookieJar object</a> to use.<pre><code><span style="color: #000000">        </span><span style="color: #001080">Pass</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">string</span><span style="color: #000000"> </span><span style="color: #A31515">`&#039;create&#039;`</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">create</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">one</span><span style="color: #000000"> (</span><span style="color: #001080">returned</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #A31515">`response.cookieJar`</span><span style="color: #000000">).</span>
+<span style="color: #000000">        </span><span style="color: #001080">The</span><span style="color: #000000"> </span><span style="color: #001080">response</span><span style="color: #000000"> </span><span style="color: #001080">will</span><span style="color: #000000"> </span><span style="color: #001080">have</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">utility</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> `</span><span style="color: #795E26">async</span><span style="color: #000000"> </span><span style="color: #795E26">getCookieValue</span><span style="color: #000000">(</span><span style="color: #001080">name</span><span style="color: #000000">)` </span><span style="color: #795E26">to</span><span style="color: #000000"> </span><span style="color: #795E26">quickly</span><span style="color: #000000"> </span><span style="color: #795E26">retrieve</span><span style="color: #000000"> </span><span style="color: #795E26">a</span><span style="color: #000000"> </span><span style="color: #795E26">cookie</span><span style="color: #000000"> </span><span style="color: #795E26">value</span><span style="color: #000000"> </span><span style="color: #795E26">from</span><span style="color: #000000"> </span><span style="color: #795E26">the</span><span style="color: #000000"> </span><span style="color: #795E26">jar</span><span style="color: #000000">.</span>
+</code></pre>
+											</li>
 										</ul>
 									</div>
 								</li>
@@ -147,7 +151,7 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="setuptlsclientauth" class="tsd-anchor"></a>
+					<a name="setupTLSClientAuth" class="tsd-anchor"></a>
 					<h3>setupTLSClient<wbr>Auth</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
 						<li class="tsd-signature tsd-kind-icon">setupTLSClient<wbr>Auth<span class="tsd-signature-symbol">(</span>fetchOptions<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span>, keyFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, certFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, rejectUnauthorized<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
@@ -156,7 +160,7 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/111335f/src/net_utils.js#L161">net_utils.js:161</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/42f1f1d/src/net_utils.js#L161">net_utils.js:161</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -165,10 +169,11 @@ assert.strictEqual(response.status, <span class="hljs-number">200</span>);
 								</div>
 								<dl class="tsd-comment-tags">
 									<dt>example</dt>
-									<dd><pre><code class="language-javascript"><span class="hljs-keyword">const</span> init = {<span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>, <span class="hljs-attr">body</span>: <span class="hljs-string">'{"something": "secret"}'</span>};
-<span class="hljs-keyword">await</span> setupTLSClientAuth(init, <span class="hljs-string">'key.pem'</span>, <span class="hljs-string">'cert.crt'</span>);
-<span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(config, <span class="hljs-string">'https://protected.example.org/'</span>, init);
-assert.equal(response.status, <span class="hljs-number">200</span>); <span class="hljs-comment">// 401 = invalid certificate</span></code></pre>
+									<dd><pre><code class="language-javascript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">init</span><span style="color: #000000"> = {</span><span style="color: #001080">method:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;POST&#039;</span><span style="color: #000000">, </span><span style="color: #001080">body:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;{&quot;something&quot;: &quot;secret&quot;}&#039;</span><span style="color: #000000">};</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">setupTLSClientAuth</span><span style="color: #000000">(</span><span style="color: #001080">init</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;key.pem&#039;</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;cert.crt&#039;</span><span style="color: #000000">);</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">response</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">fetch</span><span style="color: #000000">(</span><span style="color: #001080">config</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;https://protected.example.org/&#039;</span><span style="color: #000000">, </span><span style="color: #001080">init</span><span style="color: #000000">);</span>
+<span style="color: #001080">assert</span><span style="color: #000000">.</span><span style="color: #795E26">equal</span><span style="color: #000000">(</span><span style="color: #001080">response</span><span style="color: #000000">.</span><span style="color: #001080">status</span><span style="color: #000000">, </span><span style="color: #098658">200</span><span style="color: #000000">); </span><span style="color: #008000">// 401 = invalid certificate</span>
+</code></pre>
 									</dd>
 								</dl>
 							</div>
@@ -177,7 +182,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>); <span class
 								<li>
 									<h5>fetchOptions: <span class="tsd-signature-type">Object</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<p>The fetch request option object to modify. (<code>init</code> parameter in <a href="_net_utils_.html#fetch">fetch</a> above)</p>
+										<p>The fetch request option object to modify. (<code>init</code> parameter in <a href="net_utils.html#fetch">fetch</a> above)</p>
 									</div>
 								</li>
 								<li>
@@ -193,7 +198,7 @@ assert.equal(response.status, <span class="hljs-number">200</span>); <span class
 									</div>
 								</li>
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> rejectUnauthorized: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
+									<h5>rejectUnauthorized: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>to validate the server&#39;s certificate, false (=default) to accept invalid certificates as well.</p>
 									</div>
@@ -208,78 +213,48 @@ assert.equal(response.status, <span class="hljs-number">200</span>); <span class
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../globals.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../modules.html">Modules</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_assert_utils_.html">&quot;assert_<wbr>utils&quot;</a>
+						<a href="assert_utils.html">assert_<wbr>utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_browser_console_.html">&quot;browser_<wbr>console&quot;</a>
+						<a href="browser_console.html">browser_<wbr>console</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_browser_utils_.html">&quot;browser_<wbr>utils&quot;</a>
+						<a href="email.html">email</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_config_.html">&quot;config&quot;</a>
+						<a href="loader.html">loader</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_curl_command_.html">&quot;curl_<wbr>command&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_email_.html">&quot;email&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_external_locking_.html">&quot;external_<wbr>locking&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_index_.html">&quot;index&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_loader_.html">&quot;loader&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_locking_.html">&quot;locking&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_main_.html">&quot;main&quot;</a>
+						<a href="locking.html">locking</a>
 					</li>
 					<li class="current tsd-kind-module">
-						<a href="_net_utils_.html">&quot;net_<wbr>utils&quot;</a>
+						<a href="net_utils.html">net_<wbr>utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_output_.html">&quot;output&quot;</a>
+						<a href="output.html">output</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_promise_utils_.html">&quot;promise_<wbr>utils&quot;</a>
+						<a href="promise_utils.html">promise_<wbr>utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_render_.html">&quot;render&quot;</a>
+						<a href="results.html">results</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_results_.html">&quot;results&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_runner_.html">&quot;runner&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_utils_.html">&quot;utils&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_version_.html">&quot;version&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_watcher_.html">&quot;watcher&quot;</a>
+						<a href="utils.html">utils</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="_net_utils_.html#fetch" class="tsd-kind-icon">fetch</a>
+						<a href="net_utils.html#fetch" class="tsd-kind-icon">fetch</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="_net_utils_.html#setuptlsclientauth" class="tsd-kind-icon">setupTLSClient<wbr>Auth</a>
+						<a href="net_utils.html#setupTLSClientAuth" class="tsd-kind-icon">setupTLSClient<wbr>Auth</a>
 					</li>
 				</ul>
 			</nav>
@@ -291,8 +266,8 @@ assert.equal(response.status, <span class="hljs-number">200</span>); <span class
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
 				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 			</ul>
 		</div>
 	</div>
@@ -302,6 +277,5 @@ assert.equal(response.status, <span class="hljs-number">200</span>); <span class
 </div>
 <div class="overlay"></div>
 <script src="../assets/js/main.js"></script>
-<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
 </body>
 </html>

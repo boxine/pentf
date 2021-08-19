@@ -3,10 +3,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;main&quot; | pentf</title>
+	<title>browser_console | pentf</title>
 	<meta name="description" content="Documentation for pentf">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -49,13 +50,13 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../globals.html">Globals</a>
+					<a href="../modules.html">pentf</a>
 				</li>
 				<li>
-					<a href="_main_.html">&quot;main&quot;</a>
+					<a href="browser_console.html">browser_console</a>
 				</li>
 			</ul>
-			<h1>Module &quot;main&quot;</h1>
+			<h1>Module browser_console</h1>
 		</div>
 	</div>
 </header>
@@ -69,8 +70,8 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_main_.html#real_main" class="tsd-kind-icon">real_<wbr>main</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="_main_.html#runtests" class="tsd-kind-icon">run<wbr>Tests</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="browser_console.html#forwardBrowserConsole" class="tsd-kind-icon">forward<wbr>Browser<wbr>Console</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="browser_console.html#parseConsoleArg" class="tsd-kind-icon">parse<wbr>Console<wbr>Arg</a></li>
 							</ul>
 						</section>
 					</div>
@@ -79,28 +80,38 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="real_main" class="tsd-anchor"></a>
-					<h3>real_<wbr>main</h3>
+					<a name="forwardBrowserConsole" class="tsd-anchor"></a>
+					<h3>forward<wbr>Browser<wbr>Console</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">real_<wbr>main<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">forward<wbr>Browser<wbr>Console<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Config</span>, page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/111335f/src/main.js#L66">main.js:66</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/42f1f1d/src/browser_console.js#L160">browser_console.js:160</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Serialize console arguments and send them to puppeteer. Unfortunately for
+										us the native serialization methods for JSHandle objects from puppeteer
+										are lossy. They turn Error objects into <code>{}</code> and <code>null</code> to <code>undefined</code>.
+										The passed &quot;preview&quot; object is incomplete and truncates all data for nested
+									objects or other complex values.</p>
+								</div>
+								<p>The only way to keep the data intact is to use a custom serialization format
+								and pass it around as a string.</p>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
+									<h5>config: <span class="tsd-signature-type">Config</span></h5>
+								</li>
+								<li>
+									<h5>page: <span class="tsd-signature-type">Page</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
-									<ul class="tsd-parameters">
-									</ul>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -108,34 +119,32 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="runtests" class="tsd-anchor"></a>
-					<h3>run<wbr>Tests</h3>
+					<a name="parseConsoleArg" class="tsd-anchor"></a>
+					<h3>parse<wbr>Console<wbr>Arg</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">run<wbr>Tests<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span>, test_cases<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">parse<wbr>Console<wbr>Arg<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/111335f/src/main.js#L20">main.js:20</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/42f1f1d/src/browser_console.js#L8">browser_console.js:8</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Reconstruct original types from serialized message</p>
+								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>config: <span class="tsd-signature-symbol">{}</span></h5>
-									<ul class="tsd-parameters">
-									</ul>
-								</li>
-								<li>
-									<h5>test_cases: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">[]</span></h5>
+									<h5>value: <span class="tsd-signature-type">any</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -144,78 +153,48 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../globals.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../modules.html">Modules</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_assert_utils_.html">&quot;assert_<wbr>utils&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_browser_console_.html">&quot;browser_<wbr>console&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_browser_utils_.html">&quot;browser_<wbr>utils&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_config_.html">&quot;config&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_curl_command_.html">&quot;curl_<wbr>command&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_email_.html">&quot;email&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_external_locking_.html">&quot;external_<wbr>locking&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_index_.html">&quot;index&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_loader_.html">&quot;loader&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_locking_.html">&quot;locking&quot;</a>
+						<a href="assert_utils.html">assert_<wbr>utils</a>
 					</li>
 					<li class="current tsd-kind-module">
-						<a href="_main_.html">&quot;main&quot;</a>
+						<a href="browser_console.html">browser_<wbr>console</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_net_utils_.html">&quot;net_<wbr>utils&quot;</a>
+						<a href="email.html">email</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_output_.html">&quot;output&quot;</a>
+						<a href="loader.html">loader</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_promise_utils_.html">&quot;promise_<wbr>utils&quot;</a>
+						<a href="locking.html">locking</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_render_.html">&quot;render&quot;</a>
+						<a href="net_utils.html">net_<wbr>utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_results_.html">&quot;results&quot;</a>
+						<a href="output.html">output</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_runner_.html">&quot;runner&quot;</a>
+						<a href="promise_utils.html">promise_<wbr>utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_utils_.html">&quot;utils&quot;</a>
+						<a href="results.html">results</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="_version_.html">&quot;version&quot;</a>
-					</li>
-					<li class=" tsd-kind-module">
-						<a href="_watcher_.html">&quot;watcher&quot;</a>
+						<a href="utils.html">utils</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="_main_.html#real_main" class="tsd-kind-icon">real_<wbr>main</a>
+						<a href="browser_console.html#forwardBrowserConsole" class="tsd-kind-icon">forward<wbr>Browser<wbr>Console</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="_main_.html#runtests" class="tsd-kind-icon">run<wbr>Tests</a>
+						<a href="browser_console.html#parseConsoleArg" class="tsd-kind-icon">parse<wbr>Console<wbr>Arg</a>
 					</li>
 				</ul>
 			</nav>
@@ -227,8 +206,8 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
 				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
 			</ul>
 		</div>
 	</div>
@@ -238,6 +217,5 @@
 </div>
 <div class="overlay"></div>
 <script src="../assets/js/main.js"></script>
-<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
 </body>
 </html>

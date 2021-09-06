@@ -223,7 +223,7 @@ async function getMail(
 
     output.logVerbose(
         config,
-        `[email] Waiting for message to arrive ${to}... (${config._taskName})`
+        `[email] Waiting for message to arrive to ${to} ... (${config._taskName})`
     );
     const msg = await utils.retry(
         () => _find_message(config, client, since, to, subjectContains),

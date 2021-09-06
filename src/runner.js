@@ -34,6 +34,8 @@ async function run_task(config, state, task) {
         _testName: task.tc.name,
         _taskName: task.name,
         _taskGroup: task.group,
+        _video_counter: 1,
+        _video_recorder: null,
         _snapshots: [],
         start: task.start,
         accessibilityErrors: [],

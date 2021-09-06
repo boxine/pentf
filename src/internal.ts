@@ -42,6 +42,15 @@ export interface Task {
 
 export type TeardownHook = (config: TaskConfig) => Promise<void> | void;
 
+export interface VideoRecorder {
+    start(options: {
+        width: number;
+        height: number;
+        outputFile: string;
+    }): Promise<void>;
+    stop(): Promise<void>;
+}
+
 export interface TaskConfig extends Config {
     _teardown_hooks: TeardownHook[];
     _browser_pages: Page[];
@@ -49,6 +58,8 @@ export interface TaskConfig extends Config {
     _testName: string;
     _taskName: string;
     _taskGroup: string;
+    _video_counter: number;
+    _video_recorder: null | VideoRecorder;
     error: Error | null;
     resources: string[];
     _snapshots: Buffer[];

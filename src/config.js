@@ -292,6 +292,22 @@ function parseArgs(options, raw_args) {
         help: 'Update existing snapshots on mismatch',
         action: 'storeTrue',
     });
+    puppeteer_group.addArgument(['--video'], {
+        action: 'storeTrue',
+        dest: 'video',
+        help: 'Record videos of browser pages for failed tests',
+    });
+    const defaultVideoDir = path.join(
+        options.rootDir ? options.rootDir : process.cwd(),
+        'videos'
+    );
+    puppeteer_group.addArgument(['--video-directory'], {
+        metavar: 'DIR',
+        defaultValue: defaultVideoDir,
+        help: `Directory to write videos to (default: ${
+            process.env.PENTF_GENERIC_HELP ? './videos' : '%(defaultValue)s'
+        })`,
+    });
     puppeteer_group.addArgument(['-s', '--slow-mo'], {
         metavar: 'MS',
         type: 'int',
@@ -325,7 +341,7 @@ function parseArgs(options, raw_args) {
         action: 'storeTrue',
     });
     puppeteer_group.addArgument(['-d', '--debug'], {
-        help: 'Shorthand for "--keep-open --devtools-preserve --forward-console"',
+        help: 'Shorthand for "--keep-open --devtools-preserve --forward-console --video"',
         action: 'storeTrue',
     });
     puppeteer_group.addArgument(['--default-timeout'], {
@@ -491,6 +507,7 @@ function parseArgs(options, raw_args) {
         args.keep_open = true;
         args.forward_console = true;
         args.show_interactions = true;
+        args.video = true;
     }
     if (args.keep_open) {
         args.headless = false;
@@ -543,7 +560,7 @@ async function readConfigFile(configDir, env, moduleType) {
 }
 
 /**
- * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean, snapshot_directory: string, update_snapshots?: boolean}} Config
+ * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean, snapshot_directory: string, update_snapshots?: boolean, video?: boolean, video_directory: string}} Config
  */
 
 /**

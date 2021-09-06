@@ -23,6 +23,7 @@ const { wait, remove, ignoreError } = require('./utils');
 const { timeoutPromise } = require('./promise_utils');
 const { importFile } = require('./loader');
 const output = require('./output');
+const { VideoRecorder } = require('./video-recorder');
 
 const mkdirp = promisify(mkdirpCb);
 
@@ -194,6 +195,9 @@ async function newPage(config, chrome_args = []) {
         await Promise.all(targets.map(t => configureDevtools(t)));
     }
 
+    const width = 800;
+    const height = 600;
+
     // Make sure that the browser window matches the viewport size
     if (!config.headless) {
         // If devtools is enabled we need to wait until they've been
@@ -218,7 +222,41 @@ async function newPage(config, chrome_args = []) {
         }
 
         // Default puppeteer viewport size
-        await resizePage(config, page, { width: 800, height: 600 });
+        await resizePage(config, page, { width, height });
+    }
+
+    if (config.video) {
+        const taskName = config._taskName;
+        const outputFile = path.join(
+            config.video_directory,
+            `${taskName}-${config._video_counter++}.webm`
+        );
+        output.logVerbose(
+            config,
+            `[recorder] Recording video: ${outputFile} [${taskName}]`
+        );
+        const recorder = new VideoRecorder('ffmpeg', page);
+        recorder.start({ outputFile, width, height });
+        config._video_recorder = recorder;
+
+        if (config._teardown_hooks) {
+            config._teardown_hooks.push(async config => {
+                await recorder.stop();
+
+                output.logVerbose(
+                    config,
+                    `[recorder] Stopping video: ${outputFile} [${taskName}]`
+                );
+                // Delete video recording if test succeeded
+                if (!config.error) {
+                    output.logVerbose(
+                        config,
+                        `[recorder] Test succeeded, deleting video: ${outputFile} [${taskName}]`
+                    );
+                    await fs.promises.unlink(outputFile);
+                }
+            });
+        }
     }
 
     browser._logs = [];
@@ -2471,6 +2509,7 @@ async function html2pdf(config, path, html, modifyPage = null) {
     // crash when attempting to generate a pdf snapshot. See:
     // https://github.com/puppeteer/puppeteer/blob/v2.1.1/docs/api.md#puppeteerdefaultargsoptions
     pdfConfig.devtools = false;
+    pdfConfig.video = false;
     const page = await newPage(pdfConfig);
 
     await workaround_setContent(page, html);

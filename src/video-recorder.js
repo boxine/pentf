@@ -70,8 +70,8 @@ class VideoRecorder {
         });
 
         this._process.on('error', err => {
-            console.log('Failed to spawn ffmpeg', err);
-            throw err;
+            console.log(err);
+            throw new Error('Failed to spawn "ffmpeg"');
         });
 
         this._session = await this._page.target().createCDPSession();

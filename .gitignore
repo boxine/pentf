@@ -5,6 +5,7 @@ results*.md
 results*.json
 screenshots
 snapshots
+videos/
 doc/
 dist/
 
@@ -13,3 +14,6 @@ dist/
 
 # Generated types
 /*.d.ts
+
+# macOS
+.DS_Store

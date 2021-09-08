@@ -711,9 +711,14 @@ async function formatError(config, err) {
     let nearestFrame;
 
     // Assertion libraries often add multiline messages to the error stack.
-    const actualStack = err.stack
-        .replace(`${err.name}: ${err.message}`, '')
-        .replace(err.message, '');
+    let actualStack = err.stack.replace(`${err.name}: ${err.message}`, '');
+
+    // Only delete the message at the start. If the test message is
+    // "fail" and a path in the trace contains same word, we'd
+    // break the path otherwise.
+    if (actualStack.trim().startsWith(err.message)) {
+        actualStack = actualStack.replace(err.message, '');
+    }
 
     const stack = errorstacks
         .parseStackTrace(actualStack)

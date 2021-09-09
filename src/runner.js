@@ -216,13 +216,10 @@ async function run_task(config, state, task) {
                 `[runner] Executing ${task_config._teardown_hooks.length} teardown hooks`
             );
             try {
-                // Run teardown functions in sequence if there are any
-                const teardownPromise = (async () => {
-                    for (const fn of task_config._teardown_hooks) {
-                        await fn(task_config);
-                    }
-                })();
-
+                // Run teardown functions if there are any
+                const teardownPromise = Promise.all(
+                    task_config._teardown_hooks.map(fn => fn(task_config))
+                );
                 await timeoutPromise(config, teardownPromise, {
                     timeout: 30000,
                     message: 'teardown took too long',

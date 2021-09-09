@@ -2,6 +2,7 @@ const { spawn } = require('child_process');
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs').promises;
+const { ignoreError } = require('./utils');
 
 /**
  * Get time without daylight savings or other human concepts.
@@ -90,10 +91,16 @@ class VideoRecorder {
      * @param {{ sessionId: number, data: string,  metadata: { offsetTop: number, pageScaleFactor: number, deviceWidth: number, deviceHeight: number, scrollOffsetX: number, scrollOffsetY: number, timestamp: number }}} frame
      */
     async _onFrame(frame) {
-        // Confirm to devtools protocol that we received the message
-        this._session.send('Page.screencastFrameAck', {
-            sessionId: frame.sessionId,
-        });
+        try {
+            // Confirm to devtools protocol that we received the message
+            this._session.send('Page.screencastFrameAck', {
+                sessionId: frame.sessionId,
+            });
+        } catch (err) {
+            if (!ignoreError(err)) {
+                throw err;
+            }
+        }
 
         const { timestamp } = frame.metadata;
         const buffer = Buffer.from(frame.data, 'base64');
@@ -155,12 +162,15 @@ class VideoRecorder {
         this._session.off('Page.screencastFrame', this._onFrame);
 
         // Flush remaining frames up until the current time
-        this._writeFrame(
-            Buffer.from([]),
-            this._lastFrame.timestamp + (monotonicTime() - this._hrtime) / 1000
-        );
-        await this._sendFrames();
-        this._lastFrame = null;
+        if (this._lastFrame !== null) {
+            this._writeFrame(
+                Buffer.from([]),
+                this._lastFrame.timestamp +
+                    (monotonicTime() - this._hrtime) / 1000
+            );
+            await this._sendFrames();
+            this._lastFrame = null;
+        }
 
         await new Promise(r => this._process.stdin.end(r));
         await this._closePromise;

@@ -157,7 +157,13 @@ class VideoRecorder {
     async stop() {
         assert(this._process);
         if (!this._page.isClosed()) {
-            await this._session.send('Page.stopScreencast');
+            try {
+                await this._session.send('Page.stopScreencast');
+            } catch (err) {
+                if (!ignoreError(err)) {
+                    throw err;
+                }
+            }
         }
         this._session.off('Page.screencastFrame', this._onFrame);
 

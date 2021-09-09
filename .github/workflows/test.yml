@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         node-version: [12.x, 14.x]
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v2
@@ -25,12 +25,6 @@ jobs:
         run: |
             sudo apt-get install ffmpeg
             xvfb-run --auto-servernum ./run --ci
-
-      - name: macOS test
-        if: matrix.os == 'macOS-latest'
-        run: |
-            brew install ffmpeg
-            ./run --ci
 
       - run: make eslint
       #- run: make prettier-lint

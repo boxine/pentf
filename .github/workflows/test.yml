@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         node-version: [12.x, 14.x]
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v2
@@ -20,33 +20,11 @@ jobs:
 
       - run: npm ci
 
-      - name: Linux ffmpeg
+      - name: Linux test
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install ffmpeg
-
-      - name: macOS ffmpeg
-        if: matrix.os == 'macOS-latest'
-        run: brew install ffmpeg
-
-      - name: Linux test parallel
-        if: matrix.os == 'ubuntu-latest'
-        run: xvfb-run --auto-servernum ./run --ci
-
-      - name: MacOS test parallel
-        if: matrix.os == 'macOS-latest'
-        run: ./run --ci
+        run: |
+            sudo apt-get install ffmpeg
+            xvfb-run --auto-servernum ./run --ci
 
       - run: make eslint
       #- run: make prettier-lint
-
-      - name: Linux test sequential
-        if: matrix.os == 'ubuntu-latest'
-        run: xvfb-run --auto-servernum ./run -S --ci
-        env:
-          CI: true
-
-      - name: MacOS test sequential
-        if: matrix.os == 'macOS-latest'
-        run: ./run -S --ci
-        env:
-          CI: true

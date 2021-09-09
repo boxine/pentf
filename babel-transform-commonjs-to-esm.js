@@ -64,6 +64,8 @@ module.exports = function cjs2esm({ types: t }) {
                     path.node.body.forEach((node, i) => {
                         if (t.isFunctionDeclaration(node)) {
                             fns.set(node.id.name, { i, node });
+                        } else if (t.isClassDeclaration(node)) {
+                            fns.set(node.id.name, { i, node });
                         } else if (
                             t.isVariableDeclaration(node) &&
                             node.declarations.length === 1 &&

@@ -98,6 +98,17 @@ export { foo };`
 export { foo as bar };`
     );
 
+    await assertTranspile(
+        `
+        class Foo {}
+
+        module.exports = {
+            Foo,
+        };
+    `,
+        `export class Foo {}`
+    );
+
     // Append extension to relative imports
     await assertTranspile(
         `

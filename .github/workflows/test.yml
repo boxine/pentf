@@ -20,6 +20,14 @@ jobs:
 
       - run: npm ci
 
+      - name: Linux ffmpeg
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install ffmpeg
+
+      - name: macOS ffmpeg
+        if: matrix.os == 'macOS-latest'
+        run: brew install ffmpeg
+
       - name: Linux test parallel
         if: matrix.os == 'ubuntu-latest'
         run: xvfb-run --auto-servernum ./run --ci

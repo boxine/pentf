@@ -20,33 +20,17 @@ jobs:
 
       - run: npm ci
 
-      - name: Linux ffmpeg
+      - name: Linux test
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get install ffmpeg
+        run: |
+            sudo apt-get install ffmpeg
+            xvfb-run --auto-servernum ./run --ci
 
-      - name: macOS ffmpeg
+      - name: macOS test
         if: matrix.os == 'macOS-latest'
-        run: brew install ffmpeg
-
-      - name: Linux test parallel
-        if: matrix.os == 'ubuntu-latest'
-        run: xvfb-run --auto-servernum ./run --ci
-
-      - name: MacOS test parallel
-        if: matrix.os == 'macOS-latest'
-        run: ./run --ci
+        run: |
+            brew install ffmpeg
+            ./run --ci
 
       - run: make eslint
       #- run: make prettier-lint
-
-      - name: Linux test sequential
-        if: matrix.os == 'ubuntu-latest'
-        run: xvfb-run --auto-servernum ./run -S --ci
-        env:
-          CI: true
-
-      - name: MacOS test sequential
-        if: matrix.os == 'macOS-latest'
-        run: ./run -S --ci
-        env:
-          CI: true

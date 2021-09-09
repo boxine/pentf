@@ -433,6 +433,9 @@ The keys are up to you; for example you probably want to have a main entry point
                       Directory to write snapshots to (default: ./snapshots)
 -u, --update-snapshots
                       Update existing snapshots on mismatch
+--video               Record videos of browser pages for failed tests
+--video-directory DIR
+                      Directory to write videos to (default: ./videos)
 -s MS, --slow-mo MS   Wait this many milliseconds after every call to the virtual browser
 -k, --keep-open       Keep browser sessions open in case of failures. Implies -V.
 --devtools            Start browser with devtools open. Implies -V
@@ -442,7 +445,7 @@ The keys are up to you; for example you probably want to have a main entry point
                       Load unpacked browser extensions
 --forward-console     Forward browser console logs
 --show-interactions   Visually show on the page where a user interaction took place (clicks, taps,...)
--d, --debug           Shorthand for "--keep-open --devtools-preserve --forward-console"
+-d, --debug           Shorthand for "--keep-open --devtools-preserve --forward-console --video"
 --default-timeout MS  Default timeout value for various browser functions (default: 30s)
 ```
 

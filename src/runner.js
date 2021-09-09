@@ -167,27 +167,6 @@ async function run_task(config, state, task) {
 
         task.pageUrls = task_config._browser_pages.map(page => page.url());
 
-        // Close all browser windows
-        if (!config.keep_open && task_config._browser_pages.length > 0) {
-            output.logVerbose(
-                config,
-                `[task] Closing ${task_config._browser_pages.length} browser pages for task` +
-                    ` #${task._runner_task_id} (${task.name})`
-            );
-            try {
-                await Promise.all(
-                    task_config._browser_pages
-                        .slice()
-                        .map(page => browser_utils.closePage(page))
-                );
-            } catch (e) {
-                output.log(
-                    config,
-                    `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}\n${e.stack}`
-                );
-            }
-        }
-
         await output.logTaskError(config, task);
         const show_error = output.shouldShowError(config, task);
         output.logVerbose(
@@ -258,6 +237,27 @@ async function run_task(config, state, task) {
             state.remaining_teardowns.push(
                 ...task_config._teardown_hooks.map(fn => () => fn(config))
             );
+        }
+
+        // Close all browser windows
+        if (!config.keep_open && task_config._browser_pages.length > 0) {
+            output.logVerbose(
+                config,
+                `[task] Closing ${task_config._browser_pages.length} browser pages for task` +
+                    ` #${task._runner_task_id} (${task.name})`
+            );
+            try {
+                await Promise.all(
+                    task_config._browser_pages
+                        .slice()
+                        .map(page => browser_utils.closePage(page))
+                );
+            } catch (e) {
+                output.log(
+                    config,
+                    `INTERNAL ERROR: Unable to close browser pages of ${task.name}: ${e}\n${e.stack}`
+                );
+            }
         }
     }
 }

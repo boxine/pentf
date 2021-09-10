@@ -237,26 +237,7 @@ async function newPage(config, chrome_args = []) {
         );
         const recorder = new VideoRecorder('ffmpeg', page);
         recorder.start({ outputFile, width, height });
-        config._video_recorder = recorder;
-
-        if (config._teardown_hooks) {
-            config._teardown_hooks.push(async config => {
-                await recorder.stop();
-
-                output.logVerbose(
-                    config,
-                    `[recorder] Stopping video: ${outputFile} [${taskName}]`
-                );
-                // Delete video recording if test succeeded
-                if (!config.error) {
-                    output.logVerbose(
-                        config,
-                        `[recorder] Test succeeded, deleting video: ${outputFile} [${taskName}]`
-                    );
-                    await fs.promises.unlink(outputFile);
-                }
-            });
-        }
+        config._video_recorders.push(recorder);
     }
 
     browser._logs = [];

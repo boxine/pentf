@@ -3,6 +3,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs').promises;
 const { ignoreError } = require('./utils');
+const output = require('./output');
 
 /**
  * Get time without daylight savings or other human concepts.
@@ -38,16 +39,23 @@ class VideoRecorder {
 
         this._writePromise = Promise.resolve();
         this._closePromise = Promise.resolve();
+
+        this._stopped = false;
+        this.outputFile = null;
     }
 
     /**
      * @param {{ width: number, height: number, outputFile: string }} options
      */
     async start(options) {
+        if (this._stopped) return;
+
         const { width, height, outputFile } = options;
         assert(width);
         assert(height);
         assert(outputFile);
+
+        this.outputFile = outputFile;
 
         await fs.mkdir(path.dirname(outputFile), { recursive: true });
 
@@ -155,6 +163,9 @@ class VideoRecorder {
     }
 
     async stop() {
+        if (this.stopped) return;
+        this._stopped = true;
+
         assert(this._process);
         if (!this._page.isClosed()) {
             try {
@@ -183,6 +194,40 @@ class VideoRecorder {
     }
 }
 
+/**
+ * Stop all video recordings
+ * @param {import('./internal').TaskConfig} config
+ * @param {VideoRecorder[]} recorders
+ */
+async function stopAllRecordings(config, recorders) {
+    await Promise.all(
+        recorders.map(async recorder => {
+            output.logVerbose(
+                config,
+                `[recorder] Stopping video: ${recorder.outputFile} [${config._taskName}]`
+            );
+
+            await recorder.stop();
+
+            if (!config.error && recorder.outputFile) {
+                output.logVerbose(
+                    config,
+                    `[recorder] Test succeeded, deleting video: ${recorder.outputFile} [${config.taskName}]`
+                );
+                try {
+                    await fs.unlink(recorder.outputFile);
+                } catch (err) {
+                    output.log(
+                        config,
+                        `[recorder] Unable to delete file: ${recorder.outputFile} [${config.taskName}]`
+                    );
+                }
+            }
+        })
+    );
+}
+
 module.exports = {
+    stopAllRecordings,
     VideoRecorder,
 };

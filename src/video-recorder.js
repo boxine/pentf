@@ -101,7 +101,7 @@ class VideoRecorder {
     async _onFrame(frame) {
         try {
             // Confirm to devtools protocol that we received the message
-            this._session.send('Page.screencastFrameAck', {
+            await this._session.send('Page.screencastFrameAck', {
                 sessionId: frame.sessionId,
             });
         } catch (err) {

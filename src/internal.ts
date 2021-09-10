@@ -59,7 +59,7 @@ export interface TaskConfig extends Config {
     _taskName: string;
     _taskGroup: string;
     _video_counter: number;
-    _video_recorder: null | VideoRecorder;
+    _video_recorders: VideoRecorder[];
     error: Error | null;
     resources: string[];
     _snapshots: Buffer[];

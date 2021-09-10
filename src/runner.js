@@ -16,6 +16,7 @@ const version = require('./version');
 const { timeoutPromise } = require('./promise_utils');
 const { getCPUCount } = require('./config');
 const { shouldShowError } = require('./output');
+const { stopAllRecordings } = require('./video-recorder');
 
 /**
  * @param {import('./config').Config} config
@@ -35,7 +36,7 @@ async function run_task(config, state, task) {
         _taskName: task.name,
         _taskGroup: task.group,
         _video_counter: 1,
-        _video_recorder: null,
+        _video_recorders: [],
         _snapshots: [],
         start: task.start,
         accessibilityErrors: [],
@@ -55,6 +56,11 @@ async function run_task(config, state, task) {
         );
 
         await Promise.race([testPromise, timeoutPromise]);
+
+        // Stop video recordings as early as possible as it is pretty
+        // CPU intensive.
+        // TODO: Maybe we should just store frames and do the encoding later?
+        await stopAllRecordings(task_config, task_config._video_recorders);
 
         if (!finished) {
             throw new Error(
@@ -107,6 +113,11 @@ async function run_task(config, state, task) {
         task.breadcrumb = task_config._breadcrumb;
         task.status = 'error';
         task.accessibilityErrors = task_config.accessibilityErrors;
+
+        // Stop video recordings as early as possible as it is pretty
+        // CPU intensive.
+        // TODO: Maybe we should just store frames and do the encoding later?
+        await stopAllRecordings(task_config, task_config._video_recorders);
 
         // Inline expectedToFail() calls
         if (e.pentf_expectedToFail) {

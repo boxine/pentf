@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>browser_console | pentf</title>
+	<title>video-recorder | pentf</title>
 	<meta name="description" content="Documentation for pentf">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -53,10 +53,10 @@
 					<a href="../modules.html">pentf</a>
 				</li>
 				<li>
-					<a href="browser_console.html">browser_console</a>
+					<a href="video_recorder.html">video-recorder</a>
 				</li>
 			</ul>
-			<h1>Module browser_console</h1>
+			<h1>Module video-recorder</h1>
 		</div>
 	</div>
 </header>
@@ -70,8 +70,7 @@
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="browser_console.html#forwardBrowserConsole" class="tsd-kind-icon">forward<wbr>Browser<wbr>Console</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-module"><a href="browser_console.html#parseConsoleArg" class="tsd-kind-icon">parse<wbr>Console<wbr>Arg</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="video_recorder.html#stopAllRecordings" class="tsd-kind-icon">stop<wbr>All<wbr>Recordings</a></li>
 							</ul>
 						</section>
 					</div>
@@ -80,71 +79,35 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="forwardBrowserConsole" class="tsd-anchor"></a>
-					<h3>forward<wbr>Browser<wbr>Console</h3>
+					<a name="stopAllRecordings" class="tsd-anchor"></a>
+					<h3>stop<wbr>All<wbr>Recordings</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">forward<wbr>Browser<wbr>Console<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Config</span>, page<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Page</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">stop<wbr>All<wbr>Recordings<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">TaskConfig</span>, recorders<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">VideoRecorder</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/9333c1e/src/browser_console.js#L160">browser_console.js:160</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/9333c1e/src/video-recorder.js#L202">video-recorder.js:202</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Serialize console arguments and send them to puppeteer. Unfortunately for
-										us the native serialization methods for JSHandle objects from puppeteer
-										are lossy. They turn Error objects into <code>{}</code> and <code>null</code> to <code>undefined</code>.
-										The passed &quot;preview&quot; object is incomplete and truncates all data for nested
-									objects or other complex values.</p>
+									<p>Stop all video recordings</p>
 								</div>
-								<p>The only way to keep the data intact is to use a custom serialization format
-								and pass it around as a string.</p>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>config: <span class="tsd-signature-type">Config</span></h5>
+									<h5>config: <span class="tsd-signature-type">TaskConfig</span></h5>
 								</li>
 								<li>
-									<h5>page: <span class="tsd-signature-type">Page</span></h5>
+									<h5>recorders: <span class="tsd-signature-type">VideoRecorder</span><span class="tsd-signature-symbol">[]</span></h5>
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
-					<a name="parseConsoleArg" class="tsd-anchor"></a>
-					<h3>parse<wbr>Console<wbr>Arg</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">parse<wbr>Console<wbr>Arg<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/9333c1e/src/browser_console.js#L8">browser_console.js:8</a></li>
-								</ul>
-							</aside>
-							<div class="tsd-comment tsd-typography">
-								<div class="lead">
-									<p>Reconstruct original types from serialized message</p>
-								</div>
-							</div>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>value: <span class="tsd-signature-type">any</span></h5>
-									<div class="tsd-comment tsd-typography">
-									</div>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -159,7 +122,7 @@
 					<li class=" tsd-kind-module">
 						<a href="assert_utils.html">assert_<wbr>utils</a>
 					</li>
-					<li class="current tsd-kind-module">
+					<li class=" tsd-kind-module">
 						<a href="browser_console.html">browser_<wbr>console</a>
 					</li>
 					<li class=" tsd-kind-module">
@@ -186,7 +149,7 @@
 					<li class=" tsd-kind-module">
 						<a href="utils.html">utils</a>
 					</li>
-					<li class=" tsd-kind-module">
+					<li class="current tsd-kind-module">
 						<a href="video_recorder.html">video-<wbr>recorder</a>
 					</li>
 				</ul>
@@ -194,10 +157,7 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="browser_console.html#forwardBrowserConsole" class="tsd-kind-icon">forward<wbr>Browser<wbr>Console</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-module">
-						<a href="browser_console.html#parseConsoleArg" class="tsd-kind-icon">parse<wbr>Console<wbr>Arg</a>
+						<a href="video_recorder.html#stopAllRecordings" class="tsd-kind-icon">stop<wbr>All<wbr>Recordings</a>
 					</li>
 				</ul>
 			</nav>

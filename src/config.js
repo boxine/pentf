@@ -341,7 +341,7 @@ function parseArgs(options, raw_args) {
         action: 'storeTrue',
     });
     puppeteer_group.addArgument(['-d', '--debug'], {
-        help: 'Shorthand for "--keep-open --devtools-preserve --forward-console --video"',
+        help: 'Shorthand for "--keep-open --devtools-preserve --forward-console"',
         action: 'storeTrue',
     });
     puppeteer_group.addArgument(['--default-timeout'], {
@@ -507,7 +507,6 @@ function parseArgs(options, raw_args) {
         args.keep_open = true;
         args.forward_console = true;
         args.show_interactions = true;
-        args.video = true;
     }
     if (args.keep_open) {
         args.headless = false;

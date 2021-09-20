@@ -40,6 +40,8 @@ const output = require('./output');
  *               The response will have a utility function `async getCookieValue(name)` to quickly retrieve a cookie value from the jar.
  */
 async function fetch(config, url, init) {
+    assert(url, 'url parameter is required');
+    assert.equal(typeof url, 'string', 'url parameter must be a string');
     if (!init) init = {};
     if (!init._redirectChain && init.agent) {
         init._agentIsForced = true;

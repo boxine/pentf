@@ -123,6 +123,20 @@ async function run(config) {
             return resolve(port);
         });
     });
+
+    try {
+        await fetch(config);
+        assert(false, 'must fail');
+    } catch (error) {
+        assert.equal(error.message, 'url parameter is required');
+    }
+    try {
+        await fetch(config, 25);
+        assert(false, 'must fail');
+    } catch (error) {
+        assert.equal(error.message, 'url parameter must be a string');
+    }
+
     const url = `http://localhost:${port}/`;
 
     // Start with a very simple request

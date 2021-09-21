@@ -30,7 +30,7 @@ const output = require('./output');
  * ```
  * @param {*} config The pentf configuration object.
  * @param {string} url URL to fetch.
- * @param {Object?} init fetch options, see [`RequestInit` in the Fetch Spec](https://fetch.spec.whatwg.org/#requestinit).
+ * @param {RequestInit & { agent?: any, curl_include_headers?: boolean, curl_extra_options?: any, cookieJar?: any}} [init] fetch options, see [`RequestInit` in the Fetch Spec](https://fetch.spec.whatwg.org/#requestinit).
  * On top of the standard Fetch parameters, we support the following nonstandard parameters:
  * - `agent`: node [HTTP/HTTPS agent](https://nodejs.org/api/https.html#https_class_https_agent)
  * - `curl_include_headers`: boolean (default false) of whether to include `-k` in the curl output.

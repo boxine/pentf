@@ -83,13 +83,13 @@
 					<a name="fetch" class="tsd-anchor"></a>
 					<h3>fetch</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
-						<li class="tsd-signature tsd-kind-icon">fetch<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, init<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">fetch<span class="tsd-signature-symbol">(</span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, init<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/a97eacb/src/net_utils.js#L42">net_utils.js:42</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/410b3c2/src/net_utils.js#L42">net_utils.js:42</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -130,20 +130,7 @@
 									</div>
 								</li>
 								<li>
-									<h5>init: <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Object</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>fetch options, see <a href="https://fetch.spec.whatwg.org/#requestinit"><code>RequestInit</code> in the Fetch Spec</a>.
-										On top of the standard Fetch parameters, we support the following nonstandard parameters:</p>
-										<ul>
-											<li><code>agent</code>: node <a href="https://nodejs.org/api/https.html#https_class_https_agent">HTTP/HTTPS agent</a></li>
-											<li><code>curl_include_headers</code>: boolean (default false) of whether to include <code>-k</code> in the curl output.</li>
-											<li><code>curl_extra_options</code>: List of extra options for the curl output.</li>
-											<li><code>cookieJar</code>: A <a href="https://github.com/salesforce/tough-cookie/blob/master/README.md#cookiejar">CookieJar object</a> to use.<pre><code><span style="color: #000000">        </span><span style="color: #001080">Pass</span><span style="color: #000000"> </span><span style="color: #0000FF">in</span><span style="color: #000000"> </span><span style="color: #001080">the</span><span style="color: #000000"> </span><span style="color: #001080">string</span><span style="color: #000000"> </span><span style="color: #A31515">`&#039;create&#039;`</span><span style="color: #000000"> </span><span style="color: #001080">to</span><span style="color: #000000"> </span><span style="color: #001080">create</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #795E26">one</span><span style="color: #000000"> (</span><span style="color: #001080">returned</span><span style="color: #000000"> </span><span style="color: #AF00DB">as</span><span style="color: #000000"> </span><span style="color: #A31515">`response.cookieJar`</span><span style="color: #000000">).</span>
-<span style="color: #000000">        </span><span style="color: #001080">The</span><span style="color: #000000"> </span><span style="color: #001080">response</span><span style="color: #000000"> </span><span style="color: #001080">will</span><span style="color: #000000"> </span><span style="color: #001080">have</span><span style="color: #000000"> </span><span style="color: #001080">a</span><span style="color: #000000"> </span><span style="color: #001080">utility</span><span style="color: #000000"> </span><span style="color: #0000FF">function</span><span style="color: #000000"> `</span><span style="color: #795E26">async</span><span style="color: #000000"> </span><span style="color: #795E26">getCookieValue</span><span style="color: #000000">(</span><span style="color: #001080">name</span><span style="color: #000000">)` </span><span style="color: #795E26">to</span><span style="color: #000000"> </span><span style="color: #795E26">quickly</span><span style="color: #000000"> </span><span style="color: #795E26">retrieve</span><span style="color: #000000"> </span><span style="color: #795E26">a</span><span style="color: #000000"> </span><span style="color: #795E26">cookie</span><span style="color: #000000"> </span><span style="color: #795E26">value</span><span style="color: #000000"> </span><span style="color: #795E26">from</span><span style="color: #000000"> </span><span style="color: #795E26">the</span><span style="color: #000000"> </span><span style="color: #795E26">jar</span><span style="color: #000000">.</span>
-</code></pre>
-											</li>
-										</ul>
-									</div>
+									<h5>init: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-type">RequestInit</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
@@ -160,7 +147,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/a97eacb/src/net_utils.js#L163">net_utils.js:163</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/410b3c2/src/net_utils.js#L163">net_utils.js:163</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">

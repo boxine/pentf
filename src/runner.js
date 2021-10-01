@@ -248,7 +248,10 @@ async function run_task(config, state, task) {
         }
 
         // Close all browser windows
-        if (!config.keep_open && task_config._browser_pages.length > 0) {
+        if (
+            (!config.keep_open || task.status === 'success') &&
+            task_config._browser_pages.length > 0
+        ) {
             output.logVerbose(
                 config,
                 `[task] Closing ${task_config._browser_pages.length} browser pages for task` +

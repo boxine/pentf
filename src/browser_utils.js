@@ -2163,9 +2163,11 @@ async function assertAccessibility(config, page) {
                     } catch (err) {
                         output.logVerbose(
                             config,
-                            '[runner] Could not take screenshot ' + err.message
+                            `[a11y] Could not take screenshot with selector ${selector}: ${err.message}`
                         );
-                        return null;
+                        // try again without selector:
+                        const img = await takeScreenshot(config, page, name);
+                        imgs.push(img);
                     }
                 }
             }

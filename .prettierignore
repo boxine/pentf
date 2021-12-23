@@ -4,3 +4,7 @@ README.md
 *.yml
 .eslintrc.js
 doc/
+dist/
+results.md
+results.html
+

@@ -134,6 +134,10 @@ async function fetch(config, url, init) {
                 delete init.body;
             }
 
+            if (!init._agentIsForced) {
+                delete init.agent;
+            }
+
             const res = await fetch(config, next, init);
             if (!res.redirectChain) res.redirectChain = init._redirectChain;
             return res;

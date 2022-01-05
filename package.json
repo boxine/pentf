@@ -143,6 +143,11 @@
   "peerDependencies": {
     "puppeteer": "*"
   },
+  "peerDependenciesMeta": {
+    "puppeteer": {
+      "optional": true
+    }
+  },
   "scripts": {
     "test": "./run",
     "lint": "eslint . run",

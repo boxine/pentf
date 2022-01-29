@@ -209,7 +209,13 @@ async function forwardBrowserConsole(config, page) {
             const parsed = args.map(arg => parseConsoleArg(arg));
             if (type === 'trace') {
                 console.log(`Trace: ${parsed[1] || ''}${parsed[0]}`);
-            } else {
+            } else if (type === 'startGroup') {
+                // Grouping features are exclusive to the browser, but we
+                // can display the group heading here
+                console.log.apply(console, parsed);
+            }
+            // 'endGroup' is exclusive to the browser and not available in node
+            else if (type !== 'endGroup') {
                 console[type].apply(console, parsed);
             }
         } catch (err) {

@@ -136,8 +136,42 @@ async function _find_message(config, client, since, to, subjectContains) {
     return undefined;
 }
 
+class ErrorHandlingImapClient {
+  constructor(imapClient, errorPromise) {
+    this.imapClient = imapClient;
+    this.errorPromise = errorPromise;
+  }
+
+  async connect(...args) {
+    return Promise.race([this.errorPromise, this.imapClient.connect(...args)]);
+  }
+
+  async selectMailbox(...args) {
+    return Promise.race([this.errorPromise, this.imapClient.selectMailbox(...args)]);
+  }
+
+  async listMessages(...args) {
+    return Promise.race([this.errorPromise, this.imapClient.listMessages(...args)]);
+  }
+
+  async deleteMessages(...args) {
+    return Promise.race([this.errorPromise, this.imapClient.deleteMessages(...args)]);
+  }
+
+  async close(...args) {
+    // Error could occur before close call comes through, so proxy even this
+    return Promise.race([this.errorPromise, this.imapClient.close(...args)]);
+  }
+}
+
+
 async function connect(config, user) {
-    const client = new ImapClient(config.imap.host, config.imap.port, {
+    let onError;
+    const errorPromise = new Promise((resolve, reject) => {
+        onError = reject;
+    });
+
+    const imapClient = new ImapClient(config.imap.host, config.imap.port, {
         logLevel: config.email_verbose
             ? imap_client_module.LOG_LEVEL_DEBUG
             : imap_client_module.LOG_LEVEL_NONE,
@@ -146,12 +180,16 @@ async function connect(config, user) {
             pass: config.imap.password,
         },
         useSecureTransport: config.imap.tls,
+        onerror: onError,
     });
-    client.client.timeoutSocketLowerBound =
+    imapClient.client.timeoutSocketLowerBound =
         config.imap.socket_timeout || 5 * 60000;
-    await client.connect();
-    await client.selectMailbox('INBOX', {});
-    return client;
+
+    const errorHandlingClient = new ErrorHandlingImapClient(imapClient, errorPromise);
+
+    await errorHandlingClient.connect();
+    await errorHandlingClient.selectMailbox('INBOX', {});
+    return errorHandlingClient;
 }
 
 /**

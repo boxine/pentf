@@ -137,6 +137,9 @@ async function _find_message(config, client, since, to, subjectContains) {
 }
 
 async function connect(config, user) {
+    let onError;
+    const errorPromise = new Promise(_, reject => onError = reject);
+
     const client = new ImapClient(config.imap.host, config.imap.port, {
         logLevel: config.email_verbose
             ? imap_client_module.LOG_LEVEL_DEBUG
@@ -146,10 +149,13 @@ async function connect(config, user) {
             pass: config.imap.password,
         },
         useSecureTransport: config.imap.tls,
+        onerror: onError,
     });
     client.client.timeoutSocketLowerBound =
         config.imap.socket_timeout || 5 * 60000;
-    await client.connect();
+    client.errorPromise = errorPromise;
+
+    await Promise.race(client.connect(), client.errorPromise);
     await client.selectMailbox('INBOX', {});
     return client;
 }

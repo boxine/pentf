@@ -59,15 +59,16 @@ async function run() {
             tls: false,
         },
     };
-
+console.log('A')
     // A short timeout will be triggered immediately
-    // Note that socket_timeout the *minimal* timeout, emailjs adds some ms more per byte
+    // Note that socket_timeout is the *minimal* timeout, emailjs adds some ms more per byte
     pseudoConfig.imap.socket_timeout = 1;
+console.log('A1');
     await assert.rejects(
         connect(pseudoConfig, 'foo@example.org'),
         { message: ' Socket timed out!' } // yes, with a space in front
     );
-
+console.log('B')
     healthy = true;
     pseudoConfig.imap.socket_timeout = 10000;
     const client = await connect(pseudoConfig, 'foo@example.org');

@@ -68,6 +68,12 @@ async function makeCurlCommand(options, url) {
         } else if (Buffer.isBuffer(options.body)) {
             const body_b64 = options.body.toString('base64');
             curl_command = add_binary_data(curl_command, body_b64);
+        } else if (options.body instanceof URLSearchParams) {
+            if (!headers['Content-Type']) {
+                curl_command +=
+                    ' -H "Content-Type: application/x-www-form-urlencoded"';
+            }
+            curl_command += ` -d ${options.body.toString()}`;
         } else if (/\0/.test(options.body)) {
             const body_b64 = Buffer.from(options.body).toString('base64');
             curl_command = add_binary_data(curl_command, body_b64);

@@ -86,6 +86,7 @@ async function _find_message(config, client, since, to, subjectContains) {
     const since_timestamp = since.getTime();
     let newest_timestamp = 0;
     let newest_msg = undefined;
+    const targetTo = to.toLowerCase();
     for (const msg of messages) {
         const header_date = parseHeader(
             'Date',
@@ -98,7 +99,7 @@ async function _find_message(config, client, since, to, subjectContains) {
         }
 
         const header_to = parseHeader('To', msg['body[header.fields (to)]']);
-        if (header_to.toLowerCase() != to.toLowerCase()) {
+        if (header_to.toLowerCase().includes(targetTo)) {
             continue;
         }
 

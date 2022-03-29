@@ -99,7 +99,7 @@ async function _find_message(config, client, since, to, subjectContains) {
         }
 
         const header_to = parseHeader('To', msg['body[header.fields (to)]']);
-        if (header_to.toLowerCase().includes(targetTo)) {
+        if (!header_to.toLowerCase().includes(targetTo)) {
             continue;
         }
 

@@ -23,6 +23,7 @@ jobs:
       - name: Linux test
         if: matrix.os == 'ubuntu-latest'
         run: |
+            sudo apt-get update
             sudo apt-get install ffmpeg
             xvfb-run --auto-servernum ./run --ci
 

@@ -169,13 +169,20 @@ async function newPage(config, chrome_args = []) {
                         await session.send('Runtime.evaluate', {
                             expression: `(() => {
                         try {
-                            Common.moduleSetting("network_log.preserve-log").set(true);
-                            Common.moduleSetting("preserveConsoleLog").set(true);
+                            // Puppeteer >= 14.x
+                            if ('settings' in Common) {
+                                Common.settings.moduleSetting("network_log.preserve-log").set(true);
+                                Common.settings.moduleSetting("preserveConsoleLog").set(true);
+                                return Common.settings.moduleSetting("preserveConsoleLog").get() === true;
+                            } else {
+                                Common.moduleSetting("network_log.preserve-log").set(true);
+                                Common.moduleSetting("preserveConsoleLog").set(true);
+                                return Common.moduleSetting("preserveConsoleLog").get() === true;
+                            }
                         } catch { // devtools not yet loaded
                             return false;
                         }
 
-                        return Common.moduleSetting("preserveConsoleLog").get() === true;
                         })()
                     `,
                         })

@@ -78,26 +78,34 @@ function parseArgs(options, raw_args) {
     });
 
     // General arguments
-    const { configDir } = options;
-    if (configDir) {
-        assert.equal(typeof configDir, 'string');
-        parser.addArgument(['-e', '--env'], {
-            choices: listEnvs(configDir),
-            defaultValue: 'local',
-            help: 'The environment to test against. Default is %(defaultValue)s.',
-        });
-    }
     parser.addArgument(['--version'], {
         action: 'storeTrue',
         dest: 'print_version',
         help: 'Print version of tests and test framework and exit.',
     });
-    parser.addArgument(['--config'], {
+
+    const config_group = parser.addArgumentGroup({ title: 'Configuration' });
+    const { configDir } = options;
+    if (configDir) {
+        assert.equal(typeof configDir, 'string');
+        config_group.addArgument(['-e', '--env'], {
+            choices: listEnvs(configDir),
+            defaultValue: 'local',
+            help: 'The environment to test against. Default is %(defaultValue)s.',
+        });
+    }
+    config_group.addArgument(['--config'], {
         type: 'string',
         metavar: 'FILE',
         dest: 'config_file',
         defaultValue: 'pentf.config.js',
         help: 'Path to config file. (Default: pentf.config.js)',
+    });
+    config_group.addArgument(['--set-config'], {
+        metavar: 'key.subkey=JSON',
+        dest: 'set_config',
+        action: 'append',
+        help: 'Set a configuration option, e.g. imap.user="test@dev.example"',
     });
 
     const output_group = parser.addArgumentGroup({ title: 'Output' });
@@ -621,7 +629,33 @@ async function readConfig(options, args) {
 
     config.moduleType = moduleType;
 
-    return { ...config, ...args };
+    const res = { ...config, ...args };
+
+    for (const set_config of args.set_config || []) {
+        const m = /^([^=]+)=(.*)$/.exec(set_config);
+        if (!m) {
+            throw new Error(
+                `Cannot parse -set-config option ${set_config}, should be like key.subkey=json`
+            );
+        }
+
+        const keys = m[1].split('.');
+        const value = JSON.parse(m[2]);
+        const parentKeys = keys.slice(0, keys.length - 1);
+        const finalKey = keys[keys.length - 1];
+
+        let to_modify = res;
+        for (const k of parentKeys) {
+            if (to_modify[k] === undefined) {
+                to_modify[k] = {};
+            }
+            to_modify = to_modify[k];
+        }
+
+        to_modify[finalKey] = value;
+    }
+
+    return res;
 }
 
 module.exports = {

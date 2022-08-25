@@ -248,8 +248,19 @@ function cmp(a, b) {
 }
 
 function cmpKey(key) {
-    return function (x, y) {
+    return function do_cmpKey(x, y) {
         return cmp(x[key], y[key]);
+    };
+}
+
+function cmpKeys(...keys) {
+    assert(keys.length > 0);
+    return function do_cmpKeys(x, y) {
+        for (const key of keys) {
+            const res = cmp(x[key], y[key]);
+            if (res !== 0) return res;
+        }
+        return 0;
     };
 }
 
@@ -283,6 +294,7 @@ module.exports = {
     assertEventually,
     cmp,
     cmpKey,
+    cmpKeys,
     count,
     filterMap,
     ignoreError,

@@ -3,6 +3,8 @@ const http = require('http');
 const querystring = require('querystring');
 
 const { fetch } = require('../src/net_utils');
+const { performance } = require('perf_hooks');
+const { assertGreaterEqual, assertLess } = require('../src/assert_utils');
 
 function escapeHTML(s) {
     // from https://stackoverflow.com/a/20403618/35070
@@ -39,6 +41,16 @@ function handleRequest(request, response) {
             'Set-Cookie': `redirectCount=${redirectCount + 1}`,
         });
         response.end('redirected');
+        return;
+    }
+
+    const delayMatch = /^\/delay\/([0-9]+)$/.exec(request.url);
+    if (delayMatch) {
+        const delay = parseInt(delayMatch[1]);
+        setTimeout(() => {
+            response.writeHead(200, { 'Content-Type': 'text/plain' });
+            response.end('answered late');
+        }, delay);
         return;
     }
 
@@ -234,6 +246,16 @@ async function run(config) {
         }),
         { message: 'Protocol "https:" not supported. Expected "http:"' }
     );
+
+    // Timeout
+    const before = performance.now();
+    const delayUrl = url + 'delay/10000';
+    await assert.rejects(fetch(config, delayUrl, { timeout: 50 }), {
+        message: `network timeout at: ${delayUrl}`,
+    });
+    const duration = performance.now() - before;
+    assertGreaterEqual(duration, 50, 'Terminated too fast');
+    assertLess(duration, 10000);
 
     // Terminate server
     server.close(); // No new connections

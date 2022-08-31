@@ -37,6 +37,39 @@ function getCPUCount() {
     // TODO handle scenarios where our process is limited to less
 }
 
+function _parseConcurrencyFormula(spec, cpuCount) {
+    if (spec.includes('+')) {
+        return spec
+            .split('+')
+            .map(subSpec => _parseConcurrencyFormula(subSpec, cpuCount))
+            .reduce((x, y) => x + y, 0);
+    }
+    if (spec.includes('-')) {
+        const parts = spec
+            .split('-')
+            .map(subSpec => _parseConcurrencyFormula(subSpec, cpuCount));
+        return parts
+            .slice(1)
+            .reduce((total, element) => total - element, parts[0]);
+    }
+    if (spec.includes('*')) {
+        return spec
+            .split('*')
+            .map(subSpec => _parseConcurrencyFormula(subSpec, cpuCount))
+            .reduce((x, y) => x * y, 1);
+    }
+
+    spec = spec.trim();
+    if (spec === 'cpus') {
+        return cpuCount;
+    }
+    assert(
+        /^-?[0-9]+$/.test(spec),
+        `Invalid concurrency spec ${JSON.stringify(spec)}`
+    );
+    return parseInt(spec);
+}
+
 function computeConcurrency(spec, { cpuCount = undefined } = {}) {
     if (typeof spec === 'number') {
         // Somebody passed in result value directly
@@ -46,25 +79,13 @@ function computeConcurrency(spec, { cpuCount = undefined } = {}) {
         cpuCount = getCPUCount();
     }
 
-    return spec
-        .split('+')
-        .map(subSpec =>
-            subSpec
-                .split('*')
-                .map(numeric => {
-                    numeric = numeric.trim();
-                    if (numeric === 'cpus') {
-                        return cpuCount;
-                    }
-                    assert(
-                        /^[0-9]+$/.test(numeric),
-                        `Invalid concurrency spec ${JSON.stringify(spec)}`
-                    );
-                    return parseInt(numeric);
-                })
-                .reduce((x, y) => x * y, 1)
-        )
-        .reduce((x, y) => x + y, 0);
+    if (spec.trim() === '0') {
+        return 0; // sequential run desired
+    }
+
+    const res = Math.max(_parseConcurrencyFormula(spec, cpuCount), 1);
+    assert(!isNaN(res));
+    return res;
 }
 
 function parseArgs(options, raw_args) {
@@ -374,9 +395,8 @@ function parseArgs(options, raw_args) {
     });
     runner_group.addArgument(['-S', '--sequential'], {
         help: 'Do not run tests in parallel (same as -C 0)',
-        dest: 'concurrency',
-        action: 'storeConst',
-        constant: 0,
+        dest: 'sequential',
+        action: 'storeTrue',
     });
     runner_group.addArgument(['--fail-fast'], {
         help: 'Abort once a test fails',
@@ -468,15 +488,6 @@ function parseArgs(options, raw_args) {
 
     const args = parser.parseArgs(raw_args);
 
-    // Watch mode is typically used for local development. In that case
-    // we need to keep some cores available for other stuff like
-    // a bundler and/or unit test runner for frontend developers.
-    if (!args.concurrency) {
-        args.concurrency = args.watch
-            ? Math.max(1, getCPUCount() - 2)
-            : concurrency_default;
-    }
-
     // Overwrite config object passed to `pentf.main()` with command line
     // arguments. But only overwrite any existing config properties passed
     // to `pentf.main()` if they were actually set via the cli. If the
@@ -532,7 +543,25 @@ function parseArgs(options, raw_args) {
         );
     }
 
-    args.concurrency = computeConcurrency(args.concurrency);
+    let concurrency_spec = args.concurrency;
+    if (args.sequential) {
+        if (args.concurrency) {
+            parser.error(
+                'Cannot use -C/-concurrency and -S/--sequential at the same time!'
+            );
+        }
+        concurrency_spec = 0;
+    } else if (concurrency_spec === null) {
+        if (args.watch) {
+            // Watch mode is typically used for local development. In that case
+            // we need to keep some cores available for other stuff like
+            // a bundler and/or unit test runner for frontend developers.
+            concurrency_spec = 'cpus - 2';
+        } else {
+            concurrency_spec = concurrency_default;
+        }
+    }
+    args.concurrency = computeConcurrency(concurrency_spec);
 
     // argpase returns a nested array
     args.watch_files = args.watch_files ? args.watch_files[0] : [];

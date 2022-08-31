@@ -247,15 +247,51 @@ async function run(config) {
         { message: 'Protocol "https:" not supported. Expected "http:"' }
     );
 
-    // Timeout
-    const before = performance.now();
+    // Timeout with node-fetch
     const delayUrl = url + 'delay/10000';
+    const before = performance.now();
     await assert.rejects(fetch(config, delayUrl, { timeout: 50 }), {
         message: `network timeout at: ${delayUrl}`,
     });
     const duration = performance.now() - before;
     assertGreaterEqual(duration, 50, 'Terminated too fast');
     assertLess(duration, 10000);
+
+    if (typeof globalThis !== 'undefined' && globalThis.fetch) {
+        const nativeBefore = performance.now();
+
+        // suppress experimental warning
+        const originalEmit = process.emit;
+        process.emit = function (name, data) {
+            if (
+                name === 'warning' &&
+                typeof data === 'object' &&
+                data.name === 'ExperimentalWarning' &&
+                data.message.includes(
+                    'The Fetch API is an experimental feature'
+                )
+            ) {
+                return false;
+            }
+
+            return originalEmit.apply(process, arguments);
+        };
+        try {
+            await assert.rejects(
+                fetch(config, delayUrl, {
+                    timeout: 50,
+                    preferNativeFetch: true,
+                }),
+                { message: 'The operation was aborted.' }
+            );
+        } finally {
+            process.emit = originalEmit;
+        }
+
+        const nativeDuration = performance.now() - nativeBefore;
+        assertGreaterEqual(nativeDuration, 50, 'Terminated too fast');
+        assertLess(nativeDuration, 10000);
+    }
 
     // Terminate server
     server.close(); // No new connections
@@ -267,4 +303,5 @@ async function run(config) {
 module.exports = {
     description: 'net_utils.fetch, namely cookie handling',
     run,
+    resources: ['experimentalWarning'],
 };

@@ -39,6 +39,7 @@ const output = require('./output');
  * - `cookieJar`: A [CookieJar object](https://github.com/salesforce/tough-cookie/blob/master/README.md#cookiejar) to use.
  *               Pass in the string `'create'` to create a new one (returned as `response.cookieJar`).
  *               The response will have a utility function `async getCookieValue(name)` to quickly retrieve a cookie value from the jar.
+ * - `timeout`: timeout in ms (implemented by node-fetch)
  */
 async function fetch(config, url, init) {
     assert(url, 'url parameter is required');

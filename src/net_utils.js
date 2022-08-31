@@ -39,7 +39,8 @@ const output = require('./output');
  * - `cookieJar`: A [CookieJar object](https://github.com/salesforce/tough-cookie/blob/master/README.md#cookiejar) to use.
  *               Pass in the string `'create'` to create a new one (returned as `response.cookieJar`).
  *               The response will have a utility function `async getCookieValue(name)` to quickly retrieve a cookie value from the jar.
- * - `timeout`: timeout in ms (implemented by node-fetch)
+ * - `preferNativeFetch`: use native node.js fetch instead of node-fetch. (experimental, doesn't work with self-signed certificates)
+ * - `timeout`: timeout in ms
  */
 async function fetch(config, url, init) {
     assert(url, 'url parameter is required');
@@ -52,6 +53,11 @@ async function fetch(config, url, init) {
     init = { ...init }; // make sure we don't change the object directly
     init._redirect = redirect;
     init.redirect = 'manual';
+
+    const useNativeFetch =
+        init.preferNativeFetch &&
+        typeof globalThis !== 'undefined' &&
+        globalThis.fetch !== undefined;
 
     const needAgent =
         !init._agentIsForced &&
@@ -90,7 +96,27 @@ async function fetch(config, url, init) {
         output.log(config, await makeCurlCommand(init, url));
     }
 
-    const response = await node_fetch(url, init);
+    let response;
+    if (useNativeFetch) {
+        let timeout = null;
+        if (init.timeout) {
+            const controller = new AbortController();
+            timeout = setTimeout(() => {
+                controller.abort();
+            }, init.timeout);
+            init.signal = controller.signal;
+        }
+
+        try {
+            response = await globalThis.fetch(url, init);
+        } finally {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+        }
+    } else {
+        response = await node_fetch(url, init);
+    }
 
     let { cookieJar } = init;
     if (cookieJar) {

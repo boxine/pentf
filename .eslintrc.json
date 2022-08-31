@@ -9,7 +9,8 @@
     "plugins": ["prettier"],
     "globals": {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+        "SharedArrayBuffer": "readonly",
+        "globalThis": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2020

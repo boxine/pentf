@@ -123,10 +123,10 @@ function parseArgs(options, raw_args) {
         help: 'Path to config file. (Default: pentf.config.js)',
     });
     config_group.addArgument(['--set-config'], {
-        metavar: 'key.subkey=JSON',
+        metavar: 'key.subkey=JSON|STRING',
         dest: 'set_config',
         action: 'append',
-        help: 'Set a configuration option, e.g. imap.user="test@dev.example"',
+        help: 'Set a configuration option, e.g. \'imap.user=test@dev.example\' or \'smtp:{"server": "example.com", "port": 25}\'',
     });
 
     const output_group = parser.addArgumentGroup({ title: 'Output' });
@@ -595,6 +595,37 @@ async function readConfigFile(configDir, env, moduleType) {
     return config;
 }
 
+function _setConfig(res, arg) {
+    const m = /^([^=]+)=(.*)$/.exec(arg);
+    if (!m) {
+        throw new Error(
+            `Cannot parse --set-config option ${arg}, should be like key.subkey=json`
+        );
+    }
+
+    const keys = m[1].split('.');
+    let value;
+    if (/^(true|false|null|undefined|[0-9]+|"|\[|\{)/.test(m[2])) {
+        // JSON?
+        value = JSON.parse(m[2]);
+    } else {
+        // Normal string
+        value = m[2];
+    }
+    const parentKeys = keys.slice(0, keys.length - 1);
+    const finalKey = keys[keys.length - 1];
+
+    let to_modify = res;
+    for (const k of parentKeys) {
+        if (to_modify[k] === undefined) {
+            to_modify[k] = {};
+        }
+        to_modify = to_modify[k];
+    }
+
+    to_modify[finalKey] = value;
+}
+
 /**
  * @typedef {{config_file: string, no_external_locking?: boolean, no_locking?: boolean, locking_verbose?: boolean, external_locking_client?: string, external_locking_url?: string, expect_nothing?: boolean, log_file?: string, log_file_stream?: fs.WriteStream, repeatFlaky: number, concurrency: number, watch: boolean, watch_files?: string, testsGlob: string, moduleType: "commonjs" | "esm", show_interactions?: boolean, snapshot_directory: string, update_snapshots?: boolean, video?: boolean, video_directory: string}} Config
  */
@@ -661,27 +692,7 @@ async function readConfig(options, args) {
     const res = { ...config, ...args };
 
     for (const set_config of args.set_config || []) {
-        const m = /^([^=]+)=(.*)$/.exec(set_config);
-        if (!m) {
-            throw new Error(
-                `Cannot parse -set-config option ${set_config}, should be like key.subkey=json`
-            );
-        }
-
-        const keys = m[1].split('.');
-        const value = JSON.parse(m[2]);
-        const parentKeys = keys.slice(0, keys.length - 1);
-        const finalKey = keys[keys.length - 1];
-
-        let to_modify = res;
-        for (const k of parentKeys) {
-            if (to_modify[k] === undefined) {
-                to_modify[k] = {};
-            }
-            to_modify = to_modify[k];
-        }
-
-        to_modify[finalKey] = value;
+        _setConfig(res, set_config);
     }
 
     return res;
@@ -695,4 +706,5 @@ module.exports = {
     // tests only
     _readConfigFile: readConfigFile,
     _computeConcurrency: computeConcurrency,
+    _setConfig,
 };

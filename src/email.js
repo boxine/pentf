@@ -166,6 +166,16 @@ async function connect(config, user) {
     return client;
 }
 
+function resolveUser(config, to) {
+    const user = config.imap.user;
+    if (user === '__to__') {
+        return to;
+    } else if (user === '__to_account__') {
+        return to.replace(/\+[^@]+/, '');
+    }
+    return user;
+}
+
 /**
  * Retrieve and delete an email.
  *
@@ -200,10 +210,7 @@ async function getMail(
 
     assert(Array.isArray(wait_times));
 
-    let user = config.imap.user;
-    if (user === '__to__') {
-        user = to;
-    }
+    const user = resolveUser(config, to);
 
     let { email_cached_clients } = config;
     if (!email_cached_clients) {
@@ -288,4 +295,5 @@ module.exports = {
     parseBody,
     parseHeader,
     shutdown,
+    resolveUser,
 };

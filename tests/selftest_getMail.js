@@ -85,13 +85,22 @@ const PSEUDO_EMAILS = [
         'body[header.fields (to)]': 'To: foo@bar.example\r\n\r\n',
         _message: 'msg 5',
     },
+    {
+        '#': 6,
+        uid: 5000006,
+        'body[header.fields (subject)]': 'Subject: Number 6 with plus\r\n\r\n',
+        'body[header.fields (date)]':
+            'Date: Thu, 31 Aug 2023 16:06:00 +0000\r\n\r\n',
+        'body[header.fields (to)]': 'To: foo+test123@bar.example\r\n\r\n',
+        _message: 'msg 6 (with plus)',
+    },
 ];
 
 async function run() {
     const client = new PseudoEmailClient();
     const pseudoConfig = {
         imap: {
-            user: 'foo@bar.example',
+            user: '__to_account__',
         },
         keep_emails: true,
         email_cached_clients: new Map([['foo@bar.example', client]]),
@@ -106,6 +115,15 @@ async function run() {
         [1]
     );
     assert.equal(firstMail.text, 'msg 5');
+
+    const plusMail = await getMail(
+        pseudoConfig,
+        since,
+        'foo+test123@bar.example',
+        'Number',
+        [1]
+    );
+    assert.equal(plusMail.text, 'msg 6 (with plus)');
 
     const matchedByFuncMail = await getMail(
         pseudoConfig,

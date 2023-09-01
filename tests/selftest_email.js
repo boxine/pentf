@@ -1,6 +1,6 @@
 const assert = require('assert').strict;
 
-const { parseHeader } = require('../src/email');
+const { parseHeader, resolveUser } = require('../src/email');
 
 async function run() {
     assert.equal(parseHeader('To', 'To: somebody\r\n'), 'somebody');
@@ -19,6 +19,25 @@ async function run() {
             'To: integrationtests+api2_invitation_owner3mmx1hxg467@boxine.de\r\n abc\r\n abc\r\n'
         ),
         'integrationtests+api2_invitation_owner3mmx1hxg467@boxine.de abc abc'
+    );
+
+    assert.equal(
+        resolveUser(
+            { imap: { user: 'foo+a@bar.example' } },
+            'somebody+123@mail.com'
+        ),
+        'foo+a@bar.example'
+    );
+    assert.equal(
+        resolveUser({ imap: { user: '__to__' } }, 'somebody+123@mail.com'),
+        'somebody+123@mail.com'
+    );
+    assert.equal(
+        resolveUser(
+            { imap: { user: '__to_account__' } },
+            'somebody+123@mail.com'
+        ),
+        'somebody@mail.com'
     );
 }
 

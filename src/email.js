@@ -70,7 +70,7 @@ function parseHeader(name, value) {
     return libmime.decodeWords(value.trim());
 }
 
-async function _find_message(config, client, since, to, subjectContains) {
+async function _find_message(config, client, since, to, subjectMatch) {
     const messages = await client.listMessages(
         'INBOX',
         '1:*',
@@ -107,7 +107,7 @@ async function _find_message(config, client, since, to, subjectContains) {
             'Subject',
             msg['body[header.fields (subject)]']
         );
-        if (!subject.includes(subjectContains)) {
+        if (!subjectMatch(subject)) {
             continue;
         }
 
@@ -170,7 +170,7 @@ async function connect(config, user) {
  * @param {import('./internal').TaskConfig} config The pentf configuration object.
  * @param {Date} since Earliest time the email can be sent. (To avoid finding the email of a prior test.)
  * @param {string} to receiveer email address (`config.email` if you have just one email address, often the result of `makeRandomEmail`)
- * @param {string} subjectContains Search string for the subject.
+ * @param {string|(string) => boolean} subjectContains Search string for the subject, or a callable to execute to match.
  * @param {number[]} wait_times How long to wait between checking email. By default, we wait about 3 minutes total.
  * @returns {Object} Email object with `html` and `text` properties.
  */
@@ -227,18 +227,22 @@ async function getMail(
         config,
         `[email] Waiting for message to arrive to ${to} ...${taskNameRepr}`
     );
+    let subjectMatch = subjectContains;
+    if (typeof subjectMatch === 'string') {
+        subjectMatch = subject => subject.includes(subjectContains);
+    } else {
+        assert(
+            subjectContains instanceof Function,
+            `subjectContains parameter is not a Function or string: ${subjectContains}`
+        );
+    }
     const msg = await utils.retry(
         () => _find_message(config, client, since, to, subjectContains),
         wait_times
     );
     assert(
         msg,
-        'Could not find message to ' +
-            to +
-            ' matching ' +
-            JSON.stringify(subjectContains) +
-            ' since ' +
-            since
+        `Could not find message to ${to} matching "${subjectContains}" since ${since}`
     );
     output.logVerbose(config, `[email] Message arrived${taskNameRepr}`);
 

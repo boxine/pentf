@@ -200,15 +200,16 @@ async function getMail(
     }
     let client = email_cached_clients.get(user);
     let do_logout = false;
+    const taskNameRepr = config._taskName ? ` (${config._taskName})` : '';
     if (client) {
         output.logVerbose(
             config,
-            `[email] Reusing existing client for ${user} (${config._taskName})`
+            `[email] Reusing existing client for ${user}${taskNameRepr}`
         );
     } else {
         output.logVerbose(
             config,
-            `[email] Connecting to account ${user} (${config._taskName})`
+            `[email] Connecting to account ${user}${taskNameRepr}`
         );
         client = await connect(config, user);
 
@@ -224,7 +225,7 @@ async function getMail(
 
     output.logVerbose(
         config,
-        `[email] Waiting for message to arrive to ${to} ... (${config._taskName})`
+        `[email] Waiting for message to arrive to ${to} ...${taskNameRepr}`
     );
     const msg = await utils.retry(
         () => _find_message(config, client, since, to, subjectContains),
@@ -239,13 +240,13 @@ async function getMail(
             ' since ' +
             since
     );
-    output.logVerbose(config, `[email] Message arrived (${config._taskName})`);
+    output.logVerbose(config, `[email] Message arrived${taskNameRepr}`);
 
     if (do_logout) {
         await client.close();
         output.logVerbose(
             config,
-            `[email] Closed client for ${user} (${config._taskName})`
+            `[email] Closed client for ${user}${taskNameRepr}`
         );
     }
 

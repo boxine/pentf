@@ -4,7 +4,11 @@ const querystring = require('querystring');
 
 const { fetch } = require('../src/net_utils');
 const { performance } = require('perf_hooks');
-const { assertGreaterEqual, assertLess } = require('../src/assert_utils');
+const {
+    assertGreaterEqual,
+    assertIncludes,
+    assertLess,
+} = require('../src/assert_utils');
 
 function escapeHTML(s) {
     // from https://stackoverflow.com/a/20403618/35070
@@ -282,7 +286,10 @@ async function run(config) {
                     timeout: 50,
                     preferNativeFetch: true,
                 }),
-                { message: 'The operation was aborted.' }
+                err => {
+                    assertIncludes(err.message, 'abort'); // different messages in different node versions
+                    return true;
+                }
             );
         } finally {
             process.emit = originalEmit;

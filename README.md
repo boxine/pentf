@@ -354,10 +354,18 @@ The keys are up to you; for example you probably want to have a main entry point
 
 ```
 -h, --help            Show this help message and exit.
+--version             Print version of tests and test framework and exit.
+```
+
+###### Configuration
+
+```
 -e YOUR_ENVIRONMENTS, --env YOUR_ENVIRONMENTS
                       The environment to test against. Default is local.
---version             Print version of tests and test framework and exit.
 --config FILE         Path to config file. (Default: pentf.config.js)
+--set-config key.subkey=JSON|STRING
+                      Set a configuration option, e.g. 'imap.user=test@dev.example' or 'smtp:{"server": 
+                      "example.com", "port": 25}'
 ```
 
 ###### Output

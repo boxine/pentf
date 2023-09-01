@@ -28,6 +28,17 @@ function parseDeep(mime_part) {
         }
     }
 
+    // Simple text email?
+    if (
+        !text &&
+        mime_part.contentType &&
+        mime_part.contentType.value === 'text/plain'
+    ) {
+        text = new TextDecoder(mime_part.contentType.params.charset).decode(
+            mime_part.content
+        );
+    }
+
     return { text, html };
 }
 
@@ -237,7 +248,7 @@ async function getMail(
         );
     }
     const msg = await utils.retry(
-        () => _find_message(config, client, since, to, subjectContains),
+        () => _find_message(config, client, since, to, subjectMatch),
         wait_times
     );
     assert(

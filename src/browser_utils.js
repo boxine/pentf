@@ -14,7 +14,6 @@ const { performance } = require('perf_hooks');
 const mkdirpCb = require('mkdirp');
 const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch');
-const sharp = require('sharp');
 const rimraf = require('rimraf');
 
 const { assertAsyncEventually } = require('./assert_utils');
@@ -28,6 +27,8 @@ const { VideoRecorder } = require('./video-recorder');
 const mkdirp = promisify(mkdirpCb);
 
 let tmp_home;
+
+let sharp;
 
 /**
  * Launch a new browser with puppeteer, with a new page (=Tab). The browser is completely isolated from any other calls.
@@ -2272,6 +2273,18 @@ async function assertSnapshot(
 
             width = Math.max(expected.width, actual.width);
             height = Math.max(expected.height, actual.height);
+
+            if (!sharp) {
+                try {
+                    sharp = (await import('sharp')).default;
+                } catch (err) {
+                    console.log(
+                        `Please install the module "sharp" to be able to use screenshot testing`
+                    );
+
+                    throw err;
+                }
+            }
 
             // Extend actual image if needed
             if (actual.width !== width || actual.height !== height) {

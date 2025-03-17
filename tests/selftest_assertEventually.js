@@ -50,6 +50,18 @@ async function run() {
     );
     assert.strictEqual(counter, 3);
 
+    // Custom message func
+    await assert.rejects(
+        assertEventually(() => false, {
+            checkEvery: 1,
+            timeout: 1,
+            messageFunc: () => 'func',
+        }),
+        {
+            message: /func \(waited/,
+        }
+    );
+
     // Throws original error
     try {
         await assertEventually(

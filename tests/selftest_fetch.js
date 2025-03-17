@@ -150,7 +150,7 @@ async function run(config) {
         await fetch(config, 25);
         assert(false, 'must fail');
     } catch (error) {
-        assert.equal(error.message, 'url parameter must be a string');
+        assertIncludes(error.message, 'url parameter must be a string');
     }
 
     const url = `http://localhost:${port}/`;

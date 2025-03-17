@@ -144,8 +144,9 @@ function assertNotIncludes(haystack, needle, message = undefined) {
  * await assertEventually(() => called);
  * ```
  * @param {() => any} testfunc The test function. Must return `true` to signal success.
- * @param {{message?: string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
+ * @param {{message?: string, messageFunc?: () => string, timeout?: number, checkEvery?: number, crashOnError?: boolean}} [__namedParameters] Options (currently not visible in output due to typedoc bug)
  * @param {string?} message Error message shown if the condition never becomes true within the timeout.
+ * @param {(() => string) ?} messageFunc A callable to generate the error message. If set, the message parameter is ignored.
  * @param {number?} timeout How long to wait, in milliseconds.
  * @param {number?} checkEvery Intervals between checks, in milliseconds.
  * @param {boolean?} crashOnError `true` (default): A thrown error/exception is an immediate failure.
@@ -155,6 +156,7 @@ async function assertEventually(
     testfunc,
     {
         message = 'assertEventually failed',
+        messageFunc = null,
         timeout = 10000,
         checkEvery = 200,
         crashOnError = true,
@@ -195,6 +197,7 @@ async function assertEventually(
         throw caughtError;
     }
 
+    message = messageFunc ? messageFunc() : message;
     throw new Error(`${message} (waited ${output.formatTime(timeout)})`);
 }
 

@@ -10,7 +10,7 @@ async function _cmd(cmd, args, options) {
     ).stdout.trim();
 }
 
-async function testsVersion(config) {
+async function calculateTestsVersion(config) {
     try {
         const tagsOutput = await _cmd('git', ['tag', '--points-at', 'HEAD'], {
             cwd: config.rootDir,
@@ -50,6 +50,14 @@ async function testsVersion(config) {
     return 'unknown';
 }
 
+async function testsVersion(config) {
+    if (config._cachedTestsVersion) return config._cachedTestsVersion;
+
+    const res = await calculateTestsVersion(config);
+    config._cachedTestsVersion = res;
+    return res;
+}
+
 function pentfVersion() {
     // Don't use inline synchronous `require()` here, because
     // that cannot be translated to ES Modules. For ES Modules
@@ -64,6 +72,7 @@ function pentfVersion() {
 }
 
 module.exports = {
+    calculateTestsVersion,
     testsVersion,
     pentfVersion,
 };

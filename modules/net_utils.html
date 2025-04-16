@@ -71,6 +71,7 @@
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="net_utils.html#fetch" class="tsd-kind-icon">fetch</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-module"><a href="net_utils.html#findHTTPHeader" class="tsd-kind-icon">findHTTPHeader</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-module"><a href="net_utils.html#setupTLSClientAuth" class="tsd-kind-icon">setupTLSClient<wbr>Auth</a></li>
 							</ul>
 						</section>
@@ -89,7 +90,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/061423e/src/net_utils.js#L45">net_utils.js:45</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/6a7ce5d/src/net_utils.js#L45">net_utils.js:45</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -138,6 +139,51 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
+					<a name="findHTTPHeader" class="tsd-anchor"></a>
+					<h3>findHTTPHeader</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
+						<li class="tsd-signature tsd-kind-icon">findHTTPHeader<span class="tsd-signature-symbol">(</span>headers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Object</span>, headerName<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/6a7ce5d/src/net_utils.js#L232">net_utils.js:232</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Find the name of an HTTP header (case-insensitively) in a JavaScript object.</p>
+								</div>
+								<dl class="tsd-comment-tags">
+									<dt>example</dt>
+									<dd><pre><code class="language-javascript"><span style="color: #795E26">findHTTPHeader</span><span style="color: #000000">({</span><span style="color: #A31515">&#039;User-agent&#039;</span><span style="color: #001080">:</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;foo&#039;</span><span style="color: #000000">}, </span><span style="color: #A31515">&#039;User-Agent&#039;</span><span style="color: #000000">)  </span><span style="color: #008000">// Returns &#039;User-agent&#039;</span>
+<span style="color: #795E26">findHTTPHeader</span><span style="color: #000000">({}, </span><span style="color: #A31515">&#039;User-Agent&#039;</span><span style="color: #000000">)  </span><span style="color: #008000">// Returns undefined</span>
+</code></pre>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>headers: <span class="tsd-signature-type">Object</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The HTTP headers</p>
+									</div>
+								</li>
+								<li>
+									<h5>headerName: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The target header name, ideally already in lower-case</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></h4>
+							<p>The name of the header</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-module">
 					<a name="setupTLSClientAuth" class="tsd-anchor"></a>
 					<h3>setupTLSClient<wbr>Auth</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-module">
@@ -147,7 +193,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/boxine/pentf/blob/061423e/src/net_utils.js#L198">net_utils.js:198</a></li>
+									<li>Defined in <a href="https://github.com/boxine/pentf/blob/6a7ce5d/src/net_utils.js#L198">net_utils.js:198</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -242,6 +288,9 @@
 				<ul class="before-current">
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="net_utils.html#fetch" class="tsd-kind-icon">fetch</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="net_utils.html#findHTTPHeader" class="tsd-kind-icon">findHTTPHeader</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-module">
 						<a href="net_utils.html#setupTLSClientAuth" class="tsd-kind-icon">setupTLSClient<wbr>Auth</a>

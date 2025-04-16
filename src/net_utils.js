@@ -217,7 +217,32 @@ async function setupTLSClientAuth(
     );
 }
 
+/**
+ * Find the name of an HTTP header (case-insensitively) in a JavaScript object.
+ *
+ * @example
+ * ```javascript
+ * findHTTPHeader({'User-agent': 'foo'}, 'User-Agent')  // Returns 'User-agent'
+ * findHTTPHeader({}, 'User-Agent')  // Returns undefined
+ * ```
+ * @param {Object} headers The HTTP headers
+ * @param {string} headerName The target header name, ideally already in lower-case
+ * @returns {string?} The name of the header
+ */
+function findHTTPHeader(headers, headerName) {
+    headerName = headerName.toLowerCase();
+
+    for (let hn in headers) {
+        if (hn.toLowerCase() === headerName) {
+            return hn;
+        }
+    }
+
+    return undefined;
+}
+
 module.exports = {
     fetch,
+    findHTTPHeader,
     setupTLSClientAuth,
 };

@@ -365,24 +365,22 @@ async function resizePage(config, page, { width, height }) {
             return { width: window.innerWidth, height: window.innerHeight };
         });
 
-        const browser = getBrowser(page);
-
         if (actual.width !== width || actual.height !== height) {
             // Get browser tab and resize window via devtools protocol
-            const targetId = page._target._targetInfo.targetId;
-            const { windowId } = await browser._connection.send(
+            const targetId = page.target()._targetInfo.targetId;
+            const session = await page.createCDPSession();
+            const { windowId } = await session.send(
                 'Browser.getWindowForTarget',
                 {
                     targetId,
                 }
             );
-            const { bounds } = await browser._connection.send(
-                'Browser.getWindowBounds',
-                { windowId }
-            );
+            const { bounds } = await session.send('Browser.getWindowBounds', {
+                windowId,
+            });
 
             // Resize to correct dimensions
-            await browser._connection.send('Browser.setWindowBounds', {
+            await session.send('Browser.setWindowBounds', {
                 bounds: {
                     width: bounds.width + width - actual.width,
                     height: bounds.height + height - actual.height,
@@ -428,7 +426,7 @@ const isPage = x =>
 
 /** @type {(pageOrFrame: import('puppeteer').Page | import('puppeteer').Frame) => import('puppeteer').Page} */
 const getPage = pageOrFrame =>
-    isPage(pageOrFrame) ? pageOrFrame : pageOrFrame._frameManager._page;
+    isPage(pageOrFrame) ? pageOrFrame : pageOrFrame.page();
 
 /**
  * Get the text content of an error or warning page inserted by the browser.
@@ -594,9 +592,11 @@ async function installInteractions(page) {
 function getBrowser(pageOrFrame) {
     if (typeof pageOrFrame.browser === 'function') {
         return pageOrFrame.browser();
-    } else {
-        return pageOrFrame._frameManager._page.browser();
     }
+    if (typeof pageOrFrame.page === 'function') {
+        return pageOrFrame.page().browser();
+    }
+    throw new Error('Object is neither a Page nor a Frame');
 }
 
 /**
@@ -906,9 +906,8 @@ async function waitForText(
         )}${extraMessageRepr}`
     );
 
-    const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
-        const res = await page.waitForXPath(xpath, { timeout });
+        const res = await page.waitForSelector(`text/${text}`, { timeout });
         addBreadcrumb(config, `exit waitForText(${text})`);
         return res;
     } catch (e) {
@@ -1016,7 +1015,7 @@ async function waitForTestIdGone(
  * @param {string} expected The value that is expected to be present.
  */
 async function assertValue(input, expected) {
-    const page = input._page;
+    const page = input.frame.page();
     assert(page);
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertValue(${expected})`);
@@ -1238,7 +1237,7 @@ async function onSuccess(fn) {
  * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
  */
 function getMouse(pageOrFrame) {
-    return pageOrFrame.mouse || pageOrFrame._frameManager._page.mouse;
+    return pageOrFrame.mouse || pageOrFrame.page().mouse;
 }
 
 /**
@@ -2107,7 +2106,8 @@ async function _takeScreenshot(
     }
 
     // Restore emulation, fixes unable to resize window after taking a screenshot.
-    await page._client.send('Emulation.clearDeviceMetricsOverride');
+    const cdpClient = await page.createCDPSession();
+    await cdpClient.send('Emulation.clearDeviceMetricsOverride');
 
     // Restore potential emulation settings that were active before
     // we took the screenshot.
@@ -2450,18 +2450,19 @@ async function interceptRequest(page, fn) {
         await page.setRequestInterception(true);
 
         page._pentf_intercept_handlers = [];
+
         page.on('request', async request => {
             for (const handler of page._pentf_intercept_handlers) {
                 await handler(request);
 
-                if (request._interceptionHandled) {
+                if (request.isInterceptResolutionHandled()) {
                     break;
                 }
             }
 
             // Don't stall requests
-            if (!request._interceptionHandled) {
-                request.continue();
+            if (!request.isInterceptResolutionHandled()) {
+                await request.continue();
             }
         });
     }

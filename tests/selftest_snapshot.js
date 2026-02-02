@@ -17,13 +17,19 @@ async function run(config) {
     await mkdirp(dir);
 
     const page = await newPage(config);
-    await page.setContent('<h1 style="font-size: 64px">Hello world!</h1>');
+    await page.setContent(
+        '<h1 style="font-size: 64px; color: red;">Hello world!</h1>'
+    );
     await assertSnapshot(config, page, '1');
 
-    await page.setContent('<h1 style="font-size: 32px">Hello world!</h1>');
+    await page.setContent(
+        '<h1 style="font-size: 32px; color: red;">Hello world!</h1>'
+    );
     await assert.rejects(assertSnapshot(config, page, '1'));
 
-    await page.setContent('<h1 style="font-size: 64px">Hello world!</h1>');
+    await page.setContent(
+        '<h1 style="font-size: 64px; color: red;">Hello world!</h1>'
+    );
     await assertSnapshot(config, page, '1');
 }
 

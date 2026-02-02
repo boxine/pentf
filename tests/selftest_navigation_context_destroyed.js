@@ -1,3 +1,4 @@
+const assert = require('assert').strict;
 const {
     clickXPath,
     newPage,
@@ -56,7 +57,7 @@ async function run(config) {
     await assertNotSelector(page, 'h10');
 
     await reset(page);
-    await clickText(page, 'More information');
+    await assert.rejects(() => clickText(page, 'More information'));
 
     await reset(page);
     await clickNestedText(page, 'Example');

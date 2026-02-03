@@ -626,7 +626,7 @@ function addBreadcrumb(config, name) {
  * @template {K}
  * @param {import('puppeteer').Page} page
  * @param {K extends keyof import('puppeteer').Page} prop
- * @param {(...any[]) => string} getName
+ * @param {((...args: any[]) => string)} getName
  */
 function withBreadcrumb(config, page, prop, getName) {
     const original = page[prop];

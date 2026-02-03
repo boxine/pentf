@@ -2,10 +2,7 @@ const assert = require('assert').strict;
 const path = require('path');
 const fs = require('fs');
 const child_process = require('child_process');
-const rimrafCb = require('rimraf');
-const { promisify } = require('util');
-
-const rimraf = promisify(rimrafCb);
+const { rimraf } = require('rimraf');
 
 async function run() {
     const fixture = path.join(__dirname, 'screenshot_tests');

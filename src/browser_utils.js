@@ -11,11 +11,11 @@ const path = require('path');
 const { promisify } = require('util');
 const tmp = require('tmp-promise');
 const { performance } = require('perf_hooks');
-const mkdirpCb = require('mkdirp');
+const { mkdirp } = require('mkdirp');
 const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch');
 const sharp = require('sharp');
-const rimraf = require('rimraf');
+const { rimraf } = require('rimraf');
 
 const { assertAsyncEventually } = require('./assert_utils');
 const { forwardBrowserConsole } = require('./browser_console');
@@ -24,8 +24,6 @@ const { timeoutPromise } = require('./promise_utils');
 const { importFile } = require('./loader');
 const output = require('./output');
 const { VideoRecorder } = require('./video-recorder');
-
-const mkdirp = promisify(mkdirpCb);
 
 let tmp_home;
 
@@ -414,7 +412,7 @@ async function createUserProfileDir(config) {
     ).path;
 
     onTeardown(config, async () => {
-        await promisify(rimraf)(dir);
+        await rimraf(dir);
     });
 
     return dir;

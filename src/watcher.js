@@ -1,5 +1,5 @@
 const path = require('path');
-const minimatch = require('minimatch');
+const { minimatch } = require('minimatch');
 const chokidar = require('chokidar');
 const readline = require('readline');
 

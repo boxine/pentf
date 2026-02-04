@@ -2226,6 +2226,8 @@ async function assertSnapshot(
     { threshold = 0.2, selector, fullPage = true, ...pxl } = {}
 ) {
     await mkdirp(config.snapshot_directory);
+    await mkdirp(config.screenshot_directory);
+
     const target = path.join(
         config.snapshot_directory,
         `${config._taskName}_${name}-expected.png`

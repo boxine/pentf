@@ -364,27 +364,32 @@ async function resizePage(config, page, { width, height }) {
         });
 
         if (actual.width !== width || actual.height !== height) {
-            // Get browser tab and resize window via devtools protocol
-            const targetId = page.target()._targetInfo.targetId;
             const session = await page.createCDPSession();
-            const { windowId } = await session.send(
-                'Browser.getWindowForTarget',
-                {
-                    targetId,
-                }
-            );
-            const { bounds } = await session.send('Browser.getWindowBounds', {
-                windowId,
-            });
 
-            // Resize to correct dimensions
-            await session.send('Browser.setWindowBounds', {
-                bounds: {
-                    width: bounds.width + width - actual.width,
-                    height: bounds.height + height - actual.height,
-                },
-                windowId,
-            });
+            try {
+                // Get browser tab and resize window via devtools protocol
+                const { targetInfo } = await session.send(
+                    'Target.getTargetInfo'
+                );
+                const targetId = targetInfo.targetId;
+                const { windowId } = await session.send(
+                    'Browser.getWindowForTarget',
+                    { targetId }
+                );
+                const { bounds } = await session.send(
+                    'Browser.getWindowBounds',
+                    { windowId }
+                );
+                await session.send('Browser.setWindowBounds', {
+                    bounds: {
+                        width: bounds.width + width - actual.width,
+                        height: bounds.height + height - actual.height,
+                    },
+                    windowId,
+                });
+            } finally {
+                await session.detach();
+            }
         }
     }
 }

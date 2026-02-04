@@ -133,7 +133,7 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "puppeteer": ">=22"
+    "puppeteer": ">=24.15"
   },
   "peerDependenciesMeta": {
     "puppeteer": {

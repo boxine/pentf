@@ -14,7 +14,6 @@ const { performance } = require('perf_hooks');
 const mkdirpCb = require('mkdirp');
 const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch');
-const sharp = require('sharp');
 const rimraf = require('rimraf');
 
 const { assertAsyncEventually } = require('./assert_utils');
@@ -2222,6 +2221,10 @@ async function assertSnapshot(
     name,
     { threshold = 0.2, selector, fullPage = true, ...pxl } = {}
 ) {
+    // Load during runtime: sharp is quite particular about the operating system CPU, and requires AVX.
+    // Do not require this from users who don't use this function.
+    const sharp = require('sharp');
+
     await mkdirp(config.snapshot_directory);
     const target = path.join(
         config.snapshot_directory,

@@ -229,9 +229,6 @@ async function newPage(config, chrome_args = []) {
                     { timeout: 4000 }
                 );
 
-            // Hack to get puppeteer to allow us to access the page context
-            devtoolsTarget._targetInfo.type = 'page';
-
             // Wait until devtools are fully initialized
             const devtoolsPage = await devtoolsTarget.page();
             await devtoolsPage.waitForFunction(

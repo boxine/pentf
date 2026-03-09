@@ -163,28 +163,42 @@ async function newPage(config, chrome_args = []) {
             const session = await target.createCDPSession();
             await assertAsyncEventually(
                 async () => {
-                    return (
-                        await session.send('Runtime.evaluate', {
-                            expression: `(() => {
+                    const response = await session.send('Runtime.evaluate', {
+                        awaitPromise: true,
+                        expression: `(async () => {
                         try {
-                            // Puppeteer >= 14.x
-                            if ('settings' in Common) {
-                                Common.settings.moduleSetting("network_log.preserve-log").set(true);
-                                Common.settings.moduleSetting("preserveConsoleLog").set(true);
-                                return Common.settings.moduleSetting("preserveConsoleLog").get() === true;
-                            } else {
-                                Common.moduleSetting("network_log.preserve-log").set(true);
-                                Common.moduleSetting("preserveConsoleLog").set(true);
-                                return Common.moduleSetting("preserveConsoleLog").get() === true;
+                            let success = false;
+
+                            // for modern Chromes: configure via C++ bindings
+                            // this bypasses headaches with ES modules and CSP
+                            if (globalThis.InspectorFrontendHost) {
+                                // note: values must be JSON stringified strings
+                                globalThis.InspectorFrontendHost.setPreference("network_log.preserve-log", '"true"');
+                                globalThis.InspectorFrontendHost.setPreference("preserveConsoleLog", '"true"');
+                                success = true;
                             }
-                        } catch { // devtools not yet loaded
+
+                            // fallback for older Chromes: try via Common APIs
+                            if (globalThis.Common) {
+                                if ('settings' in globalThis.Common) {
+                                    globalThis.Common.settings.moduleSetting("network_log.preserve-log").set(true);
+                                    globalThis.Common.settings.moduleSetting("preserveConsoleLog").set(true);
+                                } else {
+                                    globalThis.Common.moduleSetting("network_log.preserve-log").set(true);
+                                    globalThis.Common.moduleSetting("preserveConsoleLog").set(true);
+                                }
+                                success = true;
+                            }
+
+                            return success;
+                        } catch (err) {
                             return false;
                         }
 
                         })()
                     `,
-                        })
-                    ).result.value;
+                    });
+                    return response.result.value;
                 },
                 {
                     message: 'could not toggle preserve options in devtools',

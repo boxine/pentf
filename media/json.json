@@ -1,0 +1,13 @@
+{
+    "doc:file": "A JSON configuration is simply a JSON file.",
+
+    "extends": "simple_javascript",
+    "doc:extends": [
+        "In any configuration file, you can set an extends key to inherit from another configuration",
+        "If a key occurs here and in the parent configuration, the value here will be used."
+    ],
+
+    "json_loaded": true,
+    "external_locking_url": "https://lockserver.example/",
+    "overriden": "json"
+}

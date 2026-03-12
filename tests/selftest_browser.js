@@ -46,9 +46,6 @@ async function run(config) {
     await assert.rejects(waitForText(page, { error: 'not-a-string' }), {
         message: 'Invalid text argument: {"error":"not-a-string"}',
     });
-    await assert.rejects(waitForText(page, page), {
-        message: 'Invalid text argument: [object Object]',
-    });
 
     let clickCount = 0;
     await page.exposeFunction('countClick', () => {

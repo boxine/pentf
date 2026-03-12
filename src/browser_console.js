@@ -195,14 +195,10 @@ async function forwardBrowserConsole(config, page) {
         try {
             const args = await Promise.all(
                 message.args().map(arg => {
-                    return arg.executionContext().evaluate(
-                        (handle, fn) => {
-                            const serialize = new Function(`return ${fn}`)();
-                            return serialize(handle, new Set());
-                        },
-                        arg,
-                        serialize.toString()
-                    );
+                    return arg.evaluate((handle, fn) => {
+                        const serialize = new Function(`return ${fn}`)();
+                        return serialize(handle, new Set());
+                    }, serialize.toString());
                 })
             );
 

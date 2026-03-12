@@ -11,11 +11,11 @@ const path = require('path');
 const { promisify } = require('util');
 const tmp = require('tmp-promise');
 const { performance } = require('perf_hooks');
-const mkdirpCb = require('mkdirp');
+const { mkdirp } = require('mkdirp');
 const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch');
 const sharp = require('sharp');
-const rimraf = require('rimraf');
+const { rimraf } = require('rimraf');
 
 const { assertAsyncEventually } = require('./assert_utils');
 const { forwardBrowserConsole } = require('./browser_console');
@@ -24,8 +24,6 @@ const { timeoutPromise } = require('./promise_utils');
 const { importFile } = require('./loader');
 const output = require('./output');
 const { VideoRecorder } = require('./video-recorder');
-
-const mkdirp = promisify(mkdirpCb);
 
 let tmp_home;
 
@@ -165,28 +163,42 @@ async function newPage(config, chrome_args = []) {
             const session = await target.createCDPSession();
             await assertAsyncEventually(
                 async () => {
-                    return (
-                        await session.send('Runtime.evaluate', {
-                            expression: `(() => {
+                    const response = await session.send('Runtime.evaluate', {
+                        awaitPromise: true,
+                        expression: `(async () => {
                         try {
-                            // Puppeteer >= 14.x
-                            if ('settings' in Common) {
-                                Common.settings.moduleSetting("network_log.preserve-log").set(true);
-                                Common.settings.moduleSetting("preserveConsoleLog").set(true);
-                                return Common.settings.moduleSetting("preserveConsoleLog").get() === true;
-                            } else {
-                                Common.moduleSetting("network_log.preserve-log").set(true);
-                                Common.moduleSetting("preserveConsoleLog").set(true);
-                                return Common.moduleSetting("preserveConsoleLog").get() === true;
+                            let success = false;
+
+                            // for modern Chromes: configure via C++ bindings
+                            // this bypasses headaches with ES modules and CSP
+                            if (globalThis.InspectorFrontendHost) {
+                                // note: values must be JSON stringified strings
+                                globalThis.InspectorFrontendHost.setPreference("network_log.preserve-log", '"true"');
+                                globalThis.InspectorFrontendHost.setPreference("preserveConsoleLog", '"true"');
+                                success = true;
                             }
-                        } catch { // devtools not yet loaded
+
+                            // fallback for older Chromes: try via Common APIs
+                            if (globalThis.Common) {
+                                if ('settings' in globalThis.Common) {
+                                    globalThis.Common.settings.moduleSetting("network_log.preserve-log").set(true);
+                                    globalThis.Common.settings.moduleSetting("preserveConsoleLog").set(true);
+                                } else {
+                                    globalThis.Common.moduleSetting("network_log.preserve-log").set(true);
+                                    globalThis.Common.moduleSetting("preserveConsoleLog").set(true);
+                                }
+                                success = true;
+                            }
+
+                            return success;
+                        } catch (err) {
                             return false;
                         }
 
                         })()
                     `,
-                        })
-                    ).result.value;
+                    });
+                    return response.result.value;
                 },
                 {
                     message: 'could not toggle preserve options in devtools',
@@ -216,9 +228,6 @@ async function newPage(config, chrome_args = []) {
                     target => target.url().startsWith('devtools://'),
                     { timeout: 4000 }
                 );
-
-            // Hack to get puppeteer to allow us to access the page context
-            devtoolsTarget._targetInfo.type = 'page';
 
             // Wait until devtools are fully initialized
             const devtoolsPage = await devtoolsTarget.page();
@@ -365,30 +374,33 @@ async function resizePage(config, page, { width, height }) {
             return { width: window.innerWidth, height: window.innerHeight };
         });
 
-        const browser = getBrowser(page);
-
         if (actual.width !== width || actual.height !== height) {
-            // Get browser tab and resize window via devtools protocol
-            const targetId = page._target._targetInfo.targetId;
-            const { windowId } = await browser._connection.send(
-                'Browser.getWindowForTarget',
-                {
-                    targetId,
-                }
-            );
-            const { bounds } = await browser._connection.send(
-                'Browser.getWindowBounds',
-                { windowId }
-            );
+            const session = await page.createCDPSession();
 
-            // Resize to correct dimensions
-            await browser._connection.send('Browser.setWindowBounds', {
-                bounds: {
-                    width: bounds.width + width - actual.width,
-                    height: bounds.height + height - actual.height,
-                },
-                windowId,
-            });
+            try {
+                // Get browser tab and resize window via devtools protocol
+                const { targetInfo } = await session.send(
+                    'Target.getTargetInfo'
+                );
+                const targetId = targetInfo.targetId;
+                const { windowId } = await session.send(
+                    'Browser.getWindowForTarget',
+                    { targetId }
+                );
+                const { bounds } = await session.send(
+                    'Browser.getWindowBounds',
+                    { windowId }
+                );
+                await session.send('Browser.setWindowBounds', {
+                    bounds: {
+                        width: bounds.width + width - actual.width,
+                        height: bounds.height + height - actual.height,
+                    },
+                    windowId,
+                });
+            } finally {
+                await session.detach();
+            }
         }
     }
 }
@@ -416,7 +428,7 @@ async function createUserProfileDir(config) {
     ).path;
 
     onTeardown(config, async () => {
-        await promisify(rimraf)(dir);
+        await rimraf(dir);
     });
 
     return dir;
@@ -428,7 +440,7 @@ const isPage = x =>
 
 /** @type {(pageOrFrame: import('puppeteer').Page | import('puppeteer').Frame) => import('puppeteer').Page} */
 const getPage = pageOrFrame =>
-    isPage(pageOrFrame) ? pageOrFrame : pageOrFrame._frameManager._page;
+    isPage(pageOrFrame) ? pageOrFrame : pageOrFrame.page();
 
 /**
  * Get the text content of an error or warning page inserted by the browser.
@@ -594,9 +606,11 @@ async function installInteractions(page) {
 function getBrowser(pageOrFrame) {
     if (typeof pageOrFrame.browser === 'function') {
         return pageOrFrame.browser();
-    } else {
-        return pageOrFrame._frameManager._page.browser();
     }
+    if (typeof pageOrFrame.page === 'function') {
+        return pageOrFrame.page().browser();
+    }
+    throw new Error('Object is neither a Page nor a Frame');
 }
 
 /**
@@ -626,7 +640,7 @@ function addBreadcrumb(config, name) {
  * @template {K}
  * @param {import('puppeteer').Page} page
  * @param {K extends keyof import('puppeteer').Page} prop
- * @param {(...any[]) => string} getName
+ * @param {((...args: any[]) => string)} getName
  */
 function withBreadcrumb(config, page, prop, getName) {
     const original = page[prop];
@@ -906,9 +920,8 @@ async function waitForText(
         )}${extraMessageRepr}`
     );
 
-    const xpath = `//text()[contains(., ${escapeXPathText(text)})]`;
     try {
-        const res = await page.waitForXPath(xpath, { timeout });
+        const res = await page.waitForSelector(`text/${text}`, { timeout });
         addBreadcrumb(config, `exit waitForText(${text})`);
         return res;
     } catch (e) {
@@ -1016,7 +1029,7 @@ async function waitForTestIdGone(
  * @param {string} expected The value that is expected to be present.
  */
 async function assertValue(input, expected) {
-    const page = input._page;
+    const page = input.frame.page();
     assert(page);
     const config = getBrowser(page)._pentf_config;
     addBreadcrumb(config, `enter assertValue(${expected})`);
@@ -1238,7 +1251,7 @@ async function onSuccess(fn) {
  * @param {import('puppeteer').Page | import('puppeteer').Frame} pageOrFrame
  */
 function getMouse(pageOrFrame) {
-    return pageOrFrame.mouse || pageOrFrame._frameManager._page.mouse;
+    return pageOrFrame.mouse || pageOrFrame.page().mouse;
 }
 
 /**
@@ -2107,7 +2120,8 @@ async function _takeScreenshot(
     }
 
     // Restore emulation, fixes unable to resize window after taking a screenshot.
-    await page._client.send('Emulation.clearDeviceMetricsOverride');
+    const cdpClient = await page.createCDPSession();
+    await cdpClient.send('Emulation.clearDeviceMetricsOverride');
 
     // Restore potential emulation settings that were active before
     // we took the screenshot.
@@ -2223,6 +2237,8 @@ async function assertSnapshot(
     { threshold = 0.2, selector, fullPage = true, ...pxl } = {}
 ) {
     await mkdirp(config.snapshot_directory);
+    await mkdirp(config.screenshot_directory);
+
     const target = path.join(
         config.snapshot_directory,
         `${config._taskName}_${name}-expected.png`
@@ -2450,18 +2466,19 @@ async function interceptRequest(page, fn) {
         await page.setRequestInterception(true);
 
         page._pentf_intercept_handlers = [];
+
         page.on('request', async request => {
             for (const handler of page._pentf_intercept_handlers) {
                 await handler(request);
 
-                if (request._interceptionHandled) {
+                if (request.isInterceptResolutionHandled()) {
                     break;
                 }
             }
 
             // Don't stall requests
-            if (!request._interceptionHandled) {
-                request.continue();
+            if (!request.isInterceptResolutionHandled()) {
+                await request.continue();
             }
         });
     }

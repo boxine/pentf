@@ -5,7 +5,6 @@ const node_fetch = require('node-fetch');
 const tough = require('tough-cookie');
 const { URL } = require('url');
 const fs = require('fs');
-const { promisify } = require('util');
 
 const { makeCurlCommand } = require('./curl_command');
 const output = require('./output');
@@ -126,10 +125,7 @@ async function fetch(config, url, init) {
 
         const sentCookie = response.headers.raw()['set-cookie'];
         if (Array.isArray(sentCookie)) {
-            const setCookieFunc = promisify((cookie, url, callback) =>
-                cookieJar.setCookie(cookie, url, {}, callback)
-            );
-            await Promise.all(sentCookie.map(c => setCookieFunc(c, url)));
+            await Promise.all(sentCookie.map(c => cookieJar.setCookie(c, url)));
         } else {
             assert(!sentCookie); // No Set-Cookie header
         }

@@ -91,9 +91,11 @@ async function run(config) {
     await page.goto('http://pentf.dev');
 
     const waitForIframe = async () => {
-        const iframe = page
-            .frames()
-            .find(f => page.mainFrame() !== f && f.url().includes('pentf.dev'));
+        const iframe = await page.waitForFrame(frame => {
+            return (
+                frame !== page.mainFrame() && frame.url().includes('pentf.dev')
+            );
+        });
         await iframe.waitForSelector('button');
         return iframe;
     };

@@ -1,7 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
-const { promisify } = require('util');
+const { glob } = require('glob');
 const { pathToFileURL } = require('url');
 const assert = require('assert').strict;
 const output = require('./output');
@@ -194,7 +193,7 @@ async function applyTestFilters(config, tests) {
  * @private
  */
 async function loadTests(config, globPattern) {
-    const testFiles = await promisify(glob.glob)(globPattern, {
+    const testFiles = await glob(globPattern, {
         cwd: config.rootDir,
         absolute: true,
     });

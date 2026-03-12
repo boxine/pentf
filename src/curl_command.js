@@ -1,17 +1,13 @@
 const assert = require('assert').strict;
-const streamBuffers = require('stream-buffers');
 
 async function stream2buf(stream) {
-    return new Promise((resolve, reject) => {
-        const write_stream = new streamBuffers.WritableStreamBuffer();
-        stream.pipe(write_stream);
-        write_stream.on('finish', () => {
-            resolve(write_stream.getContents());
-        });
-        write_stream.on('error', e => {
-            reject(e);
-        });
-    });
+    const chunks = [];
+
+    for await (const chunk of stream) {
+        chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+    }
+
+    return Buffer.concat(chunks);
 }
 
 function escape_shell(arg) {

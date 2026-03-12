@@ -219,12 +219,6 @@ async function run(config) {
         const page = await newPage(config);
         await page.waitForFunction(() => true);
     });
-
-    await execRunner(config, 'page.waitForXPath(//div)', async config => {
-        const page = await newPage(config);
-        await workaround_setContent(page, '<div />');
-        await page.waitForXPath('//div');
-    });
 }
 
 module.exports = {

@@ -1,16 +1,11 @@
 const assert = require('assert').strict;
-
-const { promisify } = require('util');
 const tough = require('tough-cookie');
 const { makeCurlCommand } = require('../src/curl_command');
 
 async function run() {
     const cookieJar = new tough.CookieJar();
-    const setCookieFunc = promisify((cookie, url, callback) =>
-        cookieJar.setCookie(cookie, url, {}, callback)
-    );
-    await setCookieFunc('foo=bar', 'https://example.com/');
-    await setCookieFunc('bar="baz \'\\123"', 'https://example.com/');
+    await cookieJar.setCookie('foo=bar', 'https://example.com/');
+    await cookieJar.setCookie('bar="baz \'\\123"', 'https://example.com/');
 
     const params = new URLSearchParams();
     params.append('foo', 'bar');

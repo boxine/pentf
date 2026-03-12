@@ -1,10 +1,6 @@
 const path = require('path');
-const mkdirpCb = require('mkdirp');
-const rimrafCb = require('rimraf');
-const { promisify } = require('util');
-const mkdirp = promisify(mkdirpCb);
-const rimraf = promisify(rimrafCb);
-
+const { mkdirp } = require('mkdirp');
+const { rimraf } = require('rimraf');
 const { newPage, assertSnapshot } = require('../src/browser_utils');
 
 async function run(config) {

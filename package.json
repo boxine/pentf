@@ -1,6 +1,6 @@
 {
   "name": "pentf",
-  "version": "4.0.0-beta.4",
+  "version": "4.0.0",
   "description": "parallel end-to-end test framework",
   "main": "src/index.js",
   "types": "dist/types/index.d.ts",

@@ -91,6 +91,7 @@ function computeConcurrency(spec, { cpuCount = undefined } = {}) {
 function parseArgs(options, raw_args) {
     const DEFAULT_HTML_NAME = 'results.html';
     const DEFAULT_JSON_NAME = 'results.json';
+    const DEFAULT_JUNIT_NAME = 'results.xml';
     const DEFAULT_MARKDOWN_NAME = 'results.md';
     const DEFAULT_PDF_NAME = 'results.pdf';
 
@@ -183,6 +184,16 @@ function parseArgs(options, raw_args) {
         dest: 'json_file',
         defaultValue: DEFAULT_JSON_NAME,
         help: 'JSON file to write to. Defaults to %(defaultValue)s .',
+    });
+    results_group.addArgument(['--junit'], {
+        action: 'storeTrue',
+        help: 'Write tests results as a JUnit XML file.',
+    });
+    results_group.addArgument(['--junit-file'], {
+        metavar: 'FILE.xml',
+        dest: 'junit_file',
+        defaultValue: DEFAULT_JUNIT_NAME,
+        help: 'JUnit XML file to write to. Defaults to %(defaultValue)s .',
     });
     results_group.addArgument(['-H', '--html'], {
         action: 'storeTrue',

@@ -88,7 +88,7 @@ function craftResults(config, test_info) {
 async function doRender(config, results) {
     output.logVerbose(
         config,
-        `[results] Render results JSON: ${config.json}, Markdown: ${config.markdown}, HTML: ${config.html}, PDF: ${config.pdf}`
+        `[results] Render results JSON: ${config.json}, JUnit: ${config.junit}, Markdown: ${config.markdown}, HTML: ${config.html}, PDF: ${config.pdf}`
     );
 
     if (config.json) {
@@ -124,6 +124,14 @@ async function doRender(config, results) {
     if (config.pdf) {
         output.logVerbose(config, `Rendering to PDF ${config.pdf_file}...`);
         await pdf(config, config.pdf_file, results);
+    }
+
+    if (config.junit) {
+        output.logVerbose(config, `Rendering to JUnit ${config.junit_file}...`);
+        const junit_xml = junit(results);
+        await fs.promises.writeFile(config.junit_file, junit_xml, {
+            encoding: 'utf-8',
+        });
     }
 }
 
@@ -648,6 +656,48 @@ ${table}
 
 async function pdf(config, path, results) {
     return html2pdf(config, path, html(results));
+}
+
+/**
+ * @param {import('./internal').CraftedResults} results
+ */
+function junit(results) {
+    const testcases = results.tests.map(testResult => {
+        const { skipped, taskResults } = testResult;
+
+        // Just take the first error if there is any, on retries it would probably be the same one
+        const error = taskResults.find(tr => tr.status === 'error');
+
+        const res =
+            `<testcase classname="${testResult.group}" name="${
+                testResult.name
+            }" time="${escape_html(_calcDuration(taskResults))}">` +
+            (skipped ? `<skipped>${testResult.skipReason}</skipped>` : '') +
+            (error
+                ? `<failure>${
+                      escape_html(error.error_stack) ||
+                      'INTERNAL ERROR: no error stack'
+                  }</failure>`
+                : '') +
+            (testResult.description
+                ? `<system-out>${escape_html(
+                      testResult.description
+                  )}</system-out>`
+                : '') +
+            `</testcase>`;
+        return res;
+    });
+
+    const result =
+        '<?xml version="1.0"?>\n' +
+        '<testsuites>\n' +
+        '<testsuite>\n' +
+        testcases.join('\n') +
+        '\n' +
+        '</testsuite>\n' +
+        '</testsuites>';
+
+    return result;
 }
 
 module.exports = {

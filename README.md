@@ -8,7 +8,7 @@ Browser tests using [puppeteer](https://pptr.dev/) benefit from special support 
 
 Depending on the environment (you can set up configurations to run the same tests against dev, stage, prod etc.), tests can be skipped, or marked as _expected to fail_ for test driven development where you write tests first before fixing a bug or implementing a feature.
 A locking system prevents two tests or the same tests on two different machines from accessing a shared resource, e.g. a test account.
-You can review test results in a PDF report.
+You can review test results in a PDF report or create a JUnit report file to be consumed by CI systems.
 
 ## Installation
 
@@ -391,6 +391,9 @@ The keys are up to you; for example you probably want to have a main entry point
 -J, --json            Write tests results as a JSON file.
 --json-file FILE.json
                       JSON file to write to. Defaults to results.json .
+--junit               Write tests results as a JUnit XML file.
+--junit-file FILE.xml
+                      JUnit XML file to write to. Defaults to results.xml .
 -H, --html            Write test results as an HTML file.
 --html-file FILE.html
                       HTML file to write a report to. Defaults to results.html .

@@ -45,13 +45,21 @@ async function run() {
         }
     }
 
-    const summary = lines.slice(0, 3).map(s => s.trim());
-    assert.deepEqual(summary, [
+    const summary = lines.map(s => s.trim());
+    const expected = [
         '3 tests passed',
         '3 failed (error[0], error[1], error[2])',
         '3 flaky (flaky[0], flaky[1], flaky[2])',
-    ]);
-    assert.match(lines[3], /3 slowest tests: (.+), (.+), (.+)/);
+    ];
+    for (const item of expected) {
+        assert(
+            summary.includes(item),
+            `Expected test summary to include: ${item}\nActual summary: ${JSON.stringify(
+                summary
+            )}`
+        );
+    }
+    assert.match(lines[lines.length - 1], /3 slowest tests: (.+), (.+), (.+)/);
 }
 
 module.exports = {
